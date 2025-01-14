@@ -19,6 +19,7 @@ export class GameBoard extends HTMLElement {
         shadow.appendChild(stylesheet);
 
         this.game = new Game(this.gridSize[0], this.gridSize[1], new Player("Player 1", 1), new Player("Player 2", 2));
+        this.game.addEventListener("game-turn", () => this.#draw());
         this.game.start();
 
         this.canvas = document.createElement("canvas");

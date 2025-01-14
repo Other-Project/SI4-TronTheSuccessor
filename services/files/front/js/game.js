@@ -35,7 +35,7 @@ export class Game extends EventTarget {
     #gameTurn() {
         this.players.forEach((player) => {
             player.direction = player.nextDirection;
-            player.pos = player.pos.map((item, index) => item - directions[player.direction][index]);
+            player.pos = player.pos.map((item, index) => item + directions[player.direction][index]);
         });
         this.dispatchEvent(new CustomEvent("game-turn", {
             detail: {}

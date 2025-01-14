@@ -1,3 +1,4 @@
+import { GameBoard } from "../components/game-board/game-board.js";
 import {GameBoard} from "./game-board.js";
 import {HelpPage} from "../components/help-page/help-page.js"
 import {Control} from "../components/control/control.js"

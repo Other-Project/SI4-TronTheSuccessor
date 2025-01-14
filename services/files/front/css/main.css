@@ -1,0 +1,13 @@
+body {
+    background-color: #1F1F1F;
+
+    width: 100vw;
+    min-height: 100vh;
+    margin: 0;
+}
+
+app-game-board {
+    display: block;
+    height: calc(100dvh - 2em);
+    padding: 1em;
+}

@@ -6,7 +6,7 @@ const httpProxy = require('http-proxy');
 const proxy = httpProxy.createProxyServer();
 
 /* The http module contains a createServer function, which takes one argument, which is the function that
-** will be called whenever a new request arrives to the server.
+ * will be called whenever a new request arrives to the server.
  */
 http.createServer(function (request, response) {
     // First, let's check the URL to see if it's a REST request or a file request.

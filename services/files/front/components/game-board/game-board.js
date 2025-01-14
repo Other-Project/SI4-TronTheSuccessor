@@ -8,11 +8,14 @@ export class GameBoard extends HTMLElement {
         super();
 
         const shadow = this.attachShadow({ mode: "open" });
+
+        let stylesheet = document.createElement("link");
+        stylesheet.href = "/components/game-board/game-board.css";
+        stylesheet.rel = "stylesheet";
+        stylesheet.type = "text/css";
+        shadow.appendChild(stylesheet);
+
         this.canvas = document.createElement("canvas");
-        this.canvas.style.maxWidth = "100%";
-        this.canvas.style.maxHeight = "100%";
-        this.canvas.width = 1700;
-        this.canvas.height = 1000;
         this.ctx = this.canvas.getContext("2d");
         shadow.appendChild(this.canvas);
 
@@ -20,16 +23,18 @@ export class GameBoard extends HTMLElement {
     }
 
     #cellCoordinates(x, y) {
-        return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize + this.cellSize / 4, y * this.cellSize * 3 / 4 + this.cellSize / 4];
+        return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize, y * this.cellSize * 3 / 4];
     }
 
     #draw() {
-        this.#drawHaxagons(16, 9, 100);
+        this.canvas.width = this.gridSize[0] * this.cellSize + this.cellSize / 2;
+        this.canvas.height = this.cellSize + (this.gridSize[1] - 1) * this.cellSize * 3 / 4;
+        this.#drawHexagons();
         this.#drawPlayer(1, 8, 1);
         this.#drawPlayer(14, 0, 2);
     }
 
-    #drawHaxagons() {
+    #drawHexagons() {
         for (let x = 0; x < this.gridSize[0]; x++)
             for (let y = 0; y < this.gridSize[1]; y++)
                 this.#drawHexagon(x, y, x < 2 ? 1 : x > 13 ? 2 : null);

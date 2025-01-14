@@ -1,8 +1,11 @@
+import { Game } from "/js/game.js";
+import { Player } from "/js/player.js";
+
 export class GameBoard extends HTMLElement {
     gridSize = [16, 9];
     cellSize = 100;
     playerSize = 75;
-    playerColors = ["#242424", "#D732A8", "#32BED7"];
+    unconqueredColor = "#242424";
 
     constructor() {
         super();
@@ -15,6 +18,9 @@ export class GameBoard extends HTMLElement {
         stylesheet.type = "text/css";
         shadow.appendChild(stylesheet);
 
+        this.game = new Game(this.gridSize[0], this.gridSize[1], new Player("Player 1", 1), new Player("Player 2", 2));
+        this.game.start();
+
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
         shadow.appendChild(this.canvas);
@@ -23,24 +29,23 @@ export class GameBoard extends HTMLElement {
     }
 
     #cellCoordinates(x, y) {
-        return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize, y * this.cellSize * 3 / 4];
+        return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize + 2, y * this.cellSize * 3 / 4 + 2];
     }
 
     #draw() {
-        this.canvas.width = this.gridSize[0] * this.cellSize + this.cellSize / 2;
-        this.canvas.height = this.cellSize + (this.gridSize[1] - 1) * this.cellSize * 3 / 4;
+        this.canvas.width = this.gridSize[0] * this.cellSize + 4;
+        this.canvas.height = this.cellSize + (this.gridSize[1] - 1) * this.cellSize * 3 / 4 + 4;
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.#drawHexagons();
-        this.#drawPlayer(1, 8, 1);
-        this.#drawPlayer(14, 0, 2);
+        this.game.players.forEach(player => this.#drawPlayer(player));
     }
 
     #drawHexagons() {
-        for (let x = 0; x < this.gridSize[0]; x++)
-            for (let y = 0; y < this.gridSize[1]; y++)
-                this.#drawHexagon(x, y, x < 2 ? 1 : x > 13 ? 2 : null);
+        this.game.grid.forEach((row, y) => row.forEach((cell, x) => this.#drawHexagon(x, y, cell)));
     }
 
-    #drawHexagon(x, y, owner = null) {
+    #drawHexagon(x, y, owner = 0) {
+        if (owner === null) return; // No cell
         [x, y] = this.#cellCoordinates(x, y);
         this.ctx.beginPath();
         this.ctx.moveTo(x + this.cellSize / 2, y);
@@ -53,18 +58,21 @@ export class GameBoard extends HTMLElement {
         this.ctx.strokeStyle = "#656565";
         this.ctx.lineWidth = 3;
         this.ctx.stroke();
-        this.ctx.fillStyle = this.playerColors[owner] || this.playerColors[0];
+        this.ctx.fillStyle = this.game.players[owner - 1]?.color || this.unconqueredColor;
         this.ctx.fill();
     }
 
-    #drawPlayer(x, y, player) {
-        [x, y] = this.#cellCoordinates(x, y);
+    /**
+     * @param {Player} player The player to draw
+     */
+    #drawPlayer(player) {
+        let [x, y] = this.#cellCoordinates(player.pos[0], player.pos[1]);
         let playerImg = new Image();
         playerImg.onload = () => this.ctx.drawImage(playerImg,
             x + (this.cellSize - this.playerSize) / 2,
             y + (this.cellSize - this.playerSize) / 2,
             this.playerSize,
             this.playerSize);
-        playerImg.src = `assets/player_${player}.png`;
+        playerImg.src = player.avatar ?? "";
     }
 }

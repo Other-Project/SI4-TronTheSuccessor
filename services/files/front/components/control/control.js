@@ -1,8 +1,12 @@
 export class Control extends HTMLElement {
     gridSize = [2, 3];
-    cellSize = 100;
+    cellSize = 150;
     playerSize = 75;
     playerColors = ["#242424", "#D732A8", "#32BED7"];
+    playersInput = [["A", "E", "Q", "S", "D", "W", "X"], ["7", "9", "4", "5", "6", "1", "3"]]
+    count = 0;
+
+
     constructor() {
         super();
 
@@ -22,23 +26,23 @@ export class Control extends HTMLElement {
     }
 
     #cellCoordinates(x, y) {
-        return [x * this.cellSize  + (y * this.cellSize / 2) % this.cellSize + this.cellSize/2, y * this.cellSize * 3 / 4];
+        return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize - this.cellSize/2, y * this.cellSize * 3 / 4];
     }
 
     #draw() {
         this.canvas.width = (this.gridSize[0] + 1) * this.cellSize ;
         this.canvas.height = this.cellSize + (this.gridSize[1] - 1) * this.cellSize * 3 / 4;
         this.#drawHexagons();
-        this.#drawPlayer(0, 1, 1);
+        this.#drawPlayer(1, 1, parseInt(this.getAttribute('owner')) || 0);
     }
 
     #drawHexagons() {
         for (let y = 0; y < this.gridSize[1]; y++)
             for (let x = 0; x < this.gridSize[0] + y % 2; x++)
-                this.#drawHexagon(x - y % 2, y, x < 2 ? 1 : x > 13 ? 2 : null);
+                this.#drawHexagon(x + 1 - y % 2, y);
     }
 
-    #drawHexagon(x, y, owner = null) {
+    #drawHexagon(x, y) {
         [x, y] = this.#cellCoordinates(x, y);
         this.ctx.beginPath();
         this.ctx.moveTo(x + this.cellSize / 2, y);
@@ -55,6 +59,11 @@ export class Control extends HTMLElement {
         const ownerAttr = parseInt(this.getAttribute('owner')) || 0;
         this.ctx.fillStyle = this.playerColors[ownerAttr];
         this.ctx.fill();
+        this.ctx.font = 'bold 5.5em Arial';
+        this.ctx.fillStyle = 'white';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(this.playersInput[ownerAttr-1][this.count++], x + this.cellSize / 2 , y + this.cellSize / 2);
     }
 
     #drawPlayer(x, y, player) {

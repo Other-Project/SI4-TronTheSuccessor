@@ -22,21 +22,20 @@ export class Control extends HTMLElement {
     }
 
     #cellCoordinates(x, y) {
-        return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize, y * this.cellSize * 3 / 4];
+        return [x * this.cellSize  + (y * this.cellSize / 2) % this.cellSize + this.cellSize/2, y * this.cellSize * 3 / 4];
     }
 
     #draw() {
-        this.canvas.width = this.gridSize[0] * this.cellSize + this.cellSize / 2;
+        this.canvas.width = (this.gridSize[0] + 1) * this.cellSize ;
         this.canvas.height = this.cellSize + (this.gridSize[1] - 1) * this.cellSize * 3 / 4;
         this.#drawHexagons();
-        this.#drawPlayer(1, 8, 1);
-        this.#drawPlayer(14, 0, 2);
+        this.#drawPlayer(0, 1, 1);
     }
 
     #drawHexagons() {
         for (let y = 0; y < this.gridSize[1]; y++)
-            for (let x = 0; x < this.gridSize[0] + x % 2; x++)
-                this.#drawHexagon(x, y, x < 2 ? 1 : x > 13 ? 2 : null);
+            for (let x = 0; x < this.gridSize[0] + y % 2; x++)
+                this.#drawHexagon(x - y % 2, y, x < 2 ? 1 : x > 13 ? 2 : null);
     }
 
     #drawHexagon(x, y, owner = null) {
@@ -52,7 +51,9 @@ export class Control extends HTMLElement {
         this.ctx.strokeStyle = "#656565";
         this.ctx.lineWidth = 3;
         this.ctx.stroke();
-        this.ctx.fillStyle = this.playerColors[owner] || this.playerColors[0];
+
+        const ownerAttr = parseInt(this.getAttribute('owner')) || 0;
+        this.ctx.fillStyle = this.playerColors[ownerAttr];
         this.ctx.fill();
     }
 

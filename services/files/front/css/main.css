@@ -7,7 +7,7 @@ body {
     margin: 0;
 }
 
-app-game-board {
+app-game-board, app-help-page {
     display: block;
     height: calc(100dvh - 2em);
     padding: 1em;

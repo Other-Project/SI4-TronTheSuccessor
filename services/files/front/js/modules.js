@@ -1,4 +1,4 @@
-import {GameBoard} from "../components/game-board.js";
+import {GameBoard} from "../components/game-board/game-board.js";
 import {GameChoice} from "../components/game-choice.js";
 import {HomePage} from "../components/home-page.js";
 

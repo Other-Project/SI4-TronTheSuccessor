@@ -18,6 +18,15 @@ const player2_keys = {
     "3": "down-right"
 };
 
+export const directionToAngle = {
+    "down-left": -135,
+    "left": -90,
+    "up-left": -45,
+    "up-right": 45,
+    "right": 90,
+    "down-right": 135
+}
+
 export class Player {
     /** @type {string} */ name;
     /** @type {number} */ number;

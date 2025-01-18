@@ -1,5 +1,5 @@
 import {Game} from "/js/game.js";
-import {Player} from "/js/player.js";
+import {directionToAngle, Player} from "/js/player.js";
 
 export class GameBoard extends HTMLElement {
     gridSize = [16, 9];
@@ -73,11 +73,17 @@ export class GameBoard extends HTMLElement {
         if (player.dead) return;
         let [x, y] = this.#cellCoordinates(player.pos[0], player.pos[1]);
         let playerImg = new Image();
-        playerImg.onload = () => this.ctx.drawImage(playerImg,
-            x + (this.cellSize - this.playerSize) / 2,
-            y + (this.cellSize - this.playerSize) / 2,
-            this.playerSize,
-            this.playerSize);
+
+        // // sets scale and origin
+        playerImg.onload = () => {
+            this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
+            this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);
+            this.ctx.drawImage(playerImg,
+                -this.playerSize / 2,
+                -this.playerSize / 2,
+                this.playerSize,
+                this.playerSize);
+        }
         playerImg.src = player.avatar ?? "";
     }
 }

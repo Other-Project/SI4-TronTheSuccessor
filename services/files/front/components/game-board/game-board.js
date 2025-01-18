@@ -1,5 +1,6 @@
 import {Game} from "/js/game.js";
 import {directionToAngle, Player} from "/js/player.js";
+import {HumanPlayer} from "/js/human-player.js";
 
 export class GameBoard extends HTMLElement {
     gridSize = [16, 9];
@@ -18,7 +19,7 @@ export class GameBoard extends HTMLElement {
         stylesheet.type = "text/css";
         shadow.appendChild(stylesheet);
 
-        this.game = new Game(this.gridSize[0], this.gridSize[1], new Player("Player 1", 1), new Player("Player 2", 2), 1000);
+        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), new HumanPlayer("Player 2", 2), 1000);
         this.game.addEventListener("game-turn", (e) => {
             if (e.detail.ended) alert(e.detail.draw ? "Draw" : e.detail.winner.name + " won");
             this.#draw();

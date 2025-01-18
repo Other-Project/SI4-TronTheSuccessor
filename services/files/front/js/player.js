@@ -1,30 +1,13 @@
-const playerImages = ["assets/player_1.png", "assets/player_2.png"];
-const playerColors = ["#D732A8", "#32BED7"];
-
-const player1_keys = {
-    "A": "up-left",
-    "E": "up-right",
-    "Q": "left",
-    "D": "right",
-    "W": "down-left",
-    "X": "down-right"
-};
-const player2_keys = {
-    "7": "up-left",
-    "9": "up-right",
-    "4": "left",
-    "6": "right",
-    "1": "down-left",
-    "3": "down-right"
-};
+export const playerImages = ["assets/player_1.png", "assets/player_2.png"];
+export const playerColors = ["#D732A8", "#32BED7"];
 
 export const directionToAngle = {
-    "down-left": -135,
-    "left": -90,
-    "up-left": -45,
     "up-right": 45,
     "right": 90,
-    "down-right": 135
+    "down-right": 135,
+    "down-left": 225,
+    "left": 270,
+    "up-left": 315,
 }
 
 export class Player {
@@ -51,14 +34,12 @@ export class Player {
         this.color = color;
         this.avatar = avatar;
         this.direction = this.nextDirection = number === 1 ? "right" : "left";
-        this.keys = number === 1 ? player1_keys : player2_keys;
         this.dead = false;
+    }
 
-        document.addEventListener("keypress", e => {
-            let direction = this.keys[e.key.toUpperCase()];
-            if (!direction) return;
-            if (-directionToAngle[direction] === directionToAngle[this.direction]) return; // U-turns are prohibited
-            this.nextDirection = direction;
-        });
+    setNextDirection(direction) {
+        if ((directionToAngle[direction] + 180) % 360 === directionToAngle[this.direction]) return; // U-turns are prohibited
+        this.nextDirection = direction;
     }
 }
+

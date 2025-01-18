@@ -30,11 +30,13 @@ export const directions = {
 
 export class Player {
     /** @type {string} */ name;
+    /** @type {number} */ number;
     /** @type {[number, number]} */ pos;
     /** @type {string} */ color;
     /** @type {string} */ avatar;
     /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ direction;
-    /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ nextDirection;
+    /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ nextDirection
+    /** @type {boolean} */ dead;
 
     /**
      * @param {string} name The player's name
@@ -45,11 +47,13 @@ export class Player {
      */
     constructor(name, number, pos = [0, 0], color = playerColors[number - 1], avatar = playerImages[number - 1]) {
         this.name = name;
+        this.number = number;
         this.pos = pos;
         this.color = color;
         this.avatar = avatar;
         this.direction = this.nextDirection = number === 1 ? "right" : "left";
         this.keys = number === 1 ? player1_keys : player2_keys;
+        this.dead = false;
 
         document.addEventListener("keypress", e => {
             if (this.keys[e.key.toUpperCase()]) this.nextDirection = this.keys[e.key.toUpperCase()];

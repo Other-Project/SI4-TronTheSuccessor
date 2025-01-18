@@ -18,16 +18,6 @@ const player2_keys = {
     "3": "down-right"
 };
 
-
-export const directions = {
-    "up-left": [0, -1],
-    "up-right": [1, -1],
-    "left": [-1, 0],
-    "right": [1, 0],
-    "down-left": [0, 1],
-    "down-right": [1, 1]
-};
-
 export class Player {
     /** @type {string} */ name;
     /** @type {number} */ number;

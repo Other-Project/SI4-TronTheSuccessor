@@ -1,4 +1,4 @@
-import {directions, Player} from "/js/player.js";
+import {Player} from "/js/player.js";
 
 export class Game extends EventTarget {
     gridSize;
@@ -41,8 +41,8 @@ export class Game extends EventTarget {
     #gameTurn() {
         this.players.forEach((player) => {
             if (player.dead) return;
+            player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
-            player.pos = player.pos.map((item, index) => item + directions[player.direction][index]);
             this.#updateGrid(player);
         });
 
@@ -62,5 +62,26 @@ export class Game extends EventTarget {
         if (alive.length === 0) return true;
         else if (alive.length === 1) return alive[0];
         else return false;
+    }
+
+    /**
+     * @param {[number, number]} currentPosition Current position of the player
+     * @param {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} direction Direction the player wants to go
+     */
+    #getNewPosition(currentPosition, direction) {
+        switch (direction) {
+            case "left":
+                return [currentPosition[0] - 1, currentPosition[1]];
+            case "right":
+                return [currentPosition[0] + 1, currentPosition[1]];
+            case "up-left":
+                return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] - 1] : [currentPosition[0] - 1, currentPosition[1] - 1];
+            case "down-right":
+                return currentPosition[1] % 2 ? [currentPosition[0] + 1, currentPosition[1] + 1] : [currentPosition[0], currentPosition[1] + 1];
+            case "up-right":
+                return currentPosition[1] % 2 ? [currentPosition[0] + 1, currentPosition[1] - 1] : [currentPosition[0], currentPosition[1] - 1];
+            case "down-left":
+                return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] + 1] : [currentPosition[0] - 1, currentPosition[1] + 1];
+        }
     }
 }

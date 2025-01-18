@@ -55,7 +55,10 @@ export class Player {
         this.dead = false;
 
         document.addEventListener("keypress", e => {
-            if (this.keys[e.key.toUpperCase()]) this.nextDirection = this.keys[e.key.toUpperCase()];
+            let direction = this.keys[e.key.toUpperCase()];
+            if (!direction) return;
+            if (-directionToAngle[direction] === directionToAngle[this.direction]) return; // U-turns are prohibited
+            this.nextDirection = direction;
         });
     }
 }

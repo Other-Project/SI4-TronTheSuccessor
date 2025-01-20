@@ -16,10 +16,9 @@ export class Control extends HTMLElement {
         const game = new Game(this.gridSize[0], this.gridSize[1], new Player("Player 1", 1, [1, 1]), null, 1000);
 
         for (let x = 0; x < this.gridSize[0]; x++)
-            for (let y = 0; y < this.gridSize[1]; y++) {
+            for (let y = 0; y < this.gridSize[1]; y++)
                 if (x % (this.gridSize[0] - 1) === 0 && y % (this.gridSize[1] - 1) === 0)
                     game.grid[y][x] = null;
-            }
 
         gameBoard.draw(game);
         gameBoard.ctx.font = 'bold 5.5em Arial';
@@ -31,7 +30,6 @@ export class Control extends HTMLElement {
             if (cell === null) return;
             let [px, py] = gameBoard.cellCoordinates(x, y);
             gameBoard.ctx.fillText(this.playersInput[parseInt(this.getAttribute('owner')) - 1][this.count++], px + gameBoard.cellSize / 2, py + gameBoard.cellSize / 2);
-            ;
         }));
     }
 }

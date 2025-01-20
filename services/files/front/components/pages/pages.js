@@ -16,7 +16,6 @@ export class Pages extends HTMLElement {
 
     #showElement(elementId) {
         const elements = this.shadowRoot.querySelectorAll("#pages > *");
-        console.log(elements);
         elements.forEach(element => {
             element.style.display = element.id === elementId ? "block" : "none";
         });

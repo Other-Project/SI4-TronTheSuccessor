@@ -7,7 +7,7 @@ export class GameChoice extends HTMLElement {
             .then(text => {
                 this.shadowRoot.innerHTML = text;
                 this.shadowRoot.getElementById("local-game").addEventListener("click", () => {
-                    document.dispatchEvent(new CustomEvent("menu-selection", {detail: "game"}));
+                    document.dispatchEvent(new CustomEvent("menu-selection", {detail: "help"}));
                 });
             });
     }

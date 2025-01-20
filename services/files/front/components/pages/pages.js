@@ -6,8 +6,7 @@ export class Pages extends HTMLElement {
             .then(response => response.text())
             .then(text => {
                 this.shadowRoot.innerHTML = text;
-                this.shadowRoot.getElementById("game").style.display = "none";
-                this.shadowRoot.getElementById("profil").style.display = "none";
+                this.#showElement("home");
             });
         document.addEventListener("menu-selection", (event) => {
             this.#showElement(event.detail);

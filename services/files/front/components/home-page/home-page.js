@@ -7,7 +7,7 @@ export class HomePage extends HTMLElement {
             .then(text => {
                 this.shadowRoot.innerHTML = text;
                 this.shadowRoot.getElementById("connect").addEventListener("click", () => {
-                    document.dispatchEvent(new CustomEvent("profil-start"));
+                    document.dispatchEvent(new CustomEvent("menu-selection", {detail: "profil"}));
                 });
             });
     }

@@ -5,7 +5,7 @@
     max-height: 100vh;
 }
 
-#title {
+h1 {
     font-size: 4em;
     font-weight: bolder;
 }

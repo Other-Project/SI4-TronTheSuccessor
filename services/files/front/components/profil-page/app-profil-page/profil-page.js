@@ -7,7 +7,7 @@ export class ProfilPage extends HTMLElement {
             .then(text => {
                 this.shadowRoot.innerHTML = text;
                 this.shadowRoot.getElementById("home").addEventListener("click", () => {
-                    document.dispatchEvent(new CustomEvent("home-start"));
+                    document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
                 });
             });
     }

@@ -1,14 +1,13 @@
-export class HomePage extends HTMLElement {
+import {HTMLComponent} from "/js/component.js";
+
+export class HomePage extends HTMLComponent {
     constructor() {
-        super();
-        this.attachShadow({mode: "open"});
-        fetch("/components/home-page/home-page.html")
-            .then(response => response.text())
-            .then(text => {
-                this.shadowRoot.innerHTML = text;
-                this.shadowRoot.getElementById("connect").addEventListener("click", () => {
-                    document.dispatchEvent(new CustomEvent("menu-selection", {detail: "profil"}));
-                });
-            });
+        super("/components/home-page", "home-page.html");
+    }
+
+    onSetupCompleted = () => {
+        this.shadowRoot.getElementById("connect").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "profil"}));
+        });
     }
 }

@@ -1,11 +1,7 @@
-export class ProfilPageButton extends HTMLElement {
+import {HTMLComponent} from "/js/component.js";
+
+export class ProfilPageButton extends HTMLComponent {
     constructor() {
-        super();
-        this.attachShadow({mode: "open"});
-        fetch("/components/profil-page/profil-page-button/profil-page-button.html")
-            .then(response => response.text())
-            .then(text => {
-                this.shadowRoot.innerHTML = text;
-            });
+        super("/components/profil-page/profil-page-button", "profil-page-button.html");
     }
 }

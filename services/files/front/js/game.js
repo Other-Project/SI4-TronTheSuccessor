@@ -39,6 +39,12 @@ export class Game extends EventTarget {
     }
 
     #gameTurn() {
+        const newPositions = this.players.map((player) => {
+            return this.#getNewPosition(player.pos, player.nextDirection);
+        });
+        if (newPositions[0][0] === newPositions[1][0] && newPositions[0][1] === newPositions[1][1]) {
+            this.players.forEach((player) => player.dead = true);
+        }
         this.players.forEach((player) => {
             if (player.dead) return;
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);

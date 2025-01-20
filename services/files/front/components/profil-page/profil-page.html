@@ -1,60 +1,11 @@
-<style>
-
-    #profil-page {
-        display: grid;
-        grid-template-rows: 1fr 3fr;
-        width: 100vw;
-        min-height: 100vh;
-    }
-
-    #header {
-        grid-row: 1;
-        display: flex;
-        align-items: flex-end;
-        color: white;
-        margin-bottom: 3em;
-        background: #191919;
-    }
-
-    #main {
-        grid-row: 2;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .button-profil {
-        background-color: #434242;
-        color: white;
-        border: none;
-        padding: 20px 30px 20px 30px;
-        cursor: pointer;
-        font-size: 18pt;
-        border-radius: 20px 20px 0 0;
-    }
-
-    .button-profil:hover {
-        background-color: #3c3c3c;
-    }
-
-    #home {
-        max-width: 60px;
-        max-height: 60px;
-        position: absolute;
-        right: 1em;
-        top: 2em;
-    }
-
-</style>
+<link href="/components/profil-page/profil-page.css" rel="stylesheet" type="text/css">
+<link href="css/button.css" rel="stylesheet" type="text/css">
 
 <div id="profil-page">
     <div id="header">
         <button class="button-profil">Overview</button>
         <button class="button-profil">Match history</button>
         <button class="button-profil">Ranking</button>
-        <img src="/assets/accueil.svg" alt="home" id="home">
-    </div>
-    <div id="main">
-        dqfqdfsdfsqqdfs
+        <img alt="home" id="home" src="/assets/accueil.svg">
     </div>
 </div>

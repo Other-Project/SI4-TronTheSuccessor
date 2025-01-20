@@ -1,0 +1,29 @@
+.button {
+    margin: 5px 10px 20px 10px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #2c2c2c;
+    cursor: pointer;
+    color: white;
+    border: none;
+    height: 54px;
+    font-size: 13pt;
+
+    & :hover {
+        background-color: #3c3c3c;
+    }
+}
+
+.button-profil {
+    background-color: #434242;
+    color: white;
+    border: none;
+    padding: 20px 30px 20px 30px;
+    cursor: pointer;
+    font-size: 18pt;
+    border-radius: 20px 20px 0 0;
+
+    & :hover {
+        background-color: #3c3c3c;
+    }
+}

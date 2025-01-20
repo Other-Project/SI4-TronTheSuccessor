@@ -6,6 +6,9 @@ export class GameChoice extends HTMLElement {
             .then(response => response.text())
             .then(text => {
                 this.shadowRoot.innerHTML = text;
+                this.shadowRoot.getElementById("local-game-button").addEventListener("click", () => {
+                    document.dispatchEvent(new CustomEvent("game-start", {detail: {type: "local"}}));
+                });
             });
     }
 }

@@ -1,9 +1,6 @@
-import {Game} from "/js/game.js";
 import {directionToAngle, Player} from "/js/player.js";
-import {HumanPlayer} from "/js/human-player.js";
 
 export class GameBoard extends HTMLElement {
-    gridSize = [16, 9];
     cellSize = 100;
     playerSize = 75;
     unconqueredColor = "#242424";
@@ -19,39 +16,33 @@ export class GameBoard extends HTMLElement {
         stylesheet.type = "text/css";
         shadow.appendChild(stylesheet);
 
-        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), new HumanPlayer("Player 2", 2), 1000);
-        this.game.addEventListener("game-turn", (e) => {
-            if (e.detail.ended) alert(e.detail.draw ? "Draw" : e.detail.winner.name + " won");
-            this.#draw();
-        });
-        this.game.start();
-
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
         shadow.appendChild(this.canvas);
-
-        this.#draw();
     }
 
-    #cellCoordinates(x, y) {
+    cellCoordinates(x, y) {
         return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize + 2, y * this.cellSize * 3 / 4 + 2];
     }
 
-    #draw() {
-        this.canvas.width = this.gridSize[0] * this.cellSize + 4;
-        this.canvas.height = this.cellSize + (this.gridSize[1] - 1) * this.cellSize * 3 / 4 + 4;
+    draw(game) {
+        this.canvas.width = game.grid[0].length * this.cellSize + 4;
+        this.canvas.height = this.cellSize + (game.grid.length - 1) * this.cellSize * 3 / 4 + 4;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.#drawHexagons();
-        this.game.players.forEach(player => this.#drawPlayer(player));
+        this.#drawHexagons(game);
+        game.players.forEach(player => {
+            if (player) this.#drawPlayer(player);
+        });
     }
 
-    #drawHexagons() {
-        this.game.grid.forEach((row, y) => row.forEach((cell, x) => this.#drawHexagon(x, y, cell)));
+    #drawHexagons(game) {
+        game.grid.forEach((row, y) => row.forEach((cell, x) => {
+            if (cell !== null) this.#drawHexagon(x, y, game.players[cell - 1]?.color || this.unconqueredColor);
+        }));
     }
 
-    #drawHexagon(x, y, owner = 0) {
-        if (owner === null) return; // No cell
-        [x, y] = this.#cellCoordinates(x, y);
+    #drawHexagon(x, y, ownerColor) {
+        [x, y] = this.cellCoordinates(x, y);
         this.ctx.beginPath();
         this.ctx.moveTo(x + this.cellSize / 2, y);
         this.ctx.lineTo(x, y + this.cellSize / 4);
@@ -63,7 +54,7 @@ export class GameBoard extends HTMLElement {
         this.ctx.strokeStyle = "#656565";
         this.ctx.lineWidth = 3;
         this.ctx.stroke();
-        this.ctx.fillStyle = this.game.players[owner - 1]?.color || this.unconqueredColor;
+        this.ctx.fillStyle = ownerColor;
         this.ctx.fill();
     }
 
@@ -72,7 +63,7 @@ export class GameBoard extends HTMLElement {
      */
     #drawPlayer(player) {
         if (player.dead) return;
-        let [x, y] = this.#cellCoordinates(player.pos[0], player.pos[1]);
+        let [x, y] = this.cellCoordinates(player.pos[0], player.pos[1]);
         let playerImg = new Image();
 
         // // sets scale and origin

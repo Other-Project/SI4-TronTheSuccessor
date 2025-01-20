@@ -1,79 +1,37 @@
-export class Control extends HTMLElement {
-    gridSize = [2, 3];
-    cellSize = 150;
-    playerSize = 75;
-    playerColors = ["#242424", "#D732A8", "#32BED7"];
-    playersInput = [["A", "E", "Q", "S", "D", "W", "X"], ["7", "9", "4", "5", "6", "1", "3"]]
-    count = 0;
+import {Game} from "/js/game.js";
+import {Player} from "/js/player.js";
 
+export class Control extends HTMLElement {
+    gridSize = [4, 3];
+    playersInput = [["A", "E", "Q", "S", "D", "W", "X"], ["7", "9", "4", "5", "6", "1", "3"]];
+    count = 0;
 
     constructor() {
         super();
 
         const shadow = this.attachShadow({mode: "open"});
+        const gameBoard = document.createElement("app-game-board");
+        shadow.appendChild(gameBoard);
 
-        let stylesheet = document.createElement("link");
-        stylesheet.href = "/components/game-board/game-board.css";
-        stylesheet.rel = "stylesheet";
-        stylesheet.type = "text/css";
-        shadow.appendChild(stylesheet);
+        const game = new Game(this.gridSize[0], this.gridSize[1], new Player("Player 1", 1, [1, 1]), null, 1000);
 
-        this.canvas = document.createElement("canvas");
-        this.ctx = this.canvas.getContext("2d");
-        shadow.appendChild(this.canvas);
+        for (let x = 0; x < this.gridSize[0]; x++)
+            for (let y = 0; y < this.gridSize[1]; y++) {
+                if (x % (this.gridSize[0] - 1) === 0 && y % (this.gridSize[1] - 1) === 0)
+                    game.grid[y][x] = null;
+            }
 
-        this.#draw();
-    }
+        gameBoard.draw(game);
+        gameBoard.ctx.font = 'bold 5.5em Arial';
+        gameBoard.ctx.fillStyle = 'white';
+        gameBoard.ctx.textAlign = 'center';
+        gameBoard.ctx.textBaseline = 'middle';
 
-    #cellCoordinates(x, y) {
-        return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize - this.cellSize/2, y * this.cellSize * 3 / 4];
-    }
-
-    #draw() {
-        this.canvas.width = (this.gridSize[0] + 1) * this.cellSize ;
-        this.canvas.height = this.cellSize + (this.gridSize[1] - 1) * this.cellSize * 3 / 4;
-        this.#drawHexagons();
-        this.#drawPlayer(1, 1, parseInt(this.getAttribute('owner')) || 0);
-    }
-
-    #drawHexagons() {
-        for (let y = 0; y < this.gridSize[1]; y++)
-            for (let x = 0; x < this.gridSize[0] + y % 2; x++)
-                this.#drawHexagon(x + 1 - y % 2, y);
-    }
-
-    #drawHexagon(x, y) {
-        [x, y] = this.#cellCoordinates(x, y);
-        this.ctx.beginPath();
-        this.ctx.moveTo(x + this.cellSize / 2, y);
-        this.ctx.lineTo(x, y + this.cellSize / 4);
-        this.ctx.lineTo(x, y + this.cellSize * 3 / 4);
-        this.ctx.lineTo(x + this.cellSize / 2, y + this.cellSize);
-        this.ctx.lineTo(x + this.cellSize, y + this.cellSize * 3 / 4);
-        this.ctx.lineTo(x + this.cellSize, y + this.cellSize / 4);
-        this.ctx.lineTo(x + this.cellSize / 2, y);
-        this.ctx.strokeStyle = "#656565";
-        this.ctx.lineWidth = 3;
-        this.ctx.stroke();
-
-        const ownerAttr = parseInt(this.getAttribute('owner')) || 0;
-        this.ctx.fillStyle = this.playerColors[ownerAttr];
-        this.ctx.fill();
-        this.ctx.font = 'bold 5.5em Arial';
-        this.ctx.fillStyle = 'white';
-        this.ctx.textAlign = 'center';
-        this.ctx.textBaseline = 'middle';
-        this.ctx.fillText(this.playersInput[ownerAttr-1][this.count++], x + this.cellSize / 2 , y + this.cellSize / 2);
-    }
-
-    #drawPlayer(x, y, player) {
-        [x, y] = this.#cellCoordinates(x, y);
-        let playerImg = new Image();
-        playerImg.onload = () => this.ctx.drawImage(playerImg,
-            x + (this.cellSize - this.playerSize) / 2,
-            y + (this.cellSize - this.playerSize) / 2,
-            this.playerSize,
-            this.playerSize);
-        playerImg.src = `assets/player_${player}.png`;
+        game.grid.forEach((row, y) => row.forEach((cell, x) => {
+            if (cell === null) return;
+            let [px, py] = gameBoard.cellCoordinates(x, y);
+            gameBoard.ctx.fillText(this.playersInput[parseInt(this.getAttribute('owner')) - 1][this.count++], px + gameBoard.cellSize / 2, py + gameBoard.cellSize / 2);
+            ;
+        }));
     }
 }

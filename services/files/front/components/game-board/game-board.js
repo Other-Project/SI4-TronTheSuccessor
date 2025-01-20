@@ -1,5 +1,6 @@
-import { Game } from "/js/game.js";
-import { Player } from "/js/player.js";
+import {Game} from "/js/game.js";
+import {directionToAngle, Player} from "/js/player.js";
+import {HumanPlayer} from "/js/human-player.js";
 
 export class GameBoard extends HTMLElement {
     gridSize = [16, 9];
@@ -10,7 +11,7 @@ export class GameBoard extends HTMLElement {
     constructor() {
         super();
 
-        const shadow = this.attachShadow({ mode: "open" });
+        const shadow = this.attachShadow({mode: "open"});
 
         let stylesheet = document.createElement("link");
         stylesheet.href = "/components/game-board/game-board.css";
@@ -18,8 +19,11 @@ export class GameBoard extends HTMLElement {
         stylesheet.type = "text/css";
         shadow.appendChild(stylesheet);
 
-        this.game = new Game(this.gridSize[0], this.gridSize[1], new Player("Player 1", 1), new Player("Player 2", 2), 1000);
-        this.game.addEventListener("game-turn", () => this.#draw());
+        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), new HumanPlayer("Player 2", 2), 1000);
+        this.game.addEventListener("game-turn", (e) => {
+            if (e.detail.ended) alert(e.detail.draw ? "Draw" : e.detail.winner.name + " won");
+            this.#draw();
+        });
         this.game.start();
 
         this.canvas = document.createElement("canvas");
@@ -67,13 +71,20 @@ export class GameBoard extends HTMLElement {
      * @param {Player} player The player to draw
      */
     #drawPlayer(player) {
+        if (player.dead) return;
         let [x, y] = this.#cellCoordinates(player.pos[0], player.pos[1]);
         let playerImg = new Image();
-        playerImg.onload = () => this.ctx.drawImage(playerImg,
-            x + (this.cellSize - this.playerSize) / 2,
-            y + (this.cellSize - this.playerSize) / 2,
-            this.playerSize,
-            this.playerSize);
+
+        // // sets scale and origin
+        playerImg.onload = () => {
+            this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
+            this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);
+            this.ctx.drawImage(playerImg,
+                -this.playerSize / 2,
+                -this.playerSize / 2,
+                this.playerSize,
+                this.playerSize);
+        }
         playerImg.src = player.avatar ?? "";
     }
 }

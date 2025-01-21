@@ -1,16 +1,15 @@
-export class Pages extends HTMLElement {
+import {HTMLComponent} from "/js/component.js";
+
+export class Pages extends HTMLComponent {
     constructor() {
-        super();
-        this.attachShadow({mode: "open"});
-        fetch("/components/pages/pages.html")
-            .then(response => response.text())
-            .then(text => {
-                this.shadowRoot.innerHTML = text;
-                this.#showElement("home");
-            });
+        super("/components/pages", "pages.html");
         document.addEventListener("menu-selection", (event) => {
             this.#showElement(event.detail);
         });
+    }
+
+    onVisible = () => {
+        this.#showElement("home");
     }
 
     #showElement(elementId) {

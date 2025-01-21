@@ -1,14 +1,13 @@
-export class GameChoice extends HTMLElement {
+import {HTMLComponent} from "/js/component.js";
+
+export class GameChoice extends HTMLComponent {
     constructor() {
-        super();
-        this.attachShadow({mode: "open"});
-        fetch("/components/game-choice/app-game-choice/game-choice.html")
-            .then(response => response.text())
-            .then(text => {
-                this.shadowRoot.innerHTML = text;
-                this.shadowRoot.getElementById("local-game").addEventListener("click", () => {
-                    document.dispatchEvent(new CustomEvent("menu-selection", {detail: "help"}));
-                });
-            });
+        super("/components/game-choice/app-game-choice", "game-choice.html");
+    }
+
+    onSetupCompleted = () => {
+        this.shadowRoot.getElementById("local-game").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "help"}));
+        });
     }
 }

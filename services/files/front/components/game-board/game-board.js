@@ -1,24 +1,16 @@
 import {directionToAngle, Player} from "/js/player.js";
+import {HTMLComponent} from "/js/component.js";
 
-export class GameBoard extends HTMLElement {
+export class GameBoard extends HTMLComponent {
     cellSize = 100;
     playerSize = 75;
     unconqueredColor = "#242424";
 
     constructor() {
-        super();
-
-        const shadow = this.attachShadow({mode: "open"});
-
-        let stylesheet = document.createElement("link");
-        stylesheet.href = "/components/game-board/game-board.css";
-        stylesheet.rel = "stylesheet";
-        stylesheet.type = "text/css";
-        shadow.appendChild(stylesheet);
-
+        super("/components/game-board/", null, "game-board.css");
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
-        shadow.appendChild(this.canvas);
+        this.shadowRoot.appendChild(this.canvas);
     }
 
     cellCoordinates(x, y) {
@@ -26,6 +18,7 @@ export class GameBoard extends HTMLElement {
     }
 
     draw(game) {
+        if (!this.canvas) return;
         this.canvas.width = game.grid[0].length * this.cellSize + 4;
         this.canvas.height = this.cellSize + (game.grid.length - 1) * this.cellSize * 3 / 4 + 4;
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);

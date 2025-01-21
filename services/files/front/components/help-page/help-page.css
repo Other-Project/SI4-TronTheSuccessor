@@ -21,7 +21,7 @@ slot {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5em;
+    gap: 30px;
 
 
     @media screen and (max-width: 800px) {

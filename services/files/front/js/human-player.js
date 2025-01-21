@@ -1,23 +1,25 @@
-import {Player} from "/js/player.js";
+import { Player } from "/js/player.js";
 
 const player1_keys = {
-    "A": "up-left",
-    "E": "up-right",
-    "Q": "left",
-    "D": "right",
-    "W": "down-left",
-    "X": "down-right"
+    "up-left": ["Q", "Z"],
+    "up-right": ["D", "Z"],
+    "down-left": ["Q", "S"],
+    "down-right": ["D", "S"],
+    "left": ["Q"],
+    "right": ["D"]
 };
 const player2_keys = {
-    "7": "up-left",
-    "9": "up-right",
-    "4": "left",
-    "6": "right",
-    "1": "down-left",
-    "3": "down-right"
+    "up-left": ["ARROWUP", "ARROWLEFT"],
+    "up-right": ["ARROWUP", "ARROWRIGHT"],
+    "down-left": ["ARROWDOWN", "ARROWLEFT"],
+    "down-right": ["ARROWDOWN", "ARROWRIGHT"],
+    "left": ["ARROWLEFT"],
+    "right": ["ARROWRIGHT"]
 };
 
 export class HumanPlayer extends Player {
+    #keypressed;
+
     /**
      * @param {string} name The player's name
      * @param {number} number The "number" of the player
@@ -29,9 +31,15 @@ export class HumanPlayer extends Player {
         super(name, number, pos, color, avatar);
         this.keys = number === 1 ? player1_keys : player2_keys;
 
-        document.addEventListener("keypress", e => {
-            let direction = this.keys[e.key.toUpperCase()];
-            if (direction) super.setNextDirection(direction);
+        this.#keypressed = new Set();
+        document.addEventListener("keydown", e => {
+            this.#keypressed.add(e.key.toUpperCase());
+            let direction = Object.entries(this.keys)
+                .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k))));
+            if (direction) super.setNextDirection(direction[0]);
+        });
+        document.addEventListener("keyup", e => {
+            this.#keypressed.delete(e.key.toUpperCase());
         });
     }
 }

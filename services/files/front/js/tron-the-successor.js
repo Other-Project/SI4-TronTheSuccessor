@@ -1,4 +1,5 @@
 let gameState = {};
+const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "HEAVY_LEFT", "LIGHT_LEFT"];
 
 export function setup(playersState) {
     gameState = {
@@ -15,20 +16,11 @@ export function nextMove(playersState) {
     return Promise.resolve(move);
 }
 
-
 function determineNextMove(playersState) {
     const {playerPosition, opponentPosition} = playersState;
 
     const {row: myRow, column: myCol} = playerPosition;
     const {row: oppRow, column: oppCol} = opponentPosition;
 
-    if (myCol < 16 && oppCol > myCol) {
-        return "KEEP_GOING";
-    } else if (myRow > oppRow) {
-        return "HEAVY_LEFT";
-    } else if (myRow < oppRow) {
-        return "HEAVY_RIGHT";
-    } else {
-        return "LIGHT_LEFT";
-    }
+    return moves[Math.floor(Math.random() * moves.length)];
 }

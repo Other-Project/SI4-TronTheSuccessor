@@ -2,19 +2,19 @@ import { Player } from "/js/player.js";
 
 const player1_keys = {
     "up-left": ["Q", "Z"],
-    "up-right": ["D", "Z"],
+    "up-right": ["Z", "D"],
     "down-left": ["Q", "S"],
-    "down-right": ["D", "S"],
+    "down-right": ["S", "D"],
     "left": ["Q"],
     "right": ["D"]
 };
 const player2_keys = {
-    "up-left": ["ARROWUP", "ARROWLEFT"],
-    "up-right": ["ARROWUP", "ARROWRIGHT"],
-    "down-left": ["ARROWDOWN", "ARROWLEFT"],
-    "down-right": ["ARROWDOWN", "ARROWRIGHT"],
-    "left": ["ARROWLEFT"],
-    "right": ["ARROWRIGHT"]
+    "up-left": ["ArrowLeft", "ArrowUp"],
+    "up-right": ["ArrowUp", "ArrowRight"],
+    "down-left": ["ArrowLeft", "ArrowDown"],
+    "down-right": ["ArrowDown", "ArrowRight"],
+    "left": ["ArrowLeft"],
+    "right": ["ArrowRight"]
 };
 
 export class HumanPlayer extends Player {
@@ -35,7 +35,7 @@ export class HumanPlayer extends Player {
         document.addEventListener("keydown", e => {
             this.#keypressed.add(e.key.toUpperCase());
             let direction = Object.entries(this.keys)
-                .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k))));
+                .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
             if (direction) super.setNextDirection(direction[0]);
         });
         document.addEventListener("keyup", e => {

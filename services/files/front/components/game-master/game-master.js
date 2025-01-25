@@ -1,6 +1,7 @@
 import {Game} from "/js/game.js";
 import {HumanPlayer} from "/js/human-player.js";
 import {HTMLComponent} from "/js/component.js";
+import {FlowBird} from "/js/flowbird.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -20,7 +21,9 @@ export class GameMaster extends HTMLComponent {
 
     newGame() {
         this.stopGame();
-        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), new HumanPlayer("Player 2", 2), 500);
+        const flowBird = new FlowBird();
+        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), flowBird, 500);
+        flowBird.setGame(this.game);
         this.game.addEventListener("game-turn", (e) => {
             if (e.detail.ended) this.endScreen(e.detail);
             this.gameBoard.draw(this.game);

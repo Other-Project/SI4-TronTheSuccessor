@@ -1,6 +1,6 @@
-import { Game } from "/js/game.js";
-import { HTMLComponent } from "/js/component.js";
-import { HumanPlayer } from "/js/human-player.js";
+import {Game} from "/js/game.js";
+import {HTMLComponent} from "/js/component.js";
+import {HumanPlayer} from "/js/human-player.js";
 
 const cells = {
     "up-left": [1, 0],
@@ -22,7 +22,7 @@ export class Control extends HTMLComponent {
     gridSize = [4, 3];
 
     constructor() {
-        super("/components/control", null, "control.css");
+        super();
 
         this.gameBoard = document.createElement("app-game-board");
         this.shadowRoot.appendChild(this.gameBoard);
@@ -36,7 +36,7 @@ export class Control extends HTMLComponent {
                     game.grid[y][x] = null;
 
         this.gameBoard.draw(game);
-        this.gameBoard.ctx.font = "bold 4em Inter";
+        this.gameBoard.ctx.font = "bold 36px Tomorrow";
         this.gameBoard.ctx.fillStyle = "white";
         this.gameBoard.ctx.textAlign = "center";
         this.gameBoard.ctx.textBaseline = "middle";

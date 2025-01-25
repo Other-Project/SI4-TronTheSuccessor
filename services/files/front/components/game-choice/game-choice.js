@@ -2,7 +2,7 @@ import {HTMLComponent} from "/js/component.js";
 
 export class GameChoice extends HTMLComponent {
     constructor() {
-        super("/components/game-choice/app-game-choice", "game-choice.html");
+        super("game-choice", ["html"]);
     }
 
     onSetupCompleted = () => {

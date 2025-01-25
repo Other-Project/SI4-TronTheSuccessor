@@ -2,7 +2,14 @@
 
 <div id="popup-container">
     <app-game-popup id="popup">
-        <h2 slot="title">Victory</h2>
+        <h2 slot="title" id="title">Title</h2>
+
+        <div id="popup-body" slot="body">
+            <div>
+                <p id="time"></p>
+                <p id="description"></p>
+            </div>
+        </div>
 
         <app-button slot="actions" id="restart">Rematch</app-button>
         <app-button slot="actions" id="home">Home</app-button>

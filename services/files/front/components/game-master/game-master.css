@@ -17,3 +17,15 @@
     max-height: 600px;
     width: 100%;
 }
+
+h2, p {
+    margin: 0;
+    text-align: center;
+}
+
+#popup-body {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    gap: 2rem;
+}

@@ -4,6 +4,7 @@ export class Game extends EventTarget {
     gridSize;
     players;
     grid;
+    #startTime;
     #turnDuration;
     #gameLife;
 
@@ -27,6 +28,7 @@ export class Game extends EventTarget {
         this.players[1].pos = [this.gridSize[0] - 1, this.gridSize[1] - 1 - this.players[0].pos[1]];
         this.players.forEach(player => this.#updateGrid(player));
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
+        this.#startTime = new Date();
     }
 
     stop() {
@@ -58,7 +60,8 @@ export class Game extends EventTarget {
             detail: {
                 ended: !!winner,
                 draw: winner ? winner === true : undefined,
-                winner: winner && winner instanceof Player ? winner : undefined
+                winner: winner && winner instanceof Player ? winner : undefined,
+                elapsed: new Date() - this.#startTime
             }
         }));
     }

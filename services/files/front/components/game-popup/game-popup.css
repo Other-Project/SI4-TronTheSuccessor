@@ -7,6 +7,10 @@
     border: 5px solid #bc13fe;
     padding: 1em;
     border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
 }
 
 slot[name="title"] {

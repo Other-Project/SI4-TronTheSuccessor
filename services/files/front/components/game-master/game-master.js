@@ -14,6 +14,10 @@ export class GameMaster extends HTMLComponent {
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.popupWindow = this.shadowRoot.getElementById("popup-container");
 
+        this.popupTitle = this.shadowRoot.getElementById("title");
+        this.popupTime = this.shadowRoot.getElementById("time");
+        this.popupDescription = this.shadowRoot.getElementById("description");
+
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.newGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
@@ -44,6 +48,8 @@ export class GameMaster extends HTMLComponent {
 
     endScreen(details) {
         this.popupWindow.style.display = "block";
-        alert(details.draw ? "Draw" : details.winner.name + " won");
+        this.popupTitle.innerText = details.draw ? "Draw" : details.winner.name + " won";
+        this.popupTime.innerText = `${String(Math.floor((details.elapsed / 1000) / 60)).padStart(2, '0')}'${String(Math.floor((details.elapsed / 1000) % 60)).padStart(2, '0')}"`;
+        this.popupDescription.innerText = "";
     }
 }

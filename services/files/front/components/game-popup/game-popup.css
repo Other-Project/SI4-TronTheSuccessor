@@ -1,0 +1,10 @@
+#popup-panel {
+    width: 100%;
+    height: 100%;
+
+    background: #fff1;
+    backdrop-filter: blur(5px);
+    border: 5px solid #bc13fe;
+    padding: 1em;
+    border-radius: 10px;
+}

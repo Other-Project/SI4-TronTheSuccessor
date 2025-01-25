@@ -17,11 +17,12 @@ async function nextMove(playersState) {
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
     const coord = determineNextMove(playersState);
     const move = (coord - direction + 6) % 6;
+    console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (moves[move] === "NONE") {
-        console.log("Wrong move");
+        console.error("Wrong move");
+        console.error("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
         return moves[0];
     }
-    console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     direction = coord;
     return moves[move];
 }

@@ -15,9 +15,8 @@ export function nextMove(playersState) {
     gameBoard[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1] = 1;
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
     const coord = determineNextMove(playersState);
-    console.log(coord, direction);
     const move = (coord - direction + 6) % 6;
-    console.log(move);
+    console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     direction = coord;
     return Promise.resolve(moves[move]);
 }
@@ -27,7 +26,6 @@ export function nextMove(playersState) {
  */
 function determineNextMove(playersState) {
     const possibleMoves = getPossibleMoves(playersState.playerPosition);
-    console.log(possibleMoves);
     return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]
         .indexOf(possibleMoves[Math.floor(Math.random() * possibleMoves.length)]);
 }

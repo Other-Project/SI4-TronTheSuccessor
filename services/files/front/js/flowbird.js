@@ -25,13 +25,11 @@ export class FlowBird extends Player {
     async #nextMove() {
         let action = await nextMove(this.#getPlayerState());
         const directionKeys = Object.keys(directionToAngle);
-        console.log(action);
         let index = directionKeys.indexOf(this.direction)
         index += actionToIndexDelta[action];
         if (index < 0)
             index = directionKeys.length + index;
         index %= directionKeys.length;
-        console.log(directionKeys[index]);
         this.nextDirection = directionKeys[index];
     }
 

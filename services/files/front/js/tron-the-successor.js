@@ -16,10 +16,7 @@ export function nextMove(playersState) {
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
     const coord = determineNextMove(playersState);
     console.log(coord, direction);
-
-    let move = 0;
-
-
+    const move = (coord - direction + 6) % 6;
     console.log(move);
     direction = coord;
     return Promise.resolve(moves[move]);

@@ -1,12 +1,12 @@
 import {directionToAngle, Player} from "/js/player.js";
 import {nextMove, setup} from "/js/tron-the-successor.js";
 
-const actionToAngleDelta = {
+const actionToIndexDelta = {
     "KEEP_GOING": 0,
-    "LIGHT_RIGHT": 45,
-    "HEAVY_RIGHT": 90,
-    "HEAVY_LEFT": -90,
-    "LIGHT_LEFT": -45
+    "LIGHT_RIGHT": 1,
+    "HEAVY_RIGHT": 2,
+    "HEAVY_LEFT": -2,
+    "LIGHT_LEFT": -1
 }
 
 export class FlowBird extends Player {
@@ -24,12 +24,16 @@ export class FlowBird extends Player {
 
     async #nextMove() {
         let action = await nextMove(this.#getPlayerState());
-        let angle = directionToAngle[this.direction];
-        angle += actionToAngleDelta[action];
-        if (angle < 0)
-            angle = 360 - angle;
-        angle %= 360;
-        this.nextDirection = Object.entries(directionToAngle).find(([_, a]) => a === angle)[0];
+        const directionKeys = Object.keys(directionToAngle);
+        console.log(action);
+
+        let index = directionKeys.indexOf(this.direction)
+        index += actionToIndexDelta[action];
+        if (index < 0)
+            index = directionKeys.length - index;
+        index %= directionKeys.length;
+
+        this.nextDirection = directionKeys[index];
     }
 
     #getPlayerState() {

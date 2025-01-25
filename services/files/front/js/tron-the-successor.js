@@ -3,23 +3,34 @@ let direction = 0;
 let gameBoard = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill(0));
 let allAdjacent = [];
 
-export function setup(playersState) {
+
+async function setup(playersState) {
     direction = 0;
     gameBoard[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1] = 1;
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
     allAdjacent = getAllAdjacentForGrid();
-    return Promise.resolve(true);
+    return true;
 }
 
-export function nextMove(playersState) {
+async function nextMove(playersState) {
     gameBoard[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1] = 1;
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
     const coord = determineNextMove(playersState);
     console.log(coord, direction);
     const move = (coord - direction + 6) % 6;
+    if (moves[move] === "NONE") {
+        console.log("Wrong move");
+        return moves[0];
+    }
     console.log(move);
     direction = coord;
-    return Promise.resolve(moves[move]);
+    return moves[move];
+}
+
+export {setup, nextMove}; // ES6
+if (typeof exports !== 'undefined') { // CommonJS
+    exports.setup = setup;
+    exports.nextMove = nextMove;
 }
 
 /**
@@ -60,8 +71,7 @@ function getAdjacent(x, y) {
 function getAllAdjacentForGrid() {
     allAdjacent = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill([]));
     for (let x = 0; x < gameBoard[0].length; x++)
-        for (let y = 0; y < gameBoard.length; y++) {
+        for (let y = 0; y < gameBoard.length; y++)
             allAdjacent[y][x] = getAdjacent(x, y);
-        }
     return allAdjacent;
 }

@@ -13,13 +13,18 @@ export class GameMaster extends HTMLComponent {
     onSetupCompleted = () => {
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.popupWindow = this.shadowRoot.getElementById("popup-container");
-        this.popupWindow.style.display = "none";
+
+        this.shadowRoot.getElementById("restart").addEventListener("click", () => this.newGame());
+        this.shadowRoot.getElementById("home").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
+        });
     }
 
     onVisible = () => this.newGame();
     onHidden = () => this.stopGame();
 
     newGame() {
+        this.popupWindow.style.display = "none";
         this.stopGame();
         const flowBird = new FlowBird();
         this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), flowBird, 500);

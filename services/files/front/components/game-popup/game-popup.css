@@ -8,3 +8,14 @@
     padding: 1em;
     border-radius: 10px;
 }
+
+slot[name="title"] {
+    text-align: center;
+}
+
+slot[name="actions"] {
+    display: grid;
+    grid-auto-columns: 200px;
+    grid-auto-flow: column;
+    justify-content: space-evenly;
+}

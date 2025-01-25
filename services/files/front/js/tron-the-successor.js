@@ -1,11 +1,12 @@
 const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
 let direction = 0;
-let gameBoard = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill(0));
+let gameBoard;
 let allAdjacent = [];
 
 
 async function setup(playersState) {
     direction = 0;
+    gameBoard = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill(0));
     gameBoard[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1] = 1;
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
     allAdjacent = getAllAdjacentForGrid();

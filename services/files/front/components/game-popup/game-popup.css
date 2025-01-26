@@ -19,7 +19,9 @@ slot[name="title"] {
 
 slot[name="actions"] {
     display: grid;
-    grid-auto-columns: 200px;
+    gap: 10px;
+    padding: 0 10px;
+    grid-auto-columns: minmax(125px, 200px);
     grid-auto-flow: column;
     justify-content: space-evenly;
 }

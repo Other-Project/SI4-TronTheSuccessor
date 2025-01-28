@@ -29,9 +29,9 @@ io.on('connection', (socket) => {
 function startGame() {
     let flowBird = new FlowBird();
     game = new Game(16, 9, new HumanPlayer("Player 1", 1), flowBird, 500);
+    game.start();
     io.emit('game-turn', {game: game});
     //flowBird.setGame(game);
-    game.start();
 
     refreshIntervalId = setInterval(() => {
         game.gameTurn();

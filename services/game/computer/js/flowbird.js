@@ -9,20 +9,17 @@ const actionToIndexDelta = {
     "LIGHT_LEFT": -1
 }
 
-exports = class FlowBird extends Player {
+exports.FlowBird = class FlowBird extends Player {
     constructor() {
         super("FlowBird", 2);
     }
 
     setGame(game) {
         this.game = game;
-        setup(this.#getPlayerState()).then(() => this.#nextMove());
-        game.addEventListener("game-turn", async () => {
-            await this.#nextMove();
-        });
+        setup(this.#getPlayerState()).then(() => this.nextMove());
     }
 
-    async #nextMove() {
+    async nextMove() {
         let action = await nextMove(this.#getPlayerState());
         const directionKeys = Object.keys(directionToAngle);
         let index = directionKeys.indexOf(this.direction)

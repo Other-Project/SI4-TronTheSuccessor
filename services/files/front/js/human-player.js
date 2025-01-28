@@ -1,6 +1,6 @@
-import { Player } from "/js/player.js";
+import {Player} from "/js/player.js";
 
-const player1_keys = {
+export const player1_keys = {
     "up-left": ["Q", "Z"],
     "up-right": ["Z", "D"],
     "down-left": ["Q", "S"],

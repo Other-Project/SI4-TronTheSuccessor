@@ -10,6 +10,8 @@ const directionToAngle = {
     "up-left": 315,
 }
 
+exports.directionToAngle = directionToAngle;
+
 exports.Player = class Player {
     /** @type {string} */ name;
     /** @type {number} */ number;

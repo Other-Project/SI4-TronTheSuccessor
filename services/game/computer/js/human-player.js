@@ -30,16 +30,5 @@ exports.HumanPlayer = class HumanPlayer extends Player {
     constructor(name, number, pos = [0, 0], color = undefined, avatar = undefined) {
         super(name, number, pos, color, avatar);
         this.keys = number === 1 ? player1_keys : player2_keys;
-
-        this.#keypressed = new Set();
-        document.addEventListener("keydown", e => {
-            this.#keypressed.add(e.key.toUpperCase());
-            let direction = Object.entries(this.keys)
-                .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-            if (direction) super.setNextDirection(direction[0]);
-        });
-        document.addEventListener("keyup", e => {
-            this.#keypressed.delete(e.key.toUpperCase());
-        });
     }
 }

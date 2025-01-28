@@ -27,13 +27,12 @@ exports.Game = class Game extends EventTarget {
         this.players[0].pos = [0, Math.round(Math.random() * this.gridSize[1] / 4) * 2];
         this.players[1].pos = [this.gridSize[0] - 1, this.gridSize[1] - 1 - this.players[0].pos[1]];
         this.players.forEach(player => this.#updateGrid(player));
-        this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
         this.#startTime = +new Date();
     }
 
     stop() {
         if (this.isPaused()) return;
-        const details = this.#getInfo();
+        const details = this.getInfo();
         this.#startTime -= new Date();
         clearInterval(this.#gameLife);
         this.#gameLife = null;
@@ -43,15 +42,15 @@ exports.Game = class Game extends EventTarget {
     resume() {
         if (!this.isPaused()) return;
         this.#startTime += +new Date();
-        this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
+        this.#gameLife = setInterval(() => this.gameTurn(), this.#turnDuration);
     }
 
     isPaused() {
         return !this.#gameLife;
     }
 
-    #getInfo(winner) {
-        winner ??= this.#isGameEnded();
+    getInfo(winner) {
+        winner ??= this.isGameEnded();
         return {
             ended: !!winner,
             draw: winner ? winner === true : undefined,
@@ -65,7 +64,7 @@ exports.Game = class Game extends EventTarget {
         else this.grid[player.pos[1]][player.pos[0]] = player.number;
     }
 
-    #gameTurn() {
+    gameTurn() {
         const newPositions = this.players.map((player) => {
             return this.#getNewPosition(player.pos, player.nextDirection);
         });
@@ -79,12 +78,12 @@ exports.Game = class Game extends EventTarget {
             this.#updateGrid(player);
         });
 
-        let winner = this.#isGameEnded();
-        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
+        let winner = this.isGameEnded();
+        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.getInfo(winner)}));
         if (winner) this.stop();
     }
 
-    #isGameEnded() {
+    isGameEnded() {
         let alive = this.players.filter((player) => !player.dead);
         if (alive.length === 0) return true;
         else if (alive.length === 1) return alive[0];

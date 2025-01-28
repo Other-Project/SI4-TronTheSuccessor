@@ -57,14 +57,20 @@ const socketGame = Client("http://localhost:8003");
 
 
 io.on('connection', (socket) => {
-    socket.on('Message to game', (msg) => {
-        console.log('message: ' + msg);
-        socketGame.emit('Message to game', msg);
+    socket.on('game-start', (msg) => {
+        socketGame.emit('game-start');
     });
 
-    socketGame.on('Message to client', (msg) => {
-        console.log("Received message from the game service: " + msg);
-        socket.emit('Message to client', msg);
+    socketGame.on('game-action', (msg) => {
+        socket.emit('game-action', msg);
+    });
+
+    socketGame.on('game-end', (msg) => {
+        socket.emit('game-end', msg);
+    });
+
+    socketGame.on('game-turn', (msg) => {
+        socket.emit('game-turn', msg);
     });
 });
 

@@ -1,12 +1,15 @@
 import {Game} from "/js/game.js";
-import {HumanPlayer} from "/js/human-player.js";
+import {HumanPlayer, player1_keys} from "/js/human-player.js";
 import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
+import "/js/socket.io.js"
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
     against = "local";
     paused = false;
+    socket;
+    #keypressed;
 
     static get observedAttributes() {
         return ["gridSize", "against"];
@@ -33,7 +36,8 @@ export class GameMaster extends HTMLComponent {
 
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
-        this.shadowRoot.getElementById("restart").addEventListener("click", () => this.newGame());
+        this.popupWindow.style.display = "none";
+        this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
         });
@@ -44,8 +48,12 @@ export class GameMaster extends HTMLComponent {
         if (this.popupWindow) this.newGame();
     }
 
-    onVisible = () => this.newGame();
+    onVisible = () => this.#launchGame();
     onHidden = () => this.stopGame();
+
+    #launchGame() {
+        (this.against === "computer" ? this.#gameWithServer() : this.newGame())
+    }
 
     newGame() {
         this.popupWindow.style.display = "none";
@@ -91,5 +99,30 @@ export class GameMaster extends HTMLComponent {
     resume() {
         this.popupWindow.style.display = "none";
         this.game.resume();
+    }
+
+    #gameWithServer() {
+        this.popupWindow.style.display = "none";
+        this.socket = io('http://localhost:8003');
+        this.socket.emit("game-start");
+
+        this.socket.on('game-turn', (msg) => {
+            this.gameBoard.draw(msg.game);
+        });
+
+        this.socket.on('game-end', (msg) => {
+            this.endScreen(msg);
+        });
+
+        this.#keypressed = new Set();
+        document.addEventListener("keydown", e => {
+            this.#keypressed.add(e.key.toUpperCase());
+            let direction = Object.entries(player1_keys)
+                .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
+            if (direction) this.socket.emit("game-action", {direction: direction[0]});
+        });
+        document.addEventListener("keyup", e => {
+            this.#keypressed.delete(e.key.toUpperCase());
+        });
     }
 }

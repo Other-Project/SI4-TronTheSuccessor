@@ -4,22 +4,46 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {HumanPlayer} = require("./js/human-player.js");
 
-let game = new Game(16, 9, new HumanPlayer("Player 1", 1), new HumanPlayer("Player 2", 2), 500);
 
-console.log("Game created");
+let game;
+let refreshIntervalId;
 
-
-const server = http.createServer();
-const io = new Server(server, {
+let server = http.createServer();
+io = new Server(server, {
     cors: {
         origin: "*",
     }
 });
-server.listen(8003)
+server.listen(8003);
 
 io.on('connection', (socket) => {
-    socket.on('Message to game', (msg) => {
-        console.log('message: ' + msg);
-        setTimeout(() => socket.emit('Message to client', msg), 1000);
+    socket.on('game-start', (msg) => {
+        startGame();
+    });
+
+    socket.on('game-action', (msg) => {
+        game.players[0].nextDirection = msg.direction;
     });
 });
+
+function startGame() {
+    let flowBird = new FlowBird();
+    game = new Game(16, 9, new HumanPlayer("Player 1", 1), flowBird, 500);
+    io.emit('game-turn', {game: game});
+    //flowBird.setGame(game);
+    game.start();
+
+    refreshIntervalId = setInterval(() => {
+        game.gameTurn();
+        if (game.isGameEnded()) {
+            io.emit('game-end', game.getInfo());
+            stopGame();
+            return;
+        }
+        io.emit('game-turn', {game: game});
+    }, 500);
+}
+
+function stopGame() {
+    clearInterval(refreshIntervalId);
+}

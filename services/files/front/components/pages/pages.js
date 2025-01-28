@@ -4,7 +4,8 @@ export class Pages extends HTMLComponent {
     constructor() {
         super("/components/pages", "pages.html");
         document.addEventListener("menu-selection", (event) => {
-            this.#showElement(event.detail);
+            if (event.detail && typeof event.detail === "object") this.#showElement(event.detail.name, event.detail.attr);
+            else this.#showElement(event.detail);
         });
     }
 
@@ -12,10 +13,17 @@ export class Pages extends HTMLComponent {
         this.#showElement("home");
     }
 
-    #showElement(elementId) {
+    /**
+     * @param {string} elementId
+     * @param {{string: string}} attr
+     */
+    #showElement(elementId, attr = undefined) {
         const elements = this.shadowRoot.querySelectorAll("#pages > *");
         elements.forEach(element => {
-            element.style.display = element.id === elementId ? "block" : "none";
+            if (element.id === elementId) {
+                element.style.display = "block";
+                if (attr) Object.entries(attr).forEach(([k, v]) => element.setAttribute(k, v));
+            } else element.style.display = "none";
         });
     }
 }

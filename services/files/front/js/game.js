@@ -4,6 +4,7 @@ export class Game extends EventTarget {
     gridSize;
     players;
     grid;
+    #startTime;
     #turnDuration;
     #gameLife;
 
@@ -27,10 +28,36 @@ export class Game extends EventTarget {
         this.players[1].pos = [this.gridSize[0] - 1, this.gridSize[1] - 1 - this.players[0].pos[1]];
         this.players.forEach(player => this.#updateGrid(player));
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
+        this.#startTime = +new Date();
     }
 
     stop() {
+        if (this.isPaused()) return;
+        const details = this.#getInfo();
+        this.#startTime -= new Date();
         clearInterval(this.#gameLife);
+        this.#gameLife = null;
+        return details;
+    }
+
+    resume() {
+        if (!this.isPaused()) return;
+        this.#startTime += +new Date();
+        this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
+    }
+
+    isPaused() {
+        return !this.#gameLife;
+    }
+
+    #getInfo(winner) {
+        winner ??= this.#isGameEnded();
+        return {
+            ended: !!winner,
+            draw: winner ? winner === true : undefined,
+            winner: winner && winner instanceof Player ? winner : undefined,
+            elapsed: new Date() - this.#startTime
+        };
     }
 
     #updateGrid(player) {
@@ -53,14 +80,8 @@ export class Game extends EventTarget {
         });
 
         let winner = this.#isGameEnded();
+        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
         if (winner) this.stop();
-        this.dispatchEvent(new CustomEvent("game-turn", {
-            detail: {
-                ended: !!winner,
-                draw: winner ? winner === true : undefined,
-                winner: winner && winner instanceof Player ? winner : undefined
-            }
-        }));
     }
 
     #isGameEnded() {

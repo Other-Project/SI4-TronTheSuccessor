@@ -21,7 +21,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('game-action', (msg) => {
-        game.players[0].nextDirection = msg.direction;
+        game.players[0].setNextDirection(msg.direction);
     });
 });
 
@@ -29,25 +29,12 @@ function startGame() {
     let flowBird = new FlowBird();
     game = new Game(16, 9, new HumanPlayer("Player 1", 1), flowBird, 500);
 
-    flowBird.setGame(game);
-    game.start();
-    io.emit('game-turn', {
-        grid: game.grid,
-        player1Pos: game.players[0].pos,
-        player1Direction: game.players[0].direction,
-        player1Dead: false,
-        player2Pos: game.players[1].pos,
-        player2Direction: game.players[1].direction,
-        player2Dead: false,
-    });
     game.addEventListener("game-turn", (event) => {
-        console.log("Listening to game-turn event");
         if (event.detail.ended) {
             console.log(event.detail);
             console.log("Game ended");
             io.emit('game-end', event.detail);
         }
-        console.log("Game turn");
         io.emit('game-turn', {
             grid: game.grid,
             player1Pos: game.players[0].pos,
@@ -58,4 +45,6 @@ function startGame() {
             player2Dead: game.players[1].dead
         });
     });
+    flowBird.setGame(game);
+    game.start();
 }

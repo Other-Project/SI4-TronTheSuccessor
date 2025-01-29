@@ -36,7 +36,10 @@ export class HumanPlayer extends Player {
             this.#keypressed.add(e.key.toUpperCase());
             let direction = Object.entries(this.keys)
                 .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-            if (direction) super.setNextDirection(direction[0]);
+            if (direction) {
+                super.setNextDirection(direction[0]);
+                document.dispatchEvent(new CustomEvent("player-direction", {detail: {direction: direction[0]}}));
+            }
         });
         document.addEventListener("keyup", e => {
             this.#keypressed.delete(e.key.toUpperCase());

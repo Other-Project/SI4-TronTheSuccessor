@@ -1,5 +1,5 @@
 import {Game} from "/js/game.js";
-import {HumanPlayer, player1_keys} from "/js/human-player.js";
+import {HumanPlayer} from "/js/human-player.js";
 import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
 import "/js/socket.io.js"
@@ -9,7 +9,6 @@ export class GameMaster extends HTMLComponent {
     against = "local";
     paused = false;
     socket;
-    #keypressed;
 
     static get observedAttributes() {
         return ["gridSize", "against"];
@@ -102,10 +101,19 @@ export class GameMaster extends HTMLComponent {
 
     #gameWithServer() {
         this.popupWindow.style.display = "none";
-        this.socket = io('http://localhost:8003');
-        this.socket.emit("game-start");
+        this.stopGame();
+        if (!this.socket) this.socket = io('http://localhost:8003');
 
         this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), new FlowBird(), 500);
+        this.socket.emit("game-start");
+        this.socket.on('game-start', (msg) => {
+            this.game.players[0].pos = msg.player1Pos;
+            this.game.players[0].direction = msg.player1Direction;
+            this.game.players[1].pos = msg.player2Pos;
+            this.game.players[1].direction = msg.player2Direction;
+            this.gameBoard.draw(this.game);
+            this.gameBoard.style.display = "block";
+        });
 
         this.socket.on('game-turn', (msg) => {
             this.game.players[0].pos = msg.player1Pos;
@@ -122,15 +130,8 @@ export class GameMaster extends HTMLComponent {
             this.endScreen(msg);
         });
 
-        this.#keypressed = new Set();
-        document.addEventListener("keydown", e => {
-            this.#keypressed.add(e.key.toUpperCase());
-            let direction = Object.entries(player1_keys)
-                .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-            if (direction) this.socket.emit("game-action", {direction: direction[0]});
-        });
-        document.addEventListener("keyup", e => {
-            this.#keypressed.delete(e.key.toUpperCase());
+        document.addEventListener("player-direction", (event) => {
+            this.socket.emit("game-action", {direction: event.detail.direction})
         });
     }
 }

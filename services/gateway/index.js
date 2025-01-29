@@ -57,7 +57,7 @@ const socketGame = Client("http://localhost:8003");
 
 
 io.on('connection', (socket) => {
-    socket.on('game-start', (msg) => {
+    socket.on('game-start', () => {
         socketGame.emit('game-start');
     });
 

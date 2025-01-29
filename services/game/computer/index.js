@@ -4,38 +4,42 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {HumanPlayer} = require("./js/human-player.js");
 
-
-let game;
-
 let server = http.createServer();
-io = new Server(server, {
+const io = new Server(server, {
     cors: {
         origin: "*",
     }
 });
 server.listen(8003);
 
+const games = {};
+
 io.on('connection', (socket) => {
     socket.on('game-start', () => {
-        startGame();
+        startGame(socket);
     });
 
     socket.on('game-action', (msg) => {
-        game.players[0].setNextDirection(msg.direction);
+        if (games[socket.id]) {
+            games[socket.id].players[0].setNextDirection(msg.direction);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        delete games[socket.id];
     });
 });
 
-function startGame() {
+function startGame(socket) {
     let flowBird = new FlowBird();
-    game = new Game(16, 9, new HumanPlayer("Player 1", 1), flowBird, 500);
+    let game = new Game(16, 9, new HumanPlayer("Player 1", 1), flowBird, 500);
+    games[socket.id] = game;
 
     game.addEventListener("game-turn", (event) => {
         if (event.detail.ended) {
-            console.log(event.detail);
-            console.log("Game ended");
-            io.emit('game-end', event.detail);
+            socket.emit('game-end', event.detail);
         }
-        io.emit('game-turn', {
+        socket.emit('game-turn', {
             grid: game.grid,
             player1Pos: game.players[0].pos,
             player1Direction: game.players[0].direction,

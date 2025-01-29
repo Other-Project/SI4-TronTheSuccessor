@@ -6,7 +6,6 @@ const {HumanPlayer} = require("./js/human-player.js");
 
 
 let game;
-let refreshIntervalId;
 
 let server = http.createServer();
 io = new Server(server, {
@@ -17,7 +16,7 @@ io = new Server(server, {
 server.listen(8003);
 
 io.on('connection', (socket) => {
-    socket.on('game-start', (msg) => {
+    socket.on('game-start', () => {
         startGame();
     });
 
@@ -29,21 +28,34 @@ io.on('connection', (socket) => {
 function startGame() {
     let flowBird = new FlowBird();
     game = new Game(16, 9, new HumanPlayer("Player 1", 1), flowBird, 500);
+
+    flowBird.setGame(game);
     game.start();
-    io.emit('game-turn', {game: game});
-    //flowBird.setGame(game);
-
-    refreshIntervalId = setInterval(() => {
-        game.gameTurn();
-        if (game.isGameEnded()) {
-            io.emit('game-end', game.getInfo());
-            stopGame();
-            return;
+    io.emit('game-turn', {
+        grid: game.grid,
+        player1Pos: game.players[0].pos,
+        player1Direction: game.players[0].direction,
+        player1Dead: false,
+        player2Pos: game.players[1].pos,
+        player2Direction: game.players[1].direction,
+        player2Dead: false,
+    });
+    game.addEventListener("game-turn", (event) => {
+        console.log("Listening to game-turn event");
+        if (event.detail.ended) {
+            console.log(event.detail);
+            console.log("Game ended");
+            io.emit('game-end', event.detail);
         }
-        io.emit('game-turn', {game: game});
-    }, 500);
-}
-
-function stopGame() {
-    clearInterval(refreshIntervalId);
+        console.log("Game turn");
+        io.emit('game-turn', {
+            grid: game.grid,
+            player1Pos: game.players[0].pos,
+            player1Direction: game.players[0].direction,
+            player1Dead: game.players[0].dead,
+            player2Pos: game.players[1].pos,
+            player2Direction: game.players[1].direction,
+            player2Dead: game.players[1].dead
+        });
+    });
 }

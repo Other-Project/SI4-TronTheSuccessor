@@ -55,7 +55,7 @@ export class Game extends EventTarget {
         return {
             ended: !!winner,
             draw: winner ? winner === true : undefined,
-            winner: winner && winner instanceof Player ? winner : undefined,
+            winner: winner && winner instanceof Player ? winner.name : undefined,
             elapsed: new Date() - this.#startTime
         };
     }

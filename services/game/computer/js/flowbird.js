@@ -16,10 +16,14 @@ exports.FlowBird = class FlowBird extends Player {
 
     setGame(game) {
         this.game = game;
-        setup(this.#getPlayerState()).then(() => this.nextMove());
+        setup(this.#getPlayerState()).then(() => this.#nextMove());
+        game.addEventListener("game-turn", async () => {
+            if (!this.game.isGameEnded())
+                await this.#nextMove();
+        });
     }
 
-    async nextMove() {
+    async #nextMove() {
         let action = await nextMove(this.#getPlayerState());
         const directionKeys = Object.keys(directionToAngle);
         let index = directionKeys.indexOf(this.direction)

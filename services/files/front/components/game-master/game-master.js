@@ -45,7 +45,6 @@ export class GameMaster extends HTMLComponent {
 
     attributeChangedCallback(name, oldValue, newValue) {
         this[name] = newValue;
-        if (this.popupWindow) this.newGame();
     }
 
     onVisible = () => this.#launchGame();
@@ -77,7 +76,7 @@ export class GameMaster extends HTMLComponent {
     endScreen(details) {
         this.popupWindow.style.display = "block";
         this.resumeButton.style.display = "none";
-        this.popupTitle.innerText = details.draw ? "Draw" : details.winner.name + " won";
+        this.popupTitle.innerText = details.draw ? "Draw" : details.winner + " won";
         this.popupTime.innerText = this.#timeToString(details.elapsed);
         this.popupDescription.innerText = "";
     }
@@ -106,8 +105,17 @@ export class GameMaster extends HTMLComponent {
         this.socket = io('http://localhost:8003');
         this.socket.emit("game-start");
 
+        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), new FlowBird(), 500);
+
         this.socket.on('game-turn', (msg) => {
-            this.gameBoard.draw(msg.game);
+            this.game.players[0].pos = msg.player1Pos;
+            this.game.players[0].direction = msg.player1Direction;
+            this.game.players[0].dead = msg.player1Dead;
+            this.game.players[1].pos = msg.player2Pos;
+            this.game.players[1].direction = msg.player2Direction;
+            this.game.players[1].dead = msg.player2Dead;
+            this.game.grid = msg.grid;
+            this.gameBoard.draw(this.game);
         });
 
         this.socket.on('game-end', (msg) => {

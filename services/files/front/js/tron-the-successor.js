@@ -1,6 +1,5 @@
 const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
-const number_of_games = 5000;
-const memo = new Map();
+const number_of_games = 7000;
 let direction = 0;
 let gameBoard = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill(0));
 let allAdjacent = [];
@@ -39,44 +38,30 @@ function determineNextBestMove(playersState) {
 }
 
 function simulateGames(playersState, move) {
-    const key = JSON.stringify({playersState, move});
-    if (memo.has(key)) return memo.get(key);
-
     let wins = 0;
     for (let i = 0; i < number_of_games; i++) {
         if (simulateGame(playersState, move)) wins++;
     }
     const winRate = wins / number_of_games;
-    memo.set(key, winRate);
     return winRate;
 }
 
 function simulateGame(playersState, move) {
     let tempBoard = structuredClone(gameBoard);
-    let tempPosition = [playersState.playerPosition.row - 1, playersState.playerPosition.column - 1];
-    let opponentPosition = [playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1];
-    let tempDirection = move;
-    let opponentDirection = getPossibleMoves(playersState.opponentPosition)[0];
-
+    let tempMove = move;
+    let opponentMove = getPossibleMovesArray(
+        [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1], tempBoard)[0];
     for (let i = 0; i < 144; i++) {
-        tempPosition = tempDirection;
-        if (!tempBoard[tempPosition[1]] || tempBoard[tempPosition[1]][tempPosition[0]] !== 0) return false;
-        tempBoard[tempPosition[1]][tempPosition[0]] = 1;
+        const possibleMoves = getPossibleMovesArray(tempMove, tempBoard);
+        if (possibleMoves.length === 0) return false;
+        tempMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
 
-        opponentPosition = opponentDirection;
-        if (!tempBoard[opponentPosition[1]] || tempBoard[opponentPosition[1]][opponentPosition[0]] !== 0) return true;
-        tempBoard[opponentPosition[1]][opponentPosition[0]] = 2;
-        const possibleMoves = getPossibleMoves({
-            row: tempPosition[1] + 1,
-            column: tempPosition[0] + 1
-        });
-        tempDirection = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+        const opponentMoves = getPossibleMovesArray(opponentMove, tempBoard);
+        if (opponentMoves.length === 0) return true;
+        opponentMove = opponentMoves[Math.floor(Math.random() * opponentMoves.length)];
 
-        const opponentMoves = getPossibleMoves({
-            row: opponentPosition[1] + 1,
-            column: opponentPosition[0] + 1
-        });
-        opponentDirection = opponentMoves[Math.floor(Math.random() * opponentMoves.length)];
+        tempBoard[tempMove[1]][tempMove[0]] = 1;
+        tempBoard[opponentMove[1]][opponentMove[0]] = 1;
     }
     return false;
 }
@@ -87,13 +72,9 @@ if (typeof exports !== 'undefined') { // CommonJS
     exports.nextMove = nextMove;
 }
 
-/**
- * @returns {number}
- */
-function determineNextMove(playersState) {
-    const possibleMoves = getPossibleMoves(playersState.playerPosition);
-    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]
-        .indexOf(possibleMoves[Math.floor(Math.random() * possibleMoves.length)]);
+function getPossibleMovesArray(playerPosition, board) {
+    let adjacentHex = allAdjacent[playerPosition[1]][playerPosition[0]];
+    return adjacentHex.filter(([x, y]) => board[y]?.length > x && x >= 0 && !board[y][x]);
 }
 
 function getPossibleMoves(playerPosition) {
@@ -123,8 +104,8 @@ function getAdjacent(x, y) {
 
 function getAllAdjacentForGrid() {
     allAdjacent = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill([]));
-    for (let x = 0; x < gameBoard[0].length; x++)
-        for (let y = 0; y < gameBoard.length; y++)
+    for (let y = 0; y < gameBoard.length; y++)
+        for (let x = 0; x < gameBoard[y].length; x++)
             allAdjacent[y][x] = getAdjacent(x, y);
     return allAdjacent;
 }

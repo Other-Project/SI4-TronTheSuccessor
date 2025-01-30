@@ -20,7 +20,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('game-action', (msg) => {
-        if (games[socket.id] && games[socket.id].players.length >= msg.number && msg.number > 0) {
+        if (games[socket.id]?.players[msg.number - 1]) {
             games[socket.id].players[msg.number - 1].setNextDirection(msg.direction);
         }
     });

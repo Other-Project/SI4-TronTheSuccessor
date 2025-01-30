@@ -92,7 +92,10 @@ exports.Game = class Game extends EventTarget {
     }
 
     getCopyOfPlayer(index) {
-        return new Player(this.players[index].name, this.players[index].number, this.players[index].pos);
+        let player = new Player(this.players[index].name, this.players[index].number, this.players[index].pos, this.players[index].color, this.players[index].avatar);
+        player.direction = this.players[index].direction;
+        player.dead = this.players[index].dead;
+        return player;
     }
 
     /**

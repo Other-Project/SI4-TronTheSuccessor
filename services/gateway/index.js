@@ -23,10 +23,6 @@ http.createServer(function (request, response) {
     try {
         // If the URL starts by /api, then it's a REST request (you can change that if you want).
         if (filePath[1] === "api") {
-            if (filePath[2] === "game") {
-                console.log("Request for the game service received, transferring to the game service")
-                proxy.web(request, response, {target: "http://127.0.0.1:8002"});
-            }
             // If it doesn't start by /api, then it's a request for a file.
         } else {
             console.log("Request for a file received, transferring to the file service")
@@ -65,10 +61,7 @@ io.on('connection', (socket) => {
 
     serverEvents.forEach(event => {
         socketGame.on(event, (msg) => {
-            socket.emit(event === 'game-start' ? 'game-start-info' : event, msg);
+            socket.emit(event, msg);
         });
     });
 });
-
-
-

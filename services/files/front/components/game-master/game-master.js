@@ -50,7 +50,7 @@ export class GameMaster extends HTMLComponent {
     onHidden = () => this.stopGame();
 
     #launchGame() {
-        (this.against === "computer" ? this.#gameWithServer() : this.newGame())
+        this.against === "local" ? this.newGame() : this.#gameWithServer()
     }
 
     newGame() {
@@ -103,19 +103,16 @@ export class GameMaster extends HTMLComponent {
         this.popupWindow.style.display = "none";
         this.stopGame();
         if (!this.socket) this.socket = io('http://localhost:8002');
+        this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
         this.socket.emit("game-start", {
             playerName: "Player 1",
             playerNumber: 1,
         });
-        this.socket.on('game-start-info', (msg) => {
-            this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer(msg.player1.name, msg.player1.number), msg.player2, 500);
-            this.game.players[0].pos = msg.player1.pos;
-            //To update the grid without having to send the whole grid
-            this.game.grid[this.game.players[0].pos[1]][this.game.players[0].pos[0]] = 1;
-            this.game.grid[this.game.players[1].pos[1]][this.game.players[1].pos[0]] = 2;
+        this.socket.on('game-start', (msg) => {
+            this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer(msg.player1.name, msg.player1.number, msg.player1.pos), msg.player2, 500);
+            this.game.players.forEach(player => this.game.grid[player.pos[1]][player.pos[0]] = player.number);
             this.gameBoard.draw(this.game);
-            this.gameBoard.style.display = "block";
         });
 
         this.socket.on('game-turn', (msg) => {

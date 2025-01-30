@@ -61,8 +61,12 @@ io.on('connection', (socket) => {
         socketGame.emit('game-start');
     });
 
-    socketGame.on('game-action', (msg) => {
-        socket.emit('game-action', msg);
+    socketGame.on('game-start', (msg) => {
+        socket.emit('game-start-info', msg);
+    });
+
+    socket.on('game-action', (msg) => {
+        socketGame.emit('game-action', msg);
     });
 
     socketGame.on('game-end', (msg) => {

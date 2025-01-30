@@ -102,15 +102,15 @@ export class GameMaster extends HTMLComponent {
     #gameWithServer() {
         this.popupWindow.style.display = "none";
         this.stopGame();
-        if (!this.socket) this.socket = io('http://localhost:8003');
+        if (!this.socket) this.socket = io('http://localhost:8002');
 
-        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), new FlowBird(), 500);
         this.socket.emit("game-start");
-        this.socket.on('game-start', (msg) => {
-            this.game.players[0].pos = msg.player1Pos;
-            this.game.players[0].direction = msg.player1Direction;
-            this.game.players[1].pos = msg.player2Pos;
-            this.game.players[1].direction = msg.player2Direction;
+        this.socket.on('game-start-info', (msg) => {
+            this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), msg.player2, 500);
+            this.game.players[0].pos = msg.player1.pos;
+            //To update the grid without having to send the whole grid
+            this.game.grid[this.game.players[0].pos[1]][this.game.players[0].pos[0]] = 1;
+            this.game.grid[this.game.players[1].pos[1]][this.game.players[1].pos[0]] = 2;
             this.gameBoard.draw(this.game);
             this.gameBoard.style.display = "block";
         });

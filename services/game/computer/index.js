@@ -2,7 +2,7 @@ const http = require('http');
 const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
-const {HumanPlayer} = require("./js/human-player.js");
+const {Player} = require("./js/player.js");
 
 let server = http.createServer();
 const io = new Server(server, {
@@ -32,7 +32,7 @@ io.on('connection', (socket) => {
 
 function startGame(socket) {
     let flowBird = new FlowBird();
-    let game = new Game(16, 9, new HumanPlayer("Player 1", 1), flowBird, 500);
+    let game = new Game(16, 9, new Player("Player 1", 1), flowBird, 500);
     games[socket.id] = game;
 
     game.addEventListener("game-turn", (event) => {
@@ -51,4 +51,9 @@ function startGame(socket) {
     });
     flowBird.setGame(game);
     game.start();
+
+    socket.emit('game-start', {
+        player1: game.getCopyOfPlayer(0),
+        player2: game.getCopyOfPlayer(1),
+    });
 }

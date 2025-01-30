@@ -38,13 +38,13 @@ function determineNextBestMove(playersState) {
 }
 
 function determineNextBestMoveCalc(playersState) {
-    const possibleMoves = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard);
-    const opponentMove = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
-    const winningMoves = possibleMoves.map(move => calculateGame(move, opponentMove));
+    const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
+    const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
+    const winningMoves = allAdjacent[playerPosition[1]][playerPosition[0]].map(move => calculateGame(move, opponentPosition));
     console.log("winning_moves: ", winningMoves);
     const bestMoveIndex = winningMoves.indexOf(Math.max(...winningMoves));
     return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]
-        .indexOf(possibleMoves[bestMoveIndex]);
+        .indexOf(winningMoves[bestMoveIndex]);
 }
 
 function calculateGame(playerMove, opponentMove) {

@@ -15,13 +15,13 @@ server.listen(8003);
 const games = {};
 
 io.on('connection', (socket) => {
-    socket.on('game-start', () => {
-        startGame(socket);
+    socket.on('game-start', (msg) => {
+        startGame(socket, msg);
     });
 
     socket.on('game-action', (msg) => {
-        if (games[socket.id]) {
-            games[socket.id].players[0].setNextDirection(msg.direction);
+        if (games[socket.id] && games[socket.id].players.length >= msg.number && msg.number > 0) {
+            games[socket.id].players[msg.number - 1].setNextDirection(msg.direction);
         }
     });
 
@@ -30,9 +30,9 @@ io.on('connection', (socket) => {
     });
 });
 
-function startGame(socket) {
+function startGame(socket, msg) {
     let flowBird = new FlowBird();
-    let game = new Game(16, 9, new Player("Player 1", 1), flowBird, 500);
+    let game = new Game(16, 9, new Player(msg.playerName, msg.playerNumber), flowBird, 500);
     games[socket.id] = game;
 
     game.addEventListener("game-turn", (event) => {

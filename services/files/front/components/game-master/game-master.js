@@ -104,9 +104,12 @@ export class GameMaster extends HTMLComponent {
         this.stopGame();
         if (!this.socket) this.socket = io('http://localhost:8002');
 
-        this.socket.emit("game-start");
+        this.socket.emit("game-start", {
+            playerName: "Player 1",
+            playerNumber: 1,
+        });
         this.socket.on('game-start-info', (msg) => {
-            this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), msg.player2, 500);
+            this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer(msg.player1.name, msg.player1.number), msg.player2, 500);
             this.game.players[0].pos = msg.player1.pos;
             //To update the grid without having to send the whole grid
             this.game.grid[this.game.players[0].pos[1]][this.game.players[0].pos[0]] = 1;
@@ -133,7 +136,7 @@ export class GameMaster extends HTMLComponent {
         });
 
         document.addEventListener("player-direction", (event) => {
-            this.socket.emit("game-action", {direction: event.detail.direction})
+            this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number})
         });
     }
 }

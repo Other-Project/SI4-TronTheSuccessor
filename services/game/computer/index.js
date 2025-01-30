@@ -41,12 +41,11 @@ function startGame(socket) {
         }
         socket.emit('game-turn', {
             grid: game.grid,
-            player1Pos: game.players[0].pos,
-            player1Direction: game.players[0].direction,
-            player1Dead: game.players[0].dead,
-            player2Pos: game.players[1].pos,
-            player2Direction: game.players[1].direction,
-            player2Dead: game.players[1].dead
+            playerStates: game.players.map(player => ({
+                pos: player.pos,
+                direction: player.direction,
+                dead: player.dead
+            })),
         });
     });
     flowBird.setGame(game);

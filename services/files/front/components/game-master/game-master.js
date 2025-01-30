@@ -116,12 +116,14 @@ export class GameMaster extends HTMLComponent {
         });
 
         this.socket.on('game-turn', (msg) => {
-            this.game.players[0].pos = msg.player1Pos;
-            this.game.players[0].direction = msg.player1Direction;
-            this.game.players[0].dead = msg.player1Dead;
-            this.game.players[1].pos = msg.player2Pos;
-            this.game.players[1].direction = msg.player2Direction;
-            this.game.players[1].dead = msg.player2Dead;
+            this.game.players = msg.playerStates.map((player, i) => {
+                return {
+                    ...this.game.players[i],
+                    pos: player.pos,
+                    direction: player.direction,
+                    dead: player.dead
+                };
+            });
             this.game.grid = msg.grid;
             this.gameBoard.draw(this.game);
         });

@@ -26,9 +26,6 @@ http.createServer(function (request, response) {
             if (filePath[2] === "game") {
                 console.log("Request for the game service received, transferring to the game service")
                 proxy.web(request, response, {target: "http://127.0.0.1:8002"});
-                /*socketClient.on("Test message", (msg) => {
-                    socketGame.emit("Test message", msg);
-                });*/
             }
             // If it doesn't start by /api, then it's a request for a file.
         } else {

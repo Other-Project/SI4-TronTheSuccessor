@@ -54,24 +54,19 @@ const socketGame = Client("http://localhost:8003");
 
 
 io.on('connection', (socket) => {
-    socket.on('game-start', (msg) => {
-        socketGame.emit('game-start', msg);
+    const events = ['game-start', 'game-action'];
+    const serverEvents = ['game-start', 'game-end', 'game-turn'];
+
+    events.forEach(event => {
+        socket.on(event, (msg) => {
+            socketGame.emit(event, msg);
+        });
     });
 
-    socketGame.on('game-start', (msg) => {
-        socket.emit('game-start-info', msg);
-    });
-
-    socket.on('game-action', (msg) => {
-        socketGame.emit('game-action', msg);
-    });
-
-    socketGame.on('game-end', (msg) => {
-        socket.emit('game-end', msg);
-    });
-
-    socketGame.on('game-turn', (msg) => {
-        socket.emit('game-turn', msg);
+    serverEvents.forEach(event => {
+        socketGame.on(event, (msg) => {
+            socket.emit(event === 'game-start' ? 'game-start-info' : event, msg);
+        });
     });
 });
 

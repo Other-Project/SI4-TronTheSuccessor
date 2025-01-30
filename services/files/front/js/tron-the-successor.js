@@ -1,9 +1,9 @@
 const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
-const number_of_games = 7000;
+const number_of_games = 4000;
 let direction = 0;
 let gameBoard = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill(0));
 let allAdjacent = [];
-
+const memo = new Map();
 
 async function setup(playersState) {
     direction = 0;
@@ -16,7 +16,7 @@ async function setup(playersState) {
 async function nextMove(playersState) {
     gameBoard[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1] = 1;
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
-    const coord = determineNextBestMove(playersState);
+    const coord = determineNextBestMoveCalc(playersState);
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (moves[move] === "NONE") {
@@ -29,7 +29,7 @@ async function nextMove(playersState) {
 }
 
 function determineNextBestMove(playersState) {
-    const possibleMoves = getPossibleMoves(playersState.playerPosition);
+    const possibleMoves = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard);
     const winRates = possibleMoves.map(move => simulateGames(playersState, move));
     const bestMoveIndex = winRates.indexOf(Math.max(...winRates));
     console.log("win_rates: ", winRates);
@@ -37,12 +37,69 @@ function determineNextBestMove(playersState) {
         .indexOf(possibleMoves[bestMoveIndex]);
 }
 
+function determineNextBestMoveCalc(playersState) {
+    const possibleMoves = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard);
+    const opponentMove = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
+    const winningMoves = possibleMoves.map(move => calculateGame(move, opponentMove));
+    console.log("winning_moves: ", winningMoves);
+    const bestMoveIndex = winningMoves.indexOf(Math.max(...winningMoves));
+    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]
+        .indexOf(possibleMoves[bestMoveIndex]);
+}
+
+function calculateGame(playerMove, opponentMove) {
+    let tempBoard = structuredClone(gameBoard);
+    return exploreMove(playerMove, opponentMove, tempBoard);
+}
+
+function exploreMove(playerMove, opponentMove, tempBoard) {
+    const key = JSON.stringify({playerMove, opponentMove, tempBoard});
+    if (memo.has(key)) return memo.get(key);
+
+    const possibleMoves = getPossibleMovesArray(playerMove, tempBoard);
+    const opponentPossibleMoves = getPossibleMovesArray(opponentMove, tempBoard);
+
+    if (possibleMoves.length === 0 && opponentPossibleMoves.length === 0) {
+        memo.set(key, 0);
+        return 0; // Draw
+    }
+    if (possibleMoves.length === 0) {
+        memo.set(key, -1);
+        return -1; // AI Loses
+    }
+    if (opponentPossibleMoves.length === 0) {
+        memo.set(key, 1);
+        return 1; // AI Wins
+    }
+
+    let result = -Infinity;
+    for (const nextMove of possibleMoves) {
+        for (const nextOpponentMove of opponentPossibleMoves) {
+            tempBoard[nextMove[1]][nextMove[0]] = 1;
+            tempBoard[nextOpponentMove[1]][nextOpponentMove[0]] = 1;
+
+            const score = -exploreMove(nextOpponentMove, nextMove, tempBoard);
+
+            tempBoard[nextMove[1]][nextMove[0]] = 0;
+            tempBoard[nextOpponentMove[1]][nextOpponentMove[0]] = 0;
+
+            result = Math.max(result, score);
+        }
+    }
+
+    memo.set(key, result);
+    return result;
+}
+
 function simulateGames(playersState, move) {
+    const key = JSON.stringify({playersState, move});
+    if (memo.has(key)) return memo.get(key);
     let wins = 0;
     for (let i = 0; i < number_of_games; i++) {
         if (simulateGame(playersState, move)) wins++;
     }
     const winRate = wins / number_of_games;
+    memo.set(key, winRate);
     return winRate;
 }
 
@@ -75,11 +132,6 @@ if (typeof exports !== 'undefined') { // CommonJS
 function getPossibleMovesArray(playerPosition, board) {
     let adjacentHex = allAdjacent[playerPosition[1]][playerPosition[0]];
     return adjacentHex.filter(([x, y]) => board[y]?.length > x && x >= 0 && !board[y][x]);
-}
-
-function getPossibleMoves(playerPosition) {
-    let adjacentHex = allAdjacent[playerPosition.row - 1][playerPosition.column - 1];
-    return adjacentHex.filter(([x, y]) => gameBoard[y]?.length > x && !gameBoard[y][x]);
 }
 
 function getAdjacent(x, y) {

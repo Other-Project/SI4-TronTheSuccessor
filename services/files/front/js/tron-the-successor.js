@@ -1,36 +1,51 @@
 const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
 const number_of_games = 4000;
 let direction = 0;
-let gameBoard = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill(0));
+let gameBoard = 0n;
 let allAdjacent = [];
 const memo = new Map();
 let depth = 0;
 
+function isValid(x, y) {
+    return y >= 1 && y <= 9 && x >= 1 && x <= (y % 2 === 1 ? 16 : 15);
+}
+
 function get(list, x, y) {
-    return list[y][x];
+    return Number(list >> BigInt(16 * y + x) & 1n);
 }
 
 function set(list, x, y, v) {
-    list[y][x] = v;
+    return (list & ~(1n << BigInt(16 * y + x))) | (BigInt(v) << BigInt(16 * y + x));
+}
+
+function toString(list) {
+    return list.toString(2)
+        .padStart(16 * 9, "0")
+        .split("")
+        .reverse()
+        .join(" ")
+        .match(/.{1,32}/g)
+        .map((y, i) => i % 2 === 0 ? y : " " + y.substring(0, 29))
+        .join("\n");
 }
 
 async function setup(playersState) {
     direction = 0;
-    set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
-    set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
+    gameBoard = set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
+    gameBoard = set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
     allAdjacent = getAllAdjacentForGrid();
     return true;
 }
 
 async function nextMove(playersState) {
-    set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
-    set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
+    gameBoard = set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
+    gameBoard = set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
     const coord = depth++ < 10 ? determineNextBestMoveCenter(playersState) : maximizeConnectedEmptySquares(playersState);
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
-    if (moves[move] === "NONE") {
-        console.error("Wrong move");
-        console.error("adjacent_hexagons: ", get(allAdjacent, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1));
+    if (coord < 0 || moves[move] === "NONE") {
+        console.error("Wrong move (coord:", coord, ", move:", move, ")");
+        console.error("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
         return moves[0];
     }
     direction = coord;
@@ -42,8 +57,7 @@ function determineNextBestMoveMonte(playersState) {
     const winRates = possibleMoves.map(move => simulateGames(playersState, move));
     const bestMoveIndex = winRates.indexOf(Math.max(...winRates));
     console.log("win_rates: ", winRates);
-    return get(allAdjacent, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1)
-        .indexOf(possibleMoves[bestMoveIndex]);
+    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].indexOf(possibleMoves[bestMoveIndex]);
 }
 
 function determineNextBestMoveCenter(playersState) {
@@ -52,20 +66,16 @@ function determineNextBestMoveCenter(playersState) {
     const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
 
     const heuristicScores = possibleMoves.map(move => {
-        set(gameBoard, move[0], move[1], 1);
-
         const playerArea = floodFill(move);
-        const opponentArea = floodFill(opponentPosition);
+        const opponentArea = floodFill(opponentPosition); // TODO : Always 0
 
-        set(gameBoard, move[0], move[1], 0);
-
-        const center = [Math.floor(gameBoard[0].length / 2), Math.floor(gameBoard.length / 2)];
+        const center = [Math.floor(16 / 2), Math.floor(9 / 2)];
         const distanceToCenter = Math.abs(move[0] - center[0]) + Math.abs(move[1] - center[1]);
         return 0.7 * (playerArea - opponentArea) - 0.3 * distanceToCenter;
     });
 
     const bestMoveIndex = heuristicScores.indexOf(Math.max(...heuristicScores));
-    return get(allAdjacent, playerPosition[0], playerPosition[1]).indexOf(possibleMoves[bestMoveIndex]);
+    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(possibleMoves[bestMoveIndex]);
 }
 
 function floodFill(start) {
@@ -77,7 +87,7 @@ function floodFill(start) {
         const [x, y] = stack.pop();
         const posKey = `${x},${y}`;
 
-        if (!visited.has(posKey) && gameBoard[y]?.[x] === 0) {
+        if (!visited.has(posKey) && isValid(x, y) && get(gameBoard, x, y) === 0) {
             visited.add(posKey);
             count++;
             stack.push(...getAdjacent(x, y));
@@ -87,26 +97,20 @@ function floodFill(start) {
 }
 
 function maximizeConnectedEmptySquares(playersState) {
-    let tempBoard = structuredClone(gameBoard);
     const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
-    const possibleMoves = getPossibleMovesArray(playerPosition, tempBoard);
+    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
 
     let bestMove = null;
     let maxCovered = 0;
 
     possibleMoves.forEach(move => {
-        set(tempBoard, move[0], move[1], 1);
-
         const covered = floodFill(move);
-
-        set(tempBoard, move[0], move[1], 0);
-
         if (covered > maxCovered) {
             maxCovered = covered;
             bestMove = move;
         }
     });
-    return get(allAdjacent, playerPosition[0], playerPosition[1]).indexOf(bestMove);
+    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(bestMove);
 }
 
 function simulateGames(playersState, move) {
@@ -122,7 +126,7 @@ function simulateGames(playersState, move) {
 }
 
 function simulateGame(playersState, move) {
-    let tempBoard = structuredClone(gameBoard);
+    let tempBoard = gameBoard;
     let tempMove = move;
     let opponentMove = getPossibleMovesArray(
         [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1], tempBoard)[0];
@@ -135,8 +139,8 @@ function simulateGame(playersState, move) {
         if (opponentMoves.length === 0) return true;
         opponentMove = opponentMoves[Math.floor(Math.random() * opponentMoves.length)];
 
-        set(tempBoard, tempMove[0], tempMove[1], 1);
-        set(tempBoard, opponentMove[0], opponentMove[1], 1);
+        tempBoard = set(tempBoard, tempMove[0], tempMove[1], 1);
+        tempBoard = set(tempBoard, opponentMove[0], opponentMove[1], 1);
     }
     return false;
 }
@@ -148,8 +152,8 @@ if (typeof exports !== "undefined") { // CommonJS
 }
 
 function getPossibleMovesArray(playerPosition, board) {
-    let adjacentHex = get(allAdjacent, playerPosition[0], playerPosition[1]);
-    return adjacentHex.filter(([x, y]) => y >= 1 && y <= 9 && x >= 1 && x <= (y % 2 === 1 ? 16 : 15) && !get(board, x, y));
+    let adjacentHex = allAdjacent[playerPosition[1]][playerPosition[0]];
+    return adjacentHex.filter(([x, y]) => isValid(x, y) && !get(board, x, y));
 }
 
 function getAdjacent(x, y) {
@@ -174,8 +178,8 @@ function getAdjacent(x, y) {
 
 function getAllAdjacentForGrid() {
     allAdjacent = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill([]));
-    for (let y = 0; y < gameBoard.length; y++)
-        for (let x = 0; x < gameBoard[y].length; x++)
-            set(allAdjacent, x, y, getAdjacent(x, y));
+    for (let y = 0; y < 9; y++)
+        for (let x = 0; x < 16; x++)
+            allAdjacent[y][x] = getAdjacent(x, y);
     return allAdjacent;
 }

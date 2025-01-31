@@ -7,7 +7,7 @@ const memo = new Map();
 let depth = 0;
 
 function isValid(x, y) {
-    return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 1 ? 16 : 15);
+    return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 0 ? 16 : 15);
 }
 
 function get(list, x, y) {
@@ -69,7 +69,7 @@ function determineNextBestMoveCenter(playersState) {
         const playerArea = floodFill(move);
         const opponentArea = floodFill(opponentPosition); // TODO : Always 0
 
-        const center = [Math.floor(16 / 2), Math.floor(9 / 2)];
+        const center = [8, 5];
         const distanceToCenter = Math.abs(move[0] - center[0]) + Math.abs(move[1] - center[1]);
         return 0.7 * (playerArea - opponentArea) - 0.3 * distanceToCenter;
     });

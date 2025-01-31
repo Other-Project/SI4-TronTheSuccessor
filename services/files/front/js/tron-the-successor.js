@@ -4,6 +4,7 @@ let direction = 0;
 let gameBoard = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill(0));
 let allAdjacent = [];
 const memo = new Map();
+let depth = 0;
 
 async function setup(playersState) {
     direction = 0;
@@ -16,7 +17,7 @@ async function setup(playersState) {
 async function nextMove(playersState) {
     gameBoard[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1] = 1;
     gameBoard[playersState.opponentPosition.row - 1][playersState.opponentPosition.column - 1] = 1;
-    const coord = determineNextBestMoveCalc(playersState);
+    const coord = depth++ < 10 ? determineNextBestMoveCenter(playersState) : maximizeConnectedEmptySquares(playersState);
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (moves[move] === "NONE") {
@@ -28,7 +29,7 @@ async function nextMove(playersState) {
     return moves[move];
 }
 
-function determineNextBestMove(playersState) {
+function determineNextBestMoveMonte(playersState) {
     const possibleMoves = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard);
     const winRates = possibleMoves.map(move => simulateGames(playersState, move));
     const bestMoveIndex = winRates.indexOf(Math.max(...winRates));
@@ -37,58 +38,67 @@ function determineNextBestMove(playersState) {
         .indexOf(possibleMoves[bestMoveIndex]);
 }
 
-function determineNextBestMoveCalc(playersState) {
+function determineNextBestMoveCenter(playersState) {
     const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
     const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
-    const winningMoves = allAdjacent[playerPosition[1]][playerPosition[0]].map(move => calculateGame(move, opponentPosition));
-    console.log("winning_moves: ", winningMoves);
-    const bestMoveIndex = winningMoves.indexOf(Math.max(...winningMoves));
-    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]
-        .indexOf(winningMoves[bestMoveIndex]);
+    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
+
+    const heuristicScores = possibleMoves.map(move => {
+        gameBoard[move[1]][move[0]] = 1;
+
+        const playerArea = floodFill(move);
+        const opponentArea = floodFill(opponentPosition);
+
+        gameBoard[move[1]][move[0]] = 0;
+
+        const center = [Math.floor(gameBoard[0].length / 2), Math.floor(gameBoard.length / 2)];
+        const distanceToCenter = Math.abs(move[0] - center[0]) + Math.abs(move[1] - center[1]);
+        return 0.7 * (playerArea - opponentArea) - 0.3 * distanceToCenter;
+    });
+
+    const bestMoveIndex = heuristicScores.indexOf(Math.max(...heuristicScores));
+    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(possibleMoves[bestMoveIndex]);
 }
 
-function calculateGame(playerMove, opponentMove) {
-    let tempBoard = structuredClone(gameBoard);
-    return exploreMove(playerMove, opponentMove, tempBoard);
-}
+function floodFill(start) {
+    const visited = new Set();
+    const stack = [start];
+    let count = 0;
 
-function exploreMove(playerMove, opponentMove, tempBoard) {
-    const key = JSON.stringify({playerMove, opponentMove, tempBoard});
-    if (memo.has(key)) return memo.get(key);
+    while (stack.length > 0) {
+        const [x, y] = stack.pop();
+        const posKey = `${x},${y}`;
 
-    const possibleMoves = getPossibleMovesArray(playerMove, tempBoard);
-    const opponentPossibleMoves = getPossibleMovesArray(opponentMove, tempBoard);
-
-    if (possibleMoves.length === 0 && opponentPossibleMoves.length === 0) {
-        memo.set(key, 0);
-        return 0; // Draw
-    }
-    if (possibleMoves.length === 0) {
-        memo.set(key, -1);
-        return -1; // AI Loses
-    }
-    if (opponentPossibleMoves.length === 0) {
-        memo.set(key, 1);
-        return 1; // AI Wins
-    }
-
-    let result = -Infinity;
-    for (const nextMove of possibleMoves) {
-        for (const nextOpponentMove of opponentPossibleMoves) {
-            tempBoard[nextMove[1]][nextMove[0]] = 1;
-            tempBoard[nextOpponentMove[1]][nextOpponentMove[0]] = 1;
-
-            const score = -exploreMove(nextOpponentMove, nextMove, tempBoard);
-
-            tempBoard[nextMove[1]][nextMove[0]] = 0;
-            tempBoard[nextOpponentMove[1]][nextOpponentMove[0]] = 0;
-
-            result = Math.max(result, score);
+        if (!visited.has(posKey) && gameBoard[y]?.[x] === 0) {
+            visited.add(posKey);
+            count++;
+            stack.push(...getAdjacent(x, y));
         }
     }
+    return count;
+}
 
-    memo.set(key, result);
-    return result;
+function maximizeConnectedEmptySquares(playersState) {
+    let tempBoard = structuredClone(gameBoard);
+    const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
+    const possibleMoves = getPossibleMovesArray(playerPosition, tempBoard);
+
+    let bestMove = null;
+    let maxCovered = 0;
+
+    possibleMoves.forEach(move => {
+        tempBoard[move[1]][move[0]] = 1;
+
+        const covered = floodFill(move);
+
+        tempBoard[move[1]][move[0]] = 0;
+
+        if (covered > maxCovered) {
+            maxCovered = covered;
+            bestMove = move;
+        }
+    });
+    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(bestMove);
 }
 
 function simulateGames(playersState, move) {

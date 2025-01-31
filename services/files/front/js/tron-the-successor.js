@@ -7,7 +7,7 @@ const memo = new Map();
 let depth = 0;
 
 function isValid(x, y) {
-    return y >= 1 && y <= 9 && x >= 1 && x <= (y % 2 === 1 ? 16 : 15);
+    return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 1 ? 16 : 15);
 }
 
 function get(list, x, y) {

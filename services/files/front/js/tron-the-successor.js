@@ -4,7 +4,7 @@ let direction = 0;
 let gameBoard = new Uint16Array(9);
 let allAdjacent = [];
 const memo = new Map();
-let depth = 0;
+const center = [8, 4];
 
 function isValid(x, y) {
     return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 0 ? 16 : 15);
@@ -40,7 +40,7 @@ async function setup(playersState) {
 async function nextMove(playersState) {
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    const coord = depth++ < 10 ? determineNextBestMoveCenter(playersState) : maximizeConnectedEmptySquares(playersState);
+    const coord = get(gameBoard, 8, 4) === 0 || get(gameBoard, 7, 4) === 0 ? determineNextBestMoveCenter(playersState) : maximizeConnectedEmptySquares(playersState);
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (coord < 0 || moves[move] === "NONE") {
@@ -62,18 +62,14 @@ function determineNextBestMoveMonte(playersState) {
 
 function determineNextBestMoveCenter(playersState) {
     const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
-    const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
     const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
 
     const heuristicScores = possibleMoves.map(move => {
         const playerArea = floodFill(move);
-        const opponentArea = floodFill(opponentPosition); // TODO : Always 0
 
-        const center = [8, 5];
         const distanceToCenter = Math.abs(move[0] - center[0]) + Math.abs(move[1] - center[1]);
-        return 0.7 * (playerArea - opponentArea) - 0.3 * distanceToCenter;
+        return 0.7 * playerArea - 0.3 * distanceToCenter;
     });
-
     const bestMoveIndex = heuristicScores.indexOf(Math.max(...heuristicScores));
     return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(possibleMoves[bestMoveIndex]);
 }
@@ -86,7 +82,6 @@ function floodFill(start) {
     while (stack.length > 0) {
         const [x, y] = stack.pop();
         const posKey = `${x},${y}`;
-
         if (!visited.has(posKey) && isValid(x, y) && get(gameBoard, x, y) === 0) {
             visited.add(posKey);
             count++;
@@ -96,21 +91,57 @@ function floodFill(start) {
     return count;
 }
 
-function maximizeConnectedEmptySquares(playersState) {
+function maximizeConnectedEmptySquares(playersState, depth = 5) {
     const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
-    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
+    const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
 
-    let bestMove = null;
-    let maxCovered = 0;
-
-    possibleMoves.forEach(move => {
-        const covered = floodFill(move);
-        if (covered > maxCovered) {
-            maxCovered = covered;
-            bestMove = move;
+    function minimax(position, isPlayer, currentDepth) {
+        if (currentDepth === 0) {
+            return evaluatePosition(position);
         }
+
+        const possibleMoves = getPossibleMovesArray(position, gameBoard);
+        if (possibleMoves.length === 0) {
+            return isPlayer ? -Infinity : Infinity;
+        }
+
+        if (isPlayer) {
+            let maxEval = -Infinity;
+            possibleMoves.forEach(move => {
+                set(gameBoard, move[0], move[1], 1);
+                const evaluation = minimax(move, false, currentDepth - 1);
+                set(gameBoard, move[0], move[1], 0);
+                maxEval = Math.max(maxEval, evaluation);
+            });
+            return maxEval;
+        } else {
+            let minEval = Infinity;
+            possibleMoves.forEach(move => {
+                set(gameBoard, move[0], move[1], 1);
+                const evaluation = minimax(move, true, currentDepth - 1);
+                set(gameBoard, move[0], move[1], 0);
+                minEval = Math.min(minEval, evaluation);
+            });
+            return minEval;
+        }
+    }
+
+    function evaluatePosition(position) {
+        const playerArea = floodFill(position);
+        const opponentArea = floodFill(opponentPosition);
+        return playerArea - opponentArea;
+    }
+
+    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
+    const heuristicScores = possibleMoves.map(move => {
+        set(gameBoard, move[0], move[1], 1);
+        const score = minimax(move, false, depth - 1);
+        set(gameBoard, move[0], move[1], 0);
+        return score;
     });
-    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(bestMove);
+
+    const bestMoveIndex = heuristicScores.indexOf(Math.max(...heuristicScores));
+    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(possibleMoves[bestMoveIndex]);
 }
 
 function simulateGames(playersState, move) {

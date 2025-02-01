@@ -169,7 +169,7 @@ function simulateGame(playersState, move) {
     return false;
 }
 
-//export {setup, nextMove}; // ES6
+export {setup, nextMove}; // ES6
 if (typeof exports !== "undefined") { // CommonJS
     exports.setup = setup;
     exports.nextMove = nextMove;

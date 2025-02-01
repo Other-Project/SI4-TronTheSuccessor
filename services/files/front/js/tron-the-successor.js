@@ -45,7 +45,7 @@ async function setup(playersState) {
     state = new State([
         new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1),
         new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1)
-    ], gameBoard, -1);
+    ], new Uint16Array(gameBoard), -1);
 
     const searchStats = mcts.runSearch(state, 1);
     console.log("MCTS_stats:", searchStats);
@@ -131,7 +131,6 @@ class MonteCarloNode {
      * @param {Play[]} unexpandedPlays - The node's unexpanded child plays.
      */
     constructor(parent, play, state, unexpandedPlays) {
-
         this.play = play;
         this.state = state;
 
@@ -237,6 +236,7 @@ class MonteCarloNode {
  * Handles best-move selection.
  */
 class MonteCarlo {
+    /** @type {Map<string, MonteCarloNode>} */ nodes;
 
     /**
      * Create a Monte Carlo search tree.
@@ -266,7 +266,6 @@ class MonteCarlo {
      * @return {Object} Search statistics.
      */
     runSearch(state, timeout = 3) {
-
         this.makeNode(state);
 
         let draws = 0;
@@ -299,7 +298,6 @@ class MonteCarlo {
      * @return {Play} The best play, according to the given policy.
      */
     bestPlay(state, policy = "robust") {
-
         this.makeNode(state);
 
         // If not all children are expanded, not enough information
@@ -369,7 +367,6 @@ class MonteCarlo {
      * @return {MonteCarloNode} The new expanded child node.
      */
     expand(node) {
-
         let plays = node.unexpandedPlays();
         let index = Math.floor(Math.random() * plays.length);
         let play = plays[index];
@@ -389,13 +386,16 @@ class MonteCarlo {
      * @return {number} The winner of the terminal game state.
      */
     simulate(node) {
-
         let state = node.state;
         let winner = getWinner(state);
 
         while (winner === null) {
             let plays = legalPlays(state);
             let play = plays[Math.floor(Math.random() * plays.length)];
+            if (!state || !play) {
+                console.error(state, plays, "\n", toPrettyString(state.board));
+                break;
+            }
             state = nextState(state, play);
             winner = getWinner(state);
         }
@@ -410,11 +410,10 @@ class MonteCarlo {
      * @param {number} winner - The winner to propagate.
      */
     backpropagate(node, winner) {
-
         while (node !== null) {
             node.n_plays += 1;
             // Parent's choice
-            if (node.state.isPlayer(-winner)) {
+            if (node.state.isPlayer(winner)) {
                 node.n_wins += 1;
             }
             node = node.parent;
@@ -429,7 +428,8 @@ class MonteCarlo {
      * @return {Object} The MCTS statistics.
      */
     getStats(state) {
-        let node = this.nodes.get(state.hash());
+        let node = this.nodes.get(state.hash()).parent;
+        if (!node) return null;
         let stats = {n_plays: node.n_plays, n_wins: node.n_wins, children: []};
         for (let child of node.children.values()) {
             if (child.node === null) stats.children.push({play: child.play, n_plays: null, n_wins: null});
@@ -451,10 +451,10 @@ function determineNextBestMoveMonte(playersState) {
     console.debug(toPrettyString(gameBoard));
 
     const searchStats = mcts.runSearch(state, 0.2);
-    console.log("MCTS_stats:", searchStats);
+    console.log("Search_stats:", searchStats);
 
     let stats = mcts.getStats(state);
-    console.debug(stats);
+    console.debug("State_stats:", stats);
 
     const bestMove = mcts.bestPlay(state, "robust");
     console.log("best_move:", bestMove);
@@ -485,13 +485,13 @@ function legalPlays(state) {
  * @returns {number|null}
  */
 function getWinner(state) {
-    const move = state.getOpponentMove();
-    const opponentMove = state.getMove();
+    const move = state.getMove();
+    const opponentMove = state.getOpponentMove();
     const playerMoves = getPossibleMovesArray([move.col, move.row], state.board);
     const opponentMoves = getPossibleMovesArray([opponentMove.col, opponentMove.row], state.board);
     if (playerMoves.length === 0 && opponentMoves.length === 0) return 0;
-    else if (playerMoves.length === 0) return -1;
-    else if (opponentMoves.length === 0) return 1;
+    if (playerMoves.length === 0) return -state.player;
+    if (opponentMoves.length === 0) return state.player;
     else return null;
 }
 

@@ -22,10 +22,24 @@ export class Game extends EventTarget {
         this.#turnDuration = turnDuration;
     }
 
-    start() {
-        this.players[0].pos = [0, Math.round(Math.random() * this.gridSize[1] / 4) * 2];
-        this.players[1].pos = [this.gridSize[0] - 1, this.gridSize[1] - 1 - this.players[0].pos[1]];
+    init() {
+        const yPos = Math.round(Math.random() * this.gridSize[1] / 4) * 2;
+        const playerStates = [
+            {
+                position: [0, yPos],
+                direction: "right"
+            },
+            {
+                position: [this.gridSize[0] - 1, this.gridSize[1] - 1 - yPos],
+                direction: "left"
+            }
+        ];
+
+        this.players.forEach((player, i) => player.init(i + 1, playerStates, this));
         this.players.forEach(player => this.#updateGrid(player));
+    }
+
+    start() {
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
     }
 
@@ -35,23 +49,17 @@ export class Game extends EventTarget {
 
     #updateGrid(player) {
         if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) player.dead = true;
+        else if (this.players.some(p => p !== player && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) player.dead = true;
         else this.grid[player.pos[1]][player.pos[0]] = player.number;
     }
 
     #gameTurn() {
-        const newPositions = this.players.map((player) => {
-            return this.#getNewPosition(player.pos, player.nextDirection);
-        });
-        if (newPositions[0][0] === newPositions[1][0] && newPositions[0][1] === newPositions[1][1]) {
-            this.players.forEach((player) => player.dead = true);
-        }
         this.players.forEach((player) => {
             if (player.dead) return;
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
-            this.#updateGrid(player);
         });
-
+        this.players.forEach((player) => this.#updateGrid(player));
         let winner = this.#isGameEnded();
         if (winner) this.stop();
         this.dispatchEvent(new CustomEvent("game-turn", {
@@ -68,6 +76,13 @@ export class Game extends EventTarget {
         if (alive.length === 0) return true;
         else if (alive.length === 1) return alive[0];
         else return false;
+    }
+
+    getPlayerStates() {
+        return this.players.map(player => ({
+            position: player.pos,
+            direction: player.direction
+        }));
     }
 
     /**

@@ -27,7 +27,10 @@ export class Control extends HTMLComponent {
         this.gameBoard = document.createElement("app-game-board");
         this.shadowRoot.appendChild(this.gameBoard);
 
-        const player = new HumanPlayer("Player 1", parseInt(this.getAttribute("owner")), [1, 1]);
+        const player = new HumanPlayer("Player 1");
+        const owner = parseInt(this.getAttribute("owner"));
+        player.init(owner, Array.from(Array(owner), () => ({position: [1, 1], direction: owner === 1 ? "right" : "left"})));
+        player.pos = [1, 1];
 
         const game = new Game(this.gridSize[0], this.gridSize[1], player, null, 1000);
         for (let x = 0; x < this.gridSize[0]; x++)

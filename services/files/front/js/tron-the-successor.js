@@ -1,10 +1,11 @@
 const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
 const number_of_games = 4000;
-let direction = 0;
-let gameBoard = new Uint16Array(9);
-let allAdjacent = [];
-const memo = new Map();
 const center = [8, 4];
+
+let direction;
+let gameBoard;
+let allAdjacent;
+let memo;
 
 function isValid(x, y) {
     return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 0 ? 16 : 15);
@@ -30,10 +31,13 @@ function toString(list) {
 }
 
 async function setup(playersState) {
-    direction = 0;
+    gameBoard = new Uint16Array(9);
+    memo = new Map();
+    allAdjacent = getAllAdjacentForGrid();
+
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    allAdjacent = getAllAdjacentForGrid();
+    direction = playersState.playerPosition.column === 1 ? 3 : 0;
     return true;
 }
 
@@ -165,7 +169,7 @@ function simulateGame(playersState, move) {
     return false;
 }
 
-export {setup, nextMove}; // ES6
+//export {setup, nextMove}; // ES6
 if (typeof exports !== "undefined") { // CommonJS
     exports.setup = setup;
     exports.nextMove = nextMove;

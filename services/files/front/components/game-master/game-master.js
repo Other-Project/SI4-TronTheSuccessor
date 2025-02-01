@@ -2,11 +2,13 @@ import {Game} from "/js/game.js";
 import {HumanPlayer} from "/js/human-player.js";
 import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
+import "/js/socket.io.js"
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
     against = "local";
     paused = false;
+    socket;
 
     static get observedAttributes() {
         return ["gridSize", "against"];
@@ -33,7 +35,8 @@ export class GameMaster extends HTMLComponent {
 
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
-        this.shadowRoot.getElementById("restart").addEventListener("click", () => this.newGame());
+        this.popupWindow.style.display = "none";
+        this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
         });
@@ -41,11 +44,14 @@ export class GameMaster extends HTMLComponent {
 
     attributeChangedCallback(name, oldValue, newValue) {
         this[name] = newValue;
-        if (this.popupWindow) this.newGame();
     }
 
-    onVisible = () => this.newGame();
+    onVisible = () => this.#launchGame();
     onHidden = () => this.stopGame();
+
+    #launchGame() {
+        this.against === "local" ? this.newGame() : this.#gameWithServer()
+    }
 
     newGame() {
         this.popupWindow.style.display = "none";
@@ -69,7 +75,7 @@ export class GameMaster extends HTMLComponent {
     endScreen(details) {
         this.popupWindow.style.display = "block";
         this.resumeButton.style.display = "none";
-        this.popupTitle.innerText = details.draw ? "Draw" : details.winner.name + " won";
+        this.popupTitle.innerText = details.draw ? "Draw" : details.winner + " won";
         this.popupTime.innerText = this.#timeToString(details.elapsed);
         this.popupDescription.innerText = "";
     }
@@ -91,5 +97,43 @@ export class GameMaster extends HTMLComponent {
     resume() {
         this.popupWindow.style.display = "none";
         this.game.resume();
+    }
+
+    #gameWithServer() {
+        this.popupWindow.style.display = "none";
+        this.stopGame();
+        if (!this.socket) this.socket = io('http://localhost:8002');
+        this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
+
+        this.socket.emit("game-start", {
+            playerName: "Player 1",
+            playerNumber: 1,
+        });
+        this.socket.on('game-start', (msg) => {
+            this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer(msg.player1.name, msg.player1.number, msg.player1.pos), msg.player2, 500);
+            this.game.players.forEach(player => this.game.grid[player.pos[1]][player.pos[0]] = player.number);
+            this.gameBoard.draw(this.game);
+        });
+
+        this.socket.on('game-turn', (msg) => {
+            this.game.players = msg.playerStates.map((player, i) => {
+                return {
+                    ...this.game.players[i],
+                    pos: player.pos,
+                    direction: player.direction,
+                    dead: player.dead
+                };
+            });
+            this.game.grid = msg.grid;
+            this.gameBoard.draw(this.game);
+        });
+
+        this.socket.on('game-end', (msg) => {
+            this.endScreen(msg);
+        });
+
+        document.addEventListener("player-direction", (event) => {
+            this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number})
+        });
     }
 }

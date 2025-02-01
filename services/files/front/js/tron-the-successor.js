@@ -105,25 +105,14 @@ function maximizeConnectedEmptySquares(playersState, depth = 5) {
             return isPlayer ? -Infinity : Infinity;
         }
 
-        if (isPlayer) {
-            let maxEval = -Infinity;
-            possibleMoves.forEach(move => {
-                set(gameBoard, move[0], move[1], 1);
-                const evaluation = minimax(move, false, currentDepth - 1);
-                set(gameBoard, move[0], move[1], 0);
-                maxEval = Math.max(maxEval, evaluation);
-            });
-            return maxEval;
-        } else {
-            let minEval = Infinity;
-            possibleMoves.forEach(move => {
-                set(gameBoard, move[0], move[1], 1);
-                const evaluation = minimax(move, true, currentDepth - 1);
-                set(gameBoard, move[0], move[1], 0);
-                minEval = Math.min(minEval, evaluation);
-            });
-            return minEval;
-        }
+        let MinMax = isPlayer ? -Infinity : Infinity;
+        possibleMoves.forEach(move => {
+            set(gameBoard, move[0], move[1], 1);
+            const evaluation = minimax(move, !isPlayer, currentDepth - 1);
+            set(gameBoard, move[0], move[1], 0);
+            MinMax = isPlayer ? Math.max(MinMax, evaluation) : Math.min(MinMax, evaluation);
+        });
+        return MinMax;
     }
 
     function evaluatePosition(position) {

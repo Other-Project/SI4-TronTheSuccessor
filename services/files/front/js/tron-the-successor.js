@@ -52,6 +52,7 @@ async function setup(playersState) {
 
     let stats = mcts.getStats(state);
     console.debug(stats);
+    state = null;
 
     return true;
 }
@@ -447,6 +448,8 @@ function determineNextBestMoveMonte(playersState) {
         nextState(state, new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1)),
         new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1));
 
+    console.debug(toPrettyString(gameBoard));
+
     const searchStats = mcts.runSearch(state, 0.2);
     console.log("MCTS_stats:", searchStats);
 
@@ -460,6 +463,8 @@ function determineNextBestMoveMonte(playersState) {
 
 /** Advance the given state and return it. */
 function nextState(state, play) {
+    if (!state) return new State([play], new Uint16Array(gameBoard), 1);
+
     let newHistory = state.playHistory.slice(); // shallow copy
     newHistory.push(play);
     let newBoard = new Uint16Array(state.board);

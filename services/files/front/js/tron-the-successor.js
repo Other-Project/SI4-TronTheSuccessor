@@ -47,7 +47,7 @@ async function setup(playersState) {
         new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1)
     ], new Uint16Array(gameBoard), -1);
 
-    const searchStats = mcts.runSearch(state, 1);
+    const searchStats = mcts.runSearch(state, 0.95);
     console.log("MCTS_stats:", searchStats);
 
     let stats = mcts.getStats(state);
@@ -80,6 +80,28 @@ if (typeof exports !== "undefined") { // CommonJS
 
 
 // Decisions  making
+
+let mcts;
+let state;
+
+function determineNextBestMoveMonte(playersState) {
+    state = nextState(
+        nextState(state, new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1)),
+        new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1));
+
+    console.debug(toPrettyString(gameBoard));
+
+    const searchStats = mcts.runSearch(state, 0.2);
+    console.log("Search_stats:", searchStats);
+
+    let stats = mcts.getStats(state);
+    console.debug("State_stats:", stats);
+
+    const bestMove = mcts.bestPlay(state, "robust");
+    console.log("best_move:", bestMove);
+    if (!bestMove) return -1;
+    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].findIndex(m => m[0] === bestMove.col && m[1] === bestMove.row);
+}
 
 /** Class representing a game state. */
 class State {
@@ -437,28 +459,6 @@ class MonteCarlo {
         }
         return stats;
     }
-}
-
-
-let mcts;
-let state;
-
-function determineNextBestMoveMonte(playersState) {
-    state = nextState(
-        nextState(state, new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1)),
-        new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1));
-
-    console.debug(toPrettyString(gameBoard));
-
-    const searchStats = mcts.runSearch(state, 0.2);
-    console.log("Search_stats:", searchStats);
-
-    let stats = mcts.getStats(state);
-    console.debug("State_stats:", stats);
-
-    const bestMove = mcts.bestPlay(state, "robust");
-    console.log("best_move:", bestMove);
-    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].findIndex(m => m[0] === bestMove.col && m[1] === bestMove.row);
 }
 
 /** Advance the given state and return it. */

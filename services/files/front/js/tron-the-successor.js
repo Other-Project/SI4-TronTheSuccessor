@@ -39,13 +39,13 @@ async function setup(playersState) {
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
     direction = playersState.playerPosition.column === 1 ? 3 : 0;
 
-    mcts = new MonteCarlo();
+    mcts = new MonteCarlo(Math.sqrt(2));
     state = new State([
         new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1),
         new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1)
     ], new Uint16Array(gameBoard), -1);
 
-    const searchStats = mcts.runSearch(state, 0.95);
+    const searchStats = mcts.runSearch(state, 0.925);
     console.log("MCTS_stats:", searchStats);
 
     let stats = mcts.getStats(state);
@@ -58,7 +58,15 @@ async function setup(playersState) {
 async function nextMove(playersState) {
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    const coord = determineNextBestMoveMonte(playersState);
+    let coord = determineNextBestMoveMonte(playersState);
+    if (coord < 0) {
+        console.warn("Decision making didn't return a move, falling back to any non-killing move");
+        // Do any non-killing move
+        const nonKillingMove = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard)[0];
+        if (!nonKillingMove) coord = -1; // The player is doomed, we just fall back to KEEP_GOING
+        else coord = allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].indexOf(nonKillingMove);
+    }
+
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (coord < 0 || moves[move] === "NONE") {
@@ -77,7 +85,7 @@ if (typeof exports !== "undefined") { // CommonJS
 }
 
 
-// Decisions  making
+// Decisions making
 
 let mcts;
 let state;
@@ -89,7 +97,7 @@ function determineNextBestMoveMonte(playersState) {
 
     console.debug(toPrettyString(gameBoard));
 
-    const searchStats = mcts.runSearch(state, 0.2);
+    const searchStats = mcts.runSearch(state, 0.175);
     console.log("Search_stats:", searchStats);
 
     let stats = mcts.getStats(state);
@@ -264,7 +272,7 @@ class MonteCarlo {
      */
     constructor(UCB1ExploreParam = 2) {
         this.UCB1ExploreParam = UCB1ExploreParam;
-        this.nodes = new Map(); // map: State.hash() => MonteCarloNode
+        this.nodes = new Map();
     }
 
     /**
@@ -285,7 +293,7 @@ class MonteCarlo {
      * @param {number} timeout - The time to run the simulations for, in seconds.
      * @return {Object} Search statistics.
      */
-    runSearch(state, timeout = 3) {
+    runSearch(state, timeout = 1) {
         this.makeNode(state);
 
         let draws = 0;
@@ -294,7 +302,6 @@ class MonteCarlo {
         let end = Date.now() + timeout * 1000;
 
         while (Date.now() < end) {
-
             let node = this.select(state);
             let winner = getWinner(node.state);
 
@@ -314,15 +321,17 @@ class MonteCarlo {
     /**
      * From the available statistics, calculate the best move from the given state.
      * @param {State} state - The state to get the best play from.
-     * @param {string} policy - The selection policy for the "best" play.
+     * @param {"robust"|"max"} policy - The selection policy for the "best" play.
      * @return {Play} The best play, according to the given policy.
      */
     bestPlay(state, policy = "robust") {
         this.makeNode(state);
 
         // If not all children are expanded, not enough information
-        if (this.nodes.get(state.hash()).isFullyExpanded() === false)
-            throw new Error("Not enough information!");
+        if (this.nodes.get(state.hash()).isFullyExpanded() === false) {
+            console.warn("Not enough information!");
+            return null;
+        }
 
         let node = this.nodes.get(state.hash());
         let allPlays = node.allPlays();

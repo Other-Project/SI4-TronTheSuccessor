@@ -315,7 +315,7 @@ class MonteCarlo {
             totalSims++;
         }
 
-        return {runtime: timeout, real_time: timeout + Date.now() - end, simulations: totalSims, draws: draws};
+        return {target_runtime: timeout, real_runtime: timeout + (Date.now() - end) / 1000, simulations: totalSims, draws: draws};
     }
 
     /**

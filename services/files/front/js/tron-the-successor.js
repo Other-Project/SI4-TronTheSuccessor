@@ -95,44 +95,59 @@ function floodFill(start) {
     return count;
 }
 
-function maximizeConnectedEmptySquares(playersState, depth = 5) {
+function minimax(playerPos, opponentPos, currentDepth, alpha, beta) {
+    const stateKey = `${playerPos}-${opponentPos}-${currentDepth}`;
+    if (memo.has(stateKey)) return memo.get(stateKey);
+
+    if (currentDepth === 0) return evaluatePosition(playerPos, opponentPos);
+
+    const playerMoves = getPossibleMovesArray(playerPos, gameBoard);
+    const opponentMoves = getPossibleMovesArray(opponentPos, gameBoard);
+
+    if (playerMoves.length === 0 || opponentMoves.length === 0) return evaluatePosition(playerPos, opponentPos);
+
+    let maxScore = -Infinity;
+
+    set(gameBoard, playerPos[0], playerPos[1], 1);
+    set(gameBoard, opponentPos[0], opponentPos[1], 1);
+
+    for (const playerMove of playerMoves) {
+        for (const opponentMove of opponentMoves) {
+            const score = minimax(playerMove, opponentMove, currentDepth - 1, alpha, beta);
+
+            set(gameBoard, playerMove[0], playerMove[1], 0);
+            set(gameBoard, opponentMove[0], opponentMove[1], 0);
+
+            maxScore = Math.max(maxScore, score);
+            alpha = Math.max(alpha, score);
+            if (beta <= alpha) break;
+        }
+        if (beta <= alpha) break;
+
+    }
+    memo.set(stateKey, maxScore);
+    return maxScore;
+}
+
+function evaluatePosition(playerPos, opponentPos) {
+    const playerArea = floodFill(playerPos);
+    const opponentArea = floodFill(opponentPos);
+
+    console.log("player_area: ", playerArea, "opponent_area: ", opponentArea);
+    return playerArea - opponentArea;
+}
+
+function maximizeConnectedEmptySquares(playersState, depth = 4) {
     const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
     const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
-
-    function minimax(position, isPlayer, currentDepth) {
-        if (currentDepth === 0) {
-            return evaluatePosition(position);
-        }
-
-        const possibleMoves = getPossibleMovesArray(position, gameBoard);
-        if (possibleMoves.length === 0) {
-            return isPlayer ? -Infinity : Infinity;
-        }
-
-        let MinMax = isPlayer ? -Infinity : Infinity;
-        possibleMoves.forEach(move => {
-            set(gameBoard, move[0], move[1], 1);
-            const evaluation = minimax(move, !isPlayer, currentDepth - 1);
-            set(gameBoard, move[0], move[1], 0);
-            MinMax = isPlayer ? Math.max(MinMax, evaluation) : Math.min(MinMax, evaluation);
-        });
-        return MinMax;
-    }
-
-    function evaluatePosition(position) {
-        const playerArea = floodFill(position);
-        const opponentArea = floodFill(opponentPosition);
-        return playerArea - opponentArea;
-    }
-
     const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
     const heuristicScores = possibleMoves.map(move => {
         set(gameBoard, move[0], move[1], 1);
-        const score = minimax(move, false, depth - 1);
+        const score = minimax(move, opponentPosition, depth - 1, -Infinity, Infinity);
         set(gameBoard, move[0], move[1], 0);
         return score;
     });
-
+    console.log("heuristic_scores: ", heuristicScores);
     const bestMoveIndex = heuristicScores.indexOf(Math.max(...heuristicScores));
     return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(possibleMoves[bestMoveIndex]);
 }

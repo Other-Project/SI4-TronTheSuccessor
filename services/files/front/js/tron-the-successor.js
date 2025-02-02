@@ -3,7 +3,6 @@ const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT",
 let direction;
 let gameBoard;
 let allAdjacent;
-let memo;
 
 // Utils
 
@@ -34,7 +33,6 @@ function toPrettyString(list) {
 
 async function setup(playersState) {
     gameBoard = new Uint16Array(9);
-    memo = new Map();
     allAdjacent = getAllAdjacentForGrid();
 
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
@@ -64,8 +62,8 @@ async function nextMove(playersState) {
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (coord < 0 || moves[move] === "NONE") {
-        console.error("Wrong move (coord:", coord, ", move:", move, ")");
-        console.error("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
+        console.warn("Wrong move (coord:", coord, ", move:", move, ")");
+        console.warn("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
         return moves[0];
     }
     direction = coord;
@@ -415,7 +413,7 @@ class MonteCarlo {
             let plays = legalPlays(state);
             let play = plays[Math.floor(Math.random() * plays.length)];
             if (!state || !play) {
-                console.error(state, plays, "\n", toPrettyString(state.board));
+                console.warn(state, plays, "\n", toPrettyString(state.board));
                 break;
             }
             state = nextState(state, play);

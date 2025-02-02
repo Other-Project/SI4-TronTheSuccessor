@@ -98,13 +98,13 @@ function determineNextBestMoveMonte(playersState) {
     console.debug(toPrettyString(gameBoard));
 
     const searchStats = mcts.runSearch(state, 0.175);
-    console.log("Search_stats:", searchStats);
+    console.log("Search_stats:", JSON.stringify(searchStats));
 
     let stats = mcts.getStats(state);
     console.debug("State_stats:", stats);
 
     const bestMove = mcts.bestPlay(state, "robust");
-    console.log("best_move:", bestMove);
+    console.log("best_move:", JSON.stringify(bestMove));
     if (!bestMove) return -1;
     return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].findIndex(m => m[0] === bestMove.col && m[1] === bestMove.row);
 }
@@ -315,7 +315,7 @@ class MonteCarlo {
             totalSims++;
         }
 
-        return {runtime: timeout, simulations: totalSims, draws: draws};
+        return {runtime: timeout, real_time: timeout + Date.now() - end, simulations: totalSims, draws: draws};
     }
 
     /**

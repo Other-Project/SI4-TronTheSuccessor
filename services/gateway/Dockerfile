@@ -1,4 +1,8 @@
 FROM node:18-slim
+
+ENV FILES_SERVICE_URL "http://172.0.0.1:8001"
+ENV GAME_SERVICE_URL "http://172.0.0.1:8003"
+
 USER node
 
 # mkdir and cd

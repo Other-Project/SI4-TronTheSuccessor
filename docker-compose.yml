@@ -1,0 +1,20 @@
+services:
+  gateway:
+    image: tron-the-successor/gateway
+    build:
+      context: services/gateway
+    ports:
+      - "8000:8000"
+      - "8002:8002"
+    restart: unless-stopped
+  files:
+    image: tron-the-successor/files
+    build:
+      context: services/files
+    restart: unless-stopped
+  game:
+    image: tron-the-successor/game
+    build:
+      context: services/game
+    restart: unless-stopped
+

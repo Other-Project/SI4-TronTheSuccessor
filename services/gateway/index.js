@@ -26,7 +26,7 @@ http.createServer(function (request, response) {
             // If it doesn't start by /api, then it's a request for a file.
         } else {
             console.log("Request for a file received, transferring to the file service")
-            proxy.web(request, response, {target: "http://127.0.0.1:8001"});
+            proxy.web(request, response, {target: "http://files:8001"});
         }
     } catch (error) {
         console.log(`error while processing ${request.url}: ${error}`)
@@ -46,7 +46,7 @@ const io = new Server(server, {
     }
 });
 
-const socketGame = Client("http://localhost:8003");
+const socketGame = Client("http://game:8003");
 
 
 io.on('connection', (socket) => {

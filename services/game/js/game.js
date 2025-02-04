@@ -1,8 +1,15 @@
 const {Player} = require("./player.js");
 
+class CustomEvent extends Event {
+    constructor(message, data) {
+        super(message, data);
+        this.detail = data.detail;
+    }
+}
+
 exports.Game = class Game extends EventTarget {
     gridSize;
-    players;
+    /** @type {Player[]} */ players;
     grid;
     #startTime;
     #turnDuration;
@@ -84,6 +91,9 @@ exports.Game = class Game extends EventTarget {
         if (winner) this.stop();
     }
 
+    /**
+     * @returns {Player|boolean}
+     */
     isGameEnded() {
         let alive = this.players.filter((player) => !player.dead);
         if (alive.length === 0) return true;
@@ -118,4 +128,4 @@ exports.Game = class Game extends EventTarget {
                 return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] + 1] : [currentPosition[0] - 1, currentPosition[1] + 1];
         }
     }
-}
+};

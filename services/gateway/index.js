@@ -13,7 +13,7 @@ const proxy = httpProxy.createProxyServer();
 /* The http module contains a createServer function, which takes one argument, which is the function that
  * will be called whenever a new request arrives to the server.
  */
-http.createServer(function (request, response) {
+const server = http.createServer(function (request, response) {
     // First, let's check the URL to see if it's a REST request or a file request.
     // We will remove all cases of "../" in the url for security purposes.
     let filePath = request.url.split("/").filter(function (elem) {
@@ -21,8 +21,11 @@ http.createServer(function (request, response) {
     });
 
     try {
+        if(filePath[1] === "socket.io"){
+
+        }
         // If the URL starts by /api, then it's a REST request (you can change that if you want).
-        if (filePath[1] === "api") {
+        else if (filePath[1] === "api") {
             // If it doesn't start by /api, then it's a request for a file.
         } else {
             console.log("Request for a file received, transferring to the file service")
@@ -36,8 +39,8 @@ http.createServer(function (request, response) {
 // For the server to be listening to request, it needs a port, which is set thanks to the listen function.
 }).listen(8000);
 
-const server = http.createServer();
-server.listen(8002);
+/*const server = http.createServer();
+server.listen(8002);*/
 
 
 const io = new Server(server, {

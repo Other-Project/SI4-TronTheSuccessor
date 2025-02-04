@@ -11,22 +11,22 @@ const actionToIndexDelta = {
 
 exports.FlowBird = class FlowBird extends Player {
     constructor() {
-        super("FlowBird", 2);
+        super("FlowBird");
     }
 
-    setGame(game) {
-        this.game = game;
-        setup(this.#getPlayerState()).then(() => this.#nextMove());
+    init(number, playerStates, game) {
+        super.init(number, playerStates);
+        setup(this.#convertPlayerStates(playerStates)).then(() => this.#nextMove(playerStates));
         game.addEventListener("game-turn", async () => {
-            if (!this.game.isGameEnded())
-                await this.#nextMove();
+            let c = game.getPlayerStates();
+            await this.#nextMove(c);
         });
     }
 
-    async #nextMove() {
-        let action = await nextMove(this.#getPlayerState());
+    async #nextMove(playerStates) {
+        let action = await nextMove(this.#convertPlayerStates(playerStates));
         const directionKeys = Object.keys(directionToAngle);
-        let index = directionKeys.indexOf(this.direction)
+        let index = directionKeys.indexOf(this.direction);
         index += actionToIndexDelta[action];
         if (index < 0)
             index = directionKeys.length + index;
@@ -34,10 +34,14 @@ exports.FlowBird = class FlowBird extends Player {
         this.nextDirection = directionKeys[index];
     }
 
-    #getPlayerState() {
+    #convertPlayerStates(playerStates) {
         return {
-            playerPosition: {row: this.pos[1] + 1, column: this.pos[0] + 1},
-            opponentPosition: {row: this.game.players[0].pos[1] + 1, column: this.game.players[0].pos[0] + 1}
+            playerPosition: this.#convertPlayerState(playerStates[this.number - 1]),
+            opponentPosition: this.#convertPlayerState(playerStates[playerStates.length - this.number])
         };
+    }
+
+    #convertPlayerState(playerState) {
+        return {row: playerState.pos[1] + 1, column: playerState.pos[0] + 1};
     }
 }

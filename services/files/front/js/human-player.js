@@ -38,7 +38,7 @@ export class HumanPlayer extends Player {
                 document.dispatchEvent(new CustomEvent("player-direction", {
                     detail: {
                         direction: direction[0],
-                        number: number
+                        number: super.number
                     }
                 }));
             }

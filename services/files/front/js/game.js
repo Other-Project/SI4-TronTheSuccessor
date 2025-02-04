@@ -1,4 +1,4 @@
-import {Player} from "/js/player.js";
+import { Player } from "/js/player.js";
 
 export class Game extends EventTarget {
     gridSize;
@@ -27,11 +27,11 @@ export class Game extends EventTarget {
         const yPos = Math.round(Math.random() * this.gridSize[1] / 4) * 2;
         const playerStates = [
             {
-                position: [0, yPos],
+                pos: [0, yPos],
                 direction: "right"
             },
             {
-                position: [this.gridSize[0] - 1, this.gridSize[1] - 1 - yPos],
+                pos: [this.gridSize[0] - 1, this.gridSize[1] - 1 - yPos],
                 direction: "left"
             }
         ];
@@ -88,7 +88,7 @@ export class Game extends EventTarget {
         });
         this.players.forEach((player) => this.#updateGrid(player));
         let winner = this.#isGameEnded();
-        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
+        this.dispatchEvent(new CustomEvent("game-turn", { detail: this.#getInfo(winner) }));
         if (winner) this.stop();
     }
 
@@ -101,9 +101,14 @@ export class Game extends EventTarget {
 
     getPlayerStates() {
         return this.players.map(player => ({
-            position: player.pos,
-            direction: player.direction
+            pos: player.pos,
+            direction: player.direction,
+            dead: player.dead
         }));
+    }
+
+    setPlayerStates(playerStates) {
+        playerStates.forEach((state, i) => this.players[i] = { ...this.players[i], ...state });
     }
 
     /**

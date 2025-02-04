@@ -42,6 +42,6 @@ export class FlowBird extends Player {
     }
 
     #convertPlayerState(playerState) {
-        return {row: playerState.position[1] + 1, column: playerState.position[0] + 1};
+        return {row: playerState.pos[1] + 1, column: playerState.pos[0] + 1};
     }
 }

@@ -34,14 +34,14 @@ export class Player {
     /**
      * Initialise the player for a new game
      * @param {number} number The "number" of the player
-     * @param {{position:[number, number],direction:"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"}[]} playerStates The position and the direction of all players in the grid
+     * @param {{pos:[number, number],direction:"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"}[]} playerStates The position and the direction of all players in the grid
      */
     init(number, playerStates) {
         this.number = number;
         this.color ??= playerColors[number - 1];
         this.avatar ??= playerImages[number - 1];
 
-        this.pos = playerStates[number - 1].position;
+        this.pos = playerStates[number - 1].pos;
         this.direction = this.nextDirection = playerStates[number - 1].direction;
         this.dead = false;
     }

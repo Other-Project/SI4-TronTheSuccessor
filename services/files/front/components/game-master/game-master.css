@@ -1,0 +1,31 @@
+#popup-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    align-content: center;
+
+    background: #0007;
+    backdrop-filter: blur(1px);
+}
+
+#popup {
+    display: block;
+    margin: 0 auto;
+    max-width: 600px;
+    max-height: 600px;
+    width: 100%;
+}
+
+h2, p {
+    margin: 0;
+    text-align: center;
+}
+
+#popup-body {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    gap: 2rem;
+}

@@ -1,6 +1,6 @@
 import {Player} from "/js/player.js";
 
-const player1_keys = {
+export const player1_keys = {
     "up-left": ["Q", "Z"],
     "up-right": ["Z", "D"],
     "down-left": ["Q", "S"],
@@ -33,7 +33,15 @@ export class HumanPlayer extends Player {
             this.#keypressed.add(e.key.toUpperCase());
             let direction = Object.entries(this.keys)
                 .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-            if (direction) super.setNextDirection(direction[0]);
+            if (direction) {
+                super.setNextDirection(direction[0]);
+                document.dispatchEvent(new CustomEvent("player-direction", {
+                    detail: {
+                        direction: direction[0],
+                        number: number
+                    }
+                }));
+            }
         });
         document.addEventListener("keyup", e => {
             this.#keypressed.delete(e.key.toUpperCase());

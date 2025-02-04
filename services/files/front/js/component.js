@@ -23,6 +23,13 @@ export class HTMLComponent extends HTMLElement {
     async #setup(path, html, css) {
         if (this.#setupCompleted) return;
 
+        if (Array.isArray(html)) {
+            if (html.includes("css")) css = path + ".css";
+            if (html.includes("html")) html = path + ".html";
+            else html = null;
+            path = `/components/${path}`;
+        }
+
         if (html) this.shadowRoot.innerHTML = await fetch(path + "/" + html).then(response => response.text());
         if (css) {
             const sheet = new CSSStyleSheet();

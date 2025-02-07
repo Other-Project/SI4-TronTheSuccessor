@@ -1,7 +1,4 @@
 const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
-const number_of_games = 4000;
-const center = [8, 4];
-
 let direction;
 let gameBoard;
 let allAdjacent;
@@ -41,10 +38,81 @@ async function setup(playersState) {
     return true;
 }
 
+function determineNextHex(playersState) {
+    const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
+    const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
+    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
+    const opponentMoves = getPossibleMovesArray(opponentPosition, gameBoard);
+    let bestMove = -1;
+    let bestScore = -Infinity;
+
+    possibleMoves.forEach(move => {
+        const tempBoard = structuredClone(gameBoard);
+        set(tempBoard, move[0], move[1], 1);
+        opponentMoves.forEach(opponentMove => {
+            set(tempBoard, opponentMove[0], opponentMove[1], 1);
+            let node = {
+                board: tempBoard,
+                playerPosition: move,
+                opponentPosition: opponentMove
+            }
+            const score = minimax(node, 10, true);
+            console.log("move: ", move, "opponent_move: ", opponentMove, "score: ", score);
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
+        });
+    });
+    console.log("best_score: ", bestScore);
+
+    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(bestMove);
+}
+
+function minimax(node, depth, maximizingPlayer, alpha = -Infinity, beta = Infinity) {
+    const key = JSON.stringify({node, depth, maximizingPlayer});
+    if (memo.has(key)) return memo.get(key);
+
+    if (depth === 0 || getPossibleMovesArray(node.playerPosition, node.board).length === 0 || getPossibleMovesArray(node.opponentPosition, node.board).length === 0) {
+        const evaluation = evaluateBoard(node);
+        memo.set(key, evaluation);
+        return evaluation;
+    }
+
+    let value = maximizingPlayer ? -Infinity : Infinity;
+    const possibleMoves = maximizingPlayer
+        ? getPossibleMovesArray(node.playerPosition, node.board)
+        : getPossibleMovesArray(node.opponentPosition, node.board);
+
+    for (const move of possibleMoves) {
+        const tempBoard = structuredClone(node.board);
+        set(tempBoard, move[0], move[1], 1);
+        const newNode = {
+            board: tempBoard,
+            playerPosition: maximizingPlayer ? move : node.playerPosition,
+            opponentPosition: maximizingPlayer ? node.opponentPosition : move
+        };
+        const evaluate = minimax(newNode, depth - 1, !maximizingPlayer, alpha, beta);
+        value = maximizingPlayer ? Math.max(value, evaluate) : Math.min(value, evaluate);
+        if (maximizingPlayer) alpha = Math.max(alpha, value);
+        else beta = Math.min(beta, value);
+        if (beta <= alpha) break;
+    }
+
+    memo.set(key, value);
+    return value;
+}
+
+function evaluateBoard(node) {
+    const playerMoves = getPossibleMovesArray(node.playerPosition, node.board).length;
+    const opponentMoves = getPossibleMovesArray(node.opponentPosition, node.board).length;
+    return playerMoves - opponentMoves;
+}
+
 async function nextMove(playersState) {
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    const coord = get(gameBoard, 8, 4) === 0 || get(gameBoard, 7, 4) === 0 ? determineNextBestMoveCenter(playersState) : maximizeConnectedEmptySquares(playersState);
+    const coord = determineNextHex(playersState);
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (coord < 0 || moves[move] === "NONE") {
@@ -54,134 +122,6 @@ async function nextMove(playersState) {
     }
     direction = coord;
     return moves[move];
-}
-
-function determineNextBestMoveMonte(playersState) {
-    const possibleMoves = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard);
-    const winRates = possibleMoves.map(move => simulateGames(playersState, move));
-    const bestMoveIndex = winRates.indexOf(Math.max(...winRates));
-    console.log("win_rates: ", winRates);
-    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].indexOf(possibleMoves[bestMoveIndex]);
-}
-
-function determineNextBestMoveCenter(playersState) {
-    const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
-    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
-
-    const heuristicScores = possibleMoves.map(move => {
-        const playerArea = floodFill(move);
-
-        const distanceToCenter = Math.abs(move[0] - center[0]) + Math.abs(move[1] - center[1]);
-        return 0.7 * playerArea - 0.3 * distanceToCenter;
-    });
-    const bestMoveIndex = heuristicScores.indexOf(Math.max(...heuristicScores));
-    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(possibleMoves[bestMoveIndex]);
-}
-
-function floodFill(start) {
-    const visited = new Set();
-    const stack = [start];
-    let count = 0;
-
-    while (stack.length > 0) {
-        const [x, y] = stack.pop();
-        const posKey = `${x},${y}`;
-        if (!visited.has(posKey) && isValid(x, y) && get(gameBoard, x, y) === 0) {
-            visited.add(posKey);
-            count++;
-            stack.push(...getAdjacent(x, y));
-        }
-    }
-    return count;
-}
-
-function minimax(playerPos, opponentPos, currentDepth, alpha, beta) {
-    const stateKey = `${playerPos}-${opponentPos}-${currentDepth}`;
-    if (memo.has(stateKey)) return memo.get(stateKey);
-
-    if (currentDepth === 0) return evaluatePosition(playerPos, opponentPos);
-
-    const playerMoves = getPossibleMovesArray(playerPos, gameBoard);
-    const opponentMoves = getPossibleMovesArray(opponentPos, gameBoard);
-
-    if (playerMoves.length === 0 || opponentMoves.length === 0) return evaluatePosition(playerPos, opponentPos);
-
-    let maxScore = -Infinity;
-
-    set(gameBoard, playerPos[0], playerPos[1], 1);
-    set(gameBoard, opponentPos[0], opponentPos[1], 1);
-
-    for (const playerMove of playerMoves) {
-        for (const opponentMove of opponentMoves) {
-            const score = minimax(playerMove, opponentMove, currentDepth - 1, alpha, beta);
-
-            set(gameBoard, playerMove[0], playerMove[1], 0);
-            set(gameBoard, opponentMove[0], opponentMove[1], 0);
-
-            maxScore = Math.max(maxScore, score);
-            alpha = Math.max(alpha, score);
-            if (beta <= alpha) break;
-        }
-        if (beta <= alpha) break;
-
-    }
-    memo.set(stateKey, maxScore);
-    return maxScore;
-}
-
-function evaluatePosition(playerPos, opponentPos) {
-    const playerArea = floodFill(playerPos);
-    const opponentArea = floodFill(opponentPos);
-
-    console.log("player_area: ", playerArea, "opponent_area: ", opponentArea);
-    return playerArea - opponentArea;
-}
-
-function maximizeConnectedEmptySquares(playersState, depth = 4) {
-    const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
-    const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
-    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
-    const heuristicScores = possibleMoves.map(move => {
-        set(gameBoard, move[0], move[1], 1);
-        const score = minimax(move, opponentPosition, depth - 1, -Infinity, Infinity);
-        set(gameBoard, move[0], move[1], 0);
-        return score;
-    });
-    console.log("heuristic_scores: ", heuristicScores);
-    const bestMoveIndex = heuristicScores.indexOf(Math.max(...heuristicScores));
-    return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(possibleMoves[bestMoveIndex]);
-}
-
-function simulateGames(playersState, move) {
-    const key = JSON.stringify({playersState, move});
-    if (memo.has(key)) return memo.get(key);
-    let wins = 0;
-    for (let i = 0; i < number_of_games; i++) {
-        if (simulateGame(playersState, move)) wins++;
-    }
-    const winRate = wins / number_of_games;
-    memo.set(key, winRate);
-    return winRate;
-}
-
-function simulateGame(playersState, move) {
-    let tempBoard = new Uint16Array(gameBoard);
-    let tempMove = move;
-    let opponentMove = getPossibleMovesArray(
-        [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1], tempBoard)[0];
-    for (let i = 0; i < 144; i++) {
-        const possibleMoves = getPossibleMovesArray(tempMove, tempBoard);
-        if (possibleMoves.length === 0) return false;
-        tempMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
-
-        const opponentMoves = getPossibleMovesArray(opponentMove, tempBoard);
-        if (opponentMoves.length === 0) return true;
-        opponentMove = opponentMoves[Math.floor(Math.random() * opponentMoves.length)];
-
-        set(tempBoard, tempMove[0], tempMove[1], 1);
-        set(tempBoard, opponentMove[0], opponentMove[1], 1);
-    }
-    return false;
 }
 
 export {setup, nextMove}; // ES6

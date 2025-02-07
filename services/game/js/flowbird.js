@@ -1,5 +1,4 @@
 const {directionToAngle, Player} = require("./player.js");
-const vm = require('vm');
 const importFresh = require("import-fresh");
 
 const actionToIndexDelta = {

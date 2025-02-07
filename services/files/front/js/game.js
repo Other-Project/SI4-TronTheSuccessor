@@ -2,7 +2,7 @@ import { Player } from "/js/player.js";
 
 export class Game extends EventTarget {
     gridSize;
-    players;
+    /** @type {Player[]} */ players;
     grid;
     #startTime;
     #turnDuration;

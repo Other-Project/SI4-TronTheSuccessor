@@ -20,9 +20,8 @@ io.on("connection", (socket) => {
     });
 
     socket.on("game-action", (msg) => {
-        if (games[socket.id]?.players[msg.number - 1]) {
+        if (games[socket.id]?.players[msg.number - 1])
             games[socket.id].players[msg.number - 1].setNextDirection(msg.direction);
-        }
     });
 
     socket.on("disconnect", () => {
@@ -35,13 +34,13 @@ function startGame(socket, msg) {
     games[socket.id] = game;
 
     game.addEventListener("game-turn", (event) => {
-        if (event.detail.ended) {
-            socket.emit("game-end", event.detail);
-        }
         socket.emit("game-turn", {
             grid: game.grid,
             playerStates: game.getPlayerStates()
         });
+        if (event.detail.ended) {
+            socket.emit("game-end", event.detail);
+        }
     });
     game.init();
     game.start();

@@ -1,4 +1,4 @@
-import {Player} from "/js/player.js";
+import { Player } from "/js/player.js";
 
 export const player1_keys = {
     "up-left": ["Q", "Z"],
@@ -38,7 +38,7 @@ export class HumanPlayer extends Player {
                 document.dispatchEvent(new CustomEvent("player-direction", {
                     detail: {
                         direction: direction[0],
-                        number: super.number
+                        number: this.number
                     }
                 }));
             }

@@ -22,14 +22,14 @@ const server = http.createServer(function (request, response) {
 
     try {
         if (filePath[1] === "socket.io") {
-
+            // Managed by socket.io
         }
         // If the URL starts by /api, then it's a REST request (you can change that if you want).
         else if (filePath[1] === "api") {
             // If it doesn't start by /api, then it's a request for a file.
         } else {
             console.log("Request for a file received, transferring to the file service");
-            proxy.web(request, response, { target: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001" });
+            proxy.web(request, response, {target: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001"});
         }
     } catch (error) {
         console.log(`error while processing ${request.url}: ${error}`);
@@ -39,20 +39,14 @@ const server = http.createServer(function (request, response) {
 // For the server to be listening to request, it needs a port, which is set thanks to the listen function.
 }).listen(8000);
 
-/*const server = http.createServer();
-server.listen(8002);*/
-
-
 const io = new Server(server, {
     cors: {
         origin: "*"
     }
 });
 
-const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003");
-
-
 io.on("connection", (socket) => {
+    const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003");
     socket.onAny((event, msg) => {
         socketGame.emit(event, msg);
     });

@@ -90,6 +90,8 @@ let mcts;
 let state;
 
 function determineNextBestMoveMonte(playersState) {
+    if (!isValid(playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1)) return -1;
+
     state = nextState(
         nextState(state, new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1)),
         new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1));

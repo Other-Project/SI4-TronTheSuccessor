@@ -47,34 +47,67 @@ async function setup(playersState) {
 function determineNextHex(playersState) {
     const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
     const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
-    const playerMoves = getPossibleMovesArray(playerPosition, gameBoard);
+    const playerMoves = getPossibleMovesArray(playerPosition, gameBoard).sort((a, b) => heuristic(a, opponentPosition) - heuristic(b, opponentPosition));
+    const opponentMoves = getPossibleMovesArray(opponentPosition, gameBoard).sort((a, b) => heuristic(playerPosition, a) - heuristic(playerPosition, b));
 
     let bestMove = -1;
     let bestScore = -Infinity;
 
     playerMoves.forEach(playerMove => {
-        const newBoard = gameBoard.slice();
-        set(newBoard, playerMove[0], playerMove[1], 1);
+        opponentMoves.forEach(opponentMove => {
 
-        const playerDistances = calculateDistances(playerMove, newBoard);
-        const opponentDistances = calculateDistances(opponentPosition, newBoard);
-        const {playerReachable, opponentReachable} = determineReachableTiles(playerDistances, opponentDistances);
+            let tempBoard = new Uint16Array(gameBoard);
+            set(tempBoard, playerMove[0], playerMove[1], 1);
+            set(tempBoard, opponentMove[0], opponentMove[1], 1);
 
-        let score;
-        if (isBoardSplitted(playersState)) {
-            console.log("Board is splitted, using flood fill to count reachable tiles");
-            score = floodFillCount(playerMove, newBoard); // Use flood fill to count reachable tiles
-        } else {
-            score = playerReachable - opponentReachable;
-        }
+            const score = minimax(playerMove, opponentMove, tempBoard, 2, -Infinity, Infinity);
 
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = playerMove;
-        }
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = playerMove;
+            }
+        });
     });
     console.log("score: ", bestScore);
     return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(bestMove);
+}
+
+function minimax(playerMove, opponentMove, board, depth, alpha, beta) {
+    const key = `${playerMove}-${opponentMove}-${board.toString()}-${depth}`;
+    if (memo.has(key)) return memo.get(key);
+
+    if (depth === 0) {
+        const playerDistances = calculateDistances(playerMove, board);
+        const opponentDistances = calculateDistances(opponentMove, board);
+        const {playerReachable, opponentReachable} = determineReachableTiles(playerDistances, opponentDistances);
+        const score = playerReachable - opponentReachable;
+        memo.set(key, score);
+        return score;
+    }
+
+    let tempBoard = new Uint16Array(board);
+    set(tempBoard, playerMove[0], playerMove[1], 1);
+    set(tempBoard, opponentMove[0], opponentMove[1], 1);
+
+    const playerMoves = getPossibleMovesArray(playerMove, tempBoard).sort((a, b) => heuristic(a, opponentMove) - heuristic(b, opponentMove));
+    const opponentMoves = getPossibleMovesArray(opponentMove, tempBoard).sort((a, b) => heuristic(playerMove, a) - heuristic(playerMove, b));
+
+    let bestScore = -Infinity;
+
+    playerMoves.forEach(nextPlayerMove => {
+        opponentMoves.forEach(nextOpponentMove => {
+            const score = minimax(nextPlayerMove, nextOpponentMove, tempBoard, depth - 1, alpha, beta);
+            bestScore = Math.max(bestScore, score);
+            alpha = Math.max(alpha, score);
+            if (beta <= alpha) {
+                memo.set(key, bestScore);
+                return bestScore;
+            }
+        });
+    });
+
+    memo.set(key, bestScore);
+    return bestScore;
 }
 
 function floodFillCount(startPosition, board) {
@@ -99,6 +132,10 @@ function isBoardSplit(playersState) {
     if (gameBoardSplit) return true;
     // TODO: Implement a way to check if the board is split
     return false;
+}
+
+function heuristic(move, opponentMove) {
+    return getPossibleMovesArray(move, gameBoard).length - getPossibleMovesArray(opponentMove, gameBoard).length;
 }
 
 function determineReachableTiles(playerDistances, opponentDistances) {

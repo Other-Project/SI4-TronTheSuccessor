@@ -30,17 +30,31 @@ exports.Game = class Game extends EventTarget {
         this.#turnDuration = turnDuration;
     }
 
-    start() {
-        this.players[0].pos = [0, Math.round(Math.random() * this.gridSize[1] / 4) * 2];
-        this.players[1].pos = [this.gridSize[0] - 1, this.gridSize[1] - 1 - this.players[0].pos[1]];
+    init() {
+        const yPos = Math.round(Math.random() * this.gridSize[1] / 4) * 2;
+        const playerStates = [
+            {
+                pos: [0, yPos],
+                direction: "right"
+            },
+            {
+                pos: [this.gridSize[0] - 1, this.gridSize[1] - 1 - yPos],
+                direction: "left"
+            }
+        ];
+
+        this.players.forEach((player, i) => player.init(i + 1, playerStates, this));
         this.players.forEach(player => this.#updateGrid(player));
-        this.#gameLife = setInterval(() => this.gameTurn(), this.#turnDuration);
+    }
+
+    start() {
+        this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
         this.#startTime = +new Date();
     }
 
     stop() {
         if (this.isPaused()) return;
-        const details = this.getInfo();
+        const details = this.#getInfo();
         this.#startTime -= new Date();
         clearInterval(this.#gameLife);
         this.#gameLife = null;
@@ -50,15 +64,15 @@ exports.Game = class Game extends EventTarget {
     resume() {
         if (!this.isPaused()) return;
         this.#startTime += +new Date();
-        this.#gameLife = setInterval(() => this.gameTurn(), this.#turnDuration);
+        this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
     }
 
     isPaused() {
         return !this.#gameLife;
     }
 
-    getInfo(winner) {
-        winner ??= this.isGameEnded();
+    #getInfo(winner) {
+        winner ??= this.#isGameEnded();
         return {
             ended: !!winner,
             draw: winner ? winner === true : undefined,
@@ -69,43 +83,39 @@ exports.Game = class Game extends EventTarget {
 
     #updateGrid(player) {
         if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) player.dead = true;
+        else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) player.dead = true;
         else this.grid[player.pos[1]][player.pos[0]] = player.number;
     }
 
-    gameTurn() {
-        const newPositions = this.players.map((player) => {
-            return this.#getNewPosition(player.pos, player.nextDirection);
-        });
-        if (newPositions[0][0] === newPositions[1][0] && newPositions[0][1] === newPositions[1][1]) {
-            this.players.forEach((player) => player.dead = true);
-        }
+    #gameTurn() {
         this.players.forEach((player) => {
             if (player.dead) return;
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
-            this.#updateGrid(player);
         });
-
-        let winner = this.isGameEnded();
-        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.getInfo(winner)}));
+        this.players.forEach((player) => this.#updateGrid(player));
+        let winner = this.#isGameEnded();
+        this.dispatchEvent(new CustomEvent("game-turn", { detail: this.#getInfo(winner) }));
         if (winner) this.stop();
     }
 
-    /**
-     * @returns {Player|boolean}
-     */
-    isGameEnded() {
+    #isGameEnded() {
         let alive = this.players.filter((player) => !player.dead);
         if (alive.length === 0) return true;
         else if (alive.length === 1) return alive[0];
         else return false;
     }
 
-    getCopyOfPlayer(index) {
-        let player = new Player(this.players[index].name, this.players[index].number, this.players[index].pos, this.players[index].color, this.players[index].avatar);
-        player.direction = this.players[index].direction;
-        player.dead = this.players[index].dead;
-        return player;
+    getPlayerStates() {
+        return this.players.map(player => ({
+            pos: player.pos,
+            direction: player.direction,
+            dead: player.dead
+        }));
+    }
+
+    setPlayerStates(playerStates) {
+        playerStates.forEach((state, i) => this.players[i] = { ...this.players[i], ...state });
     }
 
     /**
@@ -128,4 +138,4 @@ exports.Game = class Game extends EventTarget {
                 return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] + 1] : [currentPosition[0] - 1, currentPosition[1] + 1];
         }
     }
-};
+}

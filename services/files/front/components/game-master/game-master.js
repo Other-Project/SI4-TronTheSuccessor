@@ -1,8 +1,9 @@
-import {Game} from "/js/game.js";
-import {HumanPlayer} from "/js/human-player.js";
-import {HTMLComponent} from "/js/component.js";
-import {FlowBird} from "/js/flowbird.js";
-import "/js/socket.io.js"
+import { Game } from "/js/game.js";
+import { HumanPlayer } from "/js/human-player.js";
+import { HTMLComponent } from "/js/component.js";
+import { FlowBird } from "/js/flowbird.js";
+import "/js/socket.io.js";
+import { Player } from "../../js/player.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -10,6 +11,7 @@ export class GameMaster extends HTMLComponent {
     paused = false;
     socket;
 
+    // noinspection JSUnusedGlobalSymbols
     static get observedAttributes() {
         return ["gridSize", "against"];
     }
@@ -38,10 +40,11 @@ export class GameMaster extends HTMLComponent {
         this.popupWindow.style.display = "none";
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
+            document.dispatchEvent(new CustomEvent("menu-selection", { detail: "home" }));
         });
     };
 
+    // noinspection JSUnusedGlobalSymbols
     attributeChangedCallback(name, oldValue, newValue) {
         this[name] = newValue;
     }
@@ -50,19 +53,19 @@ export class GameMaster extends HTMLComponent {
     onHidden = () => this.stopGame();
 
     #launchGame() {
-        this.against === "local" ? this.newGame() : this.#gameWithServer()
+        this.against === "local" ? this.newGame() : this.#gameWithServer();
     }
 
     newGame() {
         this.popupWindow.style.display = "none";
         this.stopGame();
-        const opponent = this.against === "computer" ? new FlowBird() : new HumanPlayer("Player 2", 2);
-        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1", 1), opponent, 500);
-        if (opponent.setGame) opponent.setGame(this.game);
+        const opponent = this.against === "computer" ? new FlowBird() : new HumanPlayer("Player 2");
+        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1"), opponent, 500);
         this.game.addEventListener("game-turn", (e) => {
             if (e.detail.ended) this.endScreen(e.detail);
             this.gameBoard.draw(this.game);
         });
+        this.game.init();
         this.game.start();
         this.gameBoard.draw(this.game);
     }
@@ -102,38 +105,33 @@ export class GameMaster extends HTMLComponent {
     #gameWithServer() {
         this.popupWindow.style.display = "none";
         this.stopGame();
-        if (!this.socket) this.socket = io('http://localhost:8002');
+        if (!this.socket) this.socket = io("ws://localhost:8000");
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
         this.socket.emit("game-start", {
-            playerName: "Player 1",
-            playerNumber: 1,
+            playerName: "Player 1"
         });
-        this.socket.on('game-start', (msg) => {
-            this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer(msg.player1.name, msg.player1.number, msg.player1.pos), msg.player2, 500);
-            this.game.players.forEach(player => this.game.grid[player.pos[1]][player.pos[0]] = player.number);
+
+        this.socket.on("game-start", (msg) => {
+            const players = msg.players.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
+
+            this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
+            this.game.players.forEach((player, i) => player.init(msg.players[i].number, msg.playerStates));
             this.gameBoard.draw(this.game);
         });
 
-        this.socket.on('game-turn', (msg) => {
-            this.game.players = msg.playerStates.map((player, i) => {
-                return {
-                    ...this.game.players[i],
-                    pos: player.pos,
-                    direction: player.direction,
-                    dead: player.dead
-                };
-            });
+        this.socket.on("game-turn", (msg) => {
+            this.game.setPlayerStates(msg.playerStates);
             this.game.grid = msg.grid;
             this.gameBoard.draw(this.game);
         });
 
-        this.socket.on('game-end', (msg) => {
+        this.socket.on("game-end", (msg) => {
             this.endScreen(msg);
         });
 
         document.addEventListener("player-direction", (event) => {
-            this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number})
+            this.socket.emit("game-action", { direction: event.detail.direction, number: event.detail.number });
         });
     }
 }

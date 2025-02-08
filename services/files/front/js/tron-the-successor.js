@@ -3,6 +3,7 @@ let direction;
 let gameBoard;
 let allAdjacent;
 let memo;
+let gameBoardSplit;
 
 // Utils
 
@@ -34,6 +35,7 @@ function toPrettyString(list) {
 async function setup(playersState) {
     gameBoard = new Uint16Array(9);
     memo = new Map();
+    gameBoardSplit = false;
     allAdjacent = getAllAdjacentForGrid();
 
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
@@ -45,128 +47,97 @@ async function setup(playersState) {
 function determineNextHex(playersState) {
     const playerPosition = [playersState.playerPosition.column - 1, playersState.playerPosition.row - 1];
     const opponentPosition = [playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1];
-    const possibleMoves = getPossibleMovesArray(playerPosition, gameBoard);
+    const playerMoves = getPossibleMovesArray(playerPosition, gameBoard);
+
     let bestMove = -1;
     let bestScore = -Infinity;
 
-    const orderedMoves = orderMoves(possibleMoves, opponentPosition, gameBoard, true);
+    playerMoves.forEach(playerMove => {
+        const newBoard = gameBoard.slice();
+        set(newBoard, playerMove[0], playerMove[1], 1);
 
-    for (const move of orderedMoves) {
-        set(gameBoard, move[0], move[1], 1);
-        const opponentMoves = getPossibleMovesArray(opponentPosition, gameBoard);
-        const orderedOpponentMoves = orderMoves(opponentMoves, move, gameBoard, false);
-        for (const opponentMove of orderedOpponentMoves) {
-            set(gameBoard, opponentMove[0], opponentMove[1], 1);
-            const boardCopy = new Uint16Array(gameBoard);
-            const node = {
-                board: boardCopy,
-                playerPosition: move,
-                opponentPosition: opponentMove
-            };
-            const score = minimax(node, 15, true, -Infinity, Infinity);
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = move;
-            }
-            set(gameBoard, opponentMove[0], opponentMove[1], 0);
+        const playerDistances = calculateDistances(playerMove, newBoard);
+        const opponentDistances = calculateDistances(opponentPosition, newBoard);
+        const {playerReachable, opponentReachable} = determineReachableTiles(playerDistances, opponentDistances);
+
+        let score;
+        if (isBoardSplitted(playersState)) {
+            console.log("Board is splitted, using flood fill to count reachable tiles");
+            score = floodFillCount(playerMove, newBoard); // Use flood fill to count reachable tiles
+        } else {
+            score = playerReachable - opponentReachable;
         }
-        set(gameBoard, move[0], move[1], 0);
-    }
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestMove = playerMove;
+        }
+    });
     console.log("score: ", bestScore);
     return allAdjacent[playerPosition[1]][playerPosition[0]].indexOf(bestMove);
 }
 
-function orderMoves(moves, position, board, isMaximizing) {
-    return moves.sort((a, b) => {
-        const scoreA = quickEvaluate(a, position);
-        const scoreB = quickEvaluate(b, position);
-        return isMaximizing ? scoreB - scoreA : scoreA - scoreB;
-    });
-}
-
-function quickEvaluate(move, position) {
-    const centerScore = -(Math.abs(move[0] - 8) + Math.abs(move[1] - 4));
-    const distToOpponent = Math.abs(move[0] - position[0]) + Math.abs(move[1] - position[1]);
-    return centerScore - distToOpponent;
-}
-
-function minimax(node, depth, maximizingPlayer, alpha, beta) {
-    const key = `${node.playerPosition.join(',')}|${node.opponentPosition.join(',')}|${depth}|${maximizingPlayer}`;
-    if (memo.has(key)) return memo.get(key);
-
-    const playerMoves = getPossibleMovesArray(node.playerPosition, node.board);
-    const opponentMoves = getPossibleMovesArray(node.opponentPosition, node.board);
-
-    if (depth === 0 || playerMoves.length === 0 || opponentMoves.length === 0) {
-        const evaluation = evaluateBoard(node);
-        memo.set(key, evaluation);
-        return evaluation;
-    }
-
-    let value = maximizingPlayer ? -Infinity : Infinity;
-    const moves = maximizingPlayer ? playerMoves : opponentMoves;
-    const position = maximizingPlayer ? node.opponentPosition : node.playerPosition;
-
-    const orderedMoves = orderMoves(moves, position, node.board, maximizingPlayer);
-
-    for (const move of orderedMoves) {
-        set(node.board, move[0], move[1], 1);
-        const nextMoves = maximizingPlayer ? opponentMoves : playerMoves;
-
-        for (const nextMove of nextMoves) {
-            set(node.board, nextMove[0], nextMove[1], 1);
-            const childNode = {
-                board: node.board,
-                playerPosition: maximizingPlayer ? move : nextMove,
-                opponentPosition: maximizingPlayer ? nextMove : move
-            };
-
-            const score = minimax(childNode, depth - 1, !maximizingPlayer, alpha, beta);
-            value = maximizingPlayer ? Math.max(value, score) : Math.min(value, score);
-
-            set(node.board, nextMove[0], nextMove[1], 0);
-
-            if (maximizingPlayer) alpha = Math.max(alpha, value);
-            else beta = Math.min(beta, value);
-            if (beta <= alpha) {
-                set(node.board, move[0], move[1], 0);
-                memo.set(key, value);
-                return value;
-            }
-        }
-        set(node.board, move[0], move[1], 0);
-    }
-    memo.set(key, value);
-    return value;
-}
-
-function getArea(playerPosition, board) {
-    const visited = new Uint8Array(144);
-    let area = 0;
-    const stack = [playerPosition];
-
+function floodFillCount(startPosition, board) {
+    const visited = new Set();
+    const stack = [startPosition];
+    let count = 0;
     while (stack.length > 0) {
         const [x, y] = stack.pop();
-        const index = y * 16 + x;
-        if (!isValid(x, y) || visited[index] || get(board, x, y)) continue;
-        visited[index] = 1;
-        area++;
-        for (const [nx, ny] of allAdjacent[y][x])
-            stack.push([nx, ny]);
+        const key = `${x},${y}`;
+        if (!visited.has(key) && isValid(x, y) && !get(board, x, y)) {
+            visited.add(key);
+            count++;
+            for (const [nx, ny] of getAdjacent(x, y)) {
+                stack.push([nx, ny]);
+            }
+        }
     }
-    return area;
+    return count;
 }
 
-function evaluateBoard(node) {
-    const playerArea = getArea(node.playerPosition, node.board);
-    const opponentArea = getArea(node.opponentPosition, node.board);
-    return playerArea - opponentArea;
+function isBoardSplit(playersState) {
+    if (gameBoardSplit) return true;
+    // TODO: Implement a way to check if the board is split
+    return false;
+}
+
+function determineReachableTiles(playerDistances, opponentDistances) {
+    let playerReachable = 0;
+    let opponentReachable = 0;
+    for (let y = 0; y < 9; y++) {
+        for (let x = 0; x < 16; x++) {
+            if (playerDistances[y][x] < opponentDistances[y][x]) {
+                playerReachable++;
+            } else if (opponentDistances[y][x] < playerDistances[y][x]) {
+                opponentReachable++;
+            }
+        }
+    }
+    return {playerReachable, opponentReachable};
+}
+
+function calculateDistances(startPosition, board) {
+    const distances = Array.from({length: 9}, () => Array(16).fill(Infinity));
+    const queue = [[startPosition[0], startPosition[1], 0]]; // [x, y, distance]
+    distances[startPosition[1]][startPosition[0]] = 0;
+
+    while (queue.length > 0) {
+        const [x, y, dist] = queue.shift();
+        for (const [nx, ny] of getAdjacent(x, y)) {
+            if (isValid(nx, ny) && !get(board, nx, ny) && dist + 1 < distances[ny][nx]) {
+                distances[ny][nx] = dist + 1;
+                queue.push([nx, ny, dist + 1]);
+            }
+        }
+    }
+
+    return distances;
 }
 
 async function nextMove(playersState) {
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    let coord = determineNextBestMoveMonte(playersState);
+    let coord = determineNextHex(playersState);
     if (coord < 0) {
         console.warn("Decision making didn't return a move, falling back to any non-killing move");
         // Do any non-killing move

@@ -1,0 +1,27 @@
+#popup-panel {
+    width: 100%;
+    height: 100%;
+
+    background: #fff1;
+    backdrop-filter: blur(5px);
+    border: 5px solid #bc13fe;
+    padding: 1em;
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+slot[name="title"] {
+    text-align: center;
+}
+
+slot[name="actions"] {
+    display: grid;
+    gap: 10px;
+    padding: 0 10px;
+    grid-auto-columns: minmax(125px, 200px);
+    grid-auto-flow: column;
+    justify-content: space-evenly;
+}

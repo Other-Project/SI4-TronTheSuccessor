@@ -1,16 +1,18 @@
-export const playerImages = ["assets/player_1.png", "assets/player_2.png"];
-export const playerColors = ["#D732A8", "#32BED7"];
+const playerImages = ["assets/player_1.png", "assets/player_2.png"];
+const playerColors = ["#D732A8", "#32BED7"];
 
-export const directionToAngle = {
+const directionToAngle = {
     "up-right": 45,
     "right": 90,
     "down-right": 135,
     "down-left": 225,
     "left": 270,
-    "up-left": 315
-};
+    "up-left": 315,
+}
 
-export class Player {
+exports.directionToAngle = directionToAngle;
+
+exports.Player = class Player {
     /** @type {string} */ name;
     /** @type {number} */ number;
     /** @type {[number, number]} */ pos;
@@ -50,5 +52,5 @@ export class Player {
         if ((directionToAngle[direction] + 180) % 360 === directionToAngle[this.direction]) return; // U-turns are prohibited
         this.nextDirection = direction;
     }
-}
+};
 

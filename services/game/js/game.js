@@ -1,6 +1,13 @@
-import { Player } from "/js/player.js";
+const {Player} = require("./player.js");
 
-export class Game extends EventTarget {
+class CustomEvent extends Event {
+    constructor(message, data) {
+        super(message, data);
+        this.detail = data.detail;
+    }
+}
+
+exports.Game = class Game extends EventTarget {
     gridSize;
     /** @type {Player[]} */ players;
     grid;

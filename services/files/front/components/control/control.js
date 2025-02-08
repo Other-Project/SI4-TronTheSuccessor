@@ -29,7 +29,7 @@ export class Control extends HTMLComponent {
 
         const player = new HumanPlayer("Player 1");
         const owner = parseInt(this.getAttribute("owner"));
-        player.init(owner, Array.from(Array(owner), () => ({position: [1, 1], direction: owner === 1 ? "right" : "left"})));
+        player.init(owner, Array.from(Array(owner), () => ({pos: [1, 1], direction: owner === 1 ? "right" : "left"})));
         player.pos = [1, 1];
 
         const game = new Game(this.gridSize[0], this.gridSize[1], player, null, 1000);

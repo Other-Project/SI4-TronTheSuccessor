@@ -1,5 +1,5 @@
-import {directionToAngle, Player} from "/js/player.js";
-import {nextMove, setup} from "/js/tron-the-successor.js";
+const {directionToAngle, Player} = require("./player.js");
+const importFresh = require("import-fresh");
 
 const actionToIndexDelta = {
     "KEEP_GOING": 0,
@@ -7,23 +7,25 @@ const actionToIndexDelta = {
     "HEAVY_RIGHT": 2,
     "HEAVY_LEFT": -2,
     "LIGHT_LEFT": -1
-};
+}
 
-export class FlowBird extends Player {
+exports.FlowBird = class FlowBird extends Player {
     constructor() {
         super("FlowBird");
     }
 
-    init(number, playerStates, game) {
+    async init(number, playerStates, game) {
         super.init(number, playerStates);
-        setup(this.#convertPlayerStates(playerStates)).then(() => this.#nextMove(playerStates));
+        const {setup, nextMove} = await importFresh('./tron-the-successor.js')
+        await setup(this.#convertPlayerStates(playerStates));
+        await this.#nextMove(nextMove, playerStates);
         game.addEventListener("game-turn", async () => {
             let c = game.getPlayerStates();
-            await this.#nextMove(c);
+            await this.#nextMove(nextMove, c);
         });
     }
 
-    async #nextMove(playerStates) {
+    async #nextMove(nextMove, playerStates) {
         let action = await nextMove(this.#convertPlayerStates(playerStates));
         const directionKeys = Object.keys(directionToAngle);
         let index = directionKeys.indexOf(this.direction);

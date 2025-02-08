@@ -4,7 +4,10 @@
     </h1>
     <main>
         <p>Your ship can move according to the following directions :</p>
-        <slot></slot>
+        <div id="controls">
+            <app-control owner="1"></app-control>
+            <app-control owner="2"></app-control>
+        </div>
         <p>If you don't change its direction, it will follow its course.</p>
         <p>But be careful, if you touch an already colonized area, you lose.</p>
     </main>

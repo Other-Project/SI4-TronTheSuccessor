@@ -4,6 +4,8 @@ let gameBoard;
 let allAdjacent;
 let memo;
 
+// Utils
+
 function isValid(x, y) {
     return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 0 ? 16 : 15);
 }
@@ -16,7 +18,7 @@ function set(list, x, y, v) {
     list[y] = (list[y] & ~(1 << x)) | (v << x);
 }
 
-function toString(list) {
+function toPrettyString(list) {
     return Array.from(list)
         .map(y => y.toString(2)
             .padStart(16, "0")
@@ -26,6 +28,8 @@ function toString(list) {
         ).map((y, i) => i % 2 === 0 ? y : " " + y.substring(0, 29))
         .join("\n");
 }
+
+// Exports
 
 async function setup(playersState) {
     gameBoard = new Uint16Array(9);
@@ -162,19 +166,27 @@ function evaluateBoard(node) {
 async function nextMove(playersState) {
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    const coord = determineNextHex(playersState);
+    let coord = determineNextBestMoveMonte(playersState);
+    if (coord < 0) {
+        console.warn("Decision making didn't return a move, falling back to any non-killing move");
+        // Do any non-killing move
+        const nonKillingMove = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard)[0];
+        if (!nonKillingMove) coord = -1; // The player is doomed, we just fall back to KEEP_GOING
+        else coord = allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].indexOf(nonKillingMove);
+    }
+
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (coord < 0 || moves[move] === "NONE") {
-        console.error("Wrong move (coord:", coord, ", move:", move, ")");
-        console.error("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
+        console.warn("Wrong move (coord:", coord, ", move:", move, ")");
+        console.warn("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
         return moves[0];
     }
     direction = coord;
     return moves[move];
 }
 
-//export {setup, nextMove}; // ES6
+export {setup, nextMove}; // ES6
 if (typeof exports !== "undefined") { // CommonJS
     exports.setup = setup;
     exports.nextMove = nextMove;

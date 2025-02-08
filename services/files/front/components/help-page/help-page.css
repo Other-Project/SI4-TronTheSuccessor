@@ -21,7 +21,7 @@ main {
     gap: 0.25em;
 }
 
-slot {
+#controls {
     display: flex;
     justify-content: center;
     align-items: center;

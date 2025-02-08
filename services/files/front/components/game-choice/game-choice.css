@@ -10,8 +10,9 @@
     border: 5px solid #edbeff;
     border-radius: 10px;
 
-    app-game-choice-button {
-        height: 3em;
+    app-button {
+        font-size: 1.25em;
+        height: 2.5em;
     }
 
     animation: flicker 5s infinite alternate;

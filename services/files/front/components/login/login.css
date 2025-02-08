@@ -1,0 +1,115 @@
+body {
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+    color: #fff;
+}
+
+#login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+}
+
+#login {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    border-radius: 1em;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
+    width: 50%;
+    height: 55%;
+    padding: 1em;
+    animation: flicker 5s infinite alternate;
+}
+
+h1 {
+    font-size: 4em;
+    text-align: center;
+    grid-row: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    @media screen and (max-width: 600px) {
+        font-size: 2rem;
+    }
+    transition: all 0.5s ease;
+}
+
+#inputs {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 1em;
+    padding: 1em;
+    grid-row: 2;
+    align-items: center;
+}
+
+
+input {
+    width: 90%;
+    padding: 0.75em;
+    border-radius: 0.75em;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-size: 1.2em;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.5s ease;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 5px rgb(134, 107, 255);
+    border: 1px solid rgb(134, 107, 255);
+}
+
+#login-buttons {
+    display: flex;
+    gap: 1em;
+    padding: 1em 0;
+    grid-row: 3;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+button {
+    padding: 0.75em 1.5em;
+    border-radius: 0.75em;
+    background: linear-gradient(135deg, #866bff 0%, #7b00ff 100%);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1.2em;
+    width: 90%;
+    transition: all 0.5s ease;
+    box-shadow: rgb(134, 107, 255) 2px 2px 5px, rgba(107, 115, 255, 0.5) 0px 0px 1.5em;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+
+    &:hover {
+        transform: translateY(-0.2em);
+    }
+}
+
+@keyframes flicker {
+    0%, 18%, 22%, 25%, 53%, 57%, 100% {
+        border: 3px solid #edbeff;
+        box-shadow: 0 0 2px #bc13fe, 0 0 4px #bc13fe, 0 0 5px #bc13fe, inset 0 0 4px #bc13fe;
+    }
+    20%, 24%, 55% {
+        border: 3px solid #505050;
+        box-shadow: none;
+    }
+}

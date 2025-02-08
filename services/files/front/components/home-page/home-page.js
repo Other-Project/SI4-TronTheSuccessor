@@ -7,7 +7,7 @@ export class HomePage extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("connect").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "profil"}));
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "login"}));
         });
     }
 }

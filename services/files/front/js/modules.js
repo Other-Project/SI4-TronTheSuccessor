@@ -9,6 +9,7 @@ import {HelpPage} from "/components/help-page/help-page.js";
 import {Control} from "/components/control/control.js";
 import {GameMaster} from "/components/game-master/game-master.js";
 import {GamePopup} from "/components/game-popup/game-popup.js";
+import {Login} from "/components/login/login.js";
 
 customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-choice", GameChoice);
@@ -21,3 +22,4 @@ customElements.define("app-help-page", HelpPage);
 customElements.define("app-control", Control);
 customElements.define("app-game-master", GameMaster);
 customElements.define("app-game-popup", GamePopup);
+customElements.define("app-login", Login);

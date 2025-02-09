@@ -102,7 +102,7 @@ button {
     font-size: 1.2em;
     width: 90%;
     transition: all 0.5s ease;
-    box-shadow: rgb(134, 107, 255) 2px 2px 5px, rgba(107, 115, 255, 0.5) 0px 0px 1.5em;
+    box-shadow: rgb(134, 107, 255) 2px 2px 5px, rgba(107, 115, 255, 0.5) 0 0 1.5em;
     border: 1px solid rgba(255, 255, 255, 0.3);
 
     &:hover {

@@ -1,77 +1,68 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
 
-http.createServer(function (request, response) {
-    let filePath = request.url.split("/").filter(function (elem) {
-        return elem !== "..";
-    });
+const HTTP_STATUS = {
+    OK: 200,
+    BAD_REQUEST: 400,
+    NOT_FOUND: 404
+};
 
-    if (filePath[3] === "sign-up") {
-        handleSignUp(request, response);
-    } else if (filePath[3] === "sign-in") {
-        handleSignIn(request, response);
-    } else if (filePath[3] === "check-token") {
-        handleCheckToken(request, response);
-    } else {
-        response.statusCode = 404;
-        response.end();
+http.createServer(async (request, response) => {
+    const filePath = request.url.split("/").filter(elem => elem !== "..");
+
+    try {
+        switch (filePath[3]) {
+            case "sign-up":
+                await handleSignUp(request, response);
+                break;
+            case "sign-in":
+                await handleSignIn(request, response);
+                break;
+            case "check-token":
+                await handleCheckToken(request, response);
+                break;
+            default:
+                response.statusCode = HTTP_STATUS.NOT_FOUND;
+                response.end();
+        }
+    } catch (error) {
+        response.statusCode = HTTP_STATUS.BAD_REQUEST;
+        response.end(JSON.stringify({error: "Invalid request"}));
     }
 }).listen(8004);
 
+async function handleSignUp(request, response) {
+    const body = await getRequestBody(request);
+    const parsedBody = JSON.parse(body);
+    const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
+    sendResponse(response, HTTP_STATUS.OK, result);
+}
 
-function handleSignUp(request, response) {
-    let body = "";
-    request.on("data", chunk => {
-        body += chunk.toString();
-    });
-    request.on("end", async () => {
-        try {
-            const parsedBody = JSON.parse(body);
-            console.log(parsedBody);
-            response.setHeader("Content-Type", "application/json");
-            const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
-            response.end(JSON.stringify(result));
-        } catch (error) {
-            response.statusCode = 400;
-            response.end(JSON.stringify({error: "Invalid JSON"}));
-        }
+async function handleSignIn(request, response) {
+    const body = await getRequestBody(request);
+    const parsedBody = JSON.parse(body);
+    const user = await userDatabase.getUser(parsedBody.username, parsedBody.password);
+    sendResponse(response, HTTP_STATUS.OK, user);
+}
+
+async function handleCheckToken(request, response) {
+    const body = await getRequestBody(request);
+    const parsedBody = JSON.parse(body);
+    const result = await userDatabase.checkToken(parsedBody.sessionToken);
+    sendResponse(response, HTTP_STATUS.OK, {valid: result});
+}
+
+async function getRequestBody(request) {
+    return new Promise((resolve, reject) => {
+        let body = "";
+        request.on("data", chunk => body += chunk.toString());
+        request.on("end", () => resolve(body));
+        request.on("error", reject);
     });
 }
 
-function handleSignIn(request, response) {
-    let body = "";
-    request.on("data", chunk => {
-        body += chunk.toString();
-    });
-    request.on("end", async () => {
-        try {
-            const parsedBody = JSON.parse(body);
-            response.setHeader("Content-Type", "application/json");
-            const user = await userDatabase.getUser(parsedBody.username, parsedBody.password);
-            response.end(JSON.stringify(user));
-        } catch (error) {
-            response.statusCode = 400;
-            response.end(JSON.stringify({error: "Invalid JSON"}));
-        }
-    });
-}
-
-
-function handleCheckToken(request, response) {
-    let body = "";
-    request.on("data", chunk => {
-        body += chunk.toString();
-    });
-    request.on("end", async () => {
-        try {
-            const parsedBody = JSON.parse(body);
-            response.setHeader("Content-Type", "application/json");
-            const result = await userDatabase.checkToken(parsedBody.sessionToken);
-            response.statusCode = 200;
-            response.end(JSON.stringify({valid: result}));
-        } catch (error) {
-            response.statusCode = 400;
-            response.end(JSON.stringify({error: "Invalid JSON"}));
-        }
-    });
+function sendResponse(response, statusCode, data) {
+    response.statusCode = statusCode;
+    response.setHeader("Content-Type", "application/json");
+    response.end(JSON.stringify(data));
 }

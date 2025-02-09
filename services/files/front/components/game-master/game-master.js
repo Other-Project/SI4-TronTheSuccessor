@@ -3,7 +3,7 @@ import {HumanPlayer} from "/js/human-player.js";
 import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
 import "/js/socket.io.js";
-import {Player} from "../../js/player.js";
+import {Player} from "/js/player.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];

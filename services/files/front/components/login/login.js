@@ -2,8 +2,6 @@ import {HTMLComponent} from "/js/component.js";
 
 export class Login extends HTMLComponent {
 
-    //TODO : Add an icon to the home page
-
     constructor() {
         super("login", ["html", "css"]);
     }

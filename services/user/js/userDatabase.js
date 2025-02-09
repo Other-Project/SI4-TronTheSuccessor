@@ -1,7 +1,7 @@
 const {MongoClient} = require("mongodb");
 const jwt = require("jsonwebtoken");
 
-const uri = 'mongodb://localhost:27017';
+const uri = 'mongodb://mongodb:27017';
 const client = new MongoClient(uri);
 const database = client.db("Tron-the-successor");
 const userCollection = database.collection("user");

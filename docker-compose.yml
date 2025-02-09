@@ -1,4 +1,10 @@
 services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
   gateway:
     image: tron-the-successor/gateway
     build:
@@ -10,6 +16,7 @@ services:
     environment:
       FILES_SERVICE_URL: "http://files:8001"
       GAME_SERVICE_URL: "http://game:8003"
+      USER_SERVICE_URL: "http://user:8004"
   files:
     image: tron-the-successor/files
     build:
@@ -20,4 +27,11 @@ services:
     build:
       context: services/game
     restart: unless-stopped
+  user:
+    image: tron-the-successor/user
+    build:
+      context: services/user
+    restart: unless-stopped
+    depends_on:
+      - mongodb
 

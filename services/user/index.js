@@ -67,13 +67,8 @@ function handleCheckToken(request, response) {
             const parsedBody = JSON.parse(body);
             response.setHeader("Content-Type", "application/json");
             const result = await userDatabase.checkToken(parsedBody.sessionToken);
-            if (result) {
-                response.statusCode = 200;
-                response.end(JSON.stringify({valid: true, username: result.username}));
-            } else {
-                response.statusCode = 401;
-                response.end(JSON.stringify({valid: false}));
-            }
+            response.statusCode = 200;
+            response.end(JSON.stringify({valid: result}));
         } catch (error) {
             response.statusCode = 400;
             response.end(JSON.stringify({error: "Invalid JSON"}));

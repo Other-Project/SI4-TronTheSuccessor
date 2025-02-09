@@ -130,11 +130,6 @@ export class GameMaster extends HTMLComponent {
             this.endScreen(msg);
         });
 
-        this.socket.on("session-expired", (msg) => {
-            alert(msg.error);
-            location.reload();
-        });
-
         document.addEventListener("player-direction", (event) => {
             this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number});
         });

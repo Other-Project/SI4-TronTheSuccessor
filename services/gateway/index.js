@@ -26,7 +26,7 @@ const server = http.createServer(function (request, response) {
         }
         // If the URL starts by /api, then it's a REST request (you can change that if you want).
         else if (filePath[1] === "api") {
-            if (filePath[2] === "login") {
+            if (filePath[2] === "user") {
                 console.log("Request for the user service received, transferring to the user service");
                 proxy.web(request, response, {target: process.env.USER_SERVICE_URL ?? "http://127.0.0.1:8004"});
             }
@@ -51,36 +51,10 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003");
     socket.onAny((event, msg) => {
-        const sessionToken = checkSessionToken(msg.sessionToken);
-        if (sessionToken === "undefined")
-            socket.emit("session-expired", {error: "No session token provided"});
-        else if (!sessionToken)
-            socket.emit("session-expired", {error: "Invalid session token"});
-        else
-            socketGame.emit(event, msg);
+        socketGame.emit(event, msg);
     });
     socketGame.onAny((event, msg) => {
         socket.emit(event, msg);
     });
 });
 
-checkSessionToken = (sessionToken) => {
-    if (!sessionToken) {
-        return "undefined";
-    }
-
-    fetch("/api/login/check-token", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({sessionToken}),
-    })
-        .then(response => response.json())
-        .then(data => {
-            return data;
-        })
-        .catch(error => {
-            console.error(error);
-        });
-}

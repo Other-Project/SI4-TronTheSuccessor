@@ -26,12 +26,13 @@ async function addUser(username, password) {
 }
 
 async function getUser(username, password) {
-    const user = await userCollection.findOne({username: username, password: password});
+    let user = await userCollection.findOne({username: username, password: password});
     if (user) {
+        let sessionToken = jwt.sign({username: username}, secretKey, {expiresIn: "1h"});
+        await userCollection.updateOne(user, {$set: {sessionToken: sessionToken}});
         return {
             username: user.username,
-            permanentToken: user.permanentToken,
-            sessionToken: user.sessionToken
+            sessionToken: sessionToken
         };
     } else {
         return {error: "Wrong username or password"};
@@ -40,9 +41,15 @@ async function getUser(username, password) {
 
 async function checkToken(sessionToken) {
     try {
-        jwt.verify(sessionToken, secretKey, (err) => {
-            return !err;
-        });
+        if (!sessionToken) {
+            return false;
+        }
+        const decoded = jwt.verify(sessionToken, secretKey);
+        if (!decoded) {
+            return false;
+        }
+        let user = await userCollection.findOne({username: decoded.username});
+        return user && user.sessionToken === sessionToken;
     } catch (error) {
         return false;
     }
@@ -53,5 +60,3 @@ if (typeof exports !== "undefined") { // CommonJS
     exports.getUser = getUser;
     exports.checkToken = checkToken;
 }
-
-

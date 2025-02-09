@@ -16,10 +16,14 @@ export class Login extends HTMLComponent {
         this.shadowRoot.getElementById("sign-up").addEventListener("click", () => {
             this.loginFetch("sign-up");
         });
+
+        this.shadowRoot.getElementById("accueil").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
+        });
     }
 
     loginFetch(url) {
-        fetch("/api/login/" + url, {
+        fetch("/api/user/" + url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -39,11 +43,10 @@ export class Login extends HTMLComponent {
                 alert(data.error);
             } else {
                 alert("Logged in as " + data.username);
-                console.log(data);
                 if (data.permanentToken) {
                     document.cookie = `permanentToken=${data.permanentToken}; path=/; max-age=${60 * 60 * 24 * 365};`;
                 }
-                document.cookie = `sessionToken=${data.sessionToken}; path=/; max-age=${60 * 1};`;
+                document.cookie = `sessionToken=${data.sessionToken}; path=/; max-age=${60 * 60};`;
             }
         }).catch(error => {
             alert(error.message);

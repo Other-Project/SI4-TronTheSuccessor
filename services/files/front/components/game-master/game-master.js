@@ -1,9 +1,9 @@
-import { Game } from "/js/game.js";
-import { HumanPlayer } from "/js/human-player.js";
-import { HTMLComponent } from "/js/component.js";
-import { FlowBird } from "/js/flowbird.js";
+import {Game} from "/js/game.js";
+import {HumanPlayer} from "/js/human-player.js";
+import {HTMLComponent} from "/js/component.js";
+import {FlowBird} from "/js/flowbird.js";
 import "/js/socket.io.js";
-import { Player } from "../../js/player.js";
+import {Player} from "../../js/player.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -40,7 +40,7 @@ export class GameMaster extends HTMLComponent {
         this.popupWindow.style.display = "none";
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", { detail: "home" }));
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
         });
     };
 
@@ -109,12 +109,12 @@ export class GameMaster extends HTMLComponent {
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
         this.socket.emit("game-start", {
-            playerName: "Player 1"
+            playerName: "Player 1",
+            sessionToken: this.getCookie("sessionToken")
         });
 
         this.socket.on("game-start", (msg) => {
             const players = msg.players.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
-
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
             this.game.players.forEach((player, i) => player.init(msg.players[i].number, msg.playerStates));
             this.gameBoard.draw(this.game);
@@ -130,8 +130,13 @@ export class GameMaster extends HTMLComponent {
             this.endScreen(msg);
         });
 
+        this.socket.on("session-expired", (msg) => {
+            alert(msg.error);
+            location.reload();
+        });
+
         document.addEventListener("player-direction", (event) => {
-            this.socket.emit("game-action", { direction: event.detail.direction, number: event.detail.number });
+            this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number});
         });
     }
 }

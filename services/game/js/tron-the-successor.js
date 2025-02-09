@@ -290,9 +290,12 @@ class TronBot {
         }
 
         let center = {x: Math.floor(this.gridWidth / 2), y: Math.floor(this.gridHeight / 2)};
-        if (this.gameTurn < 10 && get(gameBoard, center.x, center.y) === 0) {
+        if (this.gameTurn < 10 && get(gameBoard, center.x, center.y) === 0)
+            playableMoves = this.goToCenterAlgorithm(position, playableMoves);
+
+        if (playableMoves.length === 1) {
             console.log("Decisive condition: battle for the center");
-            return this.goToCenterAlgorithm(position, playableMoves)[0];
+            return playableMoves[0];
         }
 
         playableMoves = this.firstArrivedAlgorithm(playableMoves, opponent);

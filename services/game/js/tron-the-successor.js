@@ -1,4 +1,6 @@
 class TronBot {
+    gameTurn = 0;
+
     constructor(gridWidth, gridHeight) {
         this.gridWidth = gridWidth;
         this.gridHeight = gridHeight;
@@ -26,30 +28,6 @@ class TronBot {
     }
 
     /**
-     * Returns the area reachable from a given position
-     * @remarks Uses a flood-fill algorithm
-     * @param {{x: number, y: number}} start The starting position
-     * @returns {number} The area reachable from the starting position
-     */
-    reachableArea(start) {
-        let queue = [start];
-        let visited = new Set();
-
-        let area = 0;
-        while (queue.length > 0) {
-            let {x, y} = queue.shift();
-            area++;
-            for (let neighbor of this.getFreeNeighbors(x, y)) {
-                let key = `${neighbor.x},${neighbor.y}`;
-                if (visited.has(key)) continue;
-                visited.add(key);
-                queue.push(neighbor);
-            }
-        }
-        return area;
-    }
-
-    /**
      * Checks if a position can be reached from another
      * @param start The starting position
      * @param dest The destination position
@@ -74,6 +52,32 @@ class TronBot {
         return false;
     }
 
+    //region Flood-fill algorithm
+
+    /**
+     * Returns the area reachable from a given position
+     * @remarks Uses a flood-fill algorithm
+     * @param {{x: number, y: number}} start The starting position
+     * @returns {number} The area reachable from the starting position
+     */
+    reachableArea(start) {
+        let queue = [start];
+        let visited = new Set();
+
+        let area = 0;
+        while (queue.length > 0) {
+            let {x, y} = queue.shift();
+            area++;
+            for (let neighbor of this.getFreeNeighbors(x, y)) {
+                let key = `${neighbor.x},${neighbor.y}`;
+                if (visited.has(key)) continue;
+                visited.add(key);
+                queue.push(neighbor);
+            }
+        }
+        return area;
+    }
+
     /**
      * Implementation of the flooding algorithm
      * @param neighbors The neighbors to consider
@@ -92,6 +96,10 @@ class TronBot {
                 bestMoves.push(neighbors[i]);
         return bestMoves;
     }
+
+    //endregion
+
+    //region First arrived algorithm
 
     /**
      * Performs a BFS to calculate the shortest distance from the start position to each cell.
@@ -152,19 +160,7 @@ class TronBot {
         return bestMoves;
     }
 
-    /**
-     * Implementation of the multi-ray casting algorithm
-     * @param position The position of the bot
-     * @param opponent The position of the opponent
-     * @returns {{x: number, y: number}[]} The best moves
-     */
-    multiRayCastingAlgorithm(position, opponent) {
-        // TODO
-        // Implementation of the multi-ray casting algorithm
-        // This is a placeholder and should be replaced with the actual algorithm
-        return this.getFreeNeighbors(position.x, position.y);
-    }
-
+    //endregion
 
     //region Filling algorithm
 
@@ -261,8 +257,6 @@ class TronBot {
         return bestMoves;
     }
 
-    gameTurn = 0;
-
     nextMove(position, opponent) {
         this.gameTurn++;
         let playableMoves = this.getFreeNeighbors(position.x, position.y);
@@ -300,23 +294,27 @@ class TronBot {
 
         playableMoves = this.firstArrivedAlgorithm(playableMoves, opponent);
         if (playableMoves.length === 1) {
-            console.log("Decisive condition: none (flooding, first-arrived)");
+            console.log("Decisive condition: first-arrived");
             return playableMoves[0];
         }
 
-        console.log("Decisive condition: none (multi-ray casting)");
+        console.log("Decisive condition: none (first remaining move)");
         return playableMoves[0];
-        //return this.multiRayCastingAlgorithm(position, opponent).find(move => playableMoves.some(bestMove => bestMove.x === move.x && bestMove.y !== move.y));
     }
 }
 
 
 //region Exports
 
+
+const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
+const allAdjacent = getAllAdjacentForGrid();
+
+let gameBoard;
 let bot;
 let oldStates;
 
-exports.setup = async function (playersState) {
+async function setup(playersState) {
     gameBoard = new Uint16Array(9);
     bot = new TronBot(16, 9);
 
@@ -326,7 +324,7 @@ exports.setup = async function (playersState) {
     return true;
 }
 
-exports.nextMove = async function (playersState) {
+async function nextMove(playersState) {
     const direction = getDirection(playersState.playerPosition, oldStates?.playerPosition);
     const opponentDirection = getDirection(playersState.opponentPosition, oldStates?.opponentPosition);
     oldStates = playersState;
@@ -339,39 +337,42 @@ exports.nextMove = async function (playersState) {
         y: playersState.opponentPosition.row - 1
     };
 
-    set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
-    set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
+    set(gameBoard, playerPos.x, playerPos.y, 1);
+    set(gameBoard, opponentPos.x, opponentPos.y, 1);
     console.log(toPrettyString(gameBoard, [playerPos, opponentPos], [direction, opponentDirection]));
 
     let nextMove = bot.nextMove(playerPos, opponentPos);
     console.dir(nextMove);
-    let coord = nextMove ? allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]?.findIndex(m => m[0] === nextMove.x && m[1] === nextMove.y) : null;
+    let coord = nextMove ? allAdjacent[playerPos.y][playerPos.x]?.findIndex(m => m[0] === nextMove.x && m[1] === nextMove.y) : null;
     coord ??= -1;
 
-    if (coord < 0) {
+    if (coord < 0) { // Shouldn't happen anymore
         console.warn("Decision making didn't return a move, falling back to any non-killing move");
         console.dir(nextMove);
-        console.dir(allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
+        console.dir(allAdjacent[playerPos.y][playerPos.x]);
+
         // Do any non-killing move
-        const nonKillingMove = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard)[0];
+        const nonKillingMove = allAdjacent[playerPos.y][playerPos.x].find(([x, y]) => isValid(x, y) && !get(gameBoard, x, y));
         if (!nonKillingMove) coord = -1; // The player is doomed, we just fall back to KEEP_GOING
-        else coord = allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].indexOf(nonKillingMove);
+        else coord = allAdjacent[playerPos.y][playerPos.x].indexOf(nonKillingMove);
     }
 
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (coord < 0 || moves[move] === "NONE") {
         console.warn("Wrong move (coord:", coord, ", move:", move, ")");
-        console.warn("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
+        console.warn("adjacent_hexagons: ", allAdjacent[playerPos.y][playerPos.x]);
         return moves[0];
     }
     return moves[move];
 
 }
 
+exports.setup = setup;
+exports.nextMove = nextMove;
+
 //endregion
 
-let gameBoard;
 
 //region Board manipulation
 
@@ -436,16 +437,6 @@ function toPrettyString(board, positions = undefined, directions = undefined) {
 }
 
 //endregion
-
-
-function getPossibleMovesArray(playerPosition, board) {
-    let adjacentHex = allAdjacent[playerPosition[1]][playerPosition[0]];
-    return adjacentHex.filter(([x, y]) => isValid(x, y) && !get(board, x, y));
-}
-
-
-const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
-const allAdjacent = getAllAdjacentForGrid();
 
 function getDirection(currentPos, lastPos) {
     if (!lastPos) return currentPos.column === 1 ? 3 : 0;

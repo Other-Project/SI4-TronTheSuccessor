@@ -18,13 +18,6 @@ export class Button extends HTMLComponent {
 
     updateDisabledState() {
         const button = this.shadowRoot.querySelector('button');
-        if (button) {
-            button.disabled = this._disabled;
-            button.style.opacity = this._disabled ? '0.5' : '1';
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            });
-        }
+        if (button) button.disabled = this._disabled;
     }
 }

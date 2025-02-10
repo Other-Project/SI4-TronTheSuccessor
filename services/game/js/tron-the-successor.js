@@ -1,513 +1,581 @@
+class TronBot {
+    gameTurn = 0;
+    pathHistory = [];
+
+    constructor(gridWidth, gridHeight) {
+        this.gridWidth = gridWidth;
+        this.gridHeight = gridHeight;
+    }
+
+    /**
+     * Returns the neighbors of a given position
+     * @param x The x position (0-based)
+     * @param y The y position (0-based)
+     * @returns {{x: number, y: number}[]} The neighbors
+     */
+    getNeighbors(x, y) {
+        if (!isValid(x, y)) return [];
+        return allAdjacent[y][x].filter(([x, y]) => isValid(x, y)).map(([x, y]) => ({x, y}));
+    }
+
+    /**
+     * Returns the free neighbors of a given position
+     * @param x The x position (0-based)
+     * @param y The y position (0-based)
+     * @returns {{x: number, y: number}[]} The free neighbors
+     */
+    getFreeNeighbors(x, y) {
+        return this.getNeighbors(x, y).filter(cell => !get(gameBoard, cell.x, cell.y));
+    }
+
+    /**
+     * Checks if a position can be reached from another
+     * @param start The starting position
+     * @param dest The destination position
+     * @returns {boolean} Whether the destination can be reached from the starting position
+     */
+    canReachPosition(start, dest) {
+        let queue = [start];
+        let visited = new Set();
+        visited.add(`${start.x},${start.y}`);
+
+        while (queue.length > 0) {
+            let {x, y} = queue.shift();
+            for (let neighbor of this.getNeighbors(x, y)) {
+                if (neighbor.x === dest.x && neighbor.y === dest.y) return true;
+
+                let key = `${neighbor.x},${neighbor.y}`;
+                if (visited.has(key) || get(gameBoard, neighbor.x, neighbor.y)) continue;
+                visited.add(key);
+                queue.push(neighbor);
+            }
+        }
+        return false;
+    }
+
+    //region Flood-fill algorithm
+
+    /**
+     * Returns the area reachable from a given position
+     * @remarks Uses a flood-fill algorithm
+     * @param {{x: number, y: number}} start The starting position
+     * @returns {number} The area reachable from the starting position
+     */
+    reachableArea(start) {
+        let queue = [start];
+        let visited = new Set();
+
+        let area = 0;
+        while (queue.length > 0) {
+            let {x, y} = queue.shift();
+            area++;
+            for (let neighbor of this.getFreeNeighbors(x, y)) {
+                let key = `${neighbor.x},${neighbor.y}`;
+                if (visited.has(key)) continue;
+                visited.add(key);
+                queue.push(neighbor);
+            }
+        }
+        return area;
+    }
+
+    /**
+     * Implementation of the flooding algorithm
+     * @param neighbors The neighbors to consider
+     * @returns {{x: number, y: number}[]} The best moves
+     */
+
+    floodingAlgorithm(neighbors) {
+        const scores = Array(neighbors.length);
+        for (let i = 0; i < neighbors.length; i++)
+            scores[i] = this.reachableArea(neighbors[i]);
+
+        let maxScore = Math.max(...scores);
+        let bestMoves = [];
+        for (let i = 0; i < neighbors.length; i++)
+            if (scores[i] === maxScore)
+                bestMoves.push(neighbors[i]);
+        return bestMoves;
+    }
+
+    //endregion
+
+    //region First arrived algorithm
+
+    /**
+     * Performs a BFS to calculate the shortest distance from the start position to each cell.
+     * @param {Object} start - The starting position {x, y}.
+     * @returns {Map<string, number>} A map of cell positions to their shortest distances.
+     */
+    bfsShortestDistance(start) {
+        let queue = [start];
+        let distances = new Map();
+        distances.set(`${start.x},${start.y}`, 0);
+
+        while (queue.length > 0) {
+            let {x, y} = queue.shift();
+            let currentDistance = distances.get(`${x},${y}`);
+
+            for (let neighbor of this.getFreeNeighbors(x, y)) {
+                let key = `${neighbor.x},${neighbor.y}`;
+                if (!distances.has(key)) {
+                    distances.set(key, currentDistance + 1);
+                    queue.push(neighbor);
+                }
+            }
+        }
+        return distances;
+    }
+
+    /**
+     * Counts the number of cells the bot can reach before the opponent.
+     * @param {Object} botPosition - The bot's position {x, y}.
+     * @param {Object} opponentPosition - The opponent's position {x, y}.
+     * @returns {number} The number of cells the bot can reach before the opponent.
+     */
+    countCellsReachableBeforeOpponent(botPosition, opponentPosition) {
+        let botDistances = this.bfsShortestDistance(botPosition);
+        let opponentDistances = this.bfsShortestDistance(opponentPosition);
+
+        let count = 0;
+        for (let [key, botDistance] of botDistances.entries()) {
+            let opponentDistance = opponentDistances.get(key);
+            if (opponentDistance === undefined || botDistance < opponentDistance) count++;
+            else if (botDistance === opponentDistance) count += 0.5;
+        }
+        return count;
+    }
+
+    /**
+     * Returns the best moves based on the first arrived algorithm.
+     * @param {{x: number, y: number}[]} neighbors - The neighbors to consider.
+     * @param {{x: number, y: number}} opponent - The opponent's position.
+     * @returns {{x: number, y: number}[]} The best moves.
+     */
+
+    firstArrivedAlgorithm(neighbors, opponent) {
+        const scores = [];
+        const opponentScores = [];
+        for (let i = 0; i < neighbors.length; i++)
+            for (const opponentMove of this.getFreeNeighbors(opponent.x, opponent.y)) {
+                scores[i] = Math.min(this.countCellsReachableBeforeOpponent(neighbors[i], opponentMove), scores[i] ?? Infinity);
+                opponentScores[i] = Math.max(this.countCellsReachableBeforeOpponent(opponentMove, neighbors[i]), opponentScores[i] ?? -Infinity);
+            }
+
+        let ratios = scores.map((score, i) => score - opponentScores[i]);
+        let maxScore = Math.max(...ratios);
+        let bestMoves = [];
+        for (let i = 0; i < neighbors.length; i++)
+            if (ratios[i] === maxScore)
+                bestMoves.push(neighbors[i]);
+        return bestMoves;
+    }
+
+    //endregion
+
+    //region Filling algorithm
+
+    /**
+     * Recursive helper function for finding articulation points
+     * @param {{x:number, y: number}} position The current position
+     * @param {string} parentKey The parent key
+     * @param {Object} discovery The discovery counts
+     * @param {Object} low The low values
+     * @param {Object} visited The visited nodes
+     * @param {Set<string>} articulationPoints The articulation points
+     * @param {number} count The current count
+     */
+    findArticulationPointsHelper(position, parentKey, discovery, low, visited, articulationPoints, count) {
+        const key = `${position.x},${position.y}`;
+        visited[key] = true;
+        discovery[key] = low[key] = count++;
+
+        let children = 0;
+        for (let neighbor of this.getFreeNeighbors(position.x, position.y)) {
+            let neighborKey = `${neighbor.x},${neighbor.y}`;
+            if (!visited[neighborKey]) {
+                children++;
+                this.findArticulationPointsHelper(neighbor, key, discovery, low, visited, articulationPoints, count);
+                low[key] = Math.min(low[key], low[neighborKey]);
+
+                if (parentKey && low[neighborKey] >= discovery[key]) articulationPoints.add(key);
+
+            } else low[key] = Math.min(low[key], discovery[neighborKey]);
+        }
+
+        if (parentKey === null && children > 1) articulationPoints.add(key);
+    }
+
+    /**
+     * Finds the articulation points in the graph
+     * @param {{x:number, y: number}} markedAsVisited The nodes to mark as visited
+     * @returns {Set<string>} A set of articulation points' keys
+     */
+    findArticulationPoints(...markedAsVisited) {
+        let discovery = {};
+        let low = {};
+        let visited = {};
+        for (let node of markedAsVisited) visited[`${node.x},${node.y}`] = true;
+        let articulationPoints = new Set();
+
+        this.findArticulationPointsHelper(markedAsVisited[markedAsVisited.length - 1], null, discovery, low, visited, articulationPoints, 0);
+        return articulationPoints;
+    }
+
+    /**
+     * Recursive helper function for finding the maximum number of articulation points
+     * @param {number} depth The depth of the search
+     * @param {{x: number, y: number}} path The current path
+     * @returns {number} The maximum number of articulation points
+     */
+    maxArticulationPoints(depth, ...path) {
+        if (depth === 0) return 0;
+        let base = this.findArticulationPoints(...path).size;
+        let mx = base;
+        for (let move of this.getFreeNeighbors(path[path.length - 1].x, path[path.length - 1].y))
+            if (!path.some(p => p.x === move.x && p.y === move.y))
+                mx = Math.max(mx, base + this.maxArticulationPoints(depth - 1, ...path, move));
+        return mx;
+    }
+
+    /**
+     * Handles the case where multiple moves have the same number of articulation points
+     * @param {{x:number, y: number}} position The position of the bot
+     * @param {{x:number, y: number}[]} equalMoves The moves with the same number of articulation points
+     * @returns {{x:number, y: number}[]} The best moves
+     */
+    handleEqualFilling(position, equalMoves) {
+        let minPossibleMoves = Infinity;
+        let bestMoves = [];
+        for (let move of equalMoves) {
+            let possibleMoves = this.getFreeNeighbors(move.x, move.y).length;
+            let isWallOrTrail = this.isWallOrTrail(move.x, move.y);
+            if (possibleMoves < minPossibleMoves || (possibleMoves === minPossibleMoves && isWallOrTrail)) {
+                minPossibleMoves = possibleMoves;
+                bestMoves = [move];
+            }
+        }
+        return bestMoves;
+    }
+
+    /**
+     * Checks if a position is next to a wall or trail
+     * @param {number} x The x position (0-based)
+     * @param {number} y The y position (0-based)
+     * @returns {boolean} Whether the position is next to a wall or trail
+     */
+    isWallOrTrail(x, y) {
+        if (x === 0 || y === 0 || x === this.gridWidth - 1 || y === this.gridHeight - 1) return true;
+        for (let neighbor of this.getNeighbors(x, y))
+            if (get(gameBoard, neighbor.x, neighbor.y))
+                return true;
+        return false;
+    }
+
+    /**
+     * Implementation of the filling algorithm used to avoid articulation points and thus *trying* to avoid getting trapped
+     * @param {{x:number, y: number}} position The position of the bot
+     * @param {{x:number, y: number}[]} neighbors The neighbors to consider
+     * @returns {{x:number, y: number}[]} The best moves
+     */
+    fillingAlgorithm(position, neighbors) {
+        let articulationPoints = this.findArticulationPoints(position);
+        let bestMoves = neighbors.filter(move => !articulationPoints.has(`${move.x},${move.y}`));
+        if (bestMoves.length === 0) return neighbors; // All nodes are articulation points
+
+        let maxArticulationPoints = [];
+        for (let move of bestMoves) {
+            maxArticulationPoints.push(this.maxArticulationPoints(2, position, move));
+        }
+
+        let minArticulationPoints = Math.min(...maxArticulationPoints);
+        let equalMoves = bestMoves.filter((m, i) => maxArticulationPoints[i] === minArticulationPoints);
+        return equalMoves.length > 1 ? this.handleEqualFilling(position, equalMoves) : equalMoves;
+    }
+
+    monteResults = new Map();
+    monteSimCount = 0;
+
+    /**
+     * Monte Carlo search for the longest path
+     * @param {number} maxTime The maximum time to run the simulation
+     * @param {{x: number, y: number}[]} startPath The starting path
+     * @param {{x: number, y: number}[]} neighbors The neighbors to consider
+     * @returns {{x: number, y: number}[]} The longest paths
+     */
+    monteSearchLongestPath(maxTime, startPath, neighbors) {
+        if (this.monteResults.size === 0) this.monteResults.set(startPath[startPath.length - 1], 0);
+        let startTime = Date.now();
+
+        let simulationCount = 0;
+        while (Date.now() - startTime < maxTime) {
+            let path = structuredClone(startPath);
+            let current = startPath[startPath.length - 1];
+            while (true) {
+                let neighbors = this.getFreeNeighbors(current.x, current.y).filter(move => !path.some(p => p.x === move.x && p.y === move.y));
+
+                let articulationPoints = this.findArticulationPoints(current, ...path);
+                let bestMoves = neighbors.filter(move => !articulationPoints.has(`${move.x},${move.y}`));
+                if (bestMoves.length > 0) neighbors = bestMoves; // All nodes are articulation points
+
+                if (neighbors.length === 0) break;
+                let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                path.push(next);
+                current = next;
+            }
+            simulationCount++;
+            for (let i = startPath.length; i < path.length; i++) {
+                let longestPath = path.slice(i);
+                let key = `${path[i].x},${path[i].y}`;
+                let prevScore = this.monteResults.get(key)?.length ?? 0;
+                if (longestPath.length > prevScore) this.monteResults.set(key, longestPath);
+            }
+        }
+        this.monteSimCount += simulationCount;
+
+        let maxScore = 0;
+        let bestPath = [];
+        for (let neighbor of neighbors) {
+            let path = this.monteResults.get(`${neighbor.x},${neighbor.y}`);
+            if (path && path.length > maxScore) {
+                maxScore = path.length;
+                bestPath = path;
+            }
+        }
+        console.log("longest_path_length:", bestPath.length, "new_sim_cnt:", simulationCount + " / " + this.monteSimCount);
+        return bestPath;
+    }
+
+    //endregion
+
+    /**
+     * Prioritizes moves that are closer to the center
+     * @param {{x: number, y: number}} position The position of the bot
+     * @param {{x: number, y: number}[]} neighbors The neighbors to consider
+     * @returns {{x: number, y: number}[]} The best moves
+     */
+    goToCenterAlgorithm(position, neighbors) {
+        const center = {x: Math.floor(this.gridWidth / 2), y: Math.floor(this.gridHeight / 2)};
+
+        let bestMoves = [];
+        let minDistance = Infinity;
+        for (let move of neighbors) {
+            let distance = Math.abs(move.x - center.x) + Math.abs(move.y - center.y);
+            if (distance < minDistance) {
+                minDistance = distance;
+                bestMoves = [move];
+            } else if (distance === minDistance) bestMoves.push(move);
+        }
+        return bestMoves;
+    }
+
+    /**
+     * Decides the next move of the bot
+     * @param position The position of the bot
+     * @param opponent
+     * @returns {*|{x: number, y: number}|null}
+     */
+    nextMove(position, opponent) {
+        this.pathHistory.push(position);
+        this.gameTurn++;
+        let playableMoves = this.getFreeNeighbors(position.x, position.y);
+
+        if (playableMoves.length === 0) {
+            console.log("Decisive condition: bot can't move");
+            return null; // No playable moves
+        }
+
+        const opponentMoves = this.getFreeNeighbors(opponent.x, opponent.y);
+        if (opponentMoves.length === 0) {
+            console.log("Decisive condition: opponent can't move");
+            return playableMoves[0]; // The opponent can't move, we can play any non-killing move
+        }
+        if (opponentMoves.length === 1) {
+            let avoidDraw = playableMoves.filter(move => move.x !== opponentMoves[0].x || move.y !== opponentMoves[0].y);
+            if (avoidDraw.length > 0) playableMoves = avoidDraw;
+            if (playableMoves.length === 1) {
+                console.log("Decisive condition: avoiding opponent's only move");
+                return playableMoves[0];
+            }
+
+            const futureOpponentMoves = this.getFreeNeighbors(opponentMoves[0].x, opponentMoves[0].y);
+            let blockingMove = playableMoves.filter(move => futureOpponentMoves.some(futureMove => futureMove.x === move.x && futureMove.y === move.y));
+            if (blockingMove.length > 0) playableMoves = blockingMove;
+            if (playableMoves.length === 1) {
+                console.log("Decisive condition: blocking opponent's only move");
+                return playableMoves[0];
+            }
+        }
+
+        let canReachOpponent = playableMoves.some(move => this.canReachPosition(move, opponent));
+        if (!canReachOpponent) {
+            playableMoves = this.floodingAlgorithm(playableMoves); // Only keep the moves that leads to the largest area
+            if (playableMoves.length === 1) {
+                console.log("Decisive condition: can't reach opponent (largest area)");
+                return playableMoves[0];
+            }
+
+            console.log("Decisive condition: can't reach opponent (filling)");
+            return this.fillingAlgorithm(position, playableMoves)[0];
+        }
+
+        playableMoves = this.firstArrivedAlgorithm(playableMoves, opponent);
+        if (playableMoves.length === 1) {
+            console.log("Decisive condition: first-arrived");
+            return playableMoves[0];
+        }
+
+        let center = {x: Math.floor(this.gridWidth / 2), y: Math.floor(this.gridHeight / 2)};
+        if (this.gameTurn < 10 && get(gameBoard, center.x, center.y) === 0)
+            playableMoves = this.goToCenterAlgorithm(position, playableMoves);
+
+        if (playableMoves.length === 1) {
+            console.log("Decisive condition: battle for the center");
+            return playableMoves[0];
+        }
+
+        console.log("Decisive condition: none (first remaining move)");
+        return playableMoves[0];
+    }
+}
+
+//region Exports
+
+
 const moves = ["KEEP_GOING", "LIGHT_RIGHT", "HEAVY_RIGHT", "NONE", "HEAVY_LEFT", "LIGHT_LEFT"];
+const allAdjacent = getAllAdjacentForGrid();
 
-let direction;
 let gameBoard;
-let allAdjacent;
-
-// Utils
-
-function isValid(x, y) {
-    return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 0 ? 16 : 15);
-}
-
-function get(list, x, y) {
-    return list[y] >> x & 1;
-}
-
-function set(list, x, y, v) {
-    list[y] = (list[y] & ~(1 << x)) | (v << x);
-}
-
-function toPrettyString(list) {
-    return Array.from(list)
-        .map(y => y.toString(2)
-            .padStart(16, "0")
-            .split("")
-            .reverse()
-            .join(" ")
-        ).map((y, i) => i % 2 === 0 ? y : " " + y.substring(0, 29))
-        .join("\n");
-}
-
-// Exports
+let bot;
+let oldStates;
 
 async function setup(playersState) {
     gameBoard = new Uint16Array(9);
-    allAdjacent = getAllAdjacentForGrid();
+    bot = new TronBot(16, 9);
 
     set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
     set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    direction = playersState.playerPosition.column === 1 ? 3 : 0;
-
-    mcts = new MonteCarlo(Math.sqrt(2));
-    state = new State([
-        new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1),
-        new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1)
-    ], new Uint16Array(gameBoard), -1);
-
-    const searchStats = mcts.runSearch(state, 0.925);
-    console.log("MCTS_stats:", searchStats);
-
-    let stats = mcts.getStats(state);
-    console.debug(stats);
-    state = null;
-
+    oldStates = null;
     return true;
 }
 
 async function nextMove(playersState) {
-    set(gameBoard, playersState.playerPosition.column - 1, playersState.playerPosition.row - 1, 1);
-    set(gameBoard, playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1, 1);
-    let coord = determineNextBestMoveMonte(playersState);
-    if (coord < 0) {
+    const direction = getDirection(playersState.playerPosition, oldStates?.playerPosition);
+    const opponentDirection = getDirection(playersState.opponentPosition, oldStates?.opponentPosition);
+    oldStates = playersState;
+    const playerPos = {
+        x: playersState.playerPosition.column - 1,
+        y: playersState.playerPosition.row - 1
+    };
+    const opponentPos = {
+        x: playersState.opponentPosition.column - 1,
+        y: playersState.opponentPosition.row - 1
+    };
+
+    set(gameBoard, playerPos.x, playerPos.y, 1);
+    set(gameBoard, opponentPos.x, opponentPos.y, 1);
+    console.log(toPrettyString(gameBoard, [playerPos, opponentPos], [direction, opponentDirection]));
+
+    let nextMove = bot.nextMove(playerPos, opponentPos);
+    console.dir(nextMove);
+    let coord = nextMove ? allAdjacent[playerPos.y][playerPos.x]?.findIndex(m => m[0] === nextMove.x && m[1] === nextMove.y) : null;
+    coord ??= -1;
+
+    if (coord < 0) { // Shouldn't happen anymore
         console.warn("Decision making didn't return a move, falling back to any non-killing move");
+        console.dir(nextMove);
+        console.dir(allAdjacent[playerPos.y][playerPos.x]);
+
         // Do any non-killing move
-        const nonKillingMove = getPossibleMovesArray([playersState.playerPosition.column - 1, playersState.playerPosition.row - 1], gameBoard)[0];
+        const nonKillingMove = allAdjacent[playerPos.y][playerPos.x].find(([x, y]) => isValid(x, y) && !get(gameBoard, x, y));
         if (!nonKillingMove) coord = -1; // The player is doomed, we just fall back to KEEP_GOING
-        else coord = allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].indexOf(nonKillingMove);
+        else coord = allAdjacent[playerPos.y][playerPos.x].indexOf(nonKillingMove);
     }
 
     const move = (coord - direction + 6) % 6;
     console.log("current_direction: ", direction, "next_hex: ", coord, "move_to_hex: ", moves[move]);
     if (coord < 0 || moves[move] === "NONE") {
         console.warn("Wrong move (coord:", coord, ", move:", move, ")");
-        console.warn("adjacent_hexagons: ", allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1]);
+        console.warn("adjacent_hexagons: ", allAdjacent[playerPos.y][playerPos.x]);
         return moves[0];
     }
-    direction = coord;
     return moves[move];
+
 }
 
-if (typeof exports !== "undefined") { // CommonJS
-    exports.setup = setup;
-    exports.nextMove = nextMove;
-}
+exports.setup = setup;
+exports.nextMove = nextMove;
+
+//endregion
 
 
-// Decisions making
+//region Board manipulation
 
-let mcts;
-let state;
-
-function determineNextBestMoveMonte(playersState) {
-    if (!isValid(playersState.opponentPosition.column - 1, playersState.opponentPosition.row - 1)) return -1;
-
-    state = nextState(
-        nextState(state, new Play(playersState.playerPosition.row - 1, playersState.playerPosition.column - 1)),
-        new Play(playersState.opponentPosition.row - 1, playersState.opponentPosition.column - 1));
-
-    console.debug(toPrettyString(gameBoard));
-
-    const searchStats = mcts.runSearch(state, 0.175);
-    console.log("Search_stats:", JSON.stringify(searchStats));
-
-    let stats = mcts.getStats(state);
-    console.debug("State_stats:", stats);
-
-    const bestMove = mcts.bestPlay(state, "robust");
-    console.log("best_move:", JSON.stringify(bestMove));
-    if (!bestMove) return -1;
-    return allAdjacent[playersState.playerPosition.row - 1][playersState.playerPosition.column - 1].findIndex(m => m[0] === bestMove.col && m[1] === bestMove.row);
-}
-
-/** Class representing a game state. */
-class State {
-    constructor(playHistory, board, player) {
-        this.playHistory = playHistory;
-        this.board = board;
-        this.player = player;
-    }
-
-    isPlayer(player) {
-        return (player === this.player);
-    }
-
-    getMove() {
-        return this.playHistory[this.playHistory.length - 1];
-    }
-
-    getOpponentMove() {
-        return this.playHistory[this.playHistory.length - 2];
-    }
-
-    hash() {
-        return JSON.stringify(this.playHistory);
-    }
-}
-
-/** Class representing a state transition. */
-class Play {
-    constructor(row, col) {
-        this.row = row;
-        this.col = col;
-    }
-
-    hash() {
-        return this.row.toString() + "," + this.col.toString();
-    }
+/**
+ * Is the given position valid
+ * @param {number} x The x position (0-based)
+ * @param {number} y The y position (0-based)
+ * @returns {boolean}
+ */
+function isValid(x, y) {
+    return y >= 0 && y < 9 && x >= 0 && x < (y % 2 === 0 ? 16 : 15);
 }
 
 /**
- * Class representing a node in the search tree.
- * Stores tree search stats for UCB1.
+ * Gets the value of the cell at a given position
+ * @param {Uint16Array} board The game board to look in
+ * @param {number} x The x position (0-based)
+ * @param {number} y The y position (0-based)
+ * @returns {0|1} The value of the cell
  */
-class MonteCarloNode {
-    /**
-     * Create a new MonteCarloNode in the search tree.
-     * @param {MonteCarloNode} parent - The parent node.
-     * @param {Play} play - Last play played to get to this state.
-     * @param {State} state - The corresponding state.
-     * @param {Play[]} unexpandedPlays - The node's unexpanded child plays.
-     */
-    constructor(parent, play, state, unexpandedPlays) {
-        this.play = play;
-        this.state = state;
-
-        // Monte Carlo stuff
-        this.n_plays = 0;
-        this.n_wins = 0;
-
-        // Tree stuff
-        this.parent = parent;
-        this.children = new Map();
-        for (let play of unexpandedPlays) {
-            this.children.set(play.hash(), {play: play, node: null});
-        }
-    }
-
-    /**
-     * Get the MonteCarloNode corresponding to the given play.
-     * @param {Play} play - The play leading to the child node.
-     * @return {MonteCarloNode} The child node corresponding to the play given.
-     */
-    childNode(play) {
-        let child = this.children.get(play.hash());
-        if (child === undefined) {
-            throw new Error("No such play!");
-        } else if (child.node === null) {
-            throw new Error("Child is not expanded!");
-        }
-        return child.node;
-    }
-
-    /**
-     * Expand the specified child play and return the new child node.
-     * Add the node to the array of children nodes.
-     * Remove the play from the array of unexpanded plays.
-     * @param {Play} play - The play to expand.
-     * @param {State} childState - The child state corresponding to the given play.
-     * @param {Play[]} unexpandedPlays - The given child's unexpanded child plays; typically all of them.
-     * @return {MonteCarloNode} The new child node.
-     */
-    expand(play, childState, unexpandedPlays) {
-        if (!this.children.has(play.hash())) throw new Error("No such play!");
-        let childNode = new MonteCarloNode(this, play, childState, unexpandedPlays);
-        this.children.set(play.hash(), {play: play, node: childNode});
-        return childNode;
-    }
-
-    /**
-     * Get all legal plays from this node.
-     * @return {Play[]} All plays.
-     */
-    allPlays() {
-        let ret = [];
-        for (let child of this.children.values()) {
-            ret.push(child.play);
-        }
-        return ret;
-    }
-
-    /**
-     * Get all unexpanded legal plays from this node.
-     * @return {Play[]} All unexpanded plays.
-     */
-    unexpandedPlays() {
-        let ret = [];
-        for (let child of this.children.values()) {
-            if (child.node === null) ret.push(child.play);
-        }
-        return ret;
-    }
-
-    /**
-     * Whether this node is fully expanded.
-     * @return {boolean} Whether this node is fully expanded.
-     */
-    isFullyExpanded() {
-        for (let child of this.children.values()) {
-            if (child.node === null) return false;
-        }
-        return true;
-    }
-
-    /**
-     * Whether this node is terminal in the game tree, NOT INCLUSIVE of termination due to winning.
-     * @return {boolean} Whether this node is a leaf in the tree.
-     */
-    isLeaf() {
-        return this.children.size === 0;
-    }
-
-    /**
-     * Get the UCB1 value for this node.
-     * @param {number} biasParam - The square of the bias parameter in the UCB1 algorithm, defaults to 2.
-     * @return {number} The UCB1 value of this node.
-     */
-    getUCB1(biasParam) {
-        return (this.n_wins / this.n_plays) + Math.sqrt(biasParam * Math.log(this.parent.n_plays) / this.n_plays);
-    }
+function get(board, x, y) {
+    return board[y] >> x & 1;
 }
 
 /**
- * Class representing the Monte Carlo search tree.
- * Handles the four MCTS steps: selection, expansion, simulation, backpropagation.
- * Handles best-move selection.
+ * Sets the value of the cell at a given position
+ * @param {Uint16Array} board The game board to modify
+ * @param {number} x The x position (0-based)
+ * @param {number} y The y position (0-based)
+ * @param {0|1} v The value to set
  */
-class MonteCarlo {
-    /** @type {Map<string, MonteCarloNode>} */ nodes;
-
-    /**
-     * Create a Monte Carlo search tree.
-     * @param {number} UCB1ExploreParam - The square of the bias parameter in the UCB1 algorithm; defaults to 2.
-     */
-    constructor(UCB1ExploreParam = 2) {
-        this.UCB1ExploreParam = UCB1ExploreParam;
-        this.nodes = new Map();
-    }
-
-    /**
-     * If state does not exist, create dangling node.
-     * @param {State} state - The state to make a dangling node for; its parent is set to null.
-     */
-    makeNode(state) {
-        if (!this.nodes.has(state.hash())) {
-            let unexpandedPlays = legalPlays(state).slice();
-            let node = new MonteCarloNode(null, null, state, unexpandedPlays);
-            this.nodes.set(state.hash(), node);
-        }
-    }
-
-    /**
-     * From given state, run as many simulations as possible until the time limit, building statistics.
-     * @param {State} state - The state to run the search from.
-     * @param {number} timeout - The time to run the simulations for, in seconds.
-     * @return {Object} Search statistics.
-     */
-    runSearch(state, timeout = 1) {
-        this.makeNode(state);
-
-        let draws = 0;
-        let totalSims = 0;
-
-        let end = Date.now() + timeout * 1000;
-
-        while (Date.now() < end) {
-            let node = this.select(state);
-            let winner = getWinner(node.state);
-
-            if (node.isLeaf() === false && winner === null) {
-                node = this.expand(node);
-                winner = this.simulate(node);
-            }
-            this.backpropagate(node, winner);
-
-            if (winner === 0) draws++;
-            totalSims++;
-        }
-
-        return {target_runtime: timeout, real_runtime: timeout + (Date.now() - end) / 1000, simulations: totalSims, draws: draws};
-    }
-
-    /**
-     * From the available statistics, calculate the best move from the given state.
-     * @param {State} state - The state to get the best play from.
-     * @param {"robust"|"max"} policy - The selection policy for the "best" play.
-     * @return {Play} The best play, according to the given policy.
-     */
-    bestPlay(state, policy = "robust") {
-        this.makeNode(state);
-
-        // If not all children are expanded, not enough information
-        if (this.nodes.get(state.hash()).isFullyExpanded() === false) {
-            console.warn("Not enough information!");
-            return null;
-        }
-
-        let node = this.nodes.get(state.hash());
-        let allPlays = node.allPlays();
-        let bestPlay;
-
-        // Most visits (robust child)
-        if (policy === "robust") {
-            let max = -Infinity;
-            for (let play of allPlays) {
-                let childNode = node.childNode(play);
-                if (childNode.n_plays > max) {
-                    bestPlay = play;
-                    max = childNode.n_plays;
-                }
-            }
-        }
-
-        // Highest winrate (max child)
-        else if (policy === "max") {
-            let max = -Infinity;
-            for (let play of allPlays) {
-                let childNode = node.childNode(play);
-                let ratio = childNode.n_wins / childNode.n_plays;
-                if (ratio > max) {
-                    bestPlay = play;
-                    max = ratio;
-                }
-            }
-        }
-
-        return bestPlay;
-    }
-
-    /**
-     * Phase 1: Selection
-     * Select until EITHER not fully expanded OR leaf node
-     * @param {State} state - The root state to start selection from.
-     * @return {MonteCarloNode} The selected node.
-     */
-    select(state) {
-        let node = this.nodes.get(state.hash());
-        while (node.isFullyExpanded() && !node.isLeaf()) {
-            let plays = node.allPlays();
-            let bestPlay = null;
-            let bestUCB1 = -Infinity;
-            for (let play of plays) {
-                let childUCB1 = node.childNode(play).getUCB1(this.UCB1ExploreParam);
-                if (childUCB1 > bestUCB1) {
-                    bestPlay = play;
-                    bestUCB1 = childUCB1;
-                }
-            }
-            node = node.childNode(bestPlay);
-        }
-        return node;
-    }
-
-    /**
-     * Phase 2: Expansion
-     * Of the given node, expand a random unexpanded child node
-     * @param {MonteCarloNode} node - The node to expand from. Assume not leaf.
-     * @return {MonteCarloNode} The new expanded child node.
-     */
-    expand(node) {
-        let plays = node.unexpandedPlays();
-        let index = Math.floor(Math.random() * plays.length);
-        let play = plays[index];
-
-        let childState = nextState(node.state, play);
-        let childUnexpandedPlays = legalPlays(childState);
-        let childNode = node.expand(play, childState, childUnexpandedPlays);
-        this.nodes.set(childState.hash(), childNode);
-
-        return childNode;
-    }
-
-    /**
-     * Phase 3: Simulation
-     * From given node, play the game until a terminal state, then return winner
-     * @param {MonteCarloNode} node - The node to simulate from.
-     * @return {number} The winner of the terminal game state.
-     */
-    simulate(node) {
-        let state = node.state;
-        let winner = getWinner(state);
-
-        while (winner === null) {
-            let plays = legalPlays(state);
-            let play = plays[Math.floor(Math.random() * plays.length)];
-            if (!state || !play) {
-                console.warn(state, plays, "\n", toPrettyString(state.board));
-                break;
-            }
-            state = nextState(state, play);
-            winner = getWinner(state);
-        }
-
-        return winner;
-    }
-
-    /**
-     * Phase 4: Backpropagation
-     * From given node, propagate plays and winner to ancestors' statistics
-     * @param {MonteCarloNode} node - The node to backpropagate from. Typically, leaf.
-     * @param {number} winner - The winner to propagate.
-     */
-    backpropagate(node, winner) {
-        while (node !== null) {
-            node.n_plays += 1;
-            // Parent's choice
-            if (node.state.isPlayer(winner)) {
-                node.n_wins += 1;
-            }
-            node = node.parent;
-        }
-    }
-
-    // Utility & debugging methods
-
-    /**
-     * Return MCTS statistics for this node and children nodes
-     * @param {State} state - The state to get statistics for.
-     * @return {Object} The MCTS statistics.
-     */
-    getStats(state) {
-        let node = this.nodes.get(state.hash()).parent;
-        if (!node) return null;
-        let stats = {n_plays: node.n_plays, n_wins: node.n_wins, children: []};
-        for (let child of node.children.values()) {
-            if (child.node === null) stats.children.push({play: child.play, n_plays: null, n_wins: null});
-            else stats.children.push({play: child.play, n_plays: child.node.n_plays, n_wins: child.node.n_wins});
-        }
-        return stats;
-    }
-}
-
-/** Advance the given state and return it. */
-function nextState(state, play) {
-    if (!state) return new State([play], new Uint16Array(gameBoard), 1);
-
-    let newHistory = state.playHistory.slice(); // shallow copy
-    newHistory.push(play);
-    let newBoard = new Uint16Array(state.board);
-    set(newBoard, play.col, play.row, 1);
-    let newPlayer = -state.player;
-    return new State(newHistory, newBoard, newPlayer);
-}
-
-function legalPlays(state) {
-    const move = state.getOpponentMove();
-    const playerMoves = getPossibleMovesArray([move.col, move.row], state.board);
-    return playerMoves.map(move => new Play(move[1], move[0]));
+function set(board, x, y, v) {
+    board[y] = (board[y] & ~(1 << x)) | (v << x);
 }
 
 /**
- *
- * @param {State} state
- * @returns {number|null}
+ * Gets a printable version of the board
+ * @param {Uint16Array} board The game board to stringify
+ * @param {{x:number, y:number}[]} positions The current positions of the players
+ * @param {number[]} directions The directions of the players
+ * @returns {string} The pretty string representation of the board
  */
-function getWinner(state) {
-    const move = state.getMove();
-    const opponentMove = state.getOpponentMove();
-    const playerMoves = getPossibleMovesArray([move.col, move.row], state.board);
-    const opponentMoves = getPossibleMovesArray([opponentMove.col, opponentMove.row], state.board);
-    if (playerMoves.length === 0 && opponentMoves.length === 0) return 0;
-    if (playerMoves.length === 0) return -state.player;
-    if (opponentMoves.length === 0) return state.player;
-    else return null;
+function toPrettyString(board, positions = undefined, directions = undefined) {
+    const dirSymbols = ["←", "↖", "↗", "→", "↘", "↙"];
+
+    function cellRepr(x, y) {
+        if (!get(board, x, y)) return ".";
+        let index = positions.findIndex(p => p.x === x && p.y === y);
+        if (index < 0) return "+";
+        return directions ? dirSymbols[directions[index]] : (index + 1).toString();
+    }
+
+    let res = "";
+    for (let y = 0; y < board.length; y++) {
+        if (y > 0) res += "\n";
+        for (let x = 0; x < (y % 2 === 0 ? 16 : 15); x++) {
+            if (x > 0 || y % 2) res += " ";
+            res += cellRepr(x, y);
+        }
+    }
+    return res;
 }
 
-// Grid management
+//endregion
 
-function getPossibleMovesArray(playerPosition, board) {
-    let adjacentHex = allAdjacent[playerPosition[1]][playerPosition[0]];
-    return adjacentHex.filter(([x, y]) => isValid(x, y) && !get(board, x, y));
+function getDirection(currentPos, lastPos) {
+    if (!lastPos) return currentPos.column === 1 ? 3 : 0;
+    return allAdjacent[lastPos.row - 1][lastPos.column - 1].findIndex(m => m[0] === currentPos.column - 1 && m[1] === currentPos.row - 1);
 }
 
 function getAdjacent(x, y) {
@@ -531,9 +599,9 @@ function getAdjacent(x, y) {
 }
 
 function getAllAdjacentForGrid() {
-    allAdjacent = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill([]));
+    let allAdjacent = Array.from(Array(9), (_, i) => Array(i % 2 === 0 ? 16 : 15).fill([]));
     for (let y = 0; y < 9; y++)
-        for (let x = 0; x < 16; x++)
+        for (let x = 0; x < allAdjacent[y].length; x++)
             allAdjacent[y][x] = getAdjacent(x, y);
     return allAdjacent;
 }

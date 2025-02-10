@@ -7,6 +7,14 @@ export class GameChoice extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
+        const computerButton = this.shadowRoot.getElementById("computer");
+        const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
+
+        if (!getCookie("refreshToken")) {
+            computerButton.disabled = true;
+            multiplayerButton.disabled = true;
+        }
+
         this.shadowRoot.getElementById("local-game").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {
                 detail: {
@@ -15,11 +23,8 @@ export class GameChoice extends HTMLComponent {
                 }
             }));
         });
-        this.shadowRoot.getElementById("computer").addEventListener("click", () => {
-            if (!getCookie("refreshToken")) {
-                alert("You must be log in to play against the computer");
-                return;
-            }
+
+        computerButton.addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {
                 detail: {
                     name: "help",

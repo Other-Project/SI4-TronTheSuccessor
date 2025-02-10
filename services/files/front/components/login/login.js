@@ -17,7 +17,7 @@ export class Login extends HTMLComponent {
             this.loginFetch("sign-up");
         });
 
-        this.shadowRoot.getElementById("accueil").addEventListener("click", () => {
+        this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
         });
     }

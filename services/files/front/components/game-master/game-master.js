@@ -119,7 +119,7 @@ export class GameMaster extends HTMLComponent {
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
         this.socket.emit("game-start", {
-            playerName: "Player 1",
+            playerName: "Player 1"
         });
 
         this.socket.on("game-start", (msg) => {
@@ -145,7 +145,6 @@ export class GameMaster extends HTMLComponent {
         });
 
         this.socket.on("error", async (msg) => {
-            console.log("Error received from server", msg);
             if (msg.status === 401) {
                 await renewAccessToken();
                 this.#gameWithServer();

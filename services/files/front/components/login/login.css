@@ -110,7 +110,7 @@ button {
     }
 }
 
-#accueil {
+#home {
     justify-self: end;
     grid-row: 1;
     max-width: 45px;

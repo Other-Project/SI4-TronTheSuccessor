@@ -20,6 +20,13 @@ export class Login extends HTMLComponent {
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
         });
+
+        this.shadowRoot.querySelector("form").addEventListener("submit", (event) => {
+            event.preventDefault();
+        });
+
+        this.shadowRoot.getElementById("username").setCustomValidity("Username must be at least 3 characters long and contain only letters and numbers.");
+        this.shadowRoot.getElementById("password").setCustomValidity("Password must be at least 6 characters long and contain only letters and numbers.");
     }
 
     loginFetch(url) {
@@ -52,34 +59,20 @@ export class Login extends HTMLComponent {
     }
 
     correctInputValues() {
+        const form = this.shadowRoot.querySelector("form");
         const username = this.shadowRoot.getElementById("username");
         const password = this.shadowRoot.getElementById("password");
-        let isValid = true;
-
-        this.clearErrorMessages();
-
+        username.setCustomValidity("");
+        password.setCustomValidity("");
         if (!username.validity.valid) {
-            this.showError(username, "Username must be at least 3 characters long and contain only letters and numbers.");
-            isValid = false;
+            username.setCustomValidity("Username must be at least 3 characters long and contain only letters and numbers.");
         }
 
         if (!password.validity.valid) {
-            this.showError(password, "Password must be at least 6 characters long and contain only letters and numbers.");
-            isValid = false;
+            password.setCustomValidity("Password must be at least 6 characters long and contain only letters and numbers.");
         }
-        return isValid;
-    }
-
-    showError(input, message) {
-        const errorElement = document.createElement("div");
-        errorElement.className = "error-message";
-        errorElement.style.color = "red";
-        errorElement.textContent = message;
-        input.parentNode.insertBefore(errorElement, input.nextSibling);
-    }
-
-    clearErrorMessages() {
-        const errorMessages = this.shadowRoot.querySelectorAll(".error-message");
-        errorMessages.forEach(error => error.remove());
+        username.reportValidity();
+        password.reportValidity();
+        return form.checkValidity();
     }
 }

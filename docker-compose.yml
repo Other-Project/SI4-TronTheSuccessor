@@ -5,6 +5,8 @@ services:
     ports:
       - "27017:27017"
     restart: unless-stopped
+    volumes:
+      - ./data/mongo:/data/db
   gateway:
     image: tron-the-successor/gateway
     build:

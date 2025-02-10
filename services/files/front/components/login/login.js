@@ -41,10 +41,8 @@ export class Login extends HTMLComponent {
                 alert(data.error);
             } else {
                 alert("Logged in as " + data.username);
-                if (data.permanentToken) {
-                    document.cookie = `permanentToken=${data.permanentToken}; path=/; max-age=${60 * 60 * 24 * 365};`;
-                }
-                document.cookie = `sessionToken=${data.sessionToken}; path=/; max-age=${60 * 60};`;
+                document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
+                document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
             }
         }).catch(error => {
             alert(error.message);

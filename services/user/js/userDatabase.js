@@ -6,37 +6,43 @@ const client = new MongoClient(uri);
 const database = client.db("Tron-the-successor");
 const userCollection = database.collection("user");
 const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
+const accessTokenDuration = "1h";
+const refreshTokenDuration = "7d";
 
 async function addUser(username, password) {
     const hashedPassword = password.hashCode();
     if (await userCollection.findOne({username})) {
         return {error: `User ${username} already exists`};
     }
-    const permanentToken = jwt.sign({username}, secretKey);
-    const sessionToken = jwt.sign({username}, secretKey, {expiresIn: "1h"});
-    await userCollection.insertOne({username, password: hashedPassword, permanentToken, sessionToken});
-    return {username, permanentToken, sessionToken};
+    const refreshToken = jwt.sign({username}, secretKey, {expiresIn: refreshTokenDuration});
+    const accessToken = jwt.sign({username}, secretKey, {expiresIn: "1h"});
+    await userCollection.insertOne({username, password: hashedPassword, refreshToken, accessToken});
+    return {username, refreshToken, accessToken};
 }
 
 async function getUser(username, password) {
     const user = await userCollection.findOne({username, password: password.hashCode()});
     if (user) {
-        const sessionToken = jwt.sign({username}, secretKey, {expiresIn: "1h"});
-        await userCollection.updateOne({username}, {$set: {sessionToken}});
-        return {username: user.username, sessionToken};
+        const accessToken = jwt.sign({username}, secretKey, {expiresIn: accessTokenDuration});
+        const refreshToken = jwt.sign({username}, secretKey, {expiresIn: refreshTokenDuration});
+        await userCollection.updateMany({username}, {$set: {refreshToken, accessToken}});
+        return {username: user.username, accessToken, refreshToken};
     }
     return {error: "Wrong username or password"};
 }
 
-async function checkToken(sessionToken) {
-    try {
-        if (!sessionToken) return false;
-        const decoded = jwt.verify(sessionToken, secretKey);
-        const user = await userCollection.findOne({username: decoded.username});
-        return user && user.sessionToken === sessionToken;
-    } catch (error) {
-        return false;
+async function renewToken(refreshToken) {
+    if (!refreshToken || !jwt.verify(refreshToken, secretKey)) {
+        return {valid: false};
     }
+    const user = await userCollection.findOne({refreshToken});
+    if (!user) {
+        return {valid: false};
+    }
+    const accessToken = jwt.sign({username: user.username}, secretKey, {expiresIn: accessTokenDuration});
+    const newRefreshToken = jwt.sign({username: user.username}, secretKey, {expiresIn: refreshTokenDuration});
+    await userCollection.updateMany({refreshToken}, {$set: {accessToken, refreshToken: newRefreshToken}});
+    return {valid: true, accessToken, refreshToken: newRefreshToken};
 }
 
 String.prototype.hashCode = function () {
@@ -49,4 +55,4 @@ String.prototype.hashCode = function () {
     return hash;
 };
 
-module.exports = {addUser, getUser, checkToken};
+module.exports = {addUser, getUser, renewToken};

@@ -2,8 +2,9 @@ import {Game} from "/js/game.js";
 import {HumanPlayer} from "/js/human-player.js";
 import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
-import "/js/socket.io.js";
 import {Player} from "/js/player.js";
+import "/js/socket.io.js";
+import {getCookie, renewAccessToken} from "/js/login-manager.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -103,14 +104,22 @@ export class GameMaster extends HTMLComponent {
     }
 
     #gameWithServer() {
+        if (!getCookie("accessToken")) {
+            alert("You need to be logged in to play against the server");
+            location.reload();
+            return;
+        }
         this.popupWindow.style.display = "none";
         this.stopGame();
-        if (!this.socket) this.socket = io("ws://localhost:8000");
+        this.socket = io("ws://localhost:8000", {
+            extraHeaders: {
+                authorization: getCookie("accessToken"),
+            }
+        });
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
         this.socket.emit("game-start", {
             playerName: "Player 1",
-            sessionToken: this.getCookie("sessionToken")
         });
 
         this.socket.on("game-start", (msg) => {
@@ -128,10 +137,21 @@ export class GameMaster extends HTMLComponent {
 
         this.socket.on("game-end", (msg) => {
             this.endScreen(msg);
+            this.socket.disconnect();
         });
 
         document.addEventListener("player-direction", (event) => {
             this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number});
+        });
+
+        this.socket.on("error", async (msg) => {
+            console.log("Error received from server", msg);
+            if (msg.status === 401) {
+                await renewAccessToken();
+                this.#gameWithServer();
+            } else {
+                console.error(msg);
+            }
         });
     }
 }

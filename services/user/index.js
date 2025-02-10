@@ -4,6 +4,7 @@ const userDatabase = require("./js/userDatabase.js");
 const HTTP_STATUS = {
     OK: 200,
     BAD_REQUEST: 400,
+    UNAUTHORIZED_STATUS_CODE: 401,
     NOT_FOUND: 404
 };
 
@@ -18,8 +19,8 @@ http.createServer(async (request, response) => {
             case "sign-in":
                 await handleSignIn(request, response);
                 break;
-            case "check-token":
-                await handleCheckToken(request, response);
+            case "renew-access-token":
+                await handleRenewToken(request, response);
                 break;
             default:
                 response.statusCode = HTTP_STATUS.NOT_FOUND;
@@ -45,11 +46,11 @@ async function handleSignIn(request, response) {
     sendResponse(response, HTTP_STATUS.OK, user);
 }
 
-async function handleCheckToken(request, response) {
+async function handleRenewToken(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
-    const result = await userDatabase.checkToken(parsedBody.sessionToken);
-    sendResponse(response, HTTP_STATUS.OK, {valid: result});
+    const result = await userDatabase.renewToken(parsedBody.refreshToken);
+    sendResponse(response, (result.valid ? HTTP_STATUS.OK : HTTP_STATUS.UNAUTHORIZED_STATUS_CODE), result);
 }
 
 async function getRequestBody(request) {

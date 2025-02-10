@@ -3,6 +3,8 @@ const http = require("http");
 const httpProxy = require("http-proxy");
 const {Server} = require("socket.io");
 const {io: Client} = require("socket.io-client");
+const jwt = require("jsonwebtoken");
+const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
 
 // We will need a proxy to send requests to the other services.
 const proxy = httpProxy.createProxyServer();
@@ -49,6 +51,18 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
+    const accessToken = socket.request.headers["authorization"];
+    if (!accessToken) {
+        socket.emit("error", {status: 401});
+    }
+    jwt.verify(accessToken, secretKey, (error) => {
+        if (error) {
+            if (error.name === "TokenExpiredError") {
+                socket.emit("error", {status: 401});
+            }
+            socket.disconnect();
+        }
+    });
     const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003");
     socket.onAny((event, msg) => {
         socketGame.emit(event, msg);
@@ -57,4 +71,3 @@ io.on("connection", (socket) => {
         socket.emit(event, msg);
     });
 });
-

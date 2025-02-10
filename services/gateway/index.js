@@ -52,14 +52,10 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
     const accessToken = socket.request.headers["authorization"];
-    if (!accessToken) {
-        socket.emit("error", {status: 401});
-    }
+    if (!accessToken) socket.emit("error", {status: 401});
     jwt.verify(accessToken, secretKey, (error) => {
         if (error) {
-            if (error.name === "TokenExpiredError") {
-                socket.emit("error", {status: 401});
-            }
+            if (error.name === "TokenExpiredError") socket.emit("error", {status: 401});
             socket.disconnect();
         }
     });

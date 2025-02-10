@@ -64,13 +64,8 @@ export class Login extends HTMLComponent {
         const password = this.shadowRoot.getElementById("password");
         username.setCustomValidity("");
         password.setCustomValidity("");
-        if (!username.validity.valid) {
-            username.setCustomValidity("Username must be at least 3 characters long and contain only letters and numbers.");
-        }
-
-        if (!password.validity.valid) {
-            password.setCustomValidity("Password must be at least 6 characters long and contain only letters and numbers.");
-        }
+        if (!username.validity.valid) username.setCustomValidity("Username must be at least 3 characters long and contain only letters and numbers.");
+        if (!password.validity.valid) password.setCustomValidity("Password must be at least 6 characters long and contain only letters and numbers.");
         username.reportValidity();
         password.reportValidity();
         return form.checkValidity();

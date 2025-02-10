@@ -50,22 +50,17 @@ async function renewToken(refreshToken) {
 }
 
 function checkValue(username, password) {
-    if (!username || !password) {
+    if (!username || !password)
         return {error: "Username or password is missing"};
-    }
-    if (typeof username !== "string" || typeof password !== "string") {
+    if (typeof username !== "string" || typeof password !== "string")
         return {error: "Username and password must be strings"};
-    }
-    if (username.length < usernameMinLength || password.length < passwordMinLength) {
+    if (username.length < usernameMinLength || password.length < passwordMinLength)
         return {error: `Username and password must be at least ${usernameMinLength} and ${passwordMinLength} characters long`};
-    }
-    if (username.length > 20 || password.length > 20) {
+    if (username.length > 20 || password.length > 20)
         return {error: "Username and password must be at most 20 characters long"};
-    }
     const regex = /^[a-zA-Z0-9]+$/;
-    if (!regex.test(username) || !regex.test(password)) {
+    if (!regex.test(username) || !regex.test(password))
         return {error: "Username and password must contain only letters and numbers"};
-    }
     return {};
 }
 

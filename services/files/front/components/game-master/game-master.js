@@ -113,7 +113,7 @@ export class GameMaster extends HTMLComponent {
         this.stopGame();
         this.socket = io("ws://localhost:8000", {
             extraHeaders: {
-                authorization: getCookie("accessToken"),
+                authorization: getCookie("accessToken")
             }
         });
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
@@ -148,9 +148,7 @@ export class GameMaster extends HTMLComponent {
             if (msg.status === 401) {
                 await renewAccessToken();
                 this.#gameWithServer();
-            } else {
-                console.error(msg);
-            }
+            } else console.error(msg);
         });
     }
 }

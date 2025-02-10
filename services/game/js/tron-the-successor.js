@@ -298,16 +298,24 @@ class TronBot {
             return playableMoves[0]; // The opponent can't move, we can play any non-killing move
         }
 
-        playableMoves = this.floodingAlgorithm(playableMoves); // Only keep the moves that leads to the largest area
-        if (playableMoves.length === 1) {
-            console.log("Decisive condition: only one move to the largest area");
-            return playableMoves[0];
-        }
+
 
         let canReachOpponent = playableMoves.some(move => this.canReachPosition(move, opponent));
         if (!canReachOpponent) {
+            playableMoves = this.floodingAlgorithm(playableMoves); // Only keep the moves that leads to the largest area
+            if (playableMoves.length === 1) {
+                console.log("Decisive condition: can't reach opponent (largest area)");
+                return playableMoves[0];
+            }
+
             console.log("Decisive condition: can't reach opponent (filling)");
             return this.fillingAlgorithm(position, playableMoves)[0];
+        }
+
+        playableMoves = this.firstArrivedAlgorithm(playableMoves, opponent);
+        if (playableMoves.length === 1) {
+            console.log("Decisive condition: first-arrived");
+            return playableMoves[0];
         }
 
         let center = {x: Math.floor(this.gridWidth / 2), y: Math.floor(this.gridHeight / 2)};
@@ -316,12 +324,6 @@ class TronBot {
 
         if (playableMoves.length === 1) {
             console.log("Decisive condition: battle for the center");
-            return playableMoves[0];
-        }
-
-        playableMoves = this.firstArrivedAlgorithm(playableMoves, opponent);
-        if (playableMoves.length === 1) {
-            console.log("Decisive condition: first-arrived");
             return playableMoves[0];
         }
 

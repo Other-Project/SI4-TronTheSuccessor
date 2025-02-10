@@ -159,7 +159,7 @@ class TronBot {
         for (let i = 0; i < neighbors.length; i++)
             for (const opponentMove of this.getFreeNeighbors(opponent.x, opponent.y)) {
                 scores[i] = Math.min(this.countCellsReachableBeforeOpponent(neighbors[i], opponentMove), scores[i] ?? Infinity);
-                opponentScores[i] = Math.max(this.countCellsReachableBeforeOpponent(opponentMove, neighbors[i]), opponentScores[i] ?? Infinity);
+                opponentScores[i] = Math.max(this.countCellsReachableBeforeOpponent(opponentMove, neighbors[i]), opponentScores[i] ?? -Infinity);
             }
 
         let ratios = scores.map((score, i) => score - opponentScores[i]);

@@ -1,6 +1,6 @@
 #container {
     display: grid;
-    grid-template-rows: 45px 1fr;
+    grid-template-rows: 50px 1fr;
     height: 100vh;
 }
 
@@ -14,13 +14,13 @@
 }
 
 #login {
-    display: grid;
-    grid-template-rows: 1fr 1fr 1fr;
     border-radius: 1em;
     background: rgba(255, 255, 255, 0.1);
     box-shadow: 0 0.5em 1em rgba(0, 0, 0, 0.2);
     width: 50%;
-    height: calc(55%);
+    height: 20em;
+    min-width: 20em;
+    max-width: 50em;
     padding: 1em;
     animation: flicker 5s infinite alternate;
 }
@@ -28,9 +28,6 @@
 h1 {
     font-size: 4em;
     text-align: center;
-    grid-row: 1;
-    display: flex;
-    align-items: center;
     justify-content: center;
     margin: 0;
     @media screen and (max-width: 600px) {
@@ -39,20 +36,14 @@ h1 {
     transition: all 0.5s ease;
 }
 
-#inputs {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 1em;
-    padding: 1em;
-    grid-row: 2;
-    align-items: center;
+[aria-hidden="true"] {
+    visibility: hidden;
 }
-
 
 input {
     width: calc(100% - 1.5em);
     padding: 0.75em;
-    border-radius: 0.75em;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.2);
     color: #fff;
     font-size: 1.2em;
@@ -75,21 +66,18 @@ input:focus {
 #login-buttons {
     display: flex;
     gap: 1em;
-    padding: 1em 0;
-    grid-row: 3;
-    justify-content: center;
-    align-items: center;
+    padding-top: 1em;
     width: 100%;
 }
 
 button {
+    flex: 1;
     padding: 0.75em 1.5em;
     border-radius: 0.75em;
     background: linear-gradient(135deg, #866bff 0%, #7b00ff 100%);
     color: #fff;
     cursor: pointer;
     font-size: 1.2em;
-    width: calc(50% - 1em);
     transition: all 0.5s ease;
     box-shadow: rgb(134, 107, 255) 2px 2px 5px, rgba(107, 115, 255, 0.5) 0 0 1.5em;
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -111,10 +99,10 @@ button {
 }
 
 #home {
+    margin-right: 5px;
+    align-self: end;
     justify-self: end;
-    grid-row: 1;
     max-width: 45px;
-    margin: 10px;
 }
 
 .error-message {

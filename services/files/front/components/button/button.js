@@ -7,7 +7,7 @@ export class Button extends HTMLComponent {
         this._disabled = false;
     }
 
-    onSetupCompleted = () => {
+    onVisible = () => {
         if (this._disabled) this.updateDisabledState();
     };
 

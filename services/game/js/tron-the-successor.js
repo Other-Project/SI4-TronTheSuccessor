@@ -1,5 +1,6 @@
 class TronBot {
     gameTurn = 0;
+    pathHistory = [];
 
     constructor(gridWidth, gridHeight) {
         this.gridWidth = gridWidth;
@@ -255,6 +256,59 @@ class TronBot {
         return bestMoves.filter((m, i) => maxArticulationPoints[i] === minArticulationPoints);
     }
 
+    monteResults = new Map();
+    monteSimCount = 0;
+
+    /**
+     * Monte Carlo search for the longest path
+     * @param {number} maxTime The maximum time to run the simulation
+     * @param {{x: number, y: number}[]} startPath The starting path
+     * @param {{x: number, y: number}[]} neighbors The neighbors to consider
+     * @returns {{x: number, y: number}[]} The longest paths
+     */
+    monteSearchLongestPath(maxTime, startPath, neighbors) {
+        if (this.monteResults.size === 0) this.monteResults.set(startPath[startPath.length - 1], 0);
+        let startTime = Date.now();
+
+        let simulationCount = 0;
+        while (Date.now() - startTime < maxTime) {
+            let path = structuredClone(startPath);
+            let current = startPath[startPath.length - 1];
+            while (true) {
+                let neighbors = this.getFreeNeighbors(current.x, current.y).filter(move => !path.some(p => p.x === move.x && p.y === move.y));
+
+                let articulationPoints = this.findArticulationPoints(current, ...path);
+                let bestMoves = neighbors.filter(move => !articulationPoints.has(`${move.x},${move.y}`));
+                if (bestMoves.length > 0) neighbors = bestMoves; // All nodes are articulation points
+
+                if (neighbors.length === 0) break;
+                let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                path.push(next);
+                current = next;
+            }
+            simulationCount++;
+            for (let i = startPath.length; i < path.length; i++) {
+                let longestPath = path.slice(i);
+                let key = `${path[i].x},${path[i].y}`;
+                let prevScore = this.monteResults.get(key)?.length ?? 0;
+                if (longestPath.length > prevScore) this.monteResults.set(key, longestPath);
+            }
+        }
+        this.monteSimCount += simulationCount;
+
+        let maxScore = 0;
+        let bestPath = [];
+        for (let neighbor of neighbors) {
+            let path = this.monteResults.get(`${neighbor.x},${neighbor.y}`);
+            if (path && path.length > maxScore) {
+                maxScore = path.length;
+                bestPath = path;
+            }
+        }
+        console.log("longest_path_length:", bestPath.length, "new_sim_cnt:", simulationCount + " / " + this.monteSimCount);
+        return bestPath;
+    }
+
     //endregion
 
     /**
@@ -285,6 +339,7 @@ class TronBot {
      * @returns {*|{x: number, y: number}|null}
      */
     nextMove(position, opponent) {
+        this.pathHistory.push(position);
         this.gameTurn++;
         let playableMoves = this.getFreeNeighbors(position.x, position.y);
 

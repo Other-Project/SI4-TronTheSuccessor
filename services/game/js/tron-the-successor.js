@@ -385,12 +385,27 @@ class TronBot {
             return null; // No playable moves
         }
 
-        if (this.getFreeNeighbors(opponent.x, opponent.y).length === 0) {
+        const opponentMoves = this.getFreeNeighbors(opponent.x, opponent.y);
+        if (opponentMoves.length === 0) {
             console.log("Decisive condition: opponent can't move");
             return playableMoves[0]; // The opponent can't move, we can play any non-killing move
         }
+        if (opponentMoves.length === 1) {
+            let avoidDraw = playableMoves.filter(move => move.x !== opponentMoves[0].x || move.y !== opponentMoves[0].y);
+            if (avoidDraw.length > 0) playableMoves = avoidDraw;
+            if (playableMoves.length === 1) {
+                console.log("Decisive condition: avoiding opponent's only move");
+                return playableMoves[0];
+            }
 
-
+            const futureOpponentMoves = this.getFreeNeighbors(opponentMoves[0].x, opponentMoves[0].y);
+            let blockingMove = playableMoves.filter(move => futureOpponentMoves.some(futureMove => futureMove.x === move.x && futureMove.y === move.y));
+            if (blockingMove.length > 0) playableMoves = blockingMove;
+            if (playableMoves.length === 1) {
+                console.log("Decisive condition: blocking opponent's only move");
+                return playableMoves[0];
+            }
+        }
 
         let canReachOpponent = playableMoves.some(move => this.canReachPosition(move, opponent));
         if (!canReachOpponent) {

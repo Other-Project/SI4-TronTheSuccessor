@@ -1,8 +1,7 @@
 const {MongoClient} = require("mongodb");
 const jwt = require("jsonwebtoken");
 
-const uri = 'mongodb://mongodb:27017';
-const client = new MongoClient(uri);
+const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27017');
 const database = client.db("Tron-the-successor");
 const userCollection = database.collection("user");
 const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
@@ -15,7 +14,7 @@ async function addUser(username, password) {
     const {error} = checkValue(username, password);
     if (error)
         return {error};
-    const hashedPassword = password.hashCode();
+    const hashedPassword = hash(password);
     if (await userCollection.findOne({username}))
         return {error: `User ${username} already exists`};
     const refreshToken = jwt.sign({username}, secretKey, {expiresIn: refreshTokenDuration});
@@ -25,7 +24,7 @@ async function addUser(username, password) {
 }
 
 async function getUser(username, password) {
-    const user = await userCollection.findOne({username, password: password.hashCode()});
+    const user = await userCollection.findOne({username, password: hash(password)});
     if (user) {
         const accessToken = jwt.sign({username}, secretKey, {expiresIn: accessTokenDuration});
         const refreshToken = jwt.sign({username}, secretKey, {expiresIn: refreshTokenDuration});
@@ -64,14 +63,14 @@ function checkValue(username, password) {
     return {};
 }
 
-String.prototype.hashCode = function () {
+function hash(str) {
     let hash = 0;
-    for (let i = 0; i < this.length; i++) {
-        const chr = this.charCodeAt(i);
+    for (let i = 0; i < str.length; i++) {
+        const chr = str.charCodeAt(i);
         hash = ((hash << 5) - hash) + chr;
         hash |= 0;
     }
     return hash;
-};
+}
 
 module.exports = {addUser, getUser, renewToken};

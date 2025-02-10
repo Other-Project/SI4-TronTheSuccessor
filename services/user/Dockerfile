@@ -1,6 +1,8 @@
 FROM node:18-slim
 USER node
 
+ENV MONGO_DB_URL 'mongodb://mongodb:27017'
+
 # mkdir and cd
 WORKDIR /app
 

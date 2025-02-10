@@ -24,9 +24,6 @@ export class Login extends HTMLComponent {
         this.shadowRoot.querySelector("form").addEventListener("submit", (event) => {
             event.preventDefault();
         });
-
-        this.shadowRoot.getElementById("username").setCustomValidity("Username must be at least 3 characters long and contain only letters and numbers.");
-        this.shadowRoot.getElementById("password").setCustomValidity("Password must be at least 6 characters long and contain only letters and numbers.");
     }
 
     loginFetch(url) {

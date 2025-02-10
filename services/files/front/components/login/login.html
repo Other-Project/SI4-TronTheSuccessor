@@ -4,11 +4,12 @@
         <div id="login">
             <h1>Login</h1>
             <div id="inputs">
-                <label>
-                    <input id="username" placeholder="Username" required type="text">
+                <label id="username-label">
+                    <input id="username" pattern="[a-zA-Z0-9]{3,20}" placeholder="Username" required type="text">
                 </label>
-                <label>
-                    <input id="password" placeholder="Password" required type="password">
+                <label id="password-label">
+                    <input id="password" pattern="[a-zA-Z0-9]{6,20}" placeholder="Password" required
+                           type="password">
                 </label>
             </div>
             <div id="login-buttons">
@@ -18,5 +19,3 @@
         </div>
     </div>
 </div>
-
-

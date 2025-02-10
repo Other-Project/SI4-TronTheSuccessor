@@ -8,10 +8,12 @@ export class Login extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("sign-in").addEventListener("click", () => {
+            if (!this.correctInputValues()) return;
             this.loginFetch("sign-in");
         });
 
         this.shadowRoot.getElementById("sign-up").addEventListener("click", () => {
+            if (!this.correctInputValues()) return;
             this.loginFetch("sign-up");
         });
 
@@ -31,10 +33,10 @@ export class Login extends HTMLComponent {
                 password: this.shadowRoot.getElementById("password").value
             })
         }).then(response => {
-            if (response.ok) {
+            if (response.ok)
                 return response.json();
-            } else {
-                throw new Error("Invalid credentials");
+            else {
+                throw new Error(response.statusText);
             }
         }).then(data => {
             if (data.error) {
@@ -47,5 +49,37 @@ export class Login extends HTMLComponent {
         }).catch(error => {
             alert(error.message);
         });
+    }
+
+    correctInputValues() {
+        const username = this.shadowRoot.getElementById("username");
+        const password = this.shadowRoot.getElementById("password");
+        let isValid = true;
+
+        this.clearErrorMessages();
+
+        if (!username.validity.valid) {
+            this.showError(username, "Username must be at least 3 characters long and contain only letters and numbers.");
+            isValid = false;
+        }
+
+        if (!password.validity.valid) {
+            this.showError(password, "Password must be at least 6 characters long and contain only letters and numbers.");
+            isValid = false;
+        }
+        return isValid;
+    }
+
+    showError(input, message) {
+        const errorElement = document.createElement("div");
+        errorElement.className = "error-message";
+        errorElement.style.color = "red";
+        errorElement.textContent = message;
+        input.parentNode.insertBefore(errorElement, input.nextSibling);
+    }
+
+    clearErrorMessages() {
+        const errorMessages = this.shadowRoot.querySelectorAll(".error-message");
+        errorMessages.forEach(error => error.remove());
     }
 }

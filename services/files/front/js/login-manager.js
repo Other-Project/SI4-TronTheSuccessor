@@ -16,10 +16,10 @@ export async function renewAccessToken() {
         if (response.ok) {
             return response.json();
         } else if (response.status === 401) {
-            alert("Your session has expired. Please log in again.");
+            alert(response.error);
             location.reload();
         } else {
-            throw new Error("Network response was not ok");
+            throw new Error(response.error);
         }
     }).then(data => {
         document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;

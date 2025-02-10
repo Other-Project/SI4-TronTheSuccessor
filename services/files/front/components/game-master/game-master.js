@@ -104,7 +104,7 @@ export class GameMaster extends HTMLComponent {
     }
 
     #gameWithServer() {
-        if (!getCookie("accessToken")) {
+        if (!getCookie("refreshToken")) {
             alert("You need to be logged in to play against the server");
             location.reload();
             return;

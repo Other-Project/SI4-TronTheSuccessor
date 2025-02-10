@@ -146,17 +146,27 @@ class TronBot {
         return count;
     }
 
+    /**
+     * Returns the best moves based on the first arrived algorithm.
+     * @param {{x: number, y: number}[]} neighbors - The neighbors to consider.
+     * @param {{x: number, y: number}} opponent - The opponent's position.
+     * @returns {{x: number, y: number}[]} The best moves.
+     */
+
     firstArrivedAlgorithm(neighbors, opponent) {
         const scores = [];
+        const opponentScores = [];
         for (let i = 0; i < neighbors.length; i++)
-            for (let opponentMove of this.getFreeNeighbors(opponent.x, opponent.y))
+            for (const opponentMove of this.getFreeNeighbors(opponent.x, opponent.y)) {
                 scores[i] = Math.min(this.countCellsReachableBeforeOpponent(neighbors[i], opponentMove), scores[i] ?? Infinity);
+                opponentScores[i] = Math.max(this.countCellsReachableBeforeOpponent(opponentMove, neighbors[i]), opponentScores[i] ?? Infinity);
+            }
 
-        console.dir(scores);
-        let maxScore = Math.max(...scores);
+        let ratios = scores.map((score, i) => score - opponentScores[i]);
+        let maxScore = Math.max(...ratios);
         let bestMoves = [];
         for (let i = 0; i < neighbors.length; i++)
-            if (scores[i] === maxScore)
+            if (ratios[i] === maxScore)
                 bestMoves.push(neighbors[i]);
         return bestMoves;
     }

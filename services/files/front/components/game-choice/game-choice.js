@@ -33,4 +33,13 @@ export class GameChoice extends HTMLComponent {
             }));
         });
     }
+
+    onVisible = () => {
+        const computerButton = this.shadowRoot.getElementById("computer");
+        const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
+
+        const refreshToken = getCookie("refreshToken");
+        computerButton.disabled = !refreshToken;
+        multiplayerButton.disabled = !refreshToken;
+    };
 }

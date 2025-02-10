@@ -237,6 +237,40 @@ class TronBot {
     }
 
     /**
+     * Handles the case where multiple moves have the same number of articulation points
+     * @param {{x:number, y: number}} position The position of the bot
+     * @param {{x:number, y: number}[]} equalMoves The moves with the same number of articulation points
+     * @returns {{x:number, y: number}[]} The best moves
+     */
+    handleEqualFilling(position, equalMoves) {
+        let minPossibleMoves = Infinity;
+        let bestMoves = [];
+        for (let move of equalMoves) {
+            let possibleMoves = this.getFreeNeighbors(move.x, move.y).length;
+            let isWallOrTrail = this.isWallOrTrail(move.x, move.y);
+            if (possibleMoves < minPossibleMoves || (possibleMoves === minPossibleMoves && isWallOrTrail)) {
+                minPossibleMoves = possibleMoves;
+                bestMoves = [move];
+            }
+        }
+        return bestMoves;
+    }
+
+    /**
+     * Checks if a position is next to a wall or trail
+     * @param {number} x The x position (0-based)
+     * @param {number} y The y position (0-based)
+     * @returns {boolean} Whether the position is next to a wall or trail
+     */
+    isWallOrTrail(x, y) {
+        if (x === 0 || y === 0 || x === this.gridWidth - 1 || y === this.gridHeight - 1) return true;
+        for (let neighbor of this.getNeighbors(x, y))
+            if (get(gameBoard, neighbor.x, neighbor.y))
+                return true;
+        return false;
+    }
+
+    /**
      * Implementation of the filling algorithm used to avoid articulation points and thus *trying* to avoid getting trapped
      * @param {{x:number, y: number}} position The position of the bot
      * @param {{x:number, y: number}[]} neighbors The neighbors to consider
@@ -253,7 +287,8 @@ class TronBot {
         }
 
         let minArticulationPoints = Math.min(...maxArticulationPoints);
-        return bestMoves.filter((m, i) => maxArticulationPoints[i] === minArticulationPoints);
+        let equalMoves = bestMoves.filter((m, i) => maxArticulationPoints[i] === minArticulationPoints);
+        return equalMoves.length > 1 ? this.handleEqualFilling(position, equalMoves) : equalMoves;
     }
 
     monteResults = new Map();
@@ -553,4 +588,3 @@ function getAllAdjacentForGrid() {
             allAdjacent[y][x] = getAdjacent(x, y);
     return allAdjacent;
 }
-

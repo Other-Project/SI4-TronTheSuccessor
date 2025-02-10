@@ -230,20 +230,12 @@ class TronBot {
      */
     maxArticulationPoints(depth, ...path) {
         if (depth === 0) return 0;
-        let articulationPoints = this.findArticulationPoints(...path);
-        let mx = articulationPoints.size;
-        let moves = this.getFreeNeighbors(path[path.length - 1].x, path[path.length - 1].y)
-            .filter(move => !articulationPoints.has(`${move.x},${move.y}`) && !path.some(p => p.x === move.x && p.y === move.y));
-        if (moves.length === 0) return Infinity;
-
-        let finiteMove = false;
-        for (let move of moves) {
-            let maxArt = this.maxArticulationPoints(depth - 1, ...path, move);
-            if (maxArt === Infinity) continue;
-            mx = Math.max(mx, articulationPoints.size + maxArt);
-            finiteMove = true;
-        }
-        return finiteMove ? mx : Infinity;
+        let base = this.findArticulationPoints(...path).size;
+        let mx = base;
+        for (let move of this.getFreeNeighbors(path[path.length - 1].x, path[path.length - 1].y))
+            if (!path.some(p => p.x === move.x && p.y === move.y))
+                mx = Math.max(mx, base + this.maxArticulationPoints(depth - 1, ...path, move));
+        return mx;
     }
 
     /**
@@ -293,7 +285,7 @@ class TronBot {
 
         let maxArticulationPoints = [];
         for (let move of bestMoves) {
-            maxArticulationPoints.push(this.maxArticulationPoints(4, position, move));
+            maxArticulationPoints.push(this.maxArticulationPoints(2, position, move));
         }
 
         let minArticulationPoints = Math.min(...maxArticulationPoints);

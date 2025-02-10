@@ -197,24 +197,29 @@ class TronBot {
 
     /**
      * Finds the articulation points in the graph
-     * @param {{x:number, y: number}} position The position to start from
      * @param {{x:number, y: number}} markedAsVisited The nodes to mark as visited
      * @returns {Set<string>} A set of articulation points' keys
      */
-    findArticulationPoints(position, ...markedAsVisited) {
+    findArticulationPoints(...markedAsVisited) {
         let discovery = {};
         let low = {};
         let visited = {};
         for (let node of markedAsVisited) visited[`${node.x},${node.y}`] = true;
         let articulationPoints = new Set();
 
-        this.findArticulationPointsHelper(position, null, discovery, low, visited, articulationPoints, 0);
+        this.findArticulationPointsHelper(markedAsVisited[markedAsVisited.length - 1], null, discovery, low, visited, articulationPoints, 0);
         return articulationPoints;
     }
 
+    /**
+     * Recursive helper function for finding the maximum number of articulation points
+     * @param {number} depth The depth of the search
+     * @param {{x: number, y: number}} path The current path
+     * @returns {number} The maximum number of articulation points
+     */
     maxArticulationPoints(depth, ...path) {
         if (depth === 0) return 0;
-        let articulationPoints = this.findArticulationPoints(path);
+        let articulationPoints = this.findArticulationPoints(...path);
         let mx = articulationPoints.size;
         let moves = this.getFreeNeighbors(path[path.length - 1].x, path[path.length - 1].y)
             .filter(move => !articulationPoints.has(`${move.x},${move.y}`) && !path.some(p => p.x === move.x && p.y === move.y));
@@ -252,6 +257,12 @@ class TronBot {
 
     //endregion
 
+    /**
+     * Prioritizes moves that are closer to the center
+     * @param {{x: number, y: number}} position The position of the bot
+     * @param {{x: number, y: number}[]} neighbors The neighbors to consider
+     * @returns {{x: number, y: number}[]} The best moves
+     */
     goToCenterAlgorithm(position, neighbors) {
         const center = {x: Math.floor(this.gridWidth / 2), y: Math.floor(this.gridHeight / 2)};
 
@@ -267,6 +278,12 @@ class TronBot {
         return bestMoves;
     }
 
+    /**
+     * Decides the next move of the bot
+     * @param position The position of the bot
+     * @param opponent
+     * @returns {*|{x: number, y: number}|null}
+     */
     nextMove(position, opponent) {
         this.gameTurn++;
         let playableMoves = this.getFreeNeighbors(position.x, position.y);
@@ -312,7 +329,6 @@ class TronBot {
         return playableMoves[0];
     }
 }
-
 
 //region Exports
 

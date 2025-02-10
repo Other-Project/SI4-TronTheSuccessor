@@ -1,10 +1,7 @@
 FROM node:18-slim
-
-ENV FILES_SERVICE_URL "http://127.0.0.1:8001"
-ENV GAME_SERVICE_URL "http://127.0.0.1:8003"
-ENV USER_SERVICE_URL "http://127.0.0.1:8004"
-
 USER node
+
+ENV MONGO_DB_URL 'mongodb://mongodb:27017'
 
 # mkdir and cd
 WORKDIR /app
@@ -18,9 +15,8 @@ RUN npm install --omit=dev
 # copies the service files
 COPY --chown=node:node . .
 
-# exposes the ports the service is listening to
-EXPOSE 8000
-EXPOSE 8002
+# exposes the port the service is listening to
+EXPOSE 8004
 
 # start the service
 CMD ["npm", "start"]

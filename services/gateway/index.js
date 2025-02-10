@@ -1,8 +1,10 @@
 // The http module contains methods to handle http queries.
 const http = require("http");
 const httpProxy = require("http-proxy");
-const { Server } = require("socket.io");
-const { io: Client } = require("socket.io-client");
+const {Server} = require("socket.io");
+const {io: Client} = require("socket.io-client");
+const jwt = require("jsonwebtoken");
+const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
 
 // We will need a proxy to send requests to the other services.
 const proxy = httpProxy.createProxyServer();
@@ -26,7 +28,10 @@ const server = http.createServer(function (request, response) {
         }
         // If the URL starts by /api, then it's a REST request (you can change that if you want).
         else if (filePath[1] === "api") {
-            // If it doesn't start by /api, then it's a request for a file.
+            if (filePath[2] === "user") {
+                console.log("Request for the user service received, transferring to the user service");
+                proxy.web(request, response, {target: process.env.USER_SERVICE_URL ?? "http://127.0.0.1:8004"});
+            }
         } else {
             console.log("Request for a file received, transferring to the file service");
             proxy.web(request, response, {target: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001"});
@@ -46,6 +51,14 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
+    const accessToken = socket.request.headers["authorization"];
+    if (!accessToken) socket.emit("error", {status: 401});
+    jwt.verify(accessToken, secretKey, (error) => {
+        if (error) {
+            if (error.name === "TokenExpiredError") socket.emit("error", {status: 401});
+            socket.disconnect();
+        }
+    });
     const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003");
     socket.onAny((event, msg) => {
         socketGame.emit(event, msg);

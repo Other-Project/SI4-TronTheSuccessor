@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {getCookie} from "/js/login-manager.js";
 
 export class GameChoice extends HTMLComponent {
     constructor() {
@@ -6,11 +7,39 @@ export class GameChoice extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
+        const computerButton = this.shadowRoot.getElementById("computer");
+        const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
+
+        if (!getCookie("refreshToken")) {
+            computerButton.disabled = true;
+            multiplayerButton.disabled = true;
+        }
+
         this.shadowRoot.getElementById("local-game").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: "help", attr: {"against": "local"}}}));
+            document.dispatchEvent(new CustomEvent("menu-selection", {
+                detail: {
+                    name: "help",
+                    attr: {"against": "local"}
+                }
+            }));
         });
-        this.shadowRoot.getElementById("computer").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: "help", attr: {"against": "computer"}}}));
+
+        computerButton.addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {
+                detail: {
+                    name: "help",
+                    attr: {"against": "computer"}
+                }
+            }));
         });
     }
+
+    onVisible = () => {
+        const computerButton = this.shadowRoot.getElementById("computer");
+        const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
+
+        const refreshToken = getCookie("refreshToken");
+        computerButton.disabled = !refreshToken;
+        multiplayerButton.disabled = !refreshToken;
+    };
 }

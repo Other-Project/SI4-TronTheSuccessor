@@ -1,9 +1,10 @@
-import { Game } from "/js/game.js";
-import { HumanPlayer } from "/js/human-player.js";
-import { HTMLComponent } from "/js/component.js";
-import { FlowBird } from "/js/flowbird.js";
+import {Game} from "/js/game.js";
+import {HumanPlayer} from "/js/human-player.js";
+import {HTMLComponent} from "/js/component.js";
+import {FlowBird} from "/js/flowbird.js";
+import {Player} from "/js/player.js";
 import "/js/socket.io.js";
-import { Player } from "../../js/player.js";
+import {getCookie, renewAccessToken} from "/js/login-manager.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -40,7 +41,7 @@ export class GameMaster extends HTMLComponent {
         this.popupWindow.style.display = "none";
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", { detail: "home" }));
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
         });
     };
 
@@ -103,9 +104,18 @@ export class GameMaster extends HTMLComponent {
     }
 
     #gameWithServer() {
+        if (!getCookie("refreshToken")) {
+            alert("You need to be logged in to play against the server");
+            location.reload();
+            return;
+        }
         this.popupWindow.style.display = "none";
         this.stopGame();
-        if (!this.socket) this.socket = io("ws://localhost:8000");
+        this.socket = io("ws://localhost:8000", {
+            extraHeaders: {
+                authorization: getCookie("accessToken")
+            }
+        });
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
         this.socket.emit("game-start", {
@@ -114,7 +124,6 @@ export class GameMaster extends HTMLComponent {
 
         this.socket.on("game-start", (msg) => {
             const players = msg.players.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
-
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
             this.game.players.forEach((player, i) => player.init(msg.players[i].number, msg.playerStates));
             this.gameBoard.draw(this.game);
@@ -128,10 +137,18 @@ export class GameMaster extends HTMLComponent {
 
         this.socket.on("game-end", (msg) => {
             this.endScreen(msg);
+            this.socket.disconnect();
         });
 
         document.addEventListener("player-direction", (event) => {
-            this.socket.emit("game-action", { direction: event.detail.direction, number: event.detail.number });
+            this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number});
+        });
+
+        this.socket.on("error", async (msg) => {
+            if (msg.status === 401) {
+                await renewAccessToken();
+                this.#gameWithServer();
+            } else console.error(msg);
         });
     }
 }

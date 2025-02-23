@@ -1,10 +1,10 @@
-import {Game} from "/js/game.js";
-import {HumanPlayer} from "/js/human-player.js";
-import {HTMLComponent} from "/js/component.js";
-import {FlowBird} from "/js/flowbird.js";
-import {Player} from "/js/player.js";
+import { Game } from "/js/game.js";
+import { HumanPlayer } from "/js/human-player.js";
+import { HTMLComponent } from "/js/component.js";
+import { FlowBird } from "/js/flowbird.js";
+import { Player } from "/js/player.js";
 import "/js/socket.io.js";
-import {getCookie, renewAccessToken} from "/js/login-manager.js";
+import { getCookie, renewAccessToken } from "/js/login-manager.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -111,10 +111,14 @@ export class GameMaster extends HTMLComponent {
         }
         this.popupWindow.style.display = "none";
         this.stopGame();
-        this.socket = io("ws://localhost:8000", {
+
+        let wsUrl = new URL('/', window.location.href);
+        wsUrl.protocol = wsUrl.protocol.replace('http', 'ws');
+        this.socket = io(wsUrl.href, {
             extraHeaders: {
                 authorization: getCookie("accessToken")
-            }
+            },
+            path: "/api/game"
         });
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 

@@ -23,11 +23,8 @@ const server = http.createServer(function (request, response) {
     });
 
     try {
-        if (filePath[1] === "socket.io") {
-            // Managed by socket.io
-        }
         // If the URL starts by /api, then it's a REST request (you can change that if you want).
-        else if (filePath[1] === "api") {
+        if (filePath[1] === "api") {
             if (filePath[2] === "user") {
                 console.log("Request for the user service received, transferring to the user service");
                 proxy.web(request, response, {target: process.env.USER_SERVICE_URL ?? "http://127.0.0.1:8004"});
@@ -47,7 +44,8 @@ const server = http.createServer(function (request, response) {
 const io = new Server(server, {
     cors: {
         origin: "*"
-    }
+    },
+    path: "/api/game"
 });
 
 io.on("connection", (socket) => {

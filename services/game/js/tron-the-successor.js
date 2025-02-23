@@ -481,13 +481,13 @@ async function nextMove(playersState) {
     let coord = nextMove ? allAdjacent[playerPos.y][playerPos.x]?.findIndex(m => m[0] === nextMove.x && m[1] === nextMove.y) : null;
     coord ??= -1;
 
-    if (coord < 0) { // Shouldn't happen anymore
+    if (coord < 0) {
         console.warn("Decision making didn't return a move, falling back to any non-killing move");
         console.dir(nextMove);
         console.dir(allAdjacent[playerPos.y][playerPos.x]);
 
         // Do any non-killing move
-        const nonKillingMove = allAdjacent[playerPos.y][playerPos.x].find(([x, y]) => isValid(x, y) && !get(gameBoard, x, y));
+        const nonKillingMove = allAdjacent[playerPos.y][playerPos.x]?.find(([x, y]) => isValid(x, y) && !get(gameBoard, x, y));
         if (!nonKillingMove) coord = -1; // The player is doomed, we just fall back to KEEP_GOING
         else coord = allAdjacent[playerPos.y][playerPos.x].indexOf(nonKillingMove);
     }

@@ -30,7 +30,11 @@ io.on("connection", (socket) => {
 });
 
 function startGame(socket, msg) {
-    let game = new Game(16, 9, new Player(msg.playerName), new FlowBird(), 500);
+    let opponent;
+    if (msg.against === "computer") opponent = new FlowBird();
+    else opponent = new Player("Player 2");
+
+    let game = new Game(16, 9, new Player(msg.playerName), opponent, 500);
     games[socket.id] = game;
 
     game.addEventListener("game-turn", (event) => {

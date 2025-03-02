@@ -123,7 +123,8 @@ export class GameMaster extends HTMLComponent {
         this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
         this.socket.emit("game-start", {
-            playerName: "Player 1"
+            playerName: "Player 1",
+            against: this.against
         });
 
         this.socket.on("game-start", (msg) => {

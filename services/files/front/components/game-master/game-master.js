@@ -1,10 +1,10 @@
-import { Game } from "/js/game.js";
-import { HumanPlayer } from "/js/human-player.js";
-import { HTMLComponent } from "/js/component.js";
-import { FlowBird } from "/js/flowbird.js";
-import { Player } from "/js/player.js";
+import {Game} from "/js/game.js";
+import {HumanPlayer} from "/js/human-player.js";
+import {HTMLComponent} from "/js/component.js";
+import {FlowBird} from "/js/flowbird.js";
+import {Player} from "/js/player.js";
 import "/js/socket.io.js";
-import { getCookie, renewAccessToken } from "/js/login-manager.js";
+import {getCookie, renewAccessToken} from "/js/login-manager.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -138,6 +138,7 @@ export class GameMaster extends HTMLComponent {
             this.game.setPlayerStates(msg.playerStates);
             this.game.grid = msg.grid;
             this.gameBoard.draw(this.game);
+            if (msg.ended) this.endScreen(msg);
         });
 
         this.socket.on("game-end", (msg) => {

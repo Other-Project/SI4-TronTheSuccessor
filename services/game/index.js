@@ -37,15 +37,7 @@ function startGame(socket, msg) {
     let game = new Game(16, 9, new Player(msg.playerName), opponent, 500);
     games[socket.id] = game;
 
-    game.addEventListener("game-turn", (event) => {
-        socket.emit("game-turn", {
-            grid: game.grid,
-            playerStates: game.getPlayerStates()
-        });
-        if (event.detail.ended) {
-            socket.emit("game-end", event.detail);
-        }
-    });
+    game.addEventListener("game-turn", (event) => socket.emit("game-turn", event.detail));
     game.init();
     game.start();
 

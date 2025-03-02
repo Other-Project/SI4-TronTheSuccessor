@@ -77,7 +77,9 @@ exports.Game = class Game extends EventTarget {
             ended: !!winner,
             draw: winner ? winner === true : undefined,
             winner: winner && winner instanceof Player ? winner.name : undefined,
-            elapsed: new Date() - this.#startTime
+            elapsed: new Date() - this.#startTime,
+            grid: this.grid,
+            playerStates: this.getPlayerStates()
         };
     }
 

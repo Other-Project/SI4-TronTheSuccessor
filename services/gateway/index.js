@@ -58,10 +58,16 @@ io.on("connection", (socket) => {
         }
     });
     const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003");
+
+    socket.on("disconnect", () => socketGame.disconnect());
+    socketGame.on("disconnect", () => socket.disconnect());
+
     socket.onAny((event, msg) => {
+        console.log("Transmitting " + event + " event to the game service");
         socketGame.emit(event, msg);
     });
     socketGame.onAny((event, msg) => {
+        console.log("Transmitting " + event + " event to the client");
         socket.emit(event, msg);
     });
 });

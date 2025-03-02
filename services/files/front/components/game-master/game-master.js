@@ -131,6 +131,7 @@ export class GameMaster extends HTMLComponent {
             const players = msg.players.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
             this.game.players.forEach((player, i) => player.init(msg.players[i].number, msg.playerStates));
+            this.game.grid = msg.grid;
             this.gameBoard.draw(this.game);
         });
 

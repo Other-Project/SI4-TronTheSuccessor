@@ -1,7 +1,6 @@
 services:
   mongodb:
     image: mongo:latest
-    container_name: mongodb
     ports:
       - "27017:27017"
     restart: unless-stopped
@@ -13,7 +12,6 @@ services:
       context: services/gateway
     ports:
       - "8000:8000"
-      - "8002:8002"
     restart: unless-stopped
     environment:
       FILES_SERVICE_URL: "http://files:8001"

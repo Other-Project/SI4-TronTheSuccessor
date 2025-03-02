@@ -8,7 +8,7 @@ export const player1_keys = {
     "left": ["Q"],
     "right": ["D"]
 };
-const player2_keys = {
+export const player2_keys = {
     "up-left": ["ArrowLeft", "ArrowUp"],
     "up-right": ["ArrowUp", "ArrowRight"],
     "down-left": ["ArrowLeft", "ArrowDown"],
@@ -31,17 +31,7 @@ export class HumanPlayer extends Player {
         this.#keypressed = new Set();
         document.addEventListener("keydown", e => {
             this.#keypressed.add(e.key.toUpperCase());
-            let direction = Object.entries(this.keys)
-                .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-            if (direction) {
-                super.setNextDirection(direction[0]);
-                document.dispatchEvent(new CustomEvent("player-direction", {
-                    detail: {
-                        direction: direction[0],
-                        number: this.number
-                    }
-                }));
-            }
+            this.#onKeyPressed();
         });
         document.addEventListener("keyup", e => {
             this.#keypressed.delete(e.key.toUpperCase());
@@ -51,5 +41,19 @@ export class HumanPlayer extends Player {
     init(number, playerStates) {
         super.init(number, playerStates);
         this.keys = number === 1 ? player1_keys : player2_keys;
+    }
+
+    #onKeyPressed(){
+        let direction = Object.entries(this.keys)
+            .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
+        if (direction) {
+            super.setNextDirection(direction[0]);
+            document.dispatchEvent(new CustomEvent("player-direction", {
+                detail: {
+                    direction: direction[0],
+                    number: this.number
+                }
+            }));
+        }
     }
 }

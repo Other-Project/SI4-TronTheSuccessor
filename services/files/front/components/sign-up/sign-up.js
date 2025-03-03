@@ -1,20 +1,19 @@
 import {HTMLComponent} from "/js/component.js";
 
-export class Login extends HTMLComponent {
+export class SignUp extends HTMLComponent {
 
     constructor() {
-        super("login", ["html", "css"]);
+        super("sign-up", ["html", "css"]);
     }
 
     onSetupCompleted = () => {
-        this.shadowRoot.getElementById("sign-in").addEventListener("click", () => {
-            if (!this.correctInputValues()) return;
-            this.loginFetch("sign-in");
-        });
-
         this.shadowRoot.getElementById("sign-up").addEventListener("click", () => {
             if (!this.correctInputValues()) return;
             this.loginFetch("sign-up");
+        });
+
+        this.shadowRoot.getElementById("sign-in").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
         });
 
         this.shadowRoot.getElementById("home").addEventListener("click", () => {

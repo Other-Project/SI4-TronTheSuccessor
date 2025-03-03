@@ -9,7 +9,9 @@ import {HelpPage} from "/components/help-page/help-page.js";
 import {Control} from "/components/control/control.js";
 import {GameMaster} from "/components/game-master/game-master.js";
 import {Popup} from "/components/popup/popup.js";
-import {Login} from "/components/login/login.js";
+import {SignUp} from "/components/sign-up/sign-up.js";
+import {SignIn} from "/components/sign-in/sign-in.js";
+import {SecurityQuestions} from "/components/security-questions/security-questions.js";
 
 customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-choice", GameChoice);
@@ -22,4 +24,6 @@ customElements.define("app-help-page", HelpPage);
 customElements.define("app-control", Control);
 customElements.define("app-game-master", GameMaster);
 customElements.define("app-game-popup", Popup);
-customElements.define("app-login", Login);
+customElements.define("app-sign-up", SignUp);
+customElements.define("app-sign-in", SignIn);
+customElements.define("app-security-questions", SecurityQuestions);

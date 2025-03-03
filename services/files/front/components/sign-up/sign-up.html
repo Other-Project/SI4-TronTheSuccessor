@@ -1,0 +1,47 @@
+<app-game-popup id="popup">
+    <h2 class="sign-up" slot="title">Sign up</h2>
+    <div id="popup-body" slot="body">
+        <div id="sign-up">
+            <div class="form-label-group">
+                <input autofocus class="form-control" id="inputUsername" placeholder="Username" required
+                       type="text">
+                <label for="inputUsername">Username</label>
+            </div>
+            <div class="form-label-group">
+                <input autofocus class="form-control" id="inputPassword" placeholder="password" required
+                       type="password">
+                <label for="inputPassword">Password</label>
+            </div>
+            <div class="form-label-group">
+                <input autofocus class="form-control" id="inputConfirmPassword"
+                       placeholder="ConfirmPassword" required type="password">
+                <label for="inputConfirmPassword">Confirm password</label>
+            </div>
+        </div>
+        <div id="questions-info">
+            In case you forget your password, you can use the following security questions to reset it.
+        </div>
+        <div id="password-questions">
+            <app-security-questions>First question</app-security-questions>
+            <div class="form-label-group">
+                <input autofocus class="form-control" id="inputFirstSecurityAnswer" placeholder="Answer" required
+                       type="text">
+                <label for="inputFirstSecurityAnswer">First answer</label>
+            </div>
+            <app-security-questions>Second question</app-security-questions>
+            <div class="form-label-group">
+                <input autofocus class="form-control" id="inputSecondSecurityAnswer" placeholder="Answer" required
+                       type="text">
+                <label for="inputSecondSecurityAnswer">Second answer</label>
+            </div>
+        </div>
+    </div>
+    <div id="sign-up-info" slot="actions">
+        <app-button id="login">Sign up</app-button>
+        <div id="sign-in">
+            <span>Already have an account? </span>
+            <app-button id="sign-in">Sign in</app-button>
+        </div>
+
+    </div>
+</app-game-popup>

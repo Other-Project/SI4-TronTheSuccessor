@@ -7,7 +7,13 @@ export class HomePage extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("connect").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "login"}));
+            this.shadowRoot.getElementById("popup-container").style.display = "block";
+        });
+
+        this.shadowRoot.getElementById("popup-container").addEventListener("click", (event) => {
+            if (event.target === this.shadowRoot.getElementById("popup-container")) {
+                this.shadowRoot.getElementById("popup-container").style.display = "none";
+            }
         });
     }
 }

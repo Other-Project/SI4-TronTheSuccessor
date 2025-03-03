@@ -11,4 +11,29 @@
     <footer>
         <img alt="settings" id="settings" class="icon" src="/assets/settings.svg">
     </footer>
+    <div id="popup-container">
+        <app-game-popup id="popup">
+            <h2 slot="title" class="sign-up">Sign up</h2>
+            <div id="popup-body" slot="body">
+                <div id="sign-up">
+                    <div class="form-label-group">
+                        <input type="text" id="inputUsername" class="form-control" placeholder="Username" required
+                               autofocus>
+                        <label for="inputUsername">Username</label>
+                    </div>
+                    <div class="form-label-group">
+                        <input type="password" id="inputPassword" class="form-control" placeholder="password" required
+                               autofocus>
+                        <label for="inputPassword">Password</label>
+                    </div>
+                    <div class="form-label-group">
+                        <input type="password" id="inputConfirmPassword" class="form-control"
+                               placeholder="ConfirmPassword" required autofocus>
+                        <label for="inputConfirmPassword">Confirm password</label>
+                    </div>
+                </div>
+            </div>
+            <app-button slot="actions" id="login">Login</app-button>
+        </app-game-popup>
+    </div>
 </div>

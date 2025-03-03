@@ -1,10 +1,10 @@
-import { Game } from "/js/game.js";
-import { HumanPlayer } from "/js/human-player.js";
-import { HTMLComponent } from "/js/component.js";
-import { FlowBird } from "/js/flowbird.js";
-import { Player } from "/js/player.js";
+import {Game} from "/js/game.js";
+import {HumanPlayer} from "/js/human-player.js";
+import {HTMLComponent} from "/js/component.js";
+import {FlowBird} from "/js/flowbird.js";
+import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
-import { getCookie, renewAccessToken } from "/js/login-manager.js";
+import {getCookie, renewAccessToken} from "/js/login-manager.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -30,15 +30,17 @@ export class GameMaster extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.gameBoard = this.shadowRoot.getElementById("board");
-        this.popupWindow = this.shadowRoot.getElementById("popup-container");
+        this.waitingWindow = this.shadowRoot.getElementById("waiting-panel");
+        this.waitingWindow.style.display = "none";
+        this.pauseWindow = this.shadowRoot.getElementById("pause-menu");
+        this.pauseWindow.style.display = "none";
 
-        this.popupTitle = this.shadowRoot.getElementById("title");
-        this.popupTime = this.shadowRoot.getElementById("time");
-        this.popupDescription = this.shadowRoot.getElementById("description");
+        this.pauseTitle = this.shadowRoot.getElementById("title");
+        this.pauseTime = this.shadowRoot.getElementById("time");
+        this.pauseDescription = this.shadowRoot.getElementById("description");
 
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
-        this.popupWindow.style.display = "none";
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
@@ -58,7 +60,7 @@ export class GameMaster extends HTMLComponent {
     }
 
     newGame() {
-        this.popupWindow.style.display = "none";
+        this.pauseWindow.style.display = "none";
         this.stopGame();
         const opponent = this.against === "computer" ? new FlowBird() : new HumanPlayer("Player 2");
         this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1"), opponent, 500);
@@ -77,21 +79,21 @@ export class GameMaster extends HTMLComponent {
     }
 
     endScreen(details) {
-        this.popupWindow.style.display = "block";
+        this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = "none";
-        this.popupTitle.innerText = details.draw ? "Draw" : details.winner + " won";
-        this.popupTime.innerText = this.#timeToString(details.elapsed);
-        this.popupDescription.innerText = "";
+        this.pauseTitle.innerText = details.draw ? "Draw" : details.winner + " won";
+        this.pauseTime.innerText = this.#timeToString(details.elapsed);
+        this.pauseDescription.innerText = "";
     }
 
     pause() {
         const details = this.game.stop();
         if (!details) return;
-        this.popupWindow.style.display = "block";
+        this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = this.against === "local" ? "block" : "none";
-        this.popupTitle.innerText = "Pause";
-        this.popupTime.innerText = this.#timeToString(details.elapsed);
-        this.popupDescription.innerText = "";
+        this.pauseTitle.innerText = "Pause";
+        this.pauseTime.innerText = this.#timeToString(details.elapsed);
+        this.pauseDescription.innerText = "";
     }
 
     #timeToString(time) {
@@ -99,7 +101,7 @@ export class GameMaster extends HTMLComponent {
     }
 
     resume() {
-        this.popupWindow.style.display = "none";
+        this.pauseWindow.style.display = "none";
         this.game.resume();
     }
 
@@ -109,34 +111,36 @@ export class GameMaster extends HTMLComponent {
             location.reload();
             return;
         }
-        this.popupWindow.style.display = "none";
+        this.pauseWindow.style.display = "none";
         this.stopGame();
 
         let wsUrl = new URL('/', window.location.href);
         wsUrl.protocol = wsUrl.protocol.replace('http', 'ws');
         this.socket = io(wsUrl.href, {
             extraHeaders: {
-                authorization: getCookie("accessToken")
+                authorization: "Bearer " + getCookie("accessToken")
             },
             path: "/api/game"
         });
-        this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
-        this.socket.emit("game-start", {
-            playerName: "Player 1"
-        });
+        this.gameBoard.clear();
+        this.waitingWindow.style.display = "block";
+        this.socket.emit("game-start", {against: this.against});
 
+        let reverse = false;
         this.socket.on("game-start", (msg) => {
-            const players = msg.players.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
+            reverse = msg.yourNumber === 2;
+
+            const msgPlayers = reverse ? msg.players.toReversed() : msg.players;
+            const players = msgPlayers.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
-            this.game.players.forEach((player, i) => player.init(msg.players[i].number, msg.playerStates));
-            this.gameBoard.draw(this.game);
+            this.game.players.forEach((player, i) => player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse)));
+            this.#applyMessage(msg, reverse);
+            this.waitingWindow.style.display = "none";
         });
 
         this.socket.on("game-turn", (msg) => {
-            this.game.setPlayerStates(msg.playerStates);
-            this.game.grid = msg.grid;
-            this.gameBoard.draw(this.game);
+            this.#applyMessage(msg, reverse);
         });
 
         this.socket.on("game-end", (msg) => {
@@ -145,7 +149,9 @@ export class GameMaster extends HTMLComponent {
         });
 
         document.addEventListener("player-direction", (event) => {
-            this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number});
+            const directions = Object.keys(directionToAngle);
+            const direction = reverse ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
+            this.socket.emit("game-action", {direction});
         });
 
         this.socket.on("error", async (msg) => {
@@ -154,5 +160,22 @@ export class GameMaster extends HTMLComponent {
                 this.#gameWithServer();
             } else console.error(msg);
         });
+    }
+
+    #applyMessage(msg, reverse = false) {
+        this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed()) : msg.grid;
+        this.game.setPlayerStates(this.#playerStatesTransform(msg.playerStates, reverse));
+        this.gameBoard.draw(this.game);
+        if (msg.ended) this.endScreen(msg);
+    }
+
+    #playerStatesTransform(playerStates, reverse = false) {
+        if (!reverse) return playerStates;
+        const directions = Object.keys(directionToAngle);
+        return playerStates.toReversed().map(state => ({
+            pos: [(state.pos[1] % 2 ? 14 : 15) - state.pos[0], 8 - state.pos[1]],
+            direction: directions[(directions.indexOf(state.direction) + 3) % 6],
+            dead: state.dead
+        }));
     }
 }

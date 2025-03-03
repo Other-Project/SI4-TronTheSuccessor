@@ -1,19 +1,15 @@
 services:
   mongodb:
     image: mongo:latest
-    container_name: mongodb
-    ports:
-      - "27017:27017"
     restart: unless-stopped
     volumes:
-      - ./data/mongo:/data/db
+      - mongo-data:/data/db
   gateway:
     image: tron-the-successor/gateway
     build:
       context: services/gateway
     ports:
       - "8000:8000"
-      - "8002:8002"
     restart: unless-stopped
     environment:
       FILES_SERVICE_URL: "http://files:8001"
@@ -37,3 +33,5 @@ services:
     depends_on:
       - mongodb
 
+volumes:
+  mongo-data:

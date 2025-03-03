@@ -1,4 +1,4 @@
-#popup-container {
+.popup-container {
     position: absolute;
     top: 0;
     left: 0;
@@ -10,7 +10,7 @@
     backdrop-filter: blur(1px);
 }
 
-#popup {
+.popup {
     display: block;
     margin: 0 auto;
     max-width: 600px;
@@ -23,7 +23,7 @@ h2, p {
     text-align: center;
 }
 
-#popup-body {
+.popup-body {
     display: grid;
     grid-auto-columns: 1fr;
     grid-auto-flow: column;

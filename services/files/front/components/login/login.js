@@ -26,8 +26,8 @@ export class Login extends HTMLComponent {
         });
     }
 
-    loginFetch(url) {
-        fetch("/api/user/" + url, {
+    async loginFetch(url) {
+        const response = await fetch("/api/user/" + url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -36,23 +36,24 @@ export class Login extends HTMLComponent {
                 username: this.shadowRoot.getElementById("username").value,
                 password: this.shadowRoot.getElementById("password").value
             })
-        }).then(response => {
-            if (response.ok)
-                return response.json();
-            else {
-                throw new Error(response.statusText);
-            }
-        }).then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                alert("Logged in as " + data.username);
-                document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
-                document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-            }
-        }).catch(error => {
-            alert(error.message);
         });
+        const data = await response.json();
+        if (!response.ok) {
+            alert(data?.error ?? response.statusText);
+            return;
+        }
+
+        const user = this.parseJwt(data.accessToken);
+        alert("Logged in as " + user.username);
+        document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
+        document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+    }
+
+    parseJwt(token) {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
     }
 
     correctInputValues() {

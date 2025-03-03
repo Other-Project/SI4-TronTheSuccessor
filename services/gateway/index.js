@@ -51,7 +51,7 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
     const accessToken = socket.request.headers.authorization?.split(" ")[1];
     if (!accessToken) {
-        socket.emit("error", {status: 404});
+        socket.emit("error", {status: 401});
         console.warn("No access token provided");
         socket.disconnect(true);
         return;

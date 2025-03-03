@@ -30,15 +30,17 @@ export class GameMaster extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.gameBoard = this.shadowRoot.getElementById("board");
-        this.popupWindow = this.shadowRoot.getElementById("popup-container");
+        this.waitingWindow = this.shadowRoot.getElementById("waiting-panel");
+        this.waitingWindow.style.display = "none";
+        this.pauseWindow = this.shadowRoot.getElementById("pause-menu");
+        this.pauseWindow.style.display = "none";
 
-        this.popupTitle = this.shadowRoot.getElementById("title");
-        this.popupTime = this.shadowRoot.getElementById("time");
-        this.popupDescription = this.shadowRoot.getElementById("description");
+        this.pauseTitle = this.shadowRoot.getElementById("title");
+        this.pauseTime = this.shadowRoot.getElementById("time");
+        this.pauseDescription = this.shadowRoot.getElementById("description");
 
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
-        this.popupWindow.style.display = "none";
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
@@ -58,7 +60,7 @@ export class GameMaster extends HTMLComponent {
     }
 
     newGame() {
-        this.popupWindow.style.display = "none";
+        this.pauseWindow.style.display = "none";
         this.stopGame();
         const opponent = this.against === "computer" ? new FlowBird() : new HumanPlayer("Player 2");
         this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1"), opponent, 500);
@@ -77,21 +79,21 @@ export class GameMaster extends HTMLComponent {
     }
 
     endScreen(details) {
-        this.popupWindow.style.display = "block";
+        this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = "none";
-        this.popupTitle.innerText = details.draw ? "Draw" : details.winner + " won";
-        this.popupTime.innerText = this.#timeToString(details.elapsed);
-        this.popupDescription.innerText = "";
+        this.pauseTitle.innerText = details.draw ? "Draw" : details.winner + " won";
+        this.pauseTime.innerText = this.#timeToString(details.elapsed);
+        this.pauseDescription.innerText = "";
     }
 
     pause() {
         const details = this.game.stop();
         if (!details) return;
-        this.popupWindow.style.display = "block";
+        this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = this.against === "local" ? "block" : "none";
-        this.popupTitle.innerText = "Pause";
-        this.popupTime.innerText = this.#timeToString(details.elapsed);
-        this.popupDescription.innerText = "";
+        this.pauseTitle.innerText = "Pause";
+        this.pauseTime.innerText = this.#timeToString(details.elapsed);
+        this.pauseDescription.innerText = "";
     }
 
     #timeToString(time) {
@@ -99,7 +101,7 @@ export class GameMaster extends HTMLComponent {
     }
 
     resume() {
-        this.popupWindow.style.display = "none";
+        this.pauseWindow.style.display = "none";
         this.game.resume();
     }
 
@@ -109,7 +111,7 @@ export class GameMaster extends HTMLComponent {
             location.reload();
             return;
         }
-        this.popupWindow.style.display = "none";
+        this.pauseWindow.style.display = "none";
         this.stopGame();
 
         let wsUrl = new URL('/', window.location.href);
@@ -120,12 +122,9 @@ export class GameMaster extends HTMLComponent {
             },
             path: "/api/game"
         });
-        this.gameBoard.draw(new Game(this.gridSize[0], this.gridSize[1], null, null, 500));
 
-        this.socket.emit("game-start", {
-            playerName: "Player 1",
-            against: this.against
-        });
+        this.waitingWindow.style.display = "block";
+        this.socket.emit("game-start", {against: this.against});
 
         this.socket.on("game-start", (msg) => {
             const players = msg.players.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
@@ -133,6 +132,7 @@ export class GameMaster extends HTMLComponent {
             this.game.players.forEach((player, i) => player.init(msg.players[i].number, msg.playerStates));
             this.game.grid = msg.grid;
             this.gameBoard.draw(this.game);
+            this.waitingWindow.style.display = "none";
         });
 
         this.socket.on("game-turn", (msg) => {

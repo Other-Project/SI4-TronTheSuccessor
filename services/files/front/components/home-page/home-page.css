@@ -59,11 +59,20 @@ app-game-choice {
     backdrop-filter: blur(1px);
 }
 
-.popup {
+
+app-sign-up {
     display: block;
     margin: 0 auto;
     max-width: 600px;
-    max-height: 600px;
+    max-height: 700px;
+    width: 100%;
+}
+
+app-sign-in {
+    display: block;
+    margin: 0 auto;
+    max-width: 600px;
+    max-height: 700px;
     width: 100%;
 }
 

@@ -10,4 +10,5 @@ label[for="security-question"] {
     padding: 10px;
     background: rgb(60, 60, 60);
     color: white;
+    height: 2.3rem;
 }

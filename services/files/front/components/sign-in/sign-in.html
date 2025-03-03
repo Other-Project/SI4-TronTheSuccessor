@@ -1,5 +1,5 @@
 <app-game-popup id="popup">
-    <h2 class="sign-in" slot="title">Sign up</h2>
+    <h2 class="sign-in" slot="title">Sign in</h2>
     <div id="popup-body" slot="body">
         <div id="sign-in">
             <div class="form-label-group">
@@ -13,9 +13,7 @@
                 <label for="inputPassword">Password</label>
             </div>
         </div>
-        <div id="sign-in-infos">
-            <button class="sign-in-button" id="sign-in-button" slot="actions">Sign in</button>
-            <span>Don't have an account ? <a id="link" href="#">Sign up</a></span>
-        </div>
+        <button id="login" slot="actions">Sign in</button>
+        <span slot="actions">Don't have an account ? <a href="#" id="link">Sign up</a></span>
     </div>
 </app-game-popup>

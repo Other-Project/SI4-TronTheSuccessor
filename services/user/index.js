@@ -27,6 +27,7 @@ http.createServer(async (request, response) => {
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
         }
     } catch (error) {
+        console.warn(error);
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid request"});
     }
 }).listen(8004);

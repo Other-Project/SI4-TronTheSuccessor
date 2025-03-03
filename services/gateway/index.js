@@ -49,15 +49,25 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-    const accessToken = socket.request.headers["authorization"];
-    if (!accessToken) socket.emit("error", {status: 401});
+    const accessToken = socket.request.headers.authorization?.split(" ")[1];
+    if (!accessToken) {
+        socket.emit("error", {status: 404});
+        console.warn("No access token provided");
+        socket.disconnect(true);
+        return;
+    }
     jwt.verify(accessToken, secretKey, (error) => {
         if (error) {
             if (error.name === "TokenExpiredError") socket.emit("error", {status: 401});
-            socket.disconnect();
+            console.error(error);
+            socket.disconnect(true);
         }
     });
-    const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003");
+    const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003", {
+        extraHeaders: {
+            authorization: "Bearer " + accessToken
+        },
+    });
 
     socket.on("disconnect", () => socketGame.disconnect());
     socketGame.on("disconnect", () => socket.disconnect());

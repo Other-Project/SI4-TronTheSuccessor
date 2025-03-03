@@ -1,4 +1,5 @@
 const http = require("http");
+const jwt = require("jsonwebtoken");
 const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
@@ -38,7 +39,7 @@ function findGame(socket, msg) {
 async function transfertRoom(waitingRoom) {
     const sockets = await io.in(waitingRoom).fetchSockets();
     if (sockets.length < 2) return;
-    const gameId = startGame(sockets[0].id, sockets[1].id);
+    const gameId = startGame(sockets[0], sockets[1]);
     for (let socket of sockets) {
         socket.leave(waitingRoom);
         joinGame(socket, gameId);
@@ -52,10 +53,8 @@ io.of("/").adapter.on("join-room", async (room, id) => {
 
 const games = {};
 
-function startGame(p1Id, p2Id = null) {
-    let p1 = new Player(p1Id, "Player 1 (" + p1Id + ")");
-    let p2 = p2Id ? new Player(p2Id, "Player 2 (" + p2Id + ")") : new FlowBird();
-    const game = new Game(16, 9, p1, p2, 500);
+function startGame(p1s, p2s = null) {
+    const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), 500);
     const id = randomUUID();
     games[id] = game;
 
@@ -68,12 +67,18 @@ function startGame(p1Id, p2Id = null) {
     return id;
 }
 
+function createPlayer(socket) {
+    if (!socket) return new FlowBird();
+    let user = jwt.decode(socket.request.headers.authorization?.split(" ")[1]);
+    return new Player(socket.id, user.username);
+}
+
 function joinGame(socket, gameId) {
     socket.join(gameId);
     const game = games[gameId];
     socket.emit("game-start", {
         yourNumber: game.players.findIndex(player => player.id === socket.id) + 1,
-        players: game.players.map(player => ({name: player.name, color: player.color, avatar: player.avatar})),
+        players: game.players.map(player => ({name: player.name, color: player.color, avatar: player.avatar, number: player.number})),
         grid: game.grid,
         playerStates: game.getPlayerStates()
     });

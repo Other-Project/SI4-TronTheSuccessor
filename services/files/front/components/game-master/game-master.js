@@ -116,7 +116,7 @@ export class GameMaster extends HTMLComponent {
         wsUrl.protocol = wsUrl.protocol.replace('http', 'ws');
         this.socket = io(wsUrl.href, {
             extraHeaders: {
-                authorization: getCookie("accessToken")
+                authorization: "Bearer " + getCookie("accessToken")
             },
             path: "/api/game"
         });
@@ -148,7 +148,7 @@ export class GameMaster extends HTMLComponent {
         });
 
         document.addEventListener("player-direction", (event) => {
-            this.socket.emit("game-action", {direction: event.detail.direction, number: event.detail.number});
+            this.socket.emit("game-action", {direction: event.detail.direction});
         });
 
         this.socket.on("error", async (msg) => {

@@ -43,7 +43,7 @@ async function handleSignIn(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const user = await userDatabase.getUser(parsedBody.username, parsedBody.password);
-    sendResponse(response, HTTP_STATUS.OK, user);
+    sendResponse(response, (user.error ? HTTP_STATUS.UNAUTHORIZED_STATUS_CODE : HTTP_STATUS.OK), user);
 }
 
 async function handleRenewToken(request, response) {

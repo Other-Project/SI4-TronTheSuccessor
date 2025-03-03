@@ -21,11 +21,16 @@ export class GameBoard extends HTMLComponent {
         if (!this.canvas) return;
         this.canvas.width = game.grid[0].length * this.cellSize + 4;
         this.canvas.height = this.cellSize + (game.grid.length - 1) * this.cellSize * 3 / 4 + 4;
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.#drawHexagons(game);
         game.players.forEach(player => {
             if (player) this.#drawPlayer(player);
         });
+    }
+
+    clear() {
+        if (!this.ctx) return;
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
     }
 
     #drawHexagons(game) {

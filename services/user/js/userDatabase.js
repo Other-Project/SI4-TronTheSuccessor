@@ -1,5 +1,6 @@
 const {MongoClient} = require("mongodb");
 const jwt = require("jsonwebtoken");
+const {createHash} = require('node:crypto');
 
 const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27017');
 const database = client.db("Tron-the-successor");
@@ -13,9 +14,8 @@ const maxLength = 20;
 const authorizedRegex = /^[a-zA-Z0-9]+$/;
 
 async function addUser(username, password, securityQuestions) {
-    const {error} = checkValue(username, password, securityQuestions);
-    if (error)
-        return {error};
+    const error = checkValue(username, password);
+    if (error) return error;
     if (await userCollection.findOne({username}))
         return {error: `User ${username} already exists`};
     const hashedPassword = hash(password);
@@ -25,30 +25,35 @@ async function addUser(username, password, securityQuestions) {
     }));
     const {accessToken, refreshToken} = getTokens({username});
     await userCollection.insertOne({username, password: hashedPassword, securityQuestions: hashedSecurityQuestions});
+    //return getJwt(user);
     return {username, refreshToken, accessToken};
 }
 
 async function getUser(username, password) {
     const user = await userCollection.findOne({username, password: hash(password)});
-    if (user) {
-        const {accessToken, refreshToken} = getTokens(user);
-        await userCollection.updateMany({username}, {$set: {refreshToken, accessToken}});
-        return {username: user.username, accessToken, refreshToken};
-    }
-    return {error: "Wrong username or password"};
+    if (!user) return {error: "Wrong username or password"};
+    return getJwt(user);
 }
 
 async function renewToken(refreshToken) {
     if (!refreshToken)
-        return {valid: false, error: "Refresh token is missing"};
+        return {error: "Refresh token is missing"};
     if (!jwt.verify(refreshToken, secretKey))
-        return {valid: false, error: "Refresh token is invalid : " + refreshToken};
-    const user = await userCollection.findOne({refreshToken});
+        return {error: "Refresh token is invalid : " + refreshToken};
+
+    const username = jwt.decode(refreshToken).username;
+    const user = await userCollection.findOne({username});
     if (!user)
-        return {valid: false, error: "Could not find user with this refresh token : " + refreshToken};
-    const {accessToken, refreshToken: newRefreshToken} = getTokens(user);
-    await userCollection.updateMany({refreshToken}, {$set: {accessToken, refreshToken: newRefreshToken}});
-    return {valid: true, accessToken, refreshToken: newRefreshToken};
+        return {error: "Could not find user with this refresh token : " + refreshToken};
+
+    return getJwt(user);
+}
+
+function getJwt(user) {
+    const userInfo = {username: user.username};
+    const accessToken = jwt.sign(userInfo, secretKey, {expiresIn: accessTokenDuration});
+    const refreshToken = jwt.sign(userInfo, secretKey, {expiresIn: refreshTokenDuration});
+    return {accessToken, refreshToken};
 }
 
 function checkValue(username, password, securityQuestions) {
@@ -73,27 +78,13 @@ function checkValue(username, password, securityQuestions) {
             return {error: "Question and answer must not be empty"};
     }
     return {};
-}
-
-function getTokens(user) {
-    return {
-        accessToken: jwt.sign({username: user.username}, secretKey, {
-            expiresIn: accessTokenDuration
-        }),
-        refreshToken: jwt.sign({username: user.username}, secretKey, {
-            expiresIn: refreshTokenDuration
-        })
-    };
+    return null;
 }
 
 function hash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const chr = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + chr;
-        hash |= 0;
-    }
-    return hash;
+    const hash = createHash('sha256');
+    hash.update(str);
+    return hash.digest('hex');
 }
 
 module.exports = {addUser, getUser, renewToken};

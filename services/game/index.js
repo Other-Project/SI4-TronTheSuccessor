@@ -1,8 +1,10 @@
 const http = require("http");
+const jwt = require("jsonwebtoken");
 const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
+const {randomUUID} = require('crypto');
 
 let server = http.createServer();
 const io = new Server(server, {
@@ -12,41 +14,72 @@ const io = new Server(server, {
 });
 server.listen(8003);
 
-const games = {};
-
 io.on("connection", (socket) => {
     socket.on("game-start", (msg) => {
-        startGame(socket, msg);
+        findGame(socket, msg);
     });
 
     socket.on("game-action", (msg) => {
-        if (games[socket.id]?.players[msg.number - 1])
-            games[socket.id].players[msg.number - 1].setNextDirection(msg.direction);
+        const game = games[Array.from(socket.rooms).find(room => room !== socket.id)];
+        game?.players.find(p => p.id === socket.id)?.setNextDirection(msg.direction);
     });
 
     socket.on("disconnect", () => {
-        delete games[socket.id];
+        const gameId = Object.keys(socket.rooms).find(room => room !== socket.id);
+        delete games[gameId];
     });
 });
 
-function startGame(socket, msg) {
-    let game = new Game(16, 9, new Player(msg.playerName), new FlowBird(), 100);
-    games[socket.id] = game;
+function findGame(socket, msg) {
+    if (msg.against === "computer")
+        joinGame(socket, startGame(socket));
+    else socket.join("waiting-anyone");
+}
+
+async function transfertRoom(waitingRoom) {
+    const sockets = await io.in(waitingRoom).fetchSockets();
+    if (sockets.length < 2) return;
+    const gameId = startGame(sockets[0], sockets[1]);
+    for (let socket of sockets) {
+        socket.leave(waitingRoom);
+        joinGame(socket, gameId);
+    }
+}
+
+io.of("/").adapter.on("join-room", async (room, id) => {
+    console.log(`socket ${id} has joined room ${room}`);
+    if (room === "waiting-anyone") await transfertRoom(room);
+});
+
+const games = {};
+
+function startGame(p1s, p2s = null) {
+    const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), 500);
+    const id = randomUUID();
+    games[id] = game;
+
     game.addEventListener("game-turn", (event) => {
-        socket.emit("game-turn", {
-            grid: game.grid,
-            playerStates: game.getPlayerStates()
-        });
-        if (event.detail.ended) {
-            socket.emit("game-end", event.detail);
-        }
+        io.to(id).emit("game-turn", event.detail);
+        if (event.detail.ended) io.in(id).disconnectSockets();
     });
     game.init();
     game.start();
+    return id;
+}
 
+function createPlayer(socket) {
+    if (!socket) return new FlowBird();
+    let user = jwt.decode(socket.request.headers.authorization?.split(" ")[1]);
+    return new Player(socket.id, user.username);
+}
+
+function joinGame(socket, gameId) {
+    socket.join(gameId);
+    const game = games[gameId];
     socket.emit("game-start", {
-        yourNumber: 1, // TODO: The current player won't always be the first one
-        players: game.players,
+        yourNumber: game.players.findIndex(player => player.id === socket.id) + 1,
+        players: game.players.map(player => ({name: player.name, color: player.color, avatar: player.avatar, number: player.number})),
+        grid: game.grid,
         playerStates: game.getPlayerStates()
     });
 }

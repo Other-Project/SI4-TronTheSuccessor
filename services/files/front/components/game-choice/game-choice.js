@@ -32,6 +32,15 @@ export class GameChoice extends HTMLComponent {
                 }
             }));
         });
+
+        multiplayerButton.addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {
+                detail: {
+                    name: "help",
+                    attr: {"against": "any-player"}
+                }
+            }));
+        });
     }
 
     onVisible = () => {

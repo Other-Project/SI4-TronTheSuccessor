@@ -1,6 +1,7 @@
 import {Game} from "/js/game.js";
 import {HTMLComponent} from "/js/component.js";
-import {HumanPlayer} from "/js/human-player.js";
+import {Player} from "/js/player.js";
+import {player1_keys, player2_keys} from "/js/human-player.js";
 
 const cells = {
     "up-left": [1, 0],
@@ -27,7 +28,7 @@ export class Control extends HTMLComponent {
         this.gameBoard = document.createElement("app-game-board");
         this.shadowRoot.appendChild(this.gameBoard);
 
-        const player = new HumanPlayer("Player 1");
+        const player = new Player("Player 1");
         const owner = parseInt(this.getAttribute("owner"));
         player.init(owner, Array.from(Array(owner), () => ({pos: [1, 1], direction: owner === 1 ? "right" : "left"})));
         player.pos = [1, 1];
@@ -44,9 +45,10 @@ export class Control extends HTMLComponent {
         this.gameBoard.ctx.textAlign = "center";
         this.gameBoard.ctx.textBaseline = "middle";
 
+        const keys = [player1_keys, player2_keys][owner-1];
         Object.entries(cells).forEach(([direction, coords]) => {
             let [px, py] = this.gameBoard.cellCoordinates(coords[0], coords[1]);
-            let text = player.keys[direction].map(k => keyText[k] || k).join("+")
+            let text = keys[direction].map(k => keyText[k] || k).join("+")
             this.gameBoard.ctx.fillText(text, px + this.gameBoard.cellSize / 2, py + this.gameBoard.cellSize / 2);
         });
     }

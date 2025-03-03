@@ -5,8 +5,35 @@ const { FlowBird } = require("./js/flowbird.js");
 const { Player } = require("./js/player.js");
 const eloDatabase = require("./js/eloDatabase.js");
 
+const HTTP_STATUS = {
+    OK: 200,
+    BAD_REQUEST: 400,
+    NOT_FOUND: 404
+};
 
-let server = http.createServer();
+let server = http.createServer(async (req, res) => {
+    const filePath = req.url.split("/").filter(elem => elem !== "..");
+
+    try {
+        switch (filePath[1]) {
+            case "elo":
+                if (req.method === 'POST') await handleAddElo(req, res);
+                else if (req.method === 'GET') await handleGetElo(req, res, filePath[2]);
+                else {
+                    res.statusCode = HTTP_STATUS.NOT_FOUND;
+                    res.end();
+                }
+                break;
+            default:
+                res.statusCode = HTTP_STATUS.NOT_FOUND;
+                res.end();
+        }
+    } catch (error) {
+        res.statusCode = HTTP_STATUS.BAD_REQUEST;
+        res.end(JSON.stringify({error: "Invalid request"}));
+    }
+})
+
 const io = new Server(server, {
     cors: {
         origin: "*"
@@ -72,4 +99,31 @@ function startGame(socket, msg) {
 function calculateEloPoints(elo, k, w, d) {
     const vD = 1 / (1 + Math.pow(10, -d / 400));
     return elo + k * (w - vD);
+}
+
+async function handleAddElo(req, res) {
+    const body = await getRequestBody(req);
+    const parsedBody = JSON.parse(body);
+    const result = await eloDatabase.addElo(parsedBody.playerId, parsedBody.elo);
+    sendResponse(res, HTTP_STATUS.OK, result);
+}
+
+async function handleGetElo(req, res, playerId) {
+    const elo = await eloDatabase.getElo(playerId);
+    sendResponse(res, HTTP_STATUS.OK, elo);
+}
+
+async function getRequestBody(request) {
+    return new Promise((resolve, reject) => {
+        let body = "";
+        request.on("data", chunk => body += chunk.toString());
+        request.on("end", () => resolve(body));
+        request.on("error", reject);
+    });
+}
+
+function sendResponse(response, statusCode, data) {
+    response.statusCode = statusCode;
+    response.setHeader("Content-Type", "application/json");
+    response.end(JSON.stringify(data));
 }

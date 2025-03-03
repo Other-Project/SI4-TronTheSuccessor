@@ -1,5 +1,6 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
+const {addElo, getElo} = require("./helper/eloHelper.js");
 
 const HTTP_STATUS = {
     OK: 200,
@@ -36,6 +37,7 @@ async function handleSignUp(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
+    await addElo(parsedBody.username, 1000);
     sendResponse(response, HTTP_STATUS.OK, result);
 }
 

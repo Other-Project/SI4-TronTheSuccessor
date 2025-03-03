@@ -36,4 +36,6 @@ services:
     restart: unless-stopped
     depends_on:
       - mongodb
+    environment:
+      GAME_SERVICE_URL: "http://game:8003"
 

@@ -1,4 +1,5 @@
 const http = require("http");
+const url = require("url");
 
 /**
  * Add ELO to a player.
@@ -9,9 +10,11 @@ const http = require("http");
 async function addElo(playerId, elo) {
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({playerId, elo});
+        const serviceUrl = process.env.GAME_SERVICE_URL || 'http://localhost:8003';
+        const {hostname, port} = new url.URL(serviceUrl);
         const options = {
-            hostname: process.env.GAME_SERVICE_HOSTNAME || 'localhost',
-            port: process.env.GAME_SERVICE_PORT || 8003,
+            hostname: hostname,
+            port: port,
             path: '/elo',
             method: 'POST',
             headers: {
@@ -23,7 +26,15 @@ async function addElo(playerId, elo) {
         const req = http.request(options, (res) => {
             let responseData = '';
             res.on('data', chunk => responseData += chunk);
-            resolve(JSON.parse(responseData));
+            res.on('end', () => {
+                if (responseData) {
+                    try {
+                        resolve(JSON.parse(responseData));
+                    } catch (error) {
+                        reject(new Error("Failed to parse response JSON"));
+                    }
+                } else resolve();
+            });
         });
 
         req.on('error', error => reject(error));

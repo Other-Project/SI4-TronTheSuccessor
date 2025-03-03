@@ -123,6 +123,7 @@ export class GameMaster extends HTMLComponent {
             path: "/api/game"
         });
 
+        this.gameBoard.clear();
         this.waitingWindow.style.display = "block";
         this.socket.emit("game-start", {against: this.against});
 

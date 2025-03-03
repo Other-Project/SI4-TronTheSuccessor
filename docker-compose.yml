@@ -1,7 +1,7 @@
 services:
   mongodb:
     image: mongo:latest
-    container_name: mongodb
+    container_name: tron-the-successor-database
     ports:
       - "27017:27017"
     restart: unless-stopped

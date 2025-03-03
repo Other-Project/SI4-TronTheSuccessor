@@ -35,7 +35,7 @@ http.createServer(async (request, response) => {
 async function handleSignUp(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
-    const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
+    const result = await userDatabase.addUser(parsedBody.username, parsedBody.password, parsedBody.securityQuestions);
     sendResponse(response, HTTP_STATUS.OK, result);
 }
 

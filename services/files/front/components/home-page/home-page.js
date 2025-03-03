@@ -1,10 +1,11 @@
 import {HTMLComponent} from "/js/component.js";
+import {getCookie} from "/js/login-manager.js";
 
 export class HomePage extends HTMLComponent {
     ids = ["sign-in", "sign-up"];
 
     constructor() {
-        super("/components/home-page", "home-page.html");
+        super("home-page", ["html", "css"]);
     }
 
     onSetupCompleted = () => {
@@ -21,6 +22,21 @@ export class HomePage extends HTMLComponent {
         document.addEventListener("change-popup", (event) => {
             this.#changePopup(event.detail.name);
         });
+
+        const username = getCookie("username");
+        if (username) {
+            this.shadowRoot.getElementById("username").textContent = username;
+            console.log("username", username);
+            this.shadowRoot.getElementById("connect").src = "/assets/disconnect.svg";
+            this.shadowRoot.getElementById("connect").addEventListener("click", () => {
+                document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                document.cookie = "refreshToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                window.location.reload();
+            });
+        } else {
+            this.shadowRoot.getElementById("username").style.display = "none";
+        }
     }
 
     #changePopup(name) {

@@ -7,21 +7,13 @@ export class SignUp extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.shadowRoot.getElementById("sign-up").addEventListener("click", () => {
+        this.shadowRoot.getElementById("login").addEventListener("click", () => {
             if (!this.correctInputValues()) return;
             this.loginFetch("sign-up");
         });
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
-        });
-
-        this.shadowRoot.getElementById("home").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
-        });
-
-        this.shadowRoot.querySelector("form").addEventListener("submit", (event) => {
-            event.preventDefault();
         });
     }
 
@@ -33,7 +25,17 @@ export class SignUp extends HTMLComponent {
             },
             body: JSON.stringify({
                 username: this.shadowRoot.getElementById("username").value,
-                password: this.shadowRoot.getElementById("password").value
+                password: this.shadowRoot.getElementById("password").value,
+                securityQuestions: [
+                    {
+                        question: this.shadowRoot.getElementById("first-question").shadowRoot.querySelector("select").value,
+                        answer: this.shadowRoot.getElementById("first-answer").value
+                    },
+                    {
+                        question: this.shadowRoot.getElementById("second-question").shadowRoot.querySelector("select").value,
+                        answer: this.shadowRoot.getElementById("second-answer").value
+                    }
+                ]
             })
         }).then(response => {
             if (response.ok)
@@ -45,9 +47,10 @@ export class SignUp extends HTMLComponent {
             if (data.error) {
                 alert(data.error);
             } else {
-                alert("Logged in as " + data.username);
                 document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
                 document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+                document.cookie = `username=${data.username}; path=/; max-age=${60 * 60};`;
+                location.reload();
             }
         }).catch(error => {
             alert(error.message);
@@ -55,15 +58,46 @@ export class SignUp extends HTMLComponent {
     }
 
     correctInputValues() {
-        const form = this.shadowRoot.querySelector("form");
         const username = this.shadowRoot.getElementById("username");
         const password = this.shadowRoot.getElementById("password");
+        const confirmPassword = this.shadowRoot.getElementById("confirm-password");
+        const firstSecurityAnswer = this.shadowRoot.getElementById("first-answer");
+        const secondSecurityAnswer = this.shadowRoot.getElementById("second-answer");
+
         username.setCustomValidity("");
         password.setCustomValidity("");
-        if (!username.validity.valid) username.setCustomValidity("Username must be at least 3 characters long and contain only letters and numbers.");
-        if (!password.validity.valid) password.setCustomValidity("Password must be at least 6 characters long and contain only letters and numbers.");
-        username.reportValidity();
+        confirmPassword.setCustomValidity("");
+        firstSecurityAnswer.setCustomValidity("");
+        secondSecurityAnswer.setCustomValidity("");
+
+        if (!username.validity.valid)
+            username.setCustomValidity("Username must be at least 3 characters long and less than 20 and contain only letters and numbers.");
+
+        if (!password.validity.valid)
+            password.setCustomValidity("Password must be at least 6 characters long and less than 20 and contain only letters and numbers.");
+
+        if (!confirmPassword.validity.valid)
+            confirmPassword.setCustomValidity("Please confirm your password.");
+
+        if (password.value !== confirmPassword.value)
+            confirmPassword.setCustomValidity("Passwords do not match.");
+
+        if (!firstSecurityAnswer.validity.valid)
+            firstSecurityAnswer.setCustomValidity("Please provide an answer to the first security question.");
+
+        if (!secondSecurityAnswer.validity.valid)
+            secondSecurityAnswer.setCustomValidity("Please provide an answer to the second security question.");
+
+        secondSecurityAnswer.reportValidity();
+        firstSecurityAnswer.reportValidity();
+        confirmPassword.reportValidity();
         password.reportValidity();
-        return form.checkValidity();
+        username.reportValidity();
+
+        return username.validity.valid &&
+            password.validity.valid &&
+            confirmPassword.validity.valid &&
+            firstSecurityAnswer.validity.valid &&
+            secondSecurityAnswer.validity.valid;
     }
 }

@@ -3,36 +3,38 @@
     <div id="popup-body" slot="body">
         <div id="sign-up">
             <div class="form-label-group">
-                <input autofocus class="form-control" id="inputUsername" placeholder="Username" required
+                <input autofocus class="form-control" id="username" pattern="[a-zA-Z0-9]{3,20}" placeholder="Username"
+                       required
                        type="text">
-                <label for="inputUsername">Username</label>
+                <label for="username">Username</label>
             </div>
             <div class="form-label-group">
-                <input autofocus class="form-control" id="inputPassword" placeholder="password" required
+                <input autofocus class="form-control" id="password" pattern="[a-zA-Z0-9]{6,20}" placeholder="password"
+                       required
                        type="password">
-                <label for="inputPassword">Password</label>
+                <label for="password">Password</label>
             </div>
             <div class="form-label-group">
-                <input autofocus class="form-control" id="inputConfirmPassword"
-                       placeholder="ConfirmPassword" required type="password">
-                <label for="inputConfirmPassword">Confirm password</label>
+                <input autofocus class="form-control" id="confirm-password"
+                       placeholder="ConfirmPassword" pattern="[a-zA-Z0-9]{6,20}" required type="password">
+                <label for="confirm-password">Confirm password</label>
             </div>
         </div>
         <div id="questions-info">
             In case you forget your password, you can use the following security questions to reset it.
         </div>
         <div id="password-questions">
-            <app-security-questions>First question</app-security-questions>
+            <app-security-questions id="first-question">First question</app-security-questions>
             <div class="form-label-group">
-                <input autofocus class="form-control" id="inputFirstSecurityAnswer" placeholder="Answer" required
+                <input autofocus class="form-control" id="first-answer" placeholder="Answer" required
                        type="text">
-                <label for="inputFirstSecurityAnswer">First answer</label>
+                <label for="first-answer">First answer</label>
             </div>
-            <app-security-questions>Second question</app-security-questions>
+            <app-security-questions id="second-question">Second question</app-security-questions>
             <div class="form-label-group">
-                <input autofocus class="form-control" id="inputSecondSecurityAnswer" placeholder="Answer" required
+                <input autofocus class="form-control" id="second-answer" placeholder="Answer" required
                        type="text">
-                <label for="inputSecondSecurityAnswer">Second answer</label>
+                <label for="second-answer">Second answer</label>
             </div>
         </div>
     </div>

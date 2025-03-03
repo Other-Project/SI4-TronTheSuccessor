@@ -33,7 +33,8 @@ async function renewToken(refreshToken) {
     if (!jwt.verify(refreshToken, secretKey))
         return {error: "Refresh token is invalid : " + refreshToken};
 
-    const user = await userCollection.findOne({refreshToken});
+    const username = jwt.decode(refreshToken).username;
+    const user = await userCollection.findOne({username});
     if (!user)
         return {error: "Could not find user with this refresh token : " + refreshToken};
 

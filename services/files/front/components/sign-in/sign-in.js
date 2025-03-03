@@ -10,10 +10,10 @@ export class SignIn extends HTMLComponent {
             this.shadowRoot.getElementById("popup-container").style.display = "block";
         });
 
-        this.shadowRoot.getElementById("popup-container").addEventListener("click", (event) => {
-            if (event.target === this.shadowRoot.getElementById("popup-container")) {
-                this.shadowRoot.getElementById("popup-container").style.display = "none";
-            }
+        this.shadowRoot.getElementById("link").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("change-popup", {
+                detail: {name: "sign-up"}
+            }))
         });
     }
 }

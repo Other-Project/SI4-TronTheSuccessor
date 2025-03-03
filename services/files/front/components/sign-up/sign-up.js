@@ -12,7 +12,7 @@ export class SignUp extends HTMLComponent {
             this.loginFetch("sign-up");
         });
 
-        this.shadowRoot.getElementById("sign-in").addEventListener("click", () => {
+        this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
         });
 

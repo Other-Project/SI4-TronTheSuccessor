@@ -58,9 +58,16 @@ io.on("connection", (socket) => {
     });
 });
 
-function startGame(socket, msg) {
+async function startGame(socket, msg) {
     let game = new Game(16, 9, new Player(msg.playerName), new FlowBird(), 500);
     games[socket.id] = game;
+
+    let eloList = [];
+    for (const player of game.players) {
+        let elo = await eloDatabase.getElo(player.name);
+        if (elo.error) elo = await eloDatabase.addElo(player.name, 1000);
+        eloList.push(elo);
+    }
 
     game.addEventListener("game-turn", async (event) => {
         socket.emit("game-turn", {
@@ -71,10 +78,9 @@ function startGame(socket, msg) {
             socket.emit("game-end", event.detail);
             for (const player of game.players) {
                 const i = game.players.indexOf(player);
-                let currentElo = eloDatabase.getElo(player.name);
-                let otherPlayerElo = eloDatabase.getElo(game.players[1 - i].name);
-                const newElo = calculateEloPoints(await currentElo, 32, event.detail.draw ? 0.5 : player === event.detail.winner ? 1 : 0, currentElo - otherPlayerElo);
+                const newElo = calculateEloPoints(eloList[i], 32, event.detail.draw ? 0.5 : player.name === event.detail.winner ? 1 : 0, eloList[i] - eloList[1 - i]);
                 await eloDatabase.updateElo(player.name, newElo);
+                console.log(`Player ${player.name} has now ${newElo} ELO points`);
             }
         }
     });
@@ -97,7 +103,8 @@ function startGame(socket, msg) {
  * @returns {number} The new ELO points.
  */
 function calculateEloPoints(elo, k, w, d) {
-    const vD = 1 / (1 + Math.pow(10, -d / 400));
+    console.log(`ELO: ${elo}, K: ${k}, W: ${w}, D: ${d}`);
+    const vD = 1 / (1 + Math.pow(10, d / 400));
     return elo + k * (w - vD);
 }
 

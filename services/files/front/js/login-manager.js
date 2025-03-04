@@ -24,3 +24,26 @@ export async function renewAccessToken() {
         document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
     });
 }
+
+export async function loginFetch(url, body) {
+    const response = await fetch("/api/user/" + url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: body
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        alert(data?.error ?? response.statusText);
+        return;
+    }
+    return data;
+}
+
+export async function parseJwt(token) {
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+    return JSON.parse(jsonPayload);
+}

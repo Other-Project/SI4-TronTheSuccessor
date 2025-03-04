@@ -12,6 +12,7 @@ import {Popup} from "/components/popup/popup.js";
 import {SignUp} from "/components/sign-up/sign-up.js";
 import {SignIn} from "/components/sign-in/sign-in.js";
 import {SecurityQuestions} from "/components/security-questions/security-questions.js";
+import {Input} from "/components/input/input.js";
 
 customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-choice", GameChoice);
@@ -23,7 +24,8 @@ customElements.define("app-profil-page-button", ProfilPageButton);
 customElements.define("app-help-page", HelpPage);
 customElements.define("app-control", Control);
 customElements.define("app-game-master", GameMaster);
-customElements.define("app-game-popup", Popup);
+customElements.define("app-popup", Popup);
 customElements.define("app-sign-up", SignUp);
 customElements.define("app-sign-in", SignIn);
 customElements.define("app-security-questions", SecurityQuestions);
+customElements.define("app-input", Input);

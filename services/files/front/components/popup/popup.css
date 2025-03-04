@@ -1,6 +1,8 @@
 #popup-panel {
+    margin: 0 auto;
+    max-width: 600px;
+    max-height: 600px;
     width: 100%;
-    height: 100%;
 
     background: #fff1;
     backdrop-filter: blur(5px);
@@ -24,4 +26,13 @@ slot[name="actions"] {
     grid-auto-columns: minmax(125px, 200px);
     grid-auto-flow: column;
     justify-content: space-evenly;
+}
+
+.popup-container {
+    position: fixed;
+    inset: 0;
+    align-content: center;
+
+    background: #0007;
+    backdrop-filter: blur(1px);
 }

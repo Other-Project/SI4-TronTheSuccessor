@@ -1,19 +1,10 @@
-<app-game-popup id="popup">
+<app-popup background="#2F1C41" id="popup">
     <h2 class="sign-in" slot="title">Sign in</h2>
     <div id="popup-body" slot="body">
-        <div id="sign-in">
-            <div class="form-label-group">
-                <input autofocus class="form-control" id="username" placeholder="Username" required
-                       type="text">
-                <label for="username">Username</label>
-            </div>
-            <div class="form-label-group">
-                <input autofocus class="form-control" id="password" placeholder="password" required
-                       type="password">
-                <label for="password">Password</label>
-            </div>
-        </div>
-        <button id="login" slot="actions">Sign in</button>
-        <span slot="actions">Don't have an account ? <a href="#" id="link">Sign up</a></span>
+        <app-input id="username-input">Username</app-input>
+        <app-input id="password-input">Password</app-input>
+        <u>Forgot password</u>
     </div>
-</app-game-popup>
+    <button id="login" slot="actions">Sign in</button>
+    <span slot="actions">Don't have an account ? <u id="link">Sign up</u></span>
+</app-popup>

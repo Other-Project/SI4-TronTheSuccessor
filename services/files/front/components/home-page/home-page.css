@@ -48,35 +48,9 @@ app-game-choice {
 
 #popup-container {
     display: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    align-content: center;
-
-    background: #0007;
-    backdrop-filter: blur(1px);
 }
 
-
-app-sign-up {
-    display: block;
-    margin: 0 auto;
-    max-width: 600px;
-    max-height: 700px;
-    width: 100%;
-}
-
-app-sign-in {
-    display: block;
-    margin: 0 auto;
-    max-width: 600px;
-    max-height: 700px;
-    width: 100%;
-}
-
-#sign-in {
+#sign-up {
     display: none;
 }
 

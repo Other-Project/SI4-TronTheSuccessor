@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {loginFetch, parseJwt} from "/js/login-manager.js";
 
 export class SignUp extends HTMLComponent {
 
@@ -9,7 +10,7 @@ export class SignUp extends HTMLComponent {
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("login").addEventListener("click", () => {
             if (!this.correctInputValues()) return;
-            this.loginFetch("sign-up");
+            this.#fetchLogin();
         });
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
@@ -17,44 +18,27 @@ export class SignUp extends HTMLComponent {
         });
     }
 
-    loginFetch(url) {
-        fetch("/api/user/" + url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                username: this.shadowRoot.getElementById("username").value,
-                password: this.shadowRoot.getElementById("password").value,
-                securityQuestions: [
-                    {
-                        question: this.shadowRoot.getElementById("first-question").shadowRoot.querySelector("select").value,
-                        answer: this.shadowRoot.getElementById("first-answer").value
-                    },
-                    {
-                        question: this.shadowRoot.getElementById("second-question").shadowRoot.querySelector("select").value,
-                        answer: this.shadowRoot.getElementById("second-answer").value
-                    }
-                ]
-            })
-        }).then(response => {
-            if (response.ok)
-                return response.json();
-            else {
-                throw new Error(response.statusText);
-            }
-        }).then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
-                document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-                document.cookie = `username=${data.username}; path=/; max-age=${60 * 60};`;
-                location.reload();
-            }
-        }).catch(error => {
-            alert(error.message);
+    async #fetchLogin() {
+        const body = JSON.stringify({
+            username: this.shadowRoot.getElementById("username").value,
+            password: this.shadowRoot.getElementById("password").value,
+            securityQuestions: [
+                {
+                    question: this.shadowRoot.getElementById("first-question").shadowRoot.querySelector("select").value,
+                    answer: this.shadowRoot.getElementById("first-answer").value
+                },
+                {
+                    question: this.shadowRoot.getElementById("second-question").shadowRoot.querySelector("select").value,
+                    answer: this.shadowRoot.getElementById("second-answer").value
+                }
+            ]
         });
+        const data = await loginFetch("sign-up", body);
+        document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
+        document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+        const result = await parseJwt(data.accessToken);
+        window.localStorage.setItem("userData", result);
+        location.reload();
     }
 
     correctInputValues() {

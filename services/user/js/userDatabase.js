@@ -14,7 +14,7 @@ const maxLength = 20;
 const authorizedRegex = /^[a-zA-Z0-9]+$/;
 
 async function addUser(username, password, securityQuestions) {
-    const error = checkValue(username, password);
+    const error = checkValue(username, password, securityQuestions);
     if (error) return error;
     if (await userCollection.findOne({username}))
         return {error: `User ${username} already exists`};
@@ -23,16 +23,17 @@ async function addUser(username, password, securityQuestions) {
         question: q.question,
         answer: hash(q.answer)
     }));
-    const {accessToken, refreshToken} = getTokens({username});
-    await userCollection.insertOne({username, password: hashedPassword, securityQuestions: hashedSecurityQuestions});
-    //return getJwt(user);
+    const user = {username, password: hashedPassword, securityQuestions: hashedSecurityQuestions};
+    await userCollection.insertOne(user);
+    const {accessToken, refreshToken} = getJwt(user);
     return {username, refreshToken, accessToken};
 }
 
 async function getUser(username, password) {
     const user = await userCollection.findOne({username, password: hash(password)});
     if (!user) return {error: "Wrong username or password"};
-    return getJwt(user);
+    const {accessToken, refreshToken} = getJwt(user);
+    return {username, refreshToken, accessToken};
 }
 
 async function renewToken(refreshToken) {
@@ -40,12 +41,10 @@ async function renewToken(refreshToken) {
         return {error: "Refresh token is missing"};
     if (!jwt.verify(refreshToken, secretKey))
         return {error: "Refresh token is invalid : " + refreshToken};
-
     const username = jwt.decode(refreshToken).username;
     const user = await userCollection.findOne({username});
     if (!user)
         return {error: "Could not find user with this refresh token : " + refreshToken};
-
     return getJwt(user);
 }
 
@@ -77,7 +76,6 @@ function checkValue(username, password, securityQuestions) {
         if (question.question === "" || question.answer === "")
             return {error: "Question and answer must not be empty"};
     }
-    return {};
     return null;
 }
 

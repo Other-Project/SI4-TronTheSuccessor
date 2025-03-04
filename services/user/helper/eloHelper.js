@@ -15,7 +15,7 @@ async function addElo(playerId, elo) {
         const options = {
             hostname: hostname,
             port: port,
-            path: '/elo',
+            path: "/api/game/elo",
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -36,9 +36,7 @@ async function addElo(playerId, elo) {
                 } else resolve();
             });
         });
-
         req.on('error', error => reject(error));
-
         req.write(data);
         req.end();
     });
@@ -54,7 +52,7 @@ async function getElo(playerId) {
         const options = {
             hostname: process.env.GAME_SERVICE_HOSTNAME || 'localhost',
             port: process.env.GAME_SERVICE_PORT || 8003,
-            path: `/elo/${playerId}`,
+            path: `/api/game/elo/${playerId}`,
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'

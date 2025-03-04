@@ -5,16 +5,8 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require('crypto');
-const eloDatabase = require("./js/eloDatabase.js");
-
-const HTTP_STATUS = {
-    OK: 200,
-    BAD_REQUEST: 400,
-    NOT_FOUND: 404,
-    INTERNAL_SERVER_ERROR: 500
-};
-
-const BASE_ELO = 1000;
+const {updateElos, handleAddElo, handleGetElo} = require("./js/elo.js");
+const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
@@ -101,27 +93,6 @@ async function startGame(p1s, p2s = null) {
     return id;
 }
 
-/**
- * Update the elo of both players
- * @param {Player[]} players
- * @param {{elapsed: number, winner: (string|undefined), grid: number[][], ended: boolean, draw: (boolean|undefined), playerStates: {pos: [number,number], dead: boolean, direction: "right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"}[]}} gameInfo
- * @returns {Promise<void>}
- */
-async function updateElos(players, gameInfo) {
-    const eloP1 = await eloDatabase.getElo(players[0].name) ?? BASE_ELO;
-    const eloP2 = await eloDatabase.getElo(players[1].name) ?? BASE_ELO;
-    const pointP1 = gameInfo.draw ? 0.5 : players[0].name === gameInfo.winner ? 1 : 0;
-    const pointP2 = 1 - pointP1;
-    const diff = eloP1 - eloP2;
-
-    const newEloP1 = Math.max(calculateEloPoints(eloP1, 32, pointP1, diff), 0);
-    const newEloP2 = Math.max(calculateEloPoints(eloP2, 32, pointP2, -diff), 0);
-    await eloDatabase.updateElo(players[0].name, newEloP1);
-    await eloDatabase.updateElo(players[1].name, newEloP2);
-    console.log(`Player ${players[0].name} has now ${newEloP1} ELO points`);
-    console.log(`Player ${players[1].name} has now ${newEloP2} ELO points`);
-}
-
 function createPlayer(socket) {
     if (!socket) return new FlowBird();
     let user = jwt.decode(socket.request.headers.authorization?.split(" ")[1]);
@@ -137,51 +108,4 @@ function joinGame(socket, gameId) {
         grid: game.grid,
         playerStates: game.getPlayerStates()
     });
-}
-
-/**
- * Calculate the ELO points won.
- * @param {number} elo The ELO at the start of the game.
- * @param {number} k The development factor.
- * @param {number} w The result of the game (1 for a win, 0.5 for a draw, 0 for a defeat).
- * @param {number} d The ELO difference between the two players.
- * @returns {number} The new ELO points.
- */
-function calculateEloPoints(elo, k, w, d) {
-    console.log(`ELO: ${elo}, K: ${k}, W: ${w}, D: ${d}`);
-    const vD = 1 / (1 + Math.pow(10, d / 400));
-    return elo + k * (w - vD);
-}
-
-/**
- * Handle a request to add an elo to the database
- * @param request The request
- * @param response The response
- * @returns {Promise<void>}
- */
-async function handleAddElo(request, response) {
-    const body = await getRequestBody(request);
-    const parsedBody = JSON.parse(body);
-    const result = await eloDatabase.addElo(parsedBody.playerId, parsedBody.elo);
-    sendResponse(response, HTTP_STATUS.OK, result);
-}
-
-async function handleGetElo(request, response, playerId) {
-    const elo = await eloDatabase.getElo(playerId);
-    sendResponse(response, HTTP_STATUS.OK, elo);
-}
-
-async function getRequestBody(request) {
-    return new Promise((resolve, reject) => {
-        let body = "";
-        request.on("data", chunk => body += chunk.toString());
-        request.on("end", () => resolve(body));
-        request.on("error", reject);
-    });
-}
-
-function sendResponse(response, statusCode, data) {
-    response.statusCode = statusCode;
-    response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify(data));
 }

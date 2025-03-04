@@ -8,11 +8,9 @@ const eloCollection = database.collection("elo");
  * Add a new ELO to the database.
  * @param {string} playerId The ID of the player.
  * @param {number} elo The ELO of the player.
- * @returns {Promise<{error: string}|number>}
+ * @returns {Promise<number>}
  */
 async function addElo(playerId, elo) {
-    const existingElo = await eloCollection.findOne({playerId});
-    if (existingElo) return {error: `ELO for player ${playerId} already exists`};
     await eloCollection.insertOne({playerId, elo});
     return elo;
 }
@@ -20,12 +18,11 @@ async function addElo(playerId, elo) {
 /**
  * Get the ELO of a player.
  * @param {string} playerId
- * @returns {Promise<number|{error: string}>}
+ * @returns {Promise<number|null>}
  */
 async function getElo(playerId) {
     const elo = await eloCollection.findOne({playerId});
-    if (elo) return elo.elo;
-    return {error: `ELO for player ${playerId} not found`};
+    return elo?.elo ?? null;
 }
 
 /**

@@ -7,39 +7,49 @@ const {Player} = require("./js/player.js");
 const {randomUUID} = require('crypto');
 const eloDatabase = require("./js/eloDatabase.js");
 
-let server = http.createServer(async (req, res) => {
-    const filePath = req.url.split("/").filter(elem => elem !== "..");
+const HTTP_STATUS = {
+    OK: 200,
+    BAD_REQUEST: 400,
+    NOT_FOUND: 404,
+    INTERNAL_SERVER_ERROR: 500
+};
+
+const BASE_ELO = 1000;
+
+let server = http.createServer(async (request, response) => {
+    const filePath = request.url.split("/").filter(elem => elem !== "..");
+    console.log(filePath);
 
     try {
-        switch (filePath[1]) {
+        switch (filePath[3]) {
             case "elo":
-                if (req.method === 'POST') await handleAddElo(req, res);
-                else if (req.method === 'GET') await handleGetElo(req, res, filePath[2]);
+                console.log("yes");
+                if (request.method === "POST") await handleAddElo(request, response);
+                else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
                 else {
-                    res.statusCode = HTTP_STATUS.NOT_FOUND;
-                    res.end();
+                    response.statusCode = HTTP_STATUS.NOT_FOUND;
+                    response.end();
                 }
                 break;
             default:
-                res.statusCode = HTTP_STATUS.NOT_FOUND;
-                res.end();
+                response.statusCode = HTTP_STATUS.NOT_FOUND;
+                response.end();
         }
     } catch (error) {
-        res.statusCode = HTTP_STATUS.BAD_REQUEST;
-        res.end(JSON.stringify({error: "Invalid request"}));
+        console.warn(error);
+        sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
     }
-})
+}).listen(8003);
 
 const io = new Server(server, {
     cors: {
         origin: "*"
     }
 });
-server.listen(8003);
 
 io.on("connection", (socket) => {
-    socket.on("game-start", (msg) => {
-        findGame(socket, msg);
+    socket.on("game-start", async (msg) => {
+        await findGame(socket, msg);
     });
 
     socket.on("game-action", (msg) => {
@@ -53,16 +63,16 @@ io.on("connection", (socket) => {
     });
 });
 
-function findGame(socket, msg) {
+async function findGame(socket, msg) {
     if (msg.against === "computer")
-        joinGame(socket, startGame(socket));
+        joinGame(socket, await startGame(socket));
     else socket.join("waiting-anyone");
 }
 
 async function transfertRoom(waitingRoom) {
     const sockets = await io.in(waitingRoom).fetchSockets();
     if (sockets.length < 2) return;
-    const gameId = startGame(sockets[0], sockets[1]);
+    const gameId = await startGame(sockets[0], sockets[1]);
     for (let socket of sockets) {
         socket.leave(waitingRoom);
         joinGame(socket, gameId);
@@ -76,42 +86,42 @@ io.of("/").adapter.on("join-room", async (room, id) => {
 
 const games = {};
 
-function startGame(p1s, p2s = null) {
+async function startGame(p1s, p2s = null) {
     const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), 500);
     const id = randomUUID();
     games[id] = game;
-async function startGame(socket, msg) {
-    let game = new Game(16, 9, new Player(msg.playerName), new FlowBird(), 500);
-    games[socket.id] = game;
 
-    let eloList = [];
-    for (const player of game.players) {
-        let elo = await eloDatabase.getElo(player.name);
-        if (elo.error) elo = await eloDatabase.addElo(player.name, 1000);
-        eloList.push(elo);
-    }
-
-    game.addEventListener("game-turn", async (event) => {
-        socket.emit("game-turn", {
-            grid: game.grid,
-            playerStates: game.getPlayerStates()
-        });
-        if (event.detail.ended) {
-            socket.emit("game-end", event.detail);
-            for (const player of game.players) {
-                const i = game.players.indexOf(player);
-                const newElo = calculateEloPoints(eloList[i], 32, event.detail.draw ? 0.5 : player.name === event.detail.winner ? 1 : 0, eloList[i] - eloList[1 - i]);
-                await eloDatabase.updateElo(player.name, newElo);
-                console.log(`Player ${player.name} has now ${newElo} ELO points`);
-            }
-        }
     game.addEventListener("game-turn", (event) => {
         io.to(id).emit("game-turn", event.detail);
-        if (event.detail.ended) io.in(id).disconnectSockets();
+        if (event.detail.ended) {
+            io.in(id).disconnectSockets();
+            if (p2s) updateElos(game.players, event.detail);
+        }
     });
     game.init();
     game.start();
     return id;
+}
+
+/**
+ * Update the elo of both players
+ * @param {Player[]} players
+ * @param {{elapsed: number, winner: (string|undefined), grid: number[][], ended: boolean, draw: (boolean|undefined), playerStates: {pos: [number,number], dead: boolean, direction: "right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"}[]}} gameInfo
+ * @returns {Promise<void>}
+ */
+async function updateElos(players, gameInfo) {
+    const eloP1 = await eloDatabase.getElo(players[0].name) ?? BASE_ELO;
+    const eloP2 = await eloDatabase.getElo(players[1].name) ?? BASE_ELO;
+    const pointP1 = gameInfo.draw ? 0.5 : players[0].name === gameInfo.winner ? 1 : 0;
+    const pointP2 = 1 - pointP1;
+    const diff = eloP1 - eloP2;
+
+    const newEloP1 = Math.max(calculateEloPoints(eloP1, 32, pointP1, diff), 0);
+    const newEloP2 = Math.max(calculateEloPoints(eloP2, 32, pointP2, -diff), 0);
+    await eloDatabase.updateElo(players[0].name, newEloP1);
+    await eloDatabase.updateElo(players[1].name, newEloP2);
+    console.log(`Player ${players[0].name} has now ${newEloP1} ELO points`);
+    console.log(`Player ${players[1].name} has now ${newEloP2} ELO points`);
 }
 
 function createPlayer(socket) {
@@ -145,16 +155,22 @@ function calculateEloPoints(elo, k, w, d) {
     return elo + k * (w - vD);
 }
 
-async function handleAddElo(req, res) {
-    const body = await getRequestBody(req);
+/**
+ * Handle a request to add an elo to the database
+ * @param request The request
+ * @param response The response
+ * @returns {Promise<void>}
+ */
+async function handleAddElo(request, response) {
+    const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await eloDatabase.addElo(parsedBody.playerId, parsedBody.elo);
-    sendResponse(res, HTTP_STATUS.OK, result);
+    sendResponse(response, HTTP_STATUS.OK, result);
 }
 
-async function handleGetElo(req, res, playerId) {
+async function handleGetElo(request, response, playerId) {
     const elo = await eloDatabase.getElo(playerId);
-    sendResponse(res, HTTP_STATUS.OK, elo);
+    sendResponse(response, HTTP_STATUS.OK, elo);
 }
 
 async function getRequestBody(request) {

@@ -37,9 +37,8 @@ async function handleSignUp(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
-    sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.CREATED, result);
     await addElo(parsedBody.username, 1000);
-    sendResponse(response, HTTP_STATUS.OK, result);
+    sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.CREATED, result);
 }
 
 async function handleSignIn(request, response) {

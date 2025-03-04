@@ -18,12 +18,10 @@ const BASE_ELO = 1000;
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
-    console.log(filePath);
 
     try {
         switch (filePath[3]) {
             case "elo":
-                console.log("yes");
                 if (request.method === "POST") await handleAddElo(request, response);
                 else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
                 else {

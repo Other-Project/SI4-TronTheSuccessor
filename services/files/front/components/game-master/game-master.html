@@ -1,10 +1,10 @@
 <app-game-board id="board"></app-game-board>
 
-<div id="popup-container">
-    <app-game-popup id="popup">
+<div class="popup-container" id="pause-menu">
+    <app-game-popup class="popup">
         <h2 slot="title" id="title">Title</h2>
 
-        <div id="popup-body" slot="body">
+        <div class="popup-body" slot="body">
             <div>
                 <p id="time"></p>
                 <p id="description"></p>
@@ -14,5 +14,14 @@
         <app-button slot="actions" id="resume">Resume</app-button>
         <app-button slot="actions" id="restart">Rematch</app-button>
         <app-button slot="actions" id="home">Home</app-button>
+    </app-game-popup>
+</div>
+
+<div class="popup-container" id="waiting-panel">
+    <app-game-popup class="popup">
+        <h2 slot="title">Waiting for an opponent</h2>
+        <div class="popup-body" slot="body">
+            <p>Waiting for an opponent to join the game...</p>
+        </div>
     </app-game-popup>
 </div>

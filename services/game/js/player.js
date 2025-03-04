@@ -13,6 +13,7 @@ const directionToAngle = {
 exports.directionToAngle = directionToAngle;
 
 exports.Player = class Player {
+    /** @type {string} */ id;
     /** @type {string} */ name;
     /** @type {number} */ number;
     /** @type {[number, number]} */ pos;
@@ -23,11 +24,13 @@ exports.Player = class Player {
     /** @type {boolean} */ dead;
 
     /**
+     * @param {string} id The socket id of the player
      * @param {string} name The player's name
      * @param {string} color The player's color
      * @param {string} avatar The player's avatar
      */
-    constructor(name, color = undefined, avatar = undefined) {
+    constructor(id, name, color = undefined, avatar = undefined) {
+        this.id = id;
         this.name = name;
         this.color = color;
         this.avatar = avatar;

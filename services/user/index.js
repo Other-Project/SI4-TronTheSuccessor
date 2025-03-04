@@ -4,6 +4,7 @@ const {addElo, getElo} = require("./helper/eloHelper.js");
 
 const HTTP_STATUS = {
     OK: 200,
+    CREATED: 201,
     BAD_REQUEST: 400,
     UNAUTHORIZED_STATUS_CODE: 401,
     NOT_FOUND: 404
@@ -24,12 +25,11 @@ http.createServer(async (request, response) => {
                 await handleRenewToken(request, response);
                 break;
             default:
-                response.statusCode = HTTP_STATUS.NOT_FOUND;
-                response.end();
+                sendResponse(response, HTTP_STATUS.NOT_FOUND);
         }
     } catch (error) {
-        response.statusCode = HTTP_STATUS.BAD_REQUEST;
-        response.end(JSON.stringify({error: "Invalid request"}));
+        console.warn(error);
+        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid request"});
     }
 }).listen(8004);
 
@@ -37,6 +37,7 @@ async function handleSignUp(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
+    sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.CREATED, result);
     await addElo(parsedBody.username, 1000);
     sendResponse(response, HTTP_STATUS.OK, result);
 }
@@ -44,17 +45,22 @@ async function handleSignUp(request, response) {
 async function handleSignIn(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
-    const user = await userDatabase.getUser(parsedBody.username, parsedBody.password);
-    sendResponse(response, HTTP_STATUS.OK, user);
+    const result = await userDatabase.getUser(parsedBody.username, parsedBody.password);
+    sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.OK, result);
 }
 
 async function handleRenewToken(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.renewToken(parsedBody.refreshToken);
-    sendResponse(response, (result.valid ? HTTP_STATUS.OK : HTTP_STATUS.UNAUTHORIZED_STATUS_CODE), result);
+    sendResponse(response, result.error ? HTTP_STATUS.UNAUTHORIZED_STATUS_CODE : HTTP_STATUS.OK, result);
 }
 
+/**
+ *
+ * @param {IncomingMessage} request
+ * @returns {Promise<string>}
+ */
 async function getRequestBody(request) {
     return new Promise((resolve, reject) => {
         let body = "";
@@ -64,8 +70,10 @@ async function getRequestBody(request) {
     });
 }
 
-function sendResponse(response, statusCode, data) {
+function sendResponse(response, statusCode, data = null) {
     response.statusCode = statusCode;
-    response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify(data));
+    if (data) {
+        response.setHeader("Content-Type", "application/json");
+        response.end(JSON.stringify(data));
+    } else response.end();
 }

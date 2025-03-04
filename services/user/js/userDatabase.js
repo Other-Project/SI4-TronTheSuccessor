@@ -1,6 +1,6 @@
 const {MongoClient} = require("mongodb");
 const jwt = require("jsonwebtoken");
-const {createHash} = require('node:crypto');
+const {createHash} = require("node:crypto");
 
 const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27017');
 const database = client.db("Tron-the-successor");
@@ -12,6 +12,24 @@ const usernameMinLength = 3;
 const passwordMinLength = 6;
 const maxLength = 20;
 const authorizedRegex = /^[a-zA-Z0-9]+$/;
+
+const securityQuestions = ["What was the name of your favorite teacher in elementary school?",
+    "What was your dream job as a child?",
+    "In what city or town did you meet your spouse/partner?",
+    "What was your favorite vacation spot as a child?",
+    "What is the name of the first book you ever read?",
+    "What was the first concert you ever attended?",
+    "What was the name of your first stuffed animal?",
+    "What was your favorite subject in high school?",
+    "What was the model of your family's first television set?",
+    "What is the name of the street where your best friend lived during childhood?",
+    "What is the first name of the person you went to your first dance with?",
+    "What is the name of the place where you had your first kiss?",
+    "What is the title of your favorite childhood book?",
+    "What is the name of the first beach you visited?",
+    "What was the first movie you saw in a theater?",
+    "What is the name of the first foreign country you visited?",
+    "What was the name of your favorite childhood cartoon character?"];
 
 async function addUser(username, password, securityQuestions) {
     const error = checkValue(username, password, securityQuestions);
@@ -55,6 +73,14 @@ function getJwt(user) {
     return {accessToken, refreshToken};
 }
 
+function getSecurityQuestions() {
+    const result = [];
+    for (let i = 0; i < securityQuestions.length; i++) {
+        result.push(securityQuestions[i]);
+    }
+    return result;
+}
+
 function checkValue(username, password, securityQuestions) {
     if (!username || !password)
         return {error: "Username or password is missing"};
@@ -80,9 +106,9 @@ function checkValue(username, password, securityQuestions) {
 }
 
 function hash(str) {
-    const hash = createHash('sha256');
+    const hash = createHash("sha256");
     hash.update(str);
-    return hash.digest('hex');
+    return hash.digest("hex");
 }
 
-module.exports = {addUser, getUser, renewToken};
+module.exports = {addUser, getUser, renewToken, getSecurityQuestions};

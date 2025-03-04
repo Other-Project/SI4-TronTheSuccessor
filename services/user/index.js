@@ -6,13 +6,17 @@ const HTTP_STATUS = {
     CREATED: 201,
     BAD_REQUEST: 400,
     UNAUTHORIZED_STATUS_CODE: 401,
-    NOT_FOUND: 404
+    NOT_FOUND: 404,
+    INTERNAL_SERVER_ERROR: 500
 };
 
 http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
 
     try {
+        if (filePath.length < 4) {
+            sendResponse(response, HTTP_STATUS.NOT_FOUND);
+        }
         switch (filePath[3]) {
             case "sign-up":
                 await handleSignUp(request, response);
@@ -23,12 +27,15 @@ http.createServer(async (request, response) => {
             case "renew-access-token":
                 await handleRenewToken(request, response);
                 break;
+            case "security-questions":
+                sendResponse(response, HTTP_STATUS.OK, userDatabase.getSecurityQuestions());
+                break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
         }
     } catch (error) {
         console.warn(error);
-        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid request"});
+        sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
     }
 }).listen(8004);
 

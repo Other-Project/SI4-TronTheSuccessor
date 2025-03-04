@@ -39,7 +39,6 @@ export class SignIn extends HTMLComponent {
         username.setCustomValidity("");
         password.setCustomValidity("");
 
-
         if (!username.validity.valid)
             username.setCustomValidity("Username must be at least 3 characters long and less than 20 and contain only letters and numbers.");
 
@@ -48,9 +47,6 @@ export class SignIn extends HTMLComponent {
 
         password.reportValidity();
         username.reportValidity();
-
-        console.log(username.validity.valid);
-        console.log(password.validity.valid);
 
         return username.validity.valid &&
             password.validity.valid;

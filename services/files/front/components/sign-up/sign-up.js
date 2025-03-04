@@ -7,7 +7,9 @@ export class SignUp extends HTMLComponent {
         super("sign-up", ["html", "css"]);
     }
 
-    onSetupCompleted = () => {
+    onSetupCompleted = async () => {
+        await this.#injectSecurityQuestions();
+
         this.shadowRoot.getElementById("next").addEventListener("click", () => {
             this.shadowRoot.querySelectorAll(".first-page").forEach(element => element.style.display = "none");
             this.shadowRoot.querySelectorAll(".second-page").forEach(element => element.style.display = "block");
@@ -93,5 +95,20 @@ export class SignUp extends HTMLComponent {
             confirmPassword.validity.valid &&
             firstSecurityAnswer.validity.valid &&
             secondSecurityAnswer.validity.valid;
+    }
+
+    async #injectSecurityQuestions() {
+        const securityQuestions = await loginFetch("security-questions", null);
+        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
+        const secondQuestion = this.shadowRoot.getElementById("second-security-question");
+
+        for (let i = 0; i < securityQuestions.length; i++) {
+            console.log(securityQuestions[i]);
+            let opt = document.createElement("option");
+            opt.value = i;
+            opt.innerHTML = securityQuestions[i];
+            firstQuestion.appendChild(opt);
+            secondQuestion.appendChild(opt.cloneNode(true));
+        }
     }
 }

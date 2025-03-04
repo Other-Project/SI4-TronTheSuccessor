@@ -41,3 +41,18 @@ span {
     text-align: center;
     font-size: 12pt;
 }
+
+select {
+    width: calc(100% - 4px);
+    border: none;
+    border-radius: 10px;
+    margin: 10px 0;
+    padding: 10px;
+    background: rgb(60, 60, 60);
+    color: white;
+    height: 40px;
+}
+
+p {
+    font-size: 15pt;
+}

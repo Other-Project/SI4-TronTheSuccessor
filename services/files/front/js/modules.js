@@ -10,6 +10,7 @@ import {Control} from "/components/control/control.js";
 import {GameMaster} from "/components/game-master/game-master.js";
 import {GamePopup} from "/components/game-popup/game-popup.js";
 import {Login} from "/components/login/login.js";
+import {ChatDrawer} from "../components/chat-drawer/chat-drawer.js";
 
 customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-choice", GameChoice);
@@ -23,3 +24,5 @@ customElements.define("app-control", Control);
 customElements.define("app-game-master", GameMaster);
 customElements.define("app-game-popup", GamePopup);
 customElements.define("app-login", Login);
+customElements.define("app-chat-drawer", ChatDrawer);
+customElements.define("app-chat-drawer", ChatDrawer);

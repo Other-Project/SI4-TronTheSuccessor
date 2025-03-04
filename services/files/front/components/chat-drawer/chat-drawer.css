@@ -1,0 +1,43 @@
+#drawer {
+    position: fixed;
+    inset: 0 auto 0 100%;
+    width: 300px;
+    transition: .25s ease-in-out;
+
+    &.show {
+        transform: translateX(-100%);
+        box-shadow: -3px 0 10px #111;
+    }
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+
+    &:has(~ :not(.show)) {
+        display: none;
+    }
+}
+
+#container {
+    padding: 1em;
+    height: 100%;
+    background: #191919;
+}
+
+#tab-button {
+    width: 20px;
+    height: 50px;
+    margin: calc(49vh - 25px) 0;
+    transform: translateX(-100%);
+    float: left;
+
+    background: #2c2c2c;
+    border: none;
+    border-radius: 5px 0 0 5px;
+    color: white;
+    font-weight: 800;
+
+    user-select: none;
+    cursor: pointer;
+}

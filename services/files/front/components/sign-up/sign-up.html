@@ -1,12 +1,13 @@
 <app-popup background="#2F1C41" id="popup">
     <h2 class="sign-up" slot="title">Sign up</h2>
     <div id="popup-body" slot="body">
-        <div id="sign-up">
-            <app-input id="username-input">Username</app-input>
-            <app-input id="password-input">Password</app-input>
-            <app-input id="confirm-password-input">Confirm password</app-input>
+        <div id="sign-up" class="first-page">
+            <app-input id="username-input" pattern="[a-zA-Z0-9]{3,20}">Username</app-input>
+            <app-input id="password-input" pattern="[a-zA-Z0-9]{6,20}" type="password">Password</app-input>
+            <app-input id="confirm-password-input" pattern="[a-zA-Z0-9]{6,20}" type="password">Confirm password
+            </app-input>
         </div>
-        <div id="password-questions">
+        <div id="password-questions" class="second-page">
             <p>In case you forget your password, you can use the following security questions to reset it.</p>
             <app-security-questions id="first-question">First question</app-security-questions>
             <app-input id="first-question-input">First answer</app-input>
@@ -14,6 +15,8 @@
             <app-input id="second-question-input">Second answer</app-input>
         </div>
     </div>
-    <app-button id="login" slot="actions">Sign up</app-button>
+    <app-button id="next" class="first-page" slot="actions">Next</app-button>
+    <app-button id="previous" class="second-page" slot="actions">Previous</app-button>
+    <app-button id="login" class="second-page" slot="actions">Sign up</app-button>
     <span slot="actions">Already have an account ? <u id="link">Sign in</u></span>
 </app-popup>

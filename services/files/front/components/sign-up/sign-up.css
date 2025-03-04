@@ -3,10 +3,22 @@ h2 {
     margin: 0;
 }
 
-
-#login {
+app-button {
     width: 100%;
     text-align: center;
+    grid-row: 2;
+}
+
+#next {
+    grid-column: 2;
+}
+
+#previous {
+    grid-column: 1;
+}
+
+#login {
+    grid-column: 2;
 }
 
 span {
@@ -14,14 +26,18 @@ span {
     align-content: center;
 }
 
-#password-questions {
+.second-page {
     display: none;
 }
 
-#link:hover {
+u:hover {
     cursor: pointer;
+    color: #1d1def;
 }
 
 span {
-    grid-row: 2;
+    grid-row: 3;
+    grid-column: 1 / span 3;
+    text-align: center;
+    font-size: 12pt;
 }

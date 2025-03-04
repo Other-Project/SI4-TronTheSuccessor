@@ -8,15 +8,25 @@ export class SignUp extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.shadowRoot.getElementById("login").addEventListener("click", () => {
+        this.shadowRoot.getElementById("next").addEventListener("click", () => {
+            this.shadowRoot.querySelectorAll(".first-page").forEach(element => element.style.display = "none");
+            this.shadowRoot.querySelectorAll(".second-page").forEach(element => element.style.display = "block");
+        });
+
+        this.shadowRoot.getElementById("previous").addEventListener("click", () => {
+            this.shadowRoot.querySelectorAll(".first-page").forEach(element => element.style.display = "block");
+            this.shadowRoot.querySelectorAll(".second-page").forEach(element => element.style.display = "none");
+        });
+
+        this.shadowRoot.getElementById("login").addEventListener("click", async () => {
             if (!this.correctInputValues()) return;
-            this.#fetchLogin();
+            await this.#fetchLogin();
         });
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
         });
-    }
+    };
 
     async #fetchLogin() {
         const body = JSON.stringify({

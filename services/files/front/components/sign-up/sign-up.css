@@ -9,21 +9,10 @@ app-button {
     grid-row: 2;
 }
 
-#next {
-    grid-column: 2;
-}
-
-#previous {
-    grid-column: 1;
-}
-
-#login {
-    grid-column: 2;
-}
-
 span {
-    font-size: 12px;
-    align-content: center;
+    grid-row: 3;
+    text-align: center;
+    font-size: 12pt;
 }
 
 .second-page {
@@ -33,13 +22,6 @@ span {
 u:hover {
     cursor: pointer;
     color: #1d1def;
-}
-
-span {
-    grid-row: 3;
-    grid-column: 1 / span 3;
-    text-align: center;
-    font-size: 12pt;
 }
 
 select {
@@ -55,4 +37,11 @@ select {
 
 p {
     font-size: 15pt;
+}
+
+.icon {
+    filter: invert();
+    height: 100%;
+    max-width: 30px;
+    max-height: 30px;
 }

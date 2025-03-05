@@ -22,20 +22,10 @@ export class HomePage extends HTMLComponent {
             this.#changePopup(event.detail.name);
         });
 
-        const username = window.localStorage.getItem("userData")?.username;
-        if (username) {
-            this.shadowRoot.getElementById("username").textContent = username;
-            this.shadowRoot.getElementById("connect").src = "/assets/disconnect.svg";
-            this.shadowRoot.getElementById("connect").addEventListener("click", () => {
-                document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                document.cookie = "accessToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                window.localStorage.removeItem("userData");
-                window.location.reload();
-            });
-        } else {
-            this.shadowRoot.getElementById("username").style.display = "none";
-        }
-    }
+        document.addEventListener("hide-login-popup", () => {
+            this.shadowRoot.getElementById("popup-container").style.display = "none";
+        });
+    };
 
     #changePopup(name) {
         this.ids.forEach((id) => {

@@ -20,7 +20,8 @@ export class Input extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        if (this.pattern) this.shadowRoot.getElementById("answer").setAttribute("pattern", this.pattern);
-        if (this.type) this.shadowRoot.getElementById("answer").setAttribute("type", this.type);
+        const input_answer = this.shadowRoot.getElementById("answer");
+        if (this.pattern) input_answer.setAttribute("pattern", this.pattern);
+        if (this.type) input_answer.setAttribute("type", this.type);
     };
 }

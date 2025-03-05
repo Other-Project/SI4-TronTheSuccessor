@@ -19,5 +19,10 @@ export class Popup extends HTMLComponent {
 
     onVisible = () => {
         this.shadowRoot.getElementById("popup-panel").style.background = this.background;
+        this.shadowRoot.querySelectorAll(".popup-container")[0].addEventListener("click", (event) => {
+            if (event.target === this.shadowRoot.querySelectorAll(".popup-container")[0]) {
+                document.dispatchEvent(new CustomEvent("hide-login-popup"));
+            }
+        });
     };
 }

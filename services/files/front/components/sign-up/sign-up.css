@@ -1,18 +1,15 @@
 h2 {
-    font-size: 1.5em;
     margin: 0;
 }
 
 app-button {
-    width: 100%;
-    text-align: center;
     grid-row: 2;
+    font-size: 15pt;
 }
 
 span {
     grid-row: 3;
     text-align: center;
-    font-size: 12pt;
 }
 
 .second-page {
@@ -41,7 +38,31 @@ p {
 
 .icon {
     filter: invert();
-    height: 100%;
-    max-width: 30px;
     max-height: 30px;
+}
+
+#left-arrow {
+    position: absolute;
+    left: 0;
+    z-index: 3;
+    top: 50%;
+}
+
+#right-arrow {
+    position: absolute;
+    right: 0;
+    z-index: 3;
+    top: 35.5%;
+}
+
+#popup-body {
+    position: relative;
+}
+
+#password-questions {
+    padding: 0 1em;
+}
+
+#sign-up {
+    padding: 0 0.7em;
 }

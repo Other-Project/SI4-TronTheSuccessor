@@ -1,15 +1,15 @@
 <app-popup background="#2F1C41" id="popup">
     <h2 class="sign-up" slot="title">Sign up</h2>
+    <img alt="right" class="icon first-page" id="right-arrow" slot="body" src="/assets/right-arrow.svg">
+    <img alt="left" class="icon second-page" id="left-arrow" slot="body" src="/assets/left-arrow.svg">
     <div id="popup-body" slot="body">
         <div class="first-page" id="sign-up">
-            <img alt="right" class="icon" id="right-arrow" src="/assets/right-arrow.svg">
             <app-input id="username-input" pattern="[a-zA-Z0-9]{3,20}">Username</app-input>
             <app-input id="password-input" pattern="[a-zA-Z0-9]{6,20}" type="password">Password</app-input>
             <app-input id="confirm-password-input" pattern="[a-zA-Z0-9]{6,20}" type="password">Confirm password
             </app-input>
         </div>
         <div class="second-page" id="password-questions">
-            <img alt="left" class="icon" id="left-arrow" src="/assets/left-arrow.svg">
             <p>In case you forget your password, you can use the following security questions to reset it.</p>
             <label for="first-security-question">
                 <slot></slot>

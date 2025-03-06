@@ -4,6 +4,11 @@
         <app-input pattern="[A-Za-z0-9#?!@$%^&*]{3,20}" id="username-input">Username</app-input>
         <app-input pattern="[A-Za-z0-9#?!@$%^&*]{6,20}" type="password" id="password-input">Password</app-input>
         <u id="password-link">Forgot password</u>
+        <br>
+        <input id="show-password" type="checkbox"> Show password
+        <label aria-hidden="true" for="show-password">
+            Show password
+        </label>
     </div>
     <app-button id="login" slot="actions">Sign in</app-button>
     <span slot="actions">Don't have an account ? <u id="link">Sign up</u></span>

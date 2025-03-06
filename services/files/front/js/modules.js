@@ -13,6 +13,7 @@ import {SignUpPopup} from "/components/sign-up-popup/sign-up-popup.js";
 import {SignInPopup} from "/components/sign-in-popup/sign-in-popup.js";
 import {Input} from "/components/input/input.js";
 import {ForgetPassword} from "/components/forget-password-popup/forget-password-popup.js";
+import {ProfilDisplay} from "/components/profil-display/profil-display.js";
 
 customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-choice", GameChoice);
@@ -29,3 +30,4 @@ customElements.define("app-sign-up-popup", SignUpPopup);
 customElements.define("app-sign-in-popup", SignInPopup);
 customElements.define("app-input", Input);
 customElements.define("app-forget-password-popup", ForgetPassword);
+customElements.define("app-profil-display", ProfilDisplay);

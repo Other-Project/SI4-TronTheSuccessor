@@ -48,3 +48,9 @@ export async function parseJwt(token) {
     const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
     return JSON.parse(jsonPayload);
 }
+
+export function disconnect() {
+    document.cookie = "accessToken=; path=/; max-age=0;";
+    document.cookie = "refreshToken=; path=/; max-age=0;";
+    location.reload();
+}

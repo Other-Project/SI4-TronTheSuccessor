@@ -16,3 +16,15 @@ u:hover {
     cursor: pointer;
     color: #1d1def;
 }
+
+[aria-hidden="true"] {
+    visibility: hidden;
+}
+
+br {
+    margin-bottom: 10px;
+}
+
+#password-link {
+    margin-left: 5px;
+}

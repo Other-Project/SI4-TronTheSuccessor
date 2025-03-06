@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {loginFetch, parseJwt} from "/js/login-manager.js";
+import {loginFetch} from "/js/login-manager.js";
 
 export class SignInPopup extends HTMLComponent {
     constructor() {
@@ -23,6 +23,12 @@ export class SignInPopup extends HTMLComponent {
             if (!this.correctInputs()) return;
             await this.#loginFetch();
         });
+
+        this.shadowRoot.getElementById("show-password").addEventListener("click", () => {
+            const show_password = this.shadowRoot.getElementById("show-password");
+            const password_input = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
+            password_input.type = show_password.checked ? "text" : "password";
+        });
     };
 
     async #loginFetch() {
@@ -33,8 +39,6 @@ export class SignInPopup extends HTMLComponent {
         if (data) {
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
             document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-            const result = await parseJwt(data.accessToken);
-            window.localStorage.setItem("userData", result);
             location.reload();
         }
     }

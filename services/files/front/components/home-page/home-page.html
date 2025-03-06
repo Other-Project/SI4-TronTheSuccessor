@@ -1,8 +1,7 @@
 <div id="home-page">
     <header>
         <h1 id="title">Tron: The Successor</h1>
-        <p id="username"></p>
-        <img alt="connect" class="icon" id="connect" src="/assets/connect.svg">
+        <app-profil-display id="profil-display"></app-profil-display>
     </header>
     <main>
         <app-game-choice></app-game-choice>
@@ -14,5 +13,10 @@
         <app-sign-up-popup class="popup" id="sign-up"></app-sign-up-popup>
         <app-sign-in-popup class="popup" id="sign-in"></app-sign-in-popup>
         <app-forget-password-popup class="popup" id="forget-password"></app-forget-password-popup>
+        <app-popup background="#2F1C41" class="popup" id="disconnect">
+            <h2 slot="title">Disconnect</h2>
+            <p slot="body">Are you sure you want to disconnect ?</p>
+            <app-button id="disconnect-button" slot="actions">Disconnect</app-button>
+        </app-popup>
     </div>
 </div>

@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {loginFetch, parseJwt} from "/js/login-manager.js";
+import {loginFetch} from "/js/login-manager.js";
 
 export class SignUpPopup extends HTMLComponent {
 
@@ -27,6 +27,14 @@ export class SignUpPopup extends HTMLComponent {
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
         });
+
+        this.shadowRoot.getElementById("show-password").addEventListener("click", () => {
+            const show_password = this.shadowRoot.getElementById("show-password");
+            const password_input = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
+            password_input.type = show_password.checked ? "text" : "password";
+            const confirm_password_input = this.shadowRoot.getElementById("confirm-password-input").shadowRoot.getElementById("answer");
+            confirm_password_input.type = show_password.checked ? "text" : "password";
+        });
     };
 
     async #fetchLogin() {
@@ -51,8 +59,6 @@ export class SignUpPopup extends HTMLComponent {
         const data = await loginFetch("sign-up", body);
         document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
         document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-        const result = await parseJwt(data.accessToken);
-        window.localStorage.setItem("userData", result);
         location.reload();
     }
 

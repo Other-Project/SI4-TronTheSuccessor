@@ -1,0 +1,60 @@
+.container {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+#tabs-container {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+button {
+    border: none;
+    color: white;
+    background: #2c2c2c;
+    border-radius: 10px;
+    padding: .5em .75em;
+    cursor: pointer;
+}
+
+#tabs {
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+
+    & > * {
+        width: 150px;
+        height: 3em;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+
+        button {
+            /* Close button */
+            padding: 0;
+            background: none;
+            float: right;
+        }
+    }
+}
+
+#new-tab-btn {
+    aspect-ratio: 1 / 1;
+    align-self: center;
+}
+
+#panels {
+    & > * {
+        height: calc(100% - 1em);
+        padding: .5em;
+
+        &:not(.active) {
+            display: none;
+        }
+    }
+}
+
+.active {
+    background: #1F1F1F;
+}

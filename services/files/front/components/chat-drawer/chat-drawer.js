@@ -8,10 +8,10 @@ export class ChatDrawer extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.tabButton = this.shadowRoot.getElementById("tab-button");
+        this.drawerHandle = this.shadowRoot.getElementById("drawer-handle");
         this.drawer = this.shadowRoot.getElementById("drawer");
 
-        this.tabButton.addEventListener("click", () => {
+        this.drawerHandle.addEventListener("click", () => {
             if (this.#opened) this.hide();
             else this.show();
         });
@@ -27,12 +27,12 @@ export class ChatDrawer extends HTMLComponent {
     show() {
         this.#opened = true;
         this.drawer.classList.add("show");
-        this.tabButton.innerText = ">";
+        this.drawerHandle.innerText = ">";
     }
 
     hide() {
         this.#opened = false;
         this.drawer.classList.remove("show");
-        this.tabButton.innerText = "<";
+        this.drawerHandle.innerText = "<";
     }
 }

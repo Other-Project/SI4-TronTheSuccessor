@@ -28,7 +28,13 @@ http.createServer(async (request, response) => {
                 await handleRenewToken(request, response);
                 break;
             case "security-questions":
-                sendResponse(response, HTTP_STATUS.OK, userDatabase.getSecurityQuestions());
+                await handleSecurityQuestions(request, response);
+                break;
+            case "verify-answers":
+                await handleVerifyAnswers(request, response);
+                break;
+            case "reset-password":
+                await handleResetPassword(request, response);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
@@ -58,6 +64,33 @@ async function handleRenewToken(request, response) {
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.renewToken(parsedBody.refreshToken);
     sendResponse(response, result.error ? HTTP_STATUS.UNAUTHORIZED_STATUS_CODE : HTTP_STATUS.OK, result);
+}
+
+async function handleSecurityQuestions(request, response) {
+    const body = await getRequestBody(request);
+    const parsedBody = (body && JSON.parse(body)) || {};
+    const result = await userDatabase.getSecurityQuestions(parsedBody.username);
+    sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.OK, result);
+}
+
+async function handleVerifyAnswers(request, response) {
+    const body = await getRequestBody(request);
+    const parsedBody = JSON.parse(body);
+    const result = await userDatabase.verifyAnswers(parsedBody.username, parsedBody.answers);
+    sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.OK, result);
+}
+
+async function handleResetPassword(request, response) {
+    const body = await getRequestBody(request);
+    const parsedBody = JSON.parse(body);
+    let resetPasswordToken;
+    try {
+        resetPasswordToken = request.headers.cookie.split("resetPasswordToken=")[1].split(";")[0];
+    } catch (error) {
+        resetPasswordToken = "";
+    }
+    const result = await userDatabase.resetPassword(parsedBody.newPassword, resetPasswordToken);
+    sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.OK, result);
 }
 
 /**

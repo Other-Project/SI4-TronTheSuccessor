@@ -13,6 +13,12 @@ export class SignInPopup extends HTMLComponent {
             }));
         });
 
+        this.shadowRoot.getElementById("password-link").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("change-popup", {
+                detail: {name: "forget-password"}
+            }));
+        });
+
         this.shadowRoot.getElementById("login").addEventListener("click", async () => {
             if (!this.correctInputs()) return;
             await this.#loginFetch();
@@ -40,10 +46,10 @@ export class SignInPopup extends HTMLComponent {
         password.setCustomValidity("");
 
         if (!username.validity.valid)
-            username.setCustomValidity("Username must be at least 3 characters long and less than 20 and contain only letters and numbers.");
+            username.setCustomValidity("Username must be at least 3 characters long and less than 20.");
 
         if (!password.validity.valid)
-            password.setCustomValidity("Password must be at least 6 characters long and less than 20 and contain only letters and numbers.");
+            password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
 
         password.reportValidity();
         username.reportValidity();

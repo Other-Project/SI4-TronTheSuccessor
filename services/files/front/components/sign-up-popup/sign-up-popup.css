@@ -3,12 +3,11 @@ h2 {
 }
 
 app-button {
-    grid-row: 2;
     font-size: 15pt;
 }
 
 span {
-    grid-row: 3;
+    grid-row: 2;
     text-align: center;
 }
 

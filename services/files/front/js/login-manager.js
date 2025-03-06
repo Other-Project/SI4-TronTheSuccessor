@@ -1,8 +1,8 @@
 export function getCookie(name) {
-    return document.cookie.split('; ').reduce((r, v) => {
-        const parts = v.split('=')
-        return parts[0] === name ? decodeURIComponent(parts[1]) : r
-    }, '');
+    return document.cookie.split("; ").reduce((r, v) => {
+        const parts = v.split("=");
+        return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+    }, "");
 }
 
 export async function renewAccessToken() {
@@ -25,11 +25,12 @@ export async function renewAccessToken() {
     });
 }
 
-export async function loginFetch(url, body) {
+export async function loginFetch(url, body, authorizationToken) {
     const response = await fetch("/api/user/" + url, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + authorizationToken
         },
         body: body
     });

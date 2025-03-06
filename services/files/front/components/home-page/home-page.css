@@ -46,11 +46,9 @@ app-game-choice {
     max-width: 400px;
 }
 
-#popup-container {
-    display: none;
-}
-
-#sign-up {
+#popup-container,
+#sign-up,
+#forget-password {
     display: none;
 }
 

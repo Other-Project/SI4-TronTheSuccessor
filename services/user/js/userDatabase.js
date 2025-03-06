@@ -6,12 +6,14 @@ const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27
 const database = client.db("Tron-the-successor");
 const userCollection = database.collection("user");
 const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
+const secretKeyPasswordReset = "cd946159c3178defdaccef2f203a007ba0add6d02a79f8b259162924fccb7ddc";
 const accessTokenDuration = "1h";
 const refreshTokenDuration = "7d";
+const resetPasswordTokenDuration = "5min";
 const usernameMinLength = 3;
 const passwordMinLength = 6;
 const maxLength = 20;
-const authorizedRegex = /^[a-zA-Z0-9]+$/;
+const authorizedRegex = /^[A-Za-z0-9#?!@$%^&*]+$/;
 
 const securityQuestionsArray = ["What was the name of your favorite teacher in elementary school ?",
     "What was your dream job as a child ?",
@@ -36,12 +38,11 @@ async function addUser(username, password, securityQuestions) {
     if (error) return error;
     if (await userCollection.findOne({username}))
         return {error: `User ${username} already exists`};
-    const hashedPassword = hash(password);
     const hashedSecurityQuestions = securityQuestions.map(q => ({
         question: q.question,
         answer: hash(q.answer)
     }));
-    const user = {username, password: hashedPassword, securityQuestions: hashedSecurityQuestions};
+    const user = {username, password: hash(password), securityQuestions: hashedSecurityQuestions};
     await userCollection.insertOne(user);
     const {accessToken, refreshToken} = getJwt(user);
     return {username, refreshToken, accessToken};
@@ -66,6 +67,52 @@ async function renewToken(refreshToken) {
     return getJwt(user);
 }
 
+async function getSecurityQuestions(username) {
+    if (username) {
+        const user = await userCollection.findOne({username});
+        if (!user)
+            return {error: "Could not find user with this username : " + username};
+        return user.securityQuestions.map(question => ({question: question.question}));
+    }
+    return getSecurityQuestionsFromArray();
+}
+
+async function verifyAnswers(username, answers) {
+    if (!username || !answers || !Array.isArray(answers) || answers.length !== 2)
+        return {error: "Username or answers are missing"};
+    const user = await userCollection.findOne({username});
+    if (!user)
+        return {error: "Could not find user with this username : " + username};
+    const hashedAnswers = answers.map(hash);
+    if (user.securityQuestions[0].answer !== hashedAnswers[0] || user.securityQuestions[1].answer !== hashedAnswers[1])
+        return {error: "Wrong answers"};
+    const userInfo = {username: user.username};
+    const resetPasswordToken = jwt.sign(userInfo, secretKeyPasswordReset, {expiresIn: resetPasswordTokenDuration});
+    return {resetPasswordToken};
+}
+
+async function resetPassword(newPassword, resetPasswordToken) {
+    if (!newPassword || !resetPasswordToken)
+        return {error: "New password or reset password token is missing"};
+    if (typeof newPassword !== "string" || newPassword.length < passwordMinLength || newPassword.length > maxLength)
+        return {error: `New password must be at least ${passwordMinLength} and at most ${maxLength} characters long`};
+    if (!authorizedRegex.test(newPassword))
+        return {error: "New password must contain only letters, numbers or one of the following characters : #?!@$%^&*"};
+    try {
+        jwt.verify(resetPasswordToken, secretKeyPasswordReset);
+    } catch (error) {
+        return {error: "Invalid reset password token"};
+    }
+
+    const username = jwt.decode(resetPasswordToken).username;
+    const user = await userCollection.findOne({username});
+    if (!user)
+        return {error: "Could not find user with this reset password token : " + resetPasswordToken};
+    await userCollection.updateOne({username}, {$set: {password: hash(newPassword)}});
+    const {accessToken, refreshToken} = getJwt(user);
+    return {message: "Password successfully reset", accessToken, refreshToken};
+}
+
 function getJwt(user) {
     const userInfo = {username: user.username};
     const accessToken = jwt.sign(userInfo, secretKey, {expiresIn: accessTokenDuration});
@@ -73,7 +120,7 @@ function getJwt(user) {
     return {accessToken, refreshToken};
 }
 
-function getSecurityQuestions() {
+function getSecurityQuestionsFromArray() {
     const result = [];
     for (let i = 0; i < securityQuestionsArray.length; i++) {
         result.push(securityQuestionsArray[i]);
@@ -91,7 +138,7 @@ function checkValue(username, password, securityQuestions) {
     if (username.length > maxLength || password.length > maxLength)
         return {error: "Username and password must be at most 20 characters long"};
     if (!authorizedRegex.test(username) || !authorizedRegex.test(password))
-        return {error: "Username and password must contain only letters and numbers"};
+        return {error: "Username and password must contain only letters, numbers or one of the following characters : #?!@$%^&*"};
     if (!Array.isArray(securityQuestions) || securityQuestions.length !== 2)
         return {error: "Security questions must be an array of 2 elements"};
     for (const question of securityQuestions) {
@@ -111,4 +158,4 @@ function hash(str) {
     return hash.digest("hex");
 }
 
-module.exports = {addUser, getUser, renewToken, getSecurityQuestions};
+module.exports = {addUser, getUser, renewToken, getSecurityQuestions, verifyAnswers, resetPassword};

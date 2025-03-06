@@ -1,7 +1,7 @@
 import {HTMLComponent} from "/js/component.js";
 
 export class HomePage extends HTMLComponent {
-    ids = ["sign-in", "sign-up"];
+    ids = ["sign-in", "sign-up", "forget-password"];
 
     constructor() {
         super("home-page", ["html", "css"]);

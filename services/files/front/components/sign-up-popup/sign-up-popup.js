@@ -66,10 +66,10 @@ export class SignUpPopup extends HTMLComponent {
         confirmPassword.setCustomValidity("");
 
         if (!username.validity.valid)
-            username.setCustomValidity("Username must be at least 3 characters long and less than 20 and contain only letters and numbers.");
+            username.setCustomValidity("Username must be at least 3 characters long and less than 20.");
 
         if (!password.validity.valid)
-            password.setCustomValidity("Password must be at least 6 characters long and less than 20 and contain only letters and numbers.");
+            password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
 
         if (!confirmPassword.validity.valid)
             confirmPassword.setCustomValidity("Please confirm your password.");

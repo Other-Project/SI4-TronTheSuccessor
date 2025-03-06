@@ -1,10 +1,10 @@
 import {HTMLComponent} from "/js/component.js";
 import {loginFetch, parseJwt} from "/js/login-manager.js";
 
-export class SignUp extends HTMLComponent {
+export class SignUpPopup extends HTMLComponent {
 
     constructor() {
-        super("sign-up", ["html", "css"]);
+        super("sign-up-popup", ["html", "css"]);
     }
 
     onSetupCompleted = async () => {

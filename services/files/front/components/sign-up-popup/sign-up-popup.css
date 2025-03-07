@@ -65,7 +65,3 @@ p {
 #sign-up {
     padding: 0 0.7em;
 }
-
-[aria-hidden="true"] {
-    visibility: hidden;
-}

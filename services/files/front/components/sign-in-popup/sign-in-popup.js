@@ -23,12 +23,6 @@ export class SignInPopup extends HTMLComponent {
             if (!this.correctInputs()) return;
             await this.#loginFetch();
         });
-
-        this.shadowRoot.getElementById("show-password").addEventListener("click", () => {
-            const show_password = this.shadowRoot.getElementById("show-password");
-            const password_input = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
-            password_input.type = show_password.checked ? "text" : "password";
-        });
     };
 
     async #loginFetch() {

@@ -23,11 +23,6 @@ export class ForgetPassword extends HTMLComponent {
             await this.#verifyAnswers();
         });
 
-        this.shadowRoot.getElementById("show-password").addEventListener("click", () => {
-            const new_password_input = this.shadowRoot.getElementById("new-password-input").shadowRoot.getElementById("answer");
-            new_password_input.type = new_password_input.type === "password" ? "text" : "password";
-        });
-
         this.shadowRoot.getElementById("password-button").addEventListener("click", async () => {
             if (!this.#passwordCheck()) return;
             await this.#resetPassword();

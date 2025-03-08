@@ -1,7 +1,9 @@
 import {HTMLComponent} from "/js/component.js";
-import {getCookie, loginFetch} from "/js/login-manager.js";
+import {loginFetch} from "/js/login-manager.js";
 
 export class ForgetPassword extends HTMLComponent {
+    resetPasswordToken;
+
     constructor() {
         super("forget-password-popup", ["html", "css"]);
     }
@@ -91,7 +93,7 @@ export class ForgetPassword extends HTMLComponent {
         const body = JSON.stringify({username, answers: [firstAnswer, secondAnswer]});
         const data = await loginFetch("verify-answers", body);
         if (data) {
-            document.cookie = `resetPasswordToken=${data.resetPasswordToken}; path=/; max-age=${60 * 5};`;
+            this.resetPasswordToken = data.resetPasswordToken;
             this.#showPart("password");
         }
     }
@@ -99,7 +101,7 @@ export class ForgetPassword extends HTMLComponent {
     async #resetPassword() {
         const newPassword = this.shadowRoot.getElementById("new-password-input").shadowRoot.getElementById("answer").value;
         const body = JSON.stringify({newPassword});
-        const data = await loginFetch("reset-password", body, getCookie("resetPasswordToken"));
+        const data = await loginFetch("reset-password", body, this.resetPasswordToken);
         if (data) {
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
             document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;

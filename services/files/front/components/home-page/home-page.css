@@ -12,7 +12,7 @@
     max-height: 45px;
 }
 
-header, footer {
+header {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
@@ -55,4 +55,9 @@ app-game-choice {
 
 #disconnect {
     text-align: center;
+    margin: 0;
+}
+
+h2, p {
+    margin: 0;
 }

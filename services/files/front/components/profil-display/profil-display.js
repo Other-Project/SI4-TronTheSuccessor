@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {getCookie} from "/js/login-manager.js";
+import {getCookie, parseJwt} from "/js/login-manager.js";
 
 export class ProfilDisplay extends HTMLComponent {
     constructor() {
@@ -8,22 +8,32 @@ export class ProfilDisplay extends HTMLComponent {
 
     onSetupCompleted = async () => {
         if (getCookie("accessToken")) {
-            this.shadowRoot.querySelectorAll(".connected").forEach(element => element.style.display = "block");
-            this.shadowRoot.getElementById("disconnected").style.display = "none";
+            this.shadowRoot.querySelectorAll(".connected").forEach(element => element.style.display = "flex");
+            this.shadowRoot.querySelectorAll(".disconnected").forEach(element => element.style.display = "none");
+            this.shadowRoot.getElementById("username").innerHTML = (await parseJwt(getCookie("accessToken"))).username;
         } else {
-            this.shadowRoot.getElementById("disconnected").style.display = "block";
+            this.shadowRoot.querySelectorAll(".disconnected").forEach(element => element.style.display = "block");
             this.shadowRoot.querySelectorAll(".connected").forEach(element => element.style.display = "none");
         }
 
         this.shadowRoot.getElementById("connected").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("change-popup", {
-                detail: {name: "disconnect"}
-            }));
+            const menu = this.shadowRoot.getElementById("dropdown-menu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
 
+        this.shadowRoot.getElementById("login").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("show-popup-container"));
         });
 
         this.shadowRoot.getElementById("disconnected").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("show-popup-container"));
+            const menu = this.shadowRoot.getElementById("dropdown-menu");
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        });
+
+        this.shadowRoot.getElementById("logout").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("change-popup", {
+                detail: {name: "disconnect"}
+            }));
         });
     };
 }

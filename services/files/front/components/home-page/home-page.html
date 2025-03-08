@@ -6,9 +6,6 @@
     <main>
         <app-game-choice></app-game-choice>
     </main>
-    <footer>
-        <img alt="settings" class="icon" id="settings" src="/assets/settings.svg">
-    </footer>
     <div id="popup-container">
         <app-sign-up-popup class="popup" id="sign-up"></app-sign-up-popup>
         <app-sign-in-popup class="popup" id="sign-in"></app-sign-in-popup>
@@ -17,6 +14,7 @@
             <h2 slot="title">Disconnect</h2>
             <p slot="body">Are you sure you want to disconnect ?</p>
             <app-button id="disconnect-button" slot="actions">Disconnect</app-button>
+            <app-button id="cancel-button" slot="actions">Cancel</app-button>
         </app-popup>
     </div>
 </div>

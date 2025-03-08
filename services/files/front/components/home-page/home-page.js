@@ -15,6 +15,15 @@ export class HomePage extends HTMLComponent {
             }
         });
 
+        this.shadowRoot.getElementById("home-page").addEventListener("click", (event) => {
+            if (this.shadowRoot.getElementById("popup-container").contains(event.target)) return;
+            const profil = this.shadowRoot.getElementById("profil-display");
+            if (event.target !== profil && !profil.contains(event.target)) {
+                const menu = profil.shadowRoot.getElementById("dropdown-menu");
+                menu.style.display = "none";
+            }
+        });
+
         document.addEventListener("change-popup", (event) => {
             this.#changePopup(event.detail.name);
         });
@@ -29,6 +38,10 @@ export class HomePage extends HTMLComponent {
 
         this.shadowRoot.getElementById("disconnect-button").addEventListener("click", () => {
             disconnect();
+        });
+
+        this.shadowRoot.getElementById("cancel-button").addEventListener("click", () => {
+            this.shadowRoot.getElementById("popup-container").style.display = "none";
         });
     };
 

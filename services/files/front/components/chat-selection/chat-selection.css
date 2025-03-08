@@ -1,0 +1,12 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#friend-list {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}

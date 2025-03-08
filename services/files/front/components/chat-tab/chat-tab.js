@@ -2,21 +2,20 @@ import {HTMLComponent} from "/js/component.js";
 
 export class ChatTab extends HTMLComponent {
     constructor() {
-        super("chat-tab", ["html", "css"]);
+        super("chat-tab");
     }
 
     onSetupCompleted = () => {
-        this.pages = this.shadowRoot.getElementById("pages");
+        const selectionPage = document.createElement("app-chat-selection");
+        this.dataset.tabTitle = "Chat selection";
+        selectionPage.addEventListener("room-selected", (event) => this.openChatRoom(event.detail));
+        this.shadowRoot.replaceChildren(selectionPage);
     }
 
-    onVisible = () => {
-        this.navigateTo("chat-selection");
-    };
-
-    navigateTo(pageId) {
-        for (let page of this.pages.children) {
-            page.classList.toggle("active", page.id === pageId);
-            if (page.id === pageId) this.dataset.tabTitle = page.dataset.tabTitle;
-        }
+    openChatRoom(room) {
+        const chatPage = document.createElement("app-chat");
+        this.dataset.tabTitle = room.name;
+        chatPage.setAttribute("room", room.id);
+        this.shadowRoot.replaceChildren(chatPage);
     }
 }

@@ -13,10 +13,6 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomIcon = this.shadowRoot.getElementById("room-icon");
         this.roomName = this.shadowRoot.getElementById("room-name");
         this.roomPreview = this.shadowRoot.getElementById("room-preview");
-
-        this.shadowRoot.getElementById("room-button").addEventListener("click", () => {
-            this.dispatchEvent(new CustomEvent("room-selected", {detail: {name: this.id}}));
-        });
     }
 
     onVisible = () => this.#refresh();
@@ -27,6 +23,7 @@ export class ChatRoomButton extends HTMLComponent {
     }
 
     #refresh() {
+        if (!this.roomIcon) return;
         this.roomIcon.src = this.icon;
         this.roomName.textContent = this.name;
         this.roomPreview.textContent = this.preview;

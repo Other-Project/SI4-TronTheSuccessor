@@ -53,6 +53,8 @@ button {
 }
 
 #panels {
+    overflow: hidden;
+
     :not(slot) {
         display: block;
         height: calc(100% - 1em);

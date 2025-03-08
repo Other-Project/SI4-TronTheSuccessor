@@ -32,7 +32,8 @@ button {
     overflow-x: auto;
     scrollbar-width: thin;
 
-    & > * {
+    [data-tab-id] {
+        display: inline-block;
         width: 150px;
         height: 3em;
         border-bottom-left-radius: 0;
@@ -52,13 +53,18 @@ button {
 }
 
 #panels {
-    & > * {
+    :not(slot) {
+        display: block;
         height: calc(100% - 1em);
         padding: .5em;
 
         &:not(.active) {
             display: none;
         }
+    }
+
+    #panel-template {
+        display: none;
     }
 }
 

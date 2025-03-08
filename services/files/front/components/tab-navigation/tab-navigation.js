@@ -48,8 +48,8 @@ export class TabNavigation extends HTMLComponent {
      */
     changeTab(tabId) {
         if (this.tabs.querySelector(`[data-tab-id="${tabId}"]`) === null) return;
-        for (let tab of this.tabs.children) tab.classList.toggle("active", tab.dataset.tabId === tabId);
-        for (let panel of this.panels.children) panel.classList.toggle("active", panel.id === "tab-" + tabId);
+        for (let tab of this.tabs.querySelectorAll("[data-tab-id]")) tab.classList.toggle("active", tab.dataset.tabId === tabId);
+        for (let panel of this.panels.querySelectorAll(":not(slot)")) panel.classList.toggle("active", panel.id === "tab-" + tabId);
         this.tabs.querySelector(".active").scrollIntoView({behavior: "smooth"});
     }
 
@@ -67,7 +67,9 @@ export class TabNavigation extends HTMLComponent {
         this.panels.appendChild(tabPanel);
 
         const tabBtn = document.createElement("button");
-        tabBtn.textContent = tabPanel.dataset.tabTitle;
+        const tabBtnText = document.createElement("span");
+        tabBtnText.textContent = tabPanel.dataset.tabTitle ?? "New Tab";
+        tabBtn.appendChild(tabBtnText);
         tabBtn.dataset.tabId = tabId;
         tabBtn.addEventListener("click", () => this.changeTab(tabId));
         tabBtn.addEventListener("mousedown", (e) => {
@@ -84,12 +86,12 @@ export class TabNavigation extends HTMLComponent {
         });
         tabBtn.appendChild(tabCloseBtn);
 
-        this.#setupTabTitleObserver(tabPanel, tabBtn);
+        this.#setupTabTitleObserver(tabPanel, tabBtnText);
         if (navigateTo) this.changeTab(tabId);
     }
 
-    #setupTabTitleObserver(tabPanel, tabBtn) {
-        new MutationObserver(() => tabBtn.textContent = tabPanel.dataset.tabTitle).observe(tabPanel, {
+    #setupTabTitleObserver(tabPanel, tabBtnText) {
+        new MutationObserver(() => tabBtnText.textContent = tabPanel.dataset.tabTitle ?? "New Tab").observe(tabPanel, {
             attributes: true,
             attributeFilter: ["data-tab-title"]
         });

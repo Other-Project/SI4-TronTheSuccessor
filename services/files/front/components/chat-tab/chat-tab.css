@@ -1,0 +1,3 @@
+#pages > :not(.active) {
+    display: none;
+}

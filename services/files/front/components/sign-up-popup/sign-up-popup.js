@@ -11,6 +11,7 @@ export class SignUpPopup extends HTMLComponent {
         await this.#injectSecurityQuestions();
 
         this.shadowRoot.getElementById("right-arrow").addEventListener("click", () => {
+            if (!this.#checkFirstPageInputs()) return;
             this.#showPage("second-page");
         });
 
@@ -27,6 +28,12 @@ export class SignUpPopup extends HTMLComponent {
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
         });
+
+        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
+        const secondQuestion = this.shadowRoot.getElementById("second-security-question");
+
+        firstQuestion.addEventListener("change", () => this.#updateSecondQuestionOptions());
+        secondQuestion.addEventListener("change", () => this.#updateFirstQuestionOptions());
     };
 
     async #fetchLogin() {
@@ -90,6 +97,7 @@ export class SignUpPopup extends HTMLComponent {
     #checkSecondPageInputs() {
         const firstSecurityAnswer = this.shadowRoot.getElementById("first-answer-input").shadowRoot.getElementById("answer");
         const secondSecurityAnswer = this.shadowRoot.getElementById("second-answer-input").shadowRoot.getElementById("answer");
+        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
 
         if (firstSecurityAnswer == null || secondSecurityAnswer == null) {
             this.#showPage("second-page");
@@ -98,6 +106,7 @@ export class SignUpPopup extends HTMLComponent {
 
         firstSecurityAnswer.setCustomValidity("");
         secondSecurityAnswer.setCustomValidity("");
+        firstQuestion.setCustomValidity("");
 
         if (!firstSecurityAnswer.validity.valid)
             firstSecurityAnswer.setCustomValidity("Please provide an answer to the first security question.");
@@ -109,12 +118,13 @@ export class SignUpPopup extends HTMLComponent {
             this.#showPage("second-page");
 
         if (this.shadowRoot.getElementById("first-security-question").value === this.shadowRoot.getElementById("second-security-question").value)
-            firstSecurityAnswer.setCustomValidity("Please choose two different questions");
+            firstQuestion.setCustomValidity("Please choose two different questions");
 
+        firstQuestion.reportValidity();
         secondSecurityAnswer.reportValidity();
         firstSecurityAnswer.reportValidity();
 
-        return firstSecurityAnswer.validity.valid && secondSecurityAnswer.validity.valid;
+        return firstSecurityAnswer.validity.valid && secondSecurityAnswer.validity.valid && firstQuestion.validity.valid;
     }
 
     #showPage(page_name) {
@@ -134,5 +144,25 @@ export class SignUpPopup extends HTMLComponent {
             firstQuestion.appendChild(opt);
             secondQuestion.appendChild(opt.cloneNode(true));
         }
+
+        secondQuestion.selectedIndex = 1;
+        this.#updateFirstQuestionOptions();
+        this.#updateSecondQuestionOptions();
+    }
+
+    #updateSecondQuestionOptions() {
+        const selectedValue = this.shadowRoot.getElementById("first-security-question").value;
+        const secondQuestion = this.shadowRoot.getElementById("second-security-question");
+        Array.from(secondQuestion.options).forEach(option => {
+            option.style.display = option.value === selectedValue ? "none" : "block";
+        });
+    }
+
+    #updateFirstQuestionOptions() {
+        const selectedValue = this.shadowRoot.getElementById("second-security-question").value;
+        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
+        Array.from(firstQuestion.options).forEach(option => {
+            option.style.display = option.value === selectedValue ? "none" : "block";
+        });
     }
 }

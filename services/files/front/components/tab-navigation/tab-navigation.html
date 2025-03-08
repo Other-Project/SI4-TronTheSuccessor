@@ -1,7 +1,11 @@
 <div class="container">
     <div id="tabs-container">
-        <div id="tabs"></div>
+        <div id="tabs">
+            <slot name="tabs"></slot>
+        </div>
         <button id="new-tab-btn">+</button>
     </div>
-    <div id="panels"></div>
+    <div id="panels">
+        <slot name="panels"></slot>
+    </div>
 </div>

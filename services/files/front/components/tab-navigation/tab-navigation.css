@@ -8,6 +8,14 @@
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 10px;
+
+    &.readonly {
+        grid-template-columns: 1fr;
+
+        #new-tab-btn, .close-btn {
+            display: none;
+        }
+    }
 }
 
 button {
@@ -30,8 +38,7 @@ button {
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
 
-        button {
-            /* Close button */
+        .close-btn {
             padding: 0;
             background: none;
             float: right;

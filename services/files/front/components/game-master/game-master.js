@@ -47,11 +47,6 @@ export class GameMaster extends HTMLComponent {
         });
     };
 
-    // noinspection JSUnusedGlobalSymbols
-    attributeChangedCallback(name, oldValue, newValue) {
-        this[name] = newValue;
-    }
-
     onVisible = () => this.#launchGame();
     onHidden = () => this.stopGame();
 

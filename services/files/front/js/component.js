@@ -39,4 +39,15 @@ export class HTMLComponent extends HTMLElement {
         this.#setupCompleted = true;
         this.#callEvent(this.onSetupCompleted);
     }
+
+    /**
+     * Called when an attribute is set through the HTML tag
+     * @param name The attribute name
+     * @param oldValue The old value of the attribute
+     * @param newValue The new value of the attribute
+     */
+    // noinspection JSUnusedGlobalSymbols
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (this.constructor.observedAttributes?.includes(name)) this[name] = newValue;
+    }
 }

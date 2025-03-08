@@ -15,6 +15,7 @@ export class TabNavigation extends HTMLComponent {
         this.tabsContainer = this.shadowRoot.getElementById("tabs-container");
         this.tabs = this.shadowRoot.getElementById("tabs");
         this.panels = this.shadowRoot.getElementById("panels");
+        this.panelTemplate = this.shadowRoot.getElementById("panel-template");
         this.tabs.onmousedown = function (e) {
             if (e.button === 1) {
                 e.preventDefault();
@@ -26,8 +27,9 @@ export class TabNavigation extends HTMLComponent {
     };
 
     onVisible = () => {
-        this.newTab();
-        this.newTab();
+        const tab = this.tabs.querySelector("[data-tab-id].active") ?? this.tabs.querySelector("[data-tab-id]");
+        if (tab) this.changeTab(tab.dataset.tabId);
+        else this.newTab();
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -59,10 +61,9 @@ export class TabNavigation extends HTMLComponent {
         if (this.readonly) return;
         const tabId = Math.random().toString(36).substring(7);
 
-        const tabPanel = document.createElement("div");
+        const tabPanel = this.panelTemplate.assignedElements()?.[0]?.cloneNode(true);
+        if (!tabPanel) return;
         tabPanel.id = "tab-" + tabId;
-        tabPanel.dataset.tabTitle = "New tab";
-        tabPanel.textContent = "Content " + tabId;
         this.panels.appendChild(tabPanel);
 
         const tabBtn = document.createElement("button");
@@ -88,11 +89,7 @@ export class TabNavigation extends HTMLComponent {
     }
 
     #setupTabTitleObserver(tabPanel, tabBtn) {
-        const observer = new MutationObserver((mutations) => {
-            tabBtn.textContent = tabPanel.dataset.tabTitle;
-        });
-
-        observer.observe(tabPanel, {
+        new MutationObserver(() => tabBtn.textContent = tabPanel.dataset.tabTitle).observe(tabPanel, {
             attributes: true,
             attributeFilter: ["data-tab-title"]
         });

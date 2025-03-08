@@ -12,6 +12,7 @@ export class TabNavigation extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
+        this.tabIdCounter = 0;
         this.tabsContainer = this.shadowRoot.getElementById("tabs-container");
         this.tabs = this.shadowRoot.getElementById("tabs");
         this.panels = this.shadowRoot.getElementById("panels");
@@ -47,10 +48,11 @@ export class TabNavigation extends HTMLComponent {
      * @param {string} tabId The tab id to display
      */
     changeTab(tabId) {
-        if (this.tabs.querySelector(`[data-tab-id="${tabId}"]`) === null) return;
+        const tabToActivate = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
+        if (!tabToActivate) return;
         for (let tab of this.tabs.querySelectorAll("[data-tab-id]")) tab.classList.toggle("active", tab.dataset.tabId === tabId);
         for (let panel of this.panels.querySelectorAll(":not(slot)")) panel.classList.toggle("active", panel.id === "tab-" + tabId);
-        this.tabs.querySelector(".active").scrollIntoView({behavior: "smooth"});
+        tabToActivate.scrollIntoView({behavior: "smooth"});
     }
 
     /**
@@ -59,7 +61,7 @@ export class TabNavigation extends HTMLComponent {
      */
     newTab(navigateTo = true) {
         if (this.readonly) return;
-        const tabId = Math.random().toString(36).substring(7);
+        const tabId = (this.tabIdCounter++).toString();
 
         const tabPanel = this.panelTemplate.assignedElements()?.[0]?.cloneNode(true);
         if (!tabPanel) return;

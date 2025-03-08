@@ -85,7 +85,7 @@ async function handleResetPassword(request, response) {
     const parsedBody = JSON.parse(body);
     let resetPasswordToken;
     try {
-        resetPasswordToken = request.headers.cookie.split("resetPasswordToken=")[1].split(";")[0];
+        resetPasswordToken = request.headers["authorization"].split("Bearer ")[1];
     } catch (error) {
         resetPasswordToken = "";
     }

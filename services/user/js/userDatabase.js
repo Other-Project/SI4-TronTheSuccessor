@@ -9,7 +9,7 @@ const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A
 const secretKeyPasswordReset = "cd946159c3178defdaccef2f203a007ba0add6d02a79f8b259162924fccb7ddc";
 const accessTokenDuration = "1h";
 const refreshTokenDuration = "7d";
-const resetPasswordTokenDuration = "5min";
+const resetPasswordTokenDuration = "10min";
 const usernameMinLength = 3;
 const passwordMinLength = 6;
 const maxLength = 20;
@@ -92,8 +92,8 @@ async function verifyAnswers(username, answers) {
 }
 
 async function resetPassword(newPassword, resetPasswordToken) {
-    if (!newPassword || !resetPasswordToken)
-        return {error: "New password or reset password token is missing"};
+    if (!newPassword)
+        return {error: "New password is missing"};
     if (typeof newPassword !== "string" || newPassword.length < passwordMinLength || newPassword.length > maxLength)
         return {error: `New password must be at least ${passwordMinLength} and at most ${maxLength} characters long`};
     if (!authorizedRegex.test(newPassword))
@@ -101,7 +101,7 @@ async function resetPassword(newPassword, resetPasswordToken) {
     try {
         jwt.verify(resetPasswordToken, secretKeyPasswordReset);
     } catch (error) {
-        return {error: "Invalid reset password token"};
+        return {error: "It took too long to reset your password, please try again"};
     }
 
     const username = jwt.decode(resetPasswordToken).username;

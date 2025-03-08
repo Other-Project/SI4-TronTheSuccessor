@@ -21,13 +21,8 @@ export class ProfilDisplay extends HTMLComponent {
             menu.style.display = menu.style.display === "block" ? "none" : "block";
         });
 
-        this.shadowRoot.getElementById("login").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("show-popup-container"));
-        });
-
         this.shadowRoot.getElementById("disconnected").addEventListener("click", () => {
-            const menu = this.shadowRoot.getElementById("dropdown-menu");
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
+            document.dispatchEvent(new CustomEvent("show-popup-container"));
         });
 
         this.shadowRoot.getElementById("logout").addEventListener("click", () => {

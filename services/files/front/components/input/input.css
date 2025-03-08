@@ -54,6 +54,7 @@
 
     img {
         height: 100%;
+        filter: invert();
     }
 }
 

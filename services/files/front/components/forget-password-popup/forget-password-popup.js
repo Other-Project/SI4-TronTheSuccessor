@@ -31,6 +31,11 @@ export class ForgetPassword extends HTMLComponent {
         });
     };
 
+    onVisible = () => {
+        this.showPart("username");
+        this.clearInputs();
+    };
+
     #usernameCheck() {
         const username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
         username.setCustomValidity("");
@@ -67,8 +72,6 @@ export class ForgetPassword extends HTMLComponent {
             newPassword.setCustomValidity("Password must be at least 6 characters long and less than 20.");
         if (newPassword.value !== confirmPassword.value)
             confirmPassword.setCustomValidity("Passwords do not match.");
-        if (!confirmPassword.validity.valid)
-            confirmPassword.setCustomValidity("Password must be at least 6 characters long and less than 20.");
         confirmPassword.reportValidity();
         newPassword.reportValidity();
         return newPassword.validity.valid && confirmPassword.validity.valid;
@@ -82,7 +85,7 @@ export class ForgetPassword extends HTMLComponent {
             for (let i = 0; i < data.length; i++) {
                 this.shadowRoot.getElementById(`question-${i}`).innerText = data[i].question;
             }
-            this.#showPart("question");
+            this.showPart("question");
         }
     }
 
@@ -94,7 +97,7 @@ export class ForgetPassword extends HTMLComponent {
         const data = await loginFetch("verify-answers", body);
         if (data) {
             this.resetPasswordToken = data.resetPasswordToken;
-            this.#showPart("password");
+            this.showPart("password");
         }
     }
 
@@ -106,13 +109,23 @@ export class ForgetPassword extends HTMLComponent {
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
             document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
             this.shadowRoot.getElementById("password-reset-popup").style.display = "block";
+        } else {
+            this.showPart("username");
+            this.clearInputs();
         }
     }
 
-    #showPart(part) {
+    showPart(part) {
         this.shadowRoot.querySelectorAll(".username-part").forEach(element => element.style.display = "none");
         this.shadowRoot.querySelectorAll(".question-part").forEach(element => element.style.display = "none");
         this.shadowRoot.querySelectorAll(".password-part").forEach(element => element.style.display = "none");
         this.shadowRoot.querySelectorAll(`.${part}-part`).forEach(element => element.style.display = "block");
+    }
+
+    clearInputs() {
+        this.shadowRoot.querySelectorAll("app-input").forEach(element => {
+            if (element.shadowRoot.getElementById("answer"))
+                element.shadowRoot.getElementById("answer").value = "";
+        });
     }
 }

@@ -24,7 +24,7 @@ export class ForgetPassword extends HTMLComponent {
         });
 
         this.shadowRoot.getElementById("password-button").addEventListener("click", async () => {
-            if (!this.#passwordCheck()) return;
+            if (!this.#passwordsCheck()) return;
             await this.#resetPassword();
         });
     };
@@ -56,13 +56,20 @@ export class ForgetPassword extends HTMLComponent {
         return firstAnswer.validity.valid && secondAnswer.validity.valid;
     }
 
-    #passwordCheck() {
+    #passwordsCheck() {
         const newPassword = this.shadowRoot.getElementById("new-password-input").shadowRoot.getElementById("answer");
+        const confirmPassword = this.shadowRoot.getElementById("confirm-password-input").shadowRoot.getElementById("answer");
         newPassword.setCustomValidity("");
+        confirmPassword.setCustomValidity("");
         if (!newPassword.validity.valid)
             newPassword.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        if (newPassword.value !== confirmPassword.value)
+            confirmPassword.setCustomValidity("Passwords do not match.");
+        if (!confirmPassword.validity.valid)
+            confirmPassword.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        confirmPassword.reportValidity();
         newPassword.reportValidity();
-        return newPassword.validity.valid;
+        return newPassword.validity.valid && confirmPassword.validity.valid;
     }
 
     async #fetchSecurityQuestionsForUser() {
@@ -94,10 +101,9 @@ export class ForgetPassword extends HTMLComponent {
         const body = JSON.stringify({newPassword});
         const data = await loginFetch("reset-password", body, getCookie("resetPasswordToken"));
         if (data) {
-            alert(data.message);
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
             document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-            location.reload();
+            this.shadowRoot.getElementById("password-reset-popup").style.display = "block";
         }
     }
 

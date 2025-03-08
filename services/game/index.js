@@ -17,13 +17,11 @@ let server = http.createServer(async (request, response) => {
                 if (request.method === "POST") await handleAddElo(request, response);
                 else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
                 else {
-                    response.statusCode = HTTP_STATUS.NOT_FOUND;
-                    response.end();
+                    sendResponse(response, HTTP_STATUS.NOT_FOUND);
                 }
                 break;
             default:
-                response.statusCode = HTTP_STATUS.NOT_FOUND;
-                response.end();
+                sendResponse(response, HTTP_STATUS.NOT_FOUND);
         }
     } catch (error) {
         console.warn(error);

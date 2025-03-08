@@ -11,7 +11,7 @@ const BASE_ELO = 1000;
  * @returns {number} The new ELO points.
  */
 function calculateEloPoints(elo, k, w, d) {
-    console.log(`ELO: ${elo}, K: ${k}, W: ${w}, D: ${d}`);
+    console.debug(`ELO: ${elo}, K: ${k}, W: ${w}, D: ${d}`);
     const vD = 1 / (1 + Math.pow(10, -d / 400));
     return elo + k * (w - vD);
 }

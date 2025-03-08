@@ -2,26 +2,27 @@ const http = require("http");
 const url = require("url");
 
 /**
- * Add ELO to a player.
- * @param {string} playerId
- * @param {number} elo
+ * Make an HTTP request.
+ * @param {string} method The HTTP method (e.g., 'GET', 'POST').
+ * @param {string} path The request path.
+ * @param {Object} [data] The request payload (for 'POST' or 'PUT' methods).
  * @returns {Promise<unknown>}
  */
-async function addElo(playerId, elo) {
+async function makeHttpRequest(method, path, data = null) {
     return new Promise((resolve, reject) => {
-        const data = JSON.stringify({playerId, elo});
         const serviceUrl = process.env.GAME_SERVICE_URL || 'http://localhost:8003';
         const {hostname, port} = new url.URL(serviceUrl);
         const options = {
             hostname: hostname,
             port: port,
-            path: "/api/game/elo",
-            method: 'POST',
+            path: path,
+            method: method,
             headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': data.length
+                'Content-Type': 'application/json'
             }
         };
+
+        if (data) options.headers['Content-Length'] = Buffer.byteLength(JSON.stringify(data));
 
         const req = http.request(options, (res) => {
             let responseData = '';
@@ -37,10 +38,23 @@ async function addElo(playerId, elo) {
             });
         });
         req.on('error', error => reject(error));
-        req.write(data);
+        if (data) req.write(JSON.stringify(data));
         req.end();
     });
 }
+
+/**
+ * Add ELO to a player.
+ * @param {string} playerId
+ * @param {number} elo
+ * @returns {Promise<unknown>}
+ */
+async function addElo(playerId, elo) {
+    const data = {playerId, elo};
+    return makeHttpRequest('POST', '/api/game/elo', data);
+}
+
+module.exports = {addElo};
 
 /**
  * Get the ELO of a player.
@@ -48,25 +62,7 @@ async function addElo(playerId, elo) {
  * @returns {Promise<unknown>}
  */
 async function getElo(playerId) {
-    return new Promise((resolve, reject) => {
-        const options = {
-            hostname: process.env.GAME_SERVICE_HOSTNAME || 'localhost',
-            port: process.env.GAME_SERVICE_PORT || 8003,
-            path: `/api/game/elo/${playerId}`,
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        const req = http.request(options, (res) => {
-            let responseData = '';
-            res.on('data', chunk => responseData += chunk);
-            res.on('end', resolve(JSON.parse(responseData)));
-            req.on('error', error => reject(error));
-        });
-        req.end();
-    });
+    return makeHttpRequest('GET', `/api/game/elo/${playerId}`);
 }
 
 module.exports = {addElo, getElo};

@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {getCookie} from "/js/login-manager.js";
 
 export class ChatDrawer extends HTMLComponent {
     #opened;
@@ -21,6 +22,7 @@ export class ChatDrawer extends HTMLComponent {
     };
 
     onVisible = () => {
+        this.style.display = getCookie("refreshToken") ? undefined : "none";
         this.hide();
     };
 

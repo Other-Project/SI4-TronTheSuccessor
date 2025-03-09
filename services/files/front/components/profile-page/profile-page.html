@@ -1,0 +1,13 @@
+<link href="/components/profile-page/profile-page.css" rel="stylesheet" type="text/css">
+
+<div id="profile-page">
+    <app-tab-navigation readonly="true">
+        <app-profile-page-button slot="tabs">Overview</app-profile-page-button>
+        <app-profile-page-button slot="tabs">Match History</app-profile-page-button>
+        <app-profile-page-button slot="tabs">Ranking</app-profile-page-button>
+        <app-profile-overview slot="panels" class="active"></app-profile-overview>
+        <app-profile-history slot="panels"></app-profile-history>
+        <app-profile-leaderboard slot="panels"></app-profile-leaderboard>
+    </app-tab-navigation>
+    <img alt="home" id="home" src="/assets/home.svg">
+</div>

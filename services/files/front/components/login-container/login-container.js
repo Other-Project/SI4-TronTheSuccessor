@@ -3,15 +3,17 @@ import {disconnect} from "/js/login-manager.js";
 
 export class LoginContainer extends HTMLComponent {
     ids = ["sign-in", "sign-up", "forget-password", "disconnect"];
+    popupContainer;
 
     constructor() {
         super("login-container", ["html", "css"]);
     }
 
     onSetupCompleted = () => {
-        this.shadowRoot.getElementById("popup-container").addEventListener("click", (event) => {
-            if (event.target === this.shadowRoot.getElementById("popup-container")) {
-                this.shadowRoot.getElementById("popup-container").style.display = "none";
+        this.popupContainer = this.shadowRoot.getElementById("popup-container");
+        this.popupContainer.addEventListener("click", (event) => {
+            if (event.target === this.popupContainer) {
+                this.popupContainer.style.display = "none";
             }
         });
 
@@ -20,11 +22,11 @@ export class LoginContainer extends HTMLComponent {
         });
 
         document.addEventListener("show-popup-container", () => {
-            this.shadowRoot.getElementById("popup-container").style.display = "block";
+            this.popupContainer.style.display = "block";
         });
 
         document.addEventListener("hide-login-popup", () => {
-            this.shadowRoot.getElementById("popup-container").style.display = "none";
+            this.popupContainer.style.display = "none";
         });
 
         this.shadowRoot.getElementById("disconnect-button").addEventListener("click", () => {
@@ -32,12 +34,12 @@ export class LoginContainer extends HTMLComponent {
         });
 
         this.shadowRoot.getElementById("cancel-button").addEventListener("click", () => {
-            this.shadowRoot.getElementById("popup-container").style.display = "none";
+            this.popupContainer.style.display = "none";
         });
     };
 
     #changePopup(name) {
-        this.shadowRoot.getElementById("popup-container").style.display = "block";
+        this.popupContainer.style.display = "block";
         this.ids.forEach((id) => {
             this.shadowRoot.getElementById(id).style.display = id === name ? "block" : "none";
         });

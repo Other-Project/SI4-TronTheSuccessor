@@ -1,15 +1,24 @@
-<template id="stats-template">
-    <h2>Stats</h2>
-    <div class="triangle-container">
-        <svg viewBox="0 0 100 87">
-            <polygon points="50,0 100,87 0,87" stroke="white" stroke-width="2" fill="none"/>
-            <polyline points="50,0 25,43.5 75,43.5" stroke="white" stroke-width="2" fill="none"/>
-            <polyline points="25,43.5 50,87 75,43.5" stroke="white" stroke-width="2" fill="none"/>
-        </svg>
+<p>Stats</p>
+<div class="triforce-container">
+    <svg viewBox="0 0 100 70">
+        <!-- Top triangle -->
+        <polygon points="50,5 70,35 30,35" stroke="white" stroke-width="2" fill="none"/>
+        <text x="50" y="27.5">1</text>
 
-        <div class="stat top"><span class="games">0</span><br><span class="label">Games Played</span></div>
-        <div class="stat center"><span class="winrate">0%</span><br><span class="label">Win Rate</span></div>
-        <div class="stat bottom-left"><span class="time">0h</span><br><span class="label">Time Played</span></div>
-        <div class="stat bottom-right"><span class="streak">0</span><br><span class="label">Win Streak</span></div>
-    </div>
-</template>
+        <!-- Bottom-left triangle -->
+        <polygon points="30,35 50,65 10,65" stroke="white" stroke-width="2" fill="none"/>
+        <text x="30" y="57.5">2</text>
+
+        <!-- Bottom-right triangle -->
+        <polygon points="70,35 90,65 50,65" stroke="white" stroke-width="2" fill="none"/>
+        <text x="70" y="57.5">3</text>
+
+        <text x="50" y="50">4</text>
+    </svg>
+    <select name="triforce" id="triforce">
+        <option value="1">All Time</option>
+        <option value="2">7 Days</option>
+        <option value="3">Current Season</option>
+        <option value="4">Last Season</option>
+    </select>
+</div>

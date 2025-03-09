@@ -9,7 +9,7 @@ export class ProfilDisplay extends HTMLComponent {
     onSetupCompleted = async () => {
         if (getCookie("accessToken")) {
             this.shadowRoot.getElementById("profil").classList.add("connected");
-            this.shadowRoot.getElementById("username").innerHTML = (await parseJwt(getCookie("accessToken"))).username;
+            this.shadowRoot.getElementById("username").innerText = (await parseJwt(getCookie("accessToken"))).username;
         }
 
         this.shadowRoot.getElementById("connected").addEventListener("click", () => {

@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {fetchApi, getUserInfo} from "/js/login-manager.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -15,10 +16,18 @@ export class ChatRoom extends HTMLComponent {
         this.messagePanel = this.shadowRoot.getElementById("messages");
         this.messageInput = this.shadowRoot.getElementById("message-input");
         this.sendButton = this.shadowRoot.getElementById("send");
-        this.sendButton.onclick = this.sendMessage;
+        this.sendButton.onclick = () => this.sendMessage();
     };
 
-    onVisible = () => this.#refresh();
+    onVisible = () => {
+        this.#refresh();
+        this.loopId = setInterval(() => this.#refresh(), 5000);
+    };
+
+    onHidden = () => {
+        if (this.loopId) clearInterval(this.loopId);
+        this.loopId = null;
+    };
 
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);
@@ -38,44 +47,29 @@ export class ChatRoom extends HTMLComponent {
             messageElement.setAttribute("content", message.content);
             messageElement.setAttribute("date", message.date);
             messageElement.setAttribute("type", message.type);
-            messageElement.setAttribute("you", (message.author === "user1").toString());
+            messageElement.setAttribute("you", (message.author === getUserInfo()?.username).toString());
             this.messagePanel.appendChild(messageElement);
         }
     }
 
     async getMessages() {
-        return [
-            {
-                "author": "user1",
-                "content": "Hello world !",
-                "date": "2025-03-09T12:00:00",
-                "type": "text"
-            },
-            {
-                "author": "user2",
-                "content": "Hi !",
-                "date": "2025-03-09T12:01:00",
-                "type": "text"
-            },
-            {
-                "author": "user1",
-                "content": "A very long message that should be displayed on multiple lines to test the layout of the chat room component.\nBut it's not a problem, the component should handle it properly.",
-                "date": "2025-03-09T13:00:00",
-                "type": "text"
-            }
-        ];
-
-        // TODO
-        /*const response = await fetch(`/api/chat/${this.room}`);
-        return await response.json();*/
+        const response = await fetchApi(`/api/chat/${this.room}`);
+        return await response.json();
     }
 
     async sendMessage() {
         const message = this.messageInput.value;
         if (!message) return;
 
-        // TODO
-
-        this.messageInput.value = "";
+        const response = await fetchApi(`/api/chat/${this.room}`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                type: "text",
+                content: message
+            })
+        });
+        if (response.ok) this.messageInput.value = "";
+        else alert("Failed to send message");
     }
 }

@@ -2,12 +2,27 @@ import {HTMLComponent} from "/js/component.js";
 import {loginFetch} from "/js/login-manager.js";
 
 export class SignUpPopup extends HTMLComponent {
+    firstQuestion;
+    firstAnswer;
+    secondQuestion;
+    secondAnswer;
+    username;
+    password;
+    confirmPassword;
 
     constructor() {
         super("sign-up-popup", ["html", "css"]);
     }
 
     onSetupCompleted = async () => {
+        this.firstQuestion = this.shadowRoot.getElementById("first-security-question");
+        this.firstAnswer = this.shadowRoot.getElementById("first-answer-input").shadowRoot.getElementById("answer");
+        this.secondQuestion = this.shadowRoot.getElementById("second-security-question");
+        this.secondAnswer = this.shadowRoot.getElementById("second-answer-input").shadowRoot.getElementById("answer");
+        this.username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
+        this.password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
+        this.confirmPassword = this.shadowRoot.getElementById("confirm-password-input").shadowRoot.getElementById("answer");
+
         await this.#injectSecurityQuestions();
 
         this.shadowRoot.getElementById("right-arrow").addEventListener("click", () => {
@@ -29,102 +44,91 @@ export class SignUpPopup extends HTMLComponent {
             document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
         });
 
-        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
-        const secondQuestion = this.shadowRoot.getElementById("second-security-question");
-
-        firstQuestion.addEventListener("change", () => this.#updateSecondQuestionOptions());
-        secondQuestion.addEventListener("change", () => this.#updateFirstQuestionOptions());
+        this.firstQuestion.addEventListener("change", () => this.#updateSecondQuestionOptions());
+        this.secondQuestion.addEventListener("change", () => this.#updateFirstQuestionOptions());
     };
 
     async #fetchLogin() {
-        const first_question = this.shadowRoot.getElementById("first-security-question");
-        const first_question_text = first_question.options[first_question.selectedIndex].text;
-        const second_question = this.shadowRoot.getElementById("second-security-question");
-        const second_question_text = second_question.options[second_question.selectedIndex].text;
+        const firstQuestionText = this.firstQuestion.options[this.firstQuestion.selectedIndex].text;
+        const secondQuestionText = this.secondQuestion.options[this.secondQuestion.selectedIndex].text;
         const body = JSON.stringify({
-            username: this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer").value,
-            password: this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer").value,
+            username: this.username.value,
+            password: this.password.value,
             securityQuestions: [
                 {
-                    question: first_question_text,
-                    answer: this.shadowRoot.getElementById("first-answer-input").shadowRoot.getElementById("answer").value
+                    question: firstQuestionText,
+                    answer: this.firstAnswer.value
                 },
                 {
-                    question: second_question_text,
-                    answer: this.shadowRoot.getElementById("second-answer-input").shadowRoot.getElementById("answer").value
+                    question: secondQuestionText,
+                    answer: this.secondAnswer.value
                 }
             ]
         });
         const data = await loginFetch("sign-up", body);
-        document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
-        document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-        location.reload();
+        if (data) {
+            document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
+            document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+            location.reload();
+        }
     }
 
     #checkFirstPageInputs() {
-        const username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
-        const password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
-        const confirmPassword = this.shadowRoot.getElementById("confirm-password-input").shadowRoot.getElementById("answer");
+        this.username.setCustomValidity("");
+        this.password.setCustomValidity("");
+        this.confirmPassword.setCustomValidity("");
 
-        username.setCustomValidity("");
-        password.setCustomValidity("");
-        confirmPassword.setCustomValidity("");
+        if (!this.username.validity.valid)
+            this.username.setCustomValidity("this.username must be at least 3 characters long and less than 20.");
 
-        if (!username.validity.valid)
-            username.setCustomValidity("Username must be at least 3 characters long and less than 20.");
+        if (!this.password.validity.valid)
+            this.password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
 
-        if (!password.validity.valid)
-            password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        if (!this.confirmPassword.validity.valid)
+            this.confirmPassword.setCustomValidity("Please confirm your password.");
 
-        if (!confirmPassword.validity.valid)
-            confirmPassword.setCustomValidity("Please confirm your password.");
+        if (this.password.value !== this.confirmPassword.value)
+            this.confirmPassword.setCustomValidity("Passwords do not match.");
 
-        if (password.value !== confirmPassword.value)
-            confirmPassword.setCustomValidity("Passwords do not match.");
-
-        if (!username.checkValidity() || !password.checkValidity() || !confirmPassword.checkValidity())
+        if (!this.username.checkValidity() || !this.password.checkValidity() || !this.confirmPassword.checkValidity())
             this.#showPage("first-page");
 
-        confirmPassword.reportValidity();
-        password.reportValidity();
-        username.reportValidity();
+        this.confirmPassword.reportValidity();
+        this.password.reportValidity();
+        this.username.reportValidity();
 
-        return username.validity.valid &&
-            password.validity.valid &&
-            confirmPassword.validity.valid;
+        return this.username.validity.valid &&
+            this.password.validity.valid &&
+            this.confirmPassword.validity.valid;
     }
 
     #checkSecondPageInputs() {
-        const firstSecurityAnswer = this.shadowRoot.getElementById("first-answer-input").shadowRoot.getElementById("answer");
-        const secondSecurityAnswer = this.shadowRoot.getElementById("second-answer-input").shadowRoot.getElementById("answer");
-        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
-
-        if (firstSecurityAnswer == null || secondSecurityAnswer == null) {
+        if (this.firstAnswer == null || this.secondAnswer == null) {
             this.#showPage("second-page");
             return;
         }
 
-        firstSecurityAnswer.setCustomValidity("");
-        secondSecurityAnswer.setCustomValidity("");
-        firstQuestion.setCustomValidity("");
+        this.firstAnswer.setCustomValidity("");
+        this.secondAnswer.setCustomValidity("");
+        this.firstQuestion.setCustomValidity("");
 
-        if (!firstSecurityAnswer.validity.valid)
-            firstSecurityAnswer.setCustomValidity("Please provide an answer to the first security question.");
+        if (!this.firstAnswer.validity.valid)
+            this.firstAnswer.setCustomValidity("Please provide an answer to the first security question.");
 
-        if (!secondSecurityAnswer.validity.valid)
-            secondSecurityAnswer.setCustomValidity("Please provide an answer to the second security question.");
+        if (!this.secondAnswer.validity.valid)
+            this.secondAnswer.setCustomValidity("Please provide an answer to the second security question.");
 
-        if (!firstSecurityAnswer.checkValidity() || !secondSecurityAnswer.checkValidity())
+        if (!this.firstAnswer.checkValidity() || !this.secondAnswer.checkValidity())
             this.#showPage("second-page");
 
         if (this.shadowRoot.getElementById("first-security-question").value === this.shadowRoot.getElementById("second-security-question").value)
-            firstQuestion.setCustomValidity("Please choose two different questions");
+            this.firstQuestion.setCustomValidity("Please choose two different questions");
 
-        firstQuestion.reportValidity();
-        secondSecurityAnswer.reportValidity();
-        firstSecurityAnswer.reportValidity();
+        this.firstQuestion.reportValidity();
+        this.secondAnswer.reportValidity();
+        this.firstAnswer.reportValidity();
 
-        return firstSecurityAnswer.validity.valid && secondSecurityAnswer.validity.valid && firstQuestion.validity.valid;
+        return this.firstAnswer.validity.valid && this.secondAnswer.validity.valid && this.firstQuestion.validity.valid;
     }
 
     #showPage(page_name) {
@@ -134,34 +138,30 @@ export class SignUpPopup extends HTMLComponent {
 
     async #injectSecurityQuestions() {
         const securityQuestions = await loginFetch("security-questions", null);
-        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
-        const secondQuestion = this.shadowRoot.getElementById("second-security-question");
 
         for (let i = 0; i < securityQuestions.length; i++) {
             let opt = document.createElement("option");
             opt.value = i;
             opt.innerHTML = securityQuestions[i];
-            firstQuestion.appendChild(opt);
-            secondQuestion.appendChild(opt.cloneNode(true));
+            this.firstQuestion.appendChild(opt);
+            this.secondQuestion.appendChild(opt.cloneNode(true));
         }
 
-        secondQuestion.selectedIndex = 1;
+        this.secondQuestion.selectedIndex = 1;
         this.#updateFirstQuestionOptions();
         this.#updateSecondQuestionOptions();
     }
 
     #updateSecondQuestionOptions() {
-        const selectedValue = this.shadowRoot.getElementById("first-security-question").value;
-        const secondQuestion = this.shadowRoot.getElementById("second-security-question");
-        Array.from(secondQuestion.options).forEach(option => {
+        const selectedValue = this.firstQuestion.value;
+        Array.from(this.secondQuestion.options).forEach(option => {
             option.style.display = option.value === selectedValue ? "none" : "block";
         });
     }
 
     #updateFirstQuestionOptions() {
-        const selectedValue = this.shadowRoot.getElementById("second-security-question").value;
-        const firstQuestion = this.shadowRoot.getElementById("first-security-question");
-        Array.from(firstQuestion.options).forEach(option => {
+        const selectedValue = this.secondQuestion.value;
+        Array.from(this.firstQuestion.options).forEach(option => {
             option.style.display = option.value === selectedValue ? "none" : "block";
         });
     }

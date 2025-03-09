@@ -40,18 +40,18 @@ p {
     max-height: 30px;
 }
 
-#left-arrow {
+#left-arrow, #right-arrow {
     position: absolute;
-    left: 0;
     z-index: 3;
-    top: 50%;
+    top: calc(50% - 15px);
+}
+
+#left-arrow {
+    left: -15px;
 }
 
 #right-arrow {
-    position: absolute;
-    right: 0;
-    z-index: 3;
-    top: 35.5%;
+    right: -15px;
 }
 
 #popup-body {

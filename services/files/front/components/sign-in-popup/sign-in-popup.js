@@ -2,11 +2,17 @@ import {HTMLComponent} from "/js/component.js";
 import {loginFetch} from "/js/login-manager.js";
 
 export class SignInPopup extends HTMLComponent {
+    username;
+    password;
+
     constructor() {
         super("sign-in-popup", ["html", "css"]);
     }
 
     onSetupCompleted = () => {
+        this.username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
+        this.password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
+
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {
                 detail: {name: "sign-up"}
@@ -26,9 +32,9 @@ export class SignInPopup extends HTMLComponent {
     };
 
     async #loginFetch() {
-        const username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer").value;
-        const password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer").value;
-        const body = JSON.stringify({username, password});
+        const username_value = this.username.value;
+        const password_value = this.password.value;
+        const body = JSON.stringify({username: username_value, password: password_value});
         const data = await loginFetch("sign-in", body);
         if (data) {
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
@@ -38,21 +44,19 @@ export class SignInPopup extends HTMLComponent {
     }
 
     correctInputs() {
-        const username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
-        const password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
-        username.setCustomValidity("");
-        password.setCustomValidity("");
+        this.username.setCustomValidity("");
+        this.password.setCustomValidity("");
 
-        if (!username.validity.valid)
-            username.setCustomValidity("Username must be at least 3 characters long and less than 20.");
+        if (!this.username.validity.valid)
+            this.username.setCustomValidity("Username must be at least 3 characters long and less than 20.");
 
-        if (!password.validity.valid)
-            password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        if (!this.password.validity.valid)
+            this.password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
 
-        password.reportValidity();
-        username.reportValidity();
+        this.password.reportValidity();
+        this.username.reportValidity();
 
-        return username.validity.valid &&
-            password.validity.valid;
+        return this.username.validity.valid &&
+            this.password.validity.valid;
     }
 }

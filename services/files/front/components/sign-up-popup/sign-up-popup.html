@@ -1,8 +1,8 @@
 <app-popup background="#2F1C41" id="popup">
     <h2 class="sign-up" slot="title">Sign up</h2>
-    <img alt="right" class="icon first-page" id="right-arrow" slot="body" src="/assets/right-arrow.svg">
-    <img alt="left" class="icon second-page" id="left-arrow" slot="body" src="/assets/left-arrow.svg">
     <div id="popup-body" slot="body">
+        <img alt="right" class="icon first-page" id="right-arrow" slot="body" src="/assets/right-arrow.svg">
+        <img alt="left" class="icon second-page" id="left-arrow" slot="body" src="/assets/left-arrow.svg">
         <div class="first-page" id="sign-up">
             <app-input id="username-input" pattern="[A-Za-z0-9#?!@$%^&*]{3,20}">Username</app-input>
             <app-input id="password-input" pattern="[A-Za-z0-9#?!@$%^&*]{6,20}" type="password">Password</app-input>
@@ -13,13 +13,13 @@
         <div class="second-page" id="password-questions">
             <p>In case you forget your password, you can use the following security questions to reset it.</p>
             <label for="first-security-question">
-                <slot></slot>
+                First security question
             </label>
             <select id="first-security-question">
             </select>
             <app-input id="first-answer-input">First answer</app-input>
             <label for="second-security-question">
-                <slot></slot>
+                Second security question
             </label>
             <select id="second-security-question">
             </select>

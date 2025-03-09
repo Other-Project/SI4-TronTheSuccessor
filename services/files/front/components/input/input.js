@@ -13,7 +13,16 @@ export class Input extends HTMLComponent {
     }
 
     constructor() {
-        super("input", ["html", "css"]);
+        super("input", ["css"]);
+        this.shadowRoot.innerHTML = "<div class=\"group-input\">\n" +
+            "    <input autofocus id=\"answer\" placeholder=\"Answer\" required type=\"text\">\n" +
+            "    <label for=\"answer\">\n" +
+            "        <slot></slot>\n" +
+            "    </label>\n" +
+            "    <button id=\"show-password\" type=\"button\">\n" +
+            "        <img alt=\"show\" src=\"/assets/password_hide.svg\">\n" +
+            "    </button>\n" +
+            "</div>\n";
     }
 
 

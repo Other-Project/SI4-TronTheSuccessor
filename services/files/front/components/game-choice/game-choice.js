@@ -11,8 +11,8 @@ export class GameChoice extends HTMLComponent {
         const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
 
         if (!getCookie("refreshToken")) {
-            computerButton.disabled = true;
-            multiplayerButton.disabled = true;
+            computerButton.button.disabled = true;
+            multiplayerButton.button.disabled = true;
         }
 
         this.shadowRoot.getElementById("local-game").addEventListener("click", () => {
@@ -41,14 +41,14 @@ export class GameChoice extends HTMLComponent {
                 }
             }));
         });
-    }
+    };
 
     onVisible = () => {
         const computerButton = this.shadowRoot.getElementById("computer");
         const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
 
         const refreshToken = getCookie("refreshToken");
-        computerButton.disabled = !refreshToken;
-        multiplayerButton.disabled = !refreshToken;
+        computerButton.button.disabled = !refreshToken;
+        multiplayerButton.button.disabled = !refreshToken;
     };
 }

@@ -1,0 +1,12 @@
+<div class="container">
+    <nav id="tabs-container">
+        <div id="tabs">
+            <slot name="tabs"></slot>
+        </div>
+        <button id="new-tab-btn">+</button>
+    </nav>
+    <div id="panels">
+        <slot name="panels"></slot>
+        <slot id="panel-template"></slot>
+    </div>
+</div>

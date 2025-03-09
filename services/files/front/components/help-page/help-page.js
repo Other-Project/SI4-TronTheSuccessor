@@ -27,7 +27,7 @@ export class HelpPage extends HTMLComponent {
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
-        this[name] = newValue;
+        super.attributeChangedCallback(name, oldValue, newValue);
         this.#refresh();
     }
 

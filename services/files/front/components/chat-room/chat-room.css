@@ -5,12 +5,17 @@
     height: 100%;
 }
 
-#messages {
+#messages-wrap {
     flex: 1;
     overflow-y: auto;
     display: flex;
-    flex-direction: column;
-    gap: 1em;
+    flex-direction: column-reverse;
+
+    #messages {
+        display: flex;
+        flex-direction: column;
+        gap: 1em;
+    }
 }
 
 #input-panel {

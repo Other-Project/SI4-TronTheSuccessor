@@ -1,0 +1,24 @@
+.chat-room {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    height: 100%;
+}
+
+#messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+#input-panel {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+
+    #message-input {
+        resize: none;
+    }
+}

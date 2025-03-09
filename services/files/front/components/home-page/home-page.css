@@ -45,19 +45,3 @@ app-game-choice {
     width: 100%;
     max-width: 400px;
 }
-
-#popup-container,
-#sign-up,
-#forget-password,
-#disconnect {
-    display: none;
-}
-
-#disconnect {
-    text-align: center;
-    margin: 0;
-}
-
-h2, p {
-    margin: 0;
-}

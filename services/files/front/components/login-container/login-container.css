@@ -1,0 +1,15 @@
+#popup-container,
+#sign-up,
+#forget-password,
+#disconnect {
+    display: none;
+}
+
+#disconnect {
+    text-align: center;
+    margin: 0;
+}
+
+h2, p {
+    margin: 0;
+}

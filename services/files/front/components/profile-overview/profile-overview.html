@@ -4,12 +4,18 @@
             <p slot="name">Name</p>
             <img src="../../assets/profil.svg" alt="Profile" slot="pfp">
         </app-profile-pfp>
-        <app-profile-button></app-profile-button>
+        <div class="profile-buttons">
+            <app-profile-button>Modify Password</app-profile-button>
+            <app-profile-button>Share Profile</app-profile-button>
+        </div>
     </div>
     <div class="column-2">
         <app-profile-stats></app-profile-stats>
     </div>
     <div class="column-3">
-        <app-profile-rank></app-profile-rank>
+        <app-profile-rank>
+            <p slot="rank-icon">Rank</p>
+            <p slot="rank">Triangle II</p>
+        </app-profile-rank>
     </div>
 </div>

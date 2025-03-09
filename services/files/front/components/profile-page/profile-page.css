@@ -5,3 +5,7 @@
     right: 1em;
     top: 1em;
 }
+
+#profile-page {
+    height: 100vh;
+}

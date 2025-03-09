@@ -1,14 +1,5 @@
-div {
-    #name {
-        font-size: 4em;
-        font-weight: bold;
-        text-align: center;
-    }
-
-    #pfp {
-        aspect-ratio: 1 / 1;
-        margin: 0 auto;
-        display: block;
-        text-align: center;
-    }
+#name {
+    font-size: 7em;
+    font-weight: bold;
+    text-align: center;
 }

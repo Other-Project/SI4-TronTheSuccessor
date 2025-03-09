@@ -84,7 +84,7 @@ async function verifyAnswers(username, answers) {
     if (!user)
         return {error: "Could not find user with this username : " + username};
     const hashedAnswers = answers.map(hash);
-    if (user.securityQuestions[0].answer !== hashedAnswers[0] || user.securityQuestions[1].answer !== hashedAnswers[1])
+    if (user.securityQuestions.every((question, i) => question.answer === hashedAnswers[i]))
         return {error: "Wrong answers"};
     const userInfo = {username: user.username};
     const resetPasswordToken = jwt.sign(userInfo, secretKeyPasswordReset, {expiresIn: resetPasswordTokenDuration});
@@ -121,11 +121,7 @@ function getJwt(user) {
 }
 
 function getSecurityQuestionsFromArray() {
-    const result = [];
-    for (let i = 0; i < securityQuestionsArray.length; i++) {
-        result.push(securityQuestionsArray[i]);
-    }
-    return result;
+    return securityQuestionsArray.slice();
 }
 
 function checkValue(username, password, securityQuestions) {
@@ -148,6 +144,9 @@ function checkValue(username, password, securityQuestions) {
             return {error: "Question and answer must not be empty"};
         if (!securityQuestionsArray.includes(question.question))
             return {error: "The question " + question.question + " is not a valid security question"};
+        if (securityQuestions.length !== new Set(securityQuestions).size) {
+            return {error: "The security questions must be different"};
+        }
     }
     return null;
 }

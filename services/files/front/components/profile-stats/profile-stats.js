@@ -10,23 +10,27 @@ export class ProfileStats extends HTMLComponent {
         this.winrate = this.shadowRoot.getElementById("winrate");
         this.time = this.shadowRoot.getElementById("time");
         this.streak = this.shadowRoot.getElementById("streak");
-        this.#updateStats();
+        this.#fetchStats();
     };
 
-    static get observedAttributes() {
-        return ["games", "winrate", "time", "streak"];
+    #fetchStats() {
+        // TODO: Fetch stats from the backend
+
+        const data = {
+            games: 10,
+            winrate: 50,
+            time: 5,
+            streak: 3
+        };
+
+        this.#updateStats(data);
+
     }
 
-    attributeChangedCallback() {
-        this.#updateStats();
-    }
-
-    #updateStats() {
-        if (!this.games || !this.winrate || !this.time || !this.streak) return;
-
-        this.games.textContent = this.getAttribute("games") || "10";
-        this.winrate.textContent = `${this.getAttribute("winrate") || "50"}%`;
-        this.time.textContent = this.getAttribute("time") || "5h";
-        this.streak.textContent = this.getAttribute("streak") || "3";
+    #updateStats(data) {
+        this.games.childNodes[0].nodeValue = data.games || "NA";
+        this.winrate.childNodes[0].nodeValue = `${data.winrate || "NA"}%`;
+        this.time.childNodes[0].nodeValue = `${data.time || "NA"}h`;
+        this.streak.childNodes[0].nodeValue = data.streak || "NA";
     }
 }

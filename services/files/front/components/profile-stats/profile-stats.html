@@ -3,22 +3,34 @@
     <svg viewBox="0 0 100 70">
         <!-- Top triangle -->
         <polygon points="50,5 70,35 30,35" stroke="white" stroke-width="2" fill="none"/>
-        <text x="50" y="27.5">1</text>
+        <text x="50" y="27.5" id="games">
+            1
+            <tspan x="50" dy="1.2em" class="label">Games Played</tspan>
+        </text>
 
         <!-- Bottom-left triangle -->
         <polygon points="30,35 50,65 10,65" stroke="white" stroke-width="2" fill="none"/>
-        <text x="30" y="57.5">2</text>
+        <text x="30" y="57.5" id="time">
+            2
+            <tspan x="30" dy="1.2em" class="label">Time Played</tspan>
+        </text>
 
         <!-- Bottom-right triangle -->
         <polygon points="70,35 90,65 50,65" stroke="white" stroke-width="2" fill="none"/>
-        <text x="70" y="57.5">3</text>
+        <text x="70" y="57.5" id="streak">
+            3
+            <tspan x="70" dy="1.2em" class="label">Win Streak</tspan>
+        </text>
 
-        <text x="50" y="50">4</text>
+        <text x="50" y="47.5" id="winrate">
+            4
+            <tspan x="50" dy="1.2em" class="label">Win Rate</tspan>
+        </text>
     </svg>
     <select name="triforce" id="triforce">
-        <option value="1">All Time</option>
-        <option value="2">7 Days</option>
-        <option value="3">Current Season</option>
-        <option value="4">Last Season</option>
+        <option value="All Time">All Time</option>
+        <option value="7 Days">7 Days</option>
+        <option value="Current Season">Current Season</option>
+        <option value="Last Season">Last Season</option>
     </select>
 </div>

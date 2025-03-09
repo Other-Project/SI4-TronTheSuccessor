@@ -1,14 +1,21 @@
 .triforce-container {
     width: 100%;
     margin: auto;
-    text-align: center; /* Center the content inside the container */
-}
+    text-align: center;
 
-text {
-    font-size: 12px;
-    font-weight: bold;
-    fill: white;
-    text-anchor: middle;
+    text {
+        font-size: 8px;
+        font-weight: bold;
+        fill: white;
+        text-anchor: middle;
+    }
+
+    .label {
+        font-size: 2px;
+        font-weight: bold;
+        fill: white;
+        text-anchor: middle;
+    }
 }
 
 p {

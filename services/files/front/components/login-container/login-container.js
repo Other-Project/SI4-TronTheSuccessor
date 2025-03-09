@@ -11,11 +11,6 @@ export class LoginContainer extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.popupContainer = this.shadowRoot.getElementById("popup-container");
-        this.popupContainer.addEventListener("click", (event) => {
-            if (event.target === this.popupContainer) {
-                this.popupContainer.style.display = "none";
-            }
-        });
 
         document.addEventListener("change-popup", (event) => {
             this.#changePopup(event.detail.name);
@@ -25,7 +20,7 @@ export class LoginContainer extends HTMLComponent {
             this.popupContainer.style.display = "block";
         });
 
-        document.addEventListener("hide-login-popup", () => {
+        document.addEventListener("hide-popup", () => {
             this.popupContainer.style.display = "none";
         });
 

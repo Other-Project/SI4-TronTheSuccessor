@@ -15,12 +15,11 @@ export class Popup extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.popupPanel = this.shadowRoot.getElementById("popup-panel");
-        //TODO: remove this
         const popupContainer = this.shadowRoot.getElementById("popup-container");
         this.shadowRoot.getElementById("popup-panel").style.background = this.background;
         popupContainer.addEventListener("click", (event) => {
             if (event.target === popupContainer) {
-                document.dispatchEvent(new CustomEvent("hide-login-popup"));
+                document.dispatchEvent(new CustomEvent("hide-popup"));
             }
         });
     };

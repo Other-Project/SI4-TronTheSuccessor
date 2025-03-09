@@ -11,10 +11,6 @@ span {
     text-align: center;
 }
 
-.second-page {
-    display: none;
-}
-
 u:hover {
     cursor: pointer;
     color: #6868e4;
@@ -48,20 +44,37 @@ p {
 
 #left-arrow {
     left: -15px;
+    display: none;
 }
 
 #right-arrow {
     right: -15px;
+    display: none;
+}
+
+#first-page.active ~ #right-arrow {
+    display: block;
+}
+
+#second-page.active ~ #left-arrow {
+    display: block;
 }
 
 #popup-body {
     position: relative;
 }
 
-#password-questions {
+#second-page {
     padding: 0 1em;
+    display: none;
 }
 
-#sign-up {
+#first-page {
     padding: 0 0.7em;
+    display: none;
+}
+
+#second-page.active,
+#first-page.active {
+    display: block;
 }

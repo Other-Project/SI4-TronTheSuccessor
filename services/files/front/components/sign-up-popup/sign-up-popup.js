@@ -132,8 +132,9 @@ export class SignUpPopup extends HTMLComponent {
     }
 
     #showPage(page_name) {
-        this.shadowRoot.querySelectorAll(".first-page").forEach(element => element.style.display = page_name === "first-page" ? "block" : "none");
-        this.shadowRoot.querySelectorAll(".second-page").forEach(element => element.style.display = page_name === "second-page" ? "block" : "none");
+        this.shadowRoot.querySelectorAll("#popup-body .page").forEach(element => {
+            element.classList.toggle("active", element.id === page_name);
+        });
     }
 
     async #injectSecurityQuestions() {
@@ -141,7 +142,7 @@ export class SignUpPopup extends HTMLComponent {
 
         for (let i = 0; i < securityQuestions.length; i++) {
             let opt = document.createElement("option");
-            opt.value = i;
+            opt.value = i.toString();
             opt.innerHTML = securityQuestions[i];
             this.firstQuestion.appendChild(opt);
             this.secondQuestion.appendChild(opt.cloneNode(true));

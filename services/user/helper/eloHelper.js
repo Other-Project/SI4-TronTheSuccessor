@@ -1,5 +1,6 @@
 const http = require("http");
 const url = require("url");
+const {getRequestBody} = require("../js/utils.js");
 
 /**
  * Make an HTTP request.
@@ -24,22 +25,14 @@ async function makeHttpRequest(method, path, data = null) {
 
         if (data) options.headers['Content-Length'] = Buffer.byteLength(JSON.stringify(data));
 
-        const req = http.request(options, (res) => {
-            let responseData = '';
-            res.on('data', chunk => responseData += chunk);
-            res.on('end', () => {
-                if (responseData) {
-                    try {
-                        resolve(JSON.parse(responseData));
-                    } catch (error) {
-                        reject(new Error("Failed to parse response JSON"));
-                    }
-                } else resolve();
-            });
+        const request = http.request(options, async (req) => {
+            const responseData = await getRequestBody(req);
+            resolve(JSON.parse(responseData));
         });
-        req.on('error', error => reject(error));
-        if (data) req.write(JSON.stringify(data));
-        req.end();
+        request.on('error', error => reject(error));
+
+        if (data) request.write(JSON.stringify(data));
+        request.end();
     });
 }
 

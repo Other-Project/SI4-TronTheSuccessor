@@ -31,13 +31,13 @@ export class Input extends HTMLComponent {
 
     // noinspection JSUnusedGlobalSymbols
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "pattern") this.pattern = newValue;
-        if (name === "type") this.type = newValue;
+        super.attributeChangedCallback(name, oldValue, newValue);
+        this.#refresh();
     }
 
 
     #refresh() {
-        if (!this.pattern) return;
+        if (!this.input_answer) return;
         if (this.pattern) this.input_answer.setAttribute("pattern", this.pattern);
         if (this.type) {
             this.input_answer.setAttribute("type", this.type);

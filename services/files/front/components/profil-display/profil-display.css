@@ -17,6 +17,10 @@ img {
     right: 0;
     background-color: #2c2525;
     border: 1px solid #2c2525;
+
+    &.show {
+        display: block;
+    }
 }
 
 ul {

@@ -13,8 +13,7 @@ export class ProfilDisplay extends HTMLComponent {
         }
 
         this.shadowRoot.getElementById("connected").addEventListener("click", () => {
-            const menu = this.shadowRoot.getElementById("dropdown-menu");
-            menu.style.display = menu.style.display === "block" ? "none" : "block";
+            this.shadowRoot.getElementById("dropdown-menu").classList.toggle("show");
         });
 
         this.shadowRoot.getElementById("disconnected").addEventListener("click", () => {

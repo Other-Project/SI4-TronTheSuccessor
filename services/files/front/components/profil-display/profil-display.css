@@ -19,30 +19,35 @@ img {
     border: 1px solid #2c2525;
 }
 
-#dropdown-menu ul {
+ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
     border: 1px solid #bc13fe;
     border-radius: 8px;
 
-    :hover {
-        background-color: #bc13fe;
-        cursor: pointer;
+    li {
+        padding: 10px;
+        color: white;
+        border-radius: 4px;
+
+        &:hover {
+            background-color: #bc13fe;
+            cursor: pointer;
+        }
     }
 }
 
-#dropdown-menu ul li {
-    padding: 10px;
-    color: white;
-    border-radius: 4px;
-}
-
-#dropdown-menu ul li a:hover {
-
-}
-
 .connected {
+    display: block;
+}
+
+.connected-info,
+.connected #disconnected {
+    display: none;
+}
+
+.connected .connected-info {
     display: flex;
     align-items: center;
     gap: 10px;

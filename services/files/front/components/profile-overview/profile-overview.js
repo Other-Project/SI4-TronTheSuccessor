@@ -9,7 +9,10 @@ export class ProfileOverview extends HTMLComponent {
     onSetupCompleted = () => {
         this.rankIcon = this.shadowRoot.querySelector('app-profile-rank [slot="rank-icon"]');
         //TODO: Fetch user the rank from the backend
-        this.#createPolygonSVG(5);
+        const userName = location.search.split("=")[1];
+
+
+        this.#createPolygonSVG(4);
     };
 
     #createPolygonSVG(vertices) {

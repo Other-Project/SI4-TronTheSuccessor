@@ -2,12 +2,12 @@
 
 <div id="profile-page">
     <app-tab-navigation>
-        <app-profile-page-button slot="tabs">Overview</app-profile-page-button>
-        <app-profile-page-button slot="tabs">Match History</app-profile-page-button>
-        <app-profile-page-button slot="tabs">Ranking</app-profile-page-button>
-        <app-profile-overview slot="panels" class="active"></app-profile-overview>
-        <app-profile-history slot="panels"></app-profile-history>
-        <app-profile-leaderboard slot="panels"></app-profile-leaderboard>
+        <button slot="tabs" data-tab-id="overview">Overview</button>
+        <button slot="tabs" data-tab-id="history">History</button>
+        <button slot="tabs" data-tab-id="ranking">Ranking</button>
+        <app-profile-overview slot="panels" id="overview" data-tab-title="Overview"></app-profile-overview>
+        <app-profile-history slot="panels" id="history" data-tab-title="History"></app-profile-history>
+        <app-profile-leaderboard slot="panels" id="ranking" data-tab-title="Ranking"></app-profile-leaderboard>
     </app-tab-navigation>
     <img alt="home" id="home" src="/assets/home.svg">
 </div>

@@ -20,7 +20,6 @@ import {ProfileHistory} from "/components/profile-history/profile-history.js";
 import {ProfileLeaderboard} from "/components/profile-leaderboard/profile-leaderboard.js";
 import {ProfilePfp} from "/components/profile-pfp/profile-pfp.js";
 import {ProfileStats} from "/components/profile-stats/profile-stats.js";
-import {ProfileButton} from "/components/profile-button/profile-button.js";
 import {ProfileRank} from "/components/profile-rank/profile-rank.js";
 
 
@@ -46,5 +45,4 @@ customElements.define("app-profile-history", ProfileHistory);
 customElements.define("app-profile-leaderboard", ProfileLeaderboard);
 customElements.define("app-profile-pfp", ProfilePfp);
 customElements.define("app-profile-stats", ProfileStats);
-customElements.define("app-profile-button", ProfileButton);
 customElements.define("app-profile-rank", ProfileRank);

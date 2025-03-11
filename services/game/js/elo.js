@@ -1,4 +1,4 @@
-const eloDatabase = require("./eloDatabase.js");
+const statsDatabase = require("./eloDatabase.js");
 const {HTTP_STATUS, getRequestBody, sendResponse} = require("./utils.js");
 const BASE_ELO = 1000;
 
@@ -23,16 +23,33 @@ function calculateEloPoints(elo, k, w, d) {
  * @returns {Promise<void>}
  */
 exports.updateElos = async function (players, gameInfo) {
-    const eloP1 = await eloDatabase.getElo(players[0].name) ?? BASE_ELO;
-    const eloP2 = await eloDatabase.getElo(players[1].name) ?? BASE_ELO;
+    const eloP1 = await statsDatabase.getElo(players[0].name) ?? BASE_ELO;
+    const eloP2 = await statsDatabase.getElo(players[1].name) ?? BASE_ELO;
     const pointP1 = gameInfo.draw ? 0.5 : players[0].name === gameInfo.winner ? 1 : 0;
     const pointP2 = 1 - pointP1;
     const diff = eloP1 - eloP2;
 
+    switch (pointP1) {
+        case 0:
+            await statsDatabase.addWin(players[1].name);
+            await statsDatabase.addLoss(players[0].name);
+            break;
+        case 0.5:
+            await statsDatabase.addDraw(players[0].name);
+            await statsDatabase.addDraw(players[1].name);
+            break;
+        case 1:
+            await statsDatabase.addWin(players[0].name);
+            await statsDatabase.addLoss(players[1].name);
+            break;
+    }
+    await statsDatabase.addGame(players[0].name);
+    await statsDatabase.addGame(players[1].name);
+
     const newEloP1 = Math.max(calculateEloPoints(eloP1, 32, pointP1, diff), 0);
     const newEloP2 = Math.max(calculateEloPoints(eloP2, 32, pointP2, -diff), 0);
-    await eloDatabase.updateElo(players[0].name, newEloP1);
-    await eloDatabase.updateElo(players[1].name, newEloP2);
+    await statsDatabase.updateElo(players[0].name, newEloP1);
+    await statsDatabase.updateElo(players[1].name, newEloP2);
     console.log(`Player ${players[0].name} has now ${newEloP1} ELO points`);
     console.log(`Player ${players[1].name} has now ${newEloP2} ELO points`);
 };
@@ -46,7 +63,7 @@ exports.updateElos = async function (players, gameInfo) {
 exports.handleAddElo = async function (request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
-    const result = await eloDatabase.addElo(parsedBody.playerId, parsedBody.elo);
+    const result = await statsDatabase.addElo(parsedBody.playerId, parsedBody.elo);
     sendResponse(response, HTTP_STATUS.OK, result);
 };
 
@@ -58,6 +75,6 @@ exports.handleAddElo = async function (request, response) {
  * @returns {Promise<void>}
  */
 exports.handleGetElo = async function (request, response, playerId) {
-    const elo = await eloDatabase.getElo(playerId);
+    const elo = await statsDatabase.getElo(playerId);
     sendResponse(response, HTTP_STATUS.OK, elo);
 };

@@ -52,5 +52,21 @@ export async function parseJwt(token) {
 export function disconnect() {
     document.cookie = "accessToken=; path=/; max-age=0;";
     document.cookie = "refreshToken=; path=/; max-age=0;";
-    location.reload();
+    fakePageReload();
+}
+
+export function fakePageReload() {
+    document.dispatchEvent(new CustomEvent("hide-popup"));
+    document.dispatchEvent(new CustomEvent("menu-selection", {
+        detail: {
+            name: ""
+        }
+    }));
+    setTimeout(() => {
+        document.dispatchEvent(new CustomEvent("menu-selection", {
+            detail: {
+                name: "home"
+            }
+        }));
+    }, 10);
 }

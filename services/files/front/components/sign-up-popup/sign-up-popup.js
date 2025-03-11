@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {loginFetch} from "/js/login-manager.js";
+import {fakePageReload, loginFetch} from "/js/login-manager.js";
 
 export class SignUpPopup extends HTMLComponent {
     firstQuestion;
@@ -41,7 +41,12 @@ export class SignUpPopup extends HTMLComponent {
         });
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("change-popup", {detail: {name: "sign-in"}}));
+            document.dispatchEvent(new CustomEvent("change-popup", {
+                detail: {
+                    name: "sign-in",
+                    display: true
+                }
+            }));
         });
 
         this.firstQuestion.addEventListener("change", () => this.#updateSecondQuestionOptions());
@@ -69,7 +74,8 @@ export class SignUpPopup extends HTMLComponent {
         if (data) {
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
             document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-            location.reload();
+            fakePageReload();
+            this.#clearInputs();
         }
     }
 
@@ -165,5 +171,13 @@ export class SignUpPopup extends HTMLComponent {
         Array.from(this.firstQuestion.options).forEach(option => {
             option.style.display = option.value === selectedValue ? "none" : "block";
         });
+    }
+
+    #clearInputs() {
+        this.username.value = "";
+        this.password.value = "";
+        this.confirmPassword.value = "";
+        this.firstAnswer.value = "";
+        this.secondAnswer.value = "";
     }
 }

@@ -23,10 +23,7 @@ export class Input extends HTMLComponent {
             "        <img alt=\"show\" src=\"/assets/password_hide.svg\">\n" +
             "    </button>\n" +
             "</div>\n";
-    }
 
-
-    onSetupCompleted = () => {
         this.input_answer = this.shadowRoot.getElementById("answer");
         this.show_password = this.shadowRoot.getElementById("show-password");
         this.show_password.addEventListener("click", () => {
@@ -34,7 +31,7 @@ export class Input extends HTMLComponent {
             this.input_answer.type = should_show_password ? "text" : "password";
             this.shadowRoot.querySelector("img").src = should_show_password ? "/assets/password_show.svg" : "/assets/password_hide.svg";
         });
-    };
+    }
 
     onVisible = () => this.#refresh();
 

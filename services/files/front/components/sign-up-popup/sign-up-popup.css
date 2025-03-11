@@ -17,7 +17,7 @@ u:hover {
 }
 
 select {
-    width: calc(100% - 4px);
+    width: 100%;
     border: none;
     border-radius: 10px;
     margin: 10px 0;
@@ -40,16 +40,15 @@ p {
     position: absolute;
     z-index: 3;
     top: calc(50% - 15px);
+    display: none;
 }
 
 #left-arrow {
     left: -15px;
-    display: none;
 }
 
 #right-arrow {
     right: -15px;
-    display: none;
 }
 
 #first-page.active ~ #right-arrow {
@@ -64,17 +63,12 @@ p {
     position: relative;
 }
 
-#second-page {
+#second-page,
+#first-page {
     padding: 0 1em;
     display: none;
-}
 
-#first-page {
-    padding: 0 0.7em;
-    display: none;
-}
-
-#second-page.active,
-#first-page.active {
-    display: block;
+    &.active {
+        display: block;
+    }
 }

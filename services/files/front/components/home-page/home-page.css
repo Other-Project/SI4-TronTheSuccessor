@@ -14,13 +14,13 @@
 
 header {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 15px;
 }
 
 #title {
-    grid-column: 1;
+    grid-column: 2;
     margin: 0;
     font-size: 4rem;
     font-weight: bolder;
@@ -32,7 +32,7 @@ header {
 }
 
 #profil-display, #settings {
-    grid-column: 2;
+    grid-column: 3;
 }
 
 main {

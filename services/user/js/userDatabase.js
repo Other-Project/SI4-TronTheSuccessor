@@ -137,6 +137,8 @@ function checkValue(username, password, securityQuestions) {
         return {error: "Username and password must contain only letters, numbers or one of the following characters : #?!@$%^&*"};
     if (!Array.isArray(securityQuestions) || securityQuestions.length !== 2)
         return {error: "Security questions must be an array of 2 elements"};
+    if (securityQuestions.length !== new Set(securityQuestions).size)
+        return {error: "The security questions must be different"};
     for (const question of securityQuestions) {
         if (!question.question || !question.answer)
             return {error: "Question or answer is missing"};
@@ -144,9 +146,6 @@ function checkValue(username, password, securityQuestions) {
             return {error: "Question and answer must not be empty"};
         if (!securityQuestionsArray.includes(question.question))
             return {error: "The question " + question.question + " is not a valid security question"};
-        if (securityQuestions.length !== new Set(securityQuestions).size) {
-            return {error: "The security questions must be different"};
-        }
     }
     return null;
 }

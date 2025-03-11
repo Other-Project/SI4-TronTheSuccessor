@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {loginFetch} from "/js/login-manager.js";
+import {fakePageReload, loginFetch} from "/js/login-manager.js";
 
 export class SignInPopup extends HTMLComponent {
     username;
@@ -15,13 +15,19 @@ export class SignInPopup extends HTMLComponent {
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {
-                detail: {name: "sign-up"}
+                detail: {
+                    name: "sign-up",
+                    display: true
+                }
             }));
         });
 
         this.shadowRoot.getElementById("password-link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {
-                detail: {name: "forget-password"}
+                detail: {
+                    name: "forget-password",
+                    display: true
+                }
             }));
         });
 
@@ -39,7 +45,8 @@ export class SignInPopup extends HTMLComponent {
         if (data) {
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
             document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-            location.reload();
+            fakePageReload();
+            this.#clearInputs();
         }
     }
 
@@ -58,5 +65,10 @@ export class SignInPopup extends HTMLComponent {
 
         return this.username.validity.valid &&
             this.password.validity.valid;
+    }
+
+    #clearInputs() {
+        this.username.value = "";
+        this.password.value = "";
     }
 }

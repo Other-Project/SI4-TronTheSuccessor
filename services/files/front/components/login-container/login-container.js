@@ -13,7 +13,7 @@ export class LoginContainer extends HTMLComponent {
         this.popupContainer = this.shadowRoot.getElementById("popup-container");
 
         document.addEventListener("change-popup", (event) => {
-            this.#changePopup(event.detail.name);
+            this.#changePopup(event.detail.name, event.detail.display);
         });
 
         document.addEventListener("show-popup-container", () => {
@@ -33,8 +33,8 @@ export class LoginContainer extends HTMLComponent {
         });
     };
 
-    #changePopup(name) {
-        this.popupContainer.style.display = "block";
+    #changePopup(name, shouldDisplay) {
+        this.popupContainer.style.display = shouldDisplay ? "block" : "none";
         this.ids.forEach((id) => {
             this.shadowRoot.getElementById(id).style.display = id === name ? "block" : "none";
         });

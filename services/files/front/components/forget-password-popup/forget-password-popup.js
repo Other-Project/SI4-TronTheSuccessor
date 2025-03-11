@@ -11,7 +11,7 @@ export class ForgetPassword extends HTMLComponent {
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {
-                detail: {name: "sign-in"}
+                detail: {name: "sign-in", display: true}
             }));
         });
 

@@ -5,18 +5,39 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require('crypto');
+const {updateElos, handleAddElo, handleGetElo} = require("./js/elo.js");
+const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
-let server = http.createServer();
+let server = http.createServer(async (request, response) => {
+    const filePath = request.url.split("/").filter(elem => elem !== "..");
+
+    try {
+        switch (filePath[3]) {
+            case "elo":
+                if (request.method === "POST") await handleAddElo(request, response);
+                else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
+                else {
+                    sendResponse(response, HTTP_STATUS.NOT_FOUND);
+                }
+                break;
+            default:
+                sendResponse(response, HTTP_STATUS.NOT_FOUND);
+        }
+    } catch (error) {
+        console.warn(error);
+        sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
+    }
+}).listen(8003);
+
 const io = new Server(server, {
     cors: {
         origin: "*"
     }
 });
-server.listen(8003);
 
 io.on("connection", (socket) => {
-    socket.on("game-start", (msg) => {
-        findGame(socket, msg);
+    socket.on("game-start", async (msg) => {
+        await findGame(socket, msg);
     });
 
     socket.on("game-action", (msg) => {
@@ -30,16 +51,16 @@ io.on("connection", (socket) => {
     });
 });
 
-function findGame(socket, msg) {
+async function findGame(socket, msg) {
     if (msg.against === "computer")
-        joinGame(socket, startGame(socket));
+        joinGame(socket, await startGame(socket));
     else socket.join("waiting-anyone");
 }
 
 async function transfertRoom(waitingRoom) {
     const sockets = await io.in(waitingRoom).fetchSockets();
     if (sockets.length < 2) return;
-    const gameId = startGame(sockets[0], sockets[1]);
+    const gameId = await startGame(sockets[0], sockets[1]);
     for (let socket of sockets) {
         socket.leave(waitingRoom);
         joinGame(socket, gameId);
@@ -53,14 +74,17 @@ io.of("/").adapter.on("join-room", async (room, id) => {
 
 const games = {};
 
-function startGame(p1s, p2s = null) {
+async function startGame(p1s, p2s = null) {
     const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), 500);
     const id = randomUUID();
     games[id] = game;
 
     game.addEventListener("game-turn", (event) => {
         io.to(id).emit("game-turn", event.detail);
-        if (event.detail.ended) io.in(id).disconnectSockets();
+        if (event.detail.ended) {
+            io.in(id).disconnectSockets();
+            if (p2s) updateElos(game.players, event.detail);
+        }
     });
     game.init();
     game.start();

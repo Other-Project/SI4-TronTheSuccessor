@@ -71,6 +71,10 @@ exports.Game = class Game extends EventTarget {
         return !this.#gameLife;
     }
 
+    /**
+     * @param winner
+     * @returns {{elapsed: number, winner: (string|undefined), grid: number[][], ended: boolean, draw: (boolean|undefined), playerStates: {pos: [number,number], dead: boolean, direction: "right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"}[]}}
+     */
     #getInfo(winner) {
         winner ??= this.#isGameEnded();
         return {
@@ -108,6 +112,9 @@ exports.Game = class Game extends EventTarget {
         else return false;
     }
 
+    /**
+     * @returns {{pos: [number,number], dead: boolean, direction: "right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"}[]}
+     */
     getPlayerStates() {
         return this.players.map(player => ({
             pos: player.pos,

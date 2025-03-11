@@ -28,6 +28,9 @@ const server = http.createServer(function (request, response) {
             if (filePath[2] === "user") {
                 console.log("Request for the user service received, transferring to the user service");
                 proxy.web(request, response, {target: process.env.USER_SERVICE_URL ?? "http://127.0.0.1:8004"});
+            } else if (filePath[2] === "game") {
+                console.log("Request for the game service received, transferring to the game service");
+                proxy.web(request, response, {target: process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003"});
             }
         } else {
             console.log("Request for a file received, transferring to the file service");

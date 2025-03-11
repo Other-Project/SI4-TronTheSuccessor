@@ -9,7 +9,7 @@ WORKDIR /app
 # copies package.json and package-lock.json
 COPY --chown=node:node package*.json .
 
-# installs dependancies
+# installs dependencies
 RUN npm install --omit=dev
 
 # copies the service files

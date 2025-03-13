@@ -1,6 +1,8 @@
 // The http module contains methods to handle http queries.
 const http = require("http");
+const https = require("https");
 const httpProxy = require("http-proxy");
+const fs = require("fs");
 const {Server} = require("socket.io");
 const {io: Client} = require("socket.io-client");
 const jwt = require("jsonwebtoken");
@@ -11,11 +13,40 @@ const proxy = httpProxy.createProxyServer();
 
 // We will also need a socket to communicate with the other services.
 
-
 /* The http module contains a createServer function, which takes one argument, which is the function that
  * will be called whenever a new request arrives to the server.
  */
-const server = http.createServer(function (request, response) {
+const httpsEnabled = process.env.SSL_ENABLED === "true";
+const httpsSslKey = process.env.SSL_KEY ?? "/ssl/key.pem";
+const httpsSslCert = process.env.SSL_CERT ?? "/ssl/cert.pem";
+
+if (httpsEnabled && !fs.existsSync(httpsSslKey, fs.constants.R_OK)) {
+    console.error(`The SSL key file is not accessible at ${httpsSslKey}`);
+    process.exit(1);
+}
+
+if (httpsEnabled && !fs.existsSync(httpsSslCert, fs.constants.R_OK)) {
+    console.error(`The SSL certificate file is not accessible at ${httpsSslCert}`);
+    process.exit(1);
+}
+
+let server;
+if (httpsEnabled) {
+    http.createServer(redirectToHttps).listen(8000);
+    server = https.createServer({
+        key: fs.readFileSync(httpsSslKey),
+        cert: fs.readFileSync(httpsSslCert)
+    }, requestHandler).listen(8443);
+} else http.createServer(requestHandler).listen(8000);
+
+function redirectToHttps(request, response) {
+    let url = new URL(request.url, `https://${request.headers.host}`);
+    url.port = process.env.HTTPS_PORT ?? "8443";
+    response.writeHead(308, {"Location": url.href});
+    response.end();
+}
+
+function requestHandler(request, response) {
     // First, let's check the URL to see if it's a REST request or a file request.
     // We will remove all cases of "../" in the url for security purposes.
     let filePath = request.url.split("/").filter(function (elem) {
@@ -42,7 +73,7 @@ const server = http.createServer(function (request, response) {
         response.end(`Something in your request (${request.url}) is strange...`);
     }
 // For the server to be listening to request, it needs a port, which is set thanks to the listen function.
-}).listen(8000);
+}
 
 const io = new Server(server, {
     cors: {
@@ -69,7 +100,7 @@ io.on("connection", (socket) => {
     const socketGame = Client(process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003", {
         extraHeaders: {
             authorization: "Bearer " + accessToken
-        },
+        }
     });
 
     socket.on("disconnect", () => socketGame.disconnect());

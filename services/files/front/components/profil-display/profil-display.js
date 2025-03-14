@@ -27,9 +27,9 @@ export class ProfilDisplay extends HTMLComponent {
     };
 
     onVisible = async () => {
-        if (getCookie("accessToken")) {
+        if (getCookie("refreshToken")) {
             this.shadowRoot.getElementById("profil").classList.add("connected");
-            this.shadowRoot.getElementById("username").innerText = (await parseJwt(getCookie("accessToken"))).username;
+            this.shadowRoot.getElementById("username").innerText = (await parseJwt(getCookie("refreshToken"))).username;
             document.dispatchEvent(new CustomEvent("change-popup", {
                 detail: {name: "disconnect", display: false}
             }));

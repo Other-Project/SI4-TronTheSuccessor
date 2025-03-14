@@ -6,23 +6,10 @@ export function getCookie(name) {
 }
 
 export async function renewAccessToken() {
-    await fetch("/api/user/renew-access-token", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({refreshToken: getCookie("refreshToken")})
-    }).then(response => {
-        if (response.ok) {
-            return response.json();
-        } else if (response.status === 401) {
-            alert(response.error);
-            location.reload();
-        } else throw new Error(response.error);
-    }).then(data => {
+    const body = JSON.stringify({refreshToken: getCookie("refreshToken")});
+    const data = await loginFetch("renew-access-token", body);
+    if (data)
         document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
-        document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
-    });
 }
 
 export async function loginFetch(url, body, authorizationToken) {

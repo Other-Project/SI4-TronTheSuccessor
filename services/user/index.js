@@ -95,25 +95,3 @@ async function handleResetPassword(request, response) {
     const result = await userDatabase.resetPassword(parsedBody.newPassword, resetPasswordToken);
     sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.OK, result);
 }
-
-/**
- *
- * @param {IncomingMessage} request
- * @returns {Promise<string>}
- */
-async function getRequestBody(request) {
-    return new Promise((resolve, reject) => {
-        let body = "";
-        request.on("data", chunk => body += chunk.toString());
-        request.on("end", () => resolve(body));
-        request.on("error", reject);
-    });
-}
-
-function sendResponse(response, statusCode, data = null) {
-    response.statusCode = statusCode;
-    if (data) {
-        response.setHeader("Content-Type", "application/json");
-        response.end(JSON.stringify(data));
-    } else response.end();
-}

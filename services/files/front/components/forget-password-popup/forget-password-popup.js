@@ -3,12 +3,23 @@ import {loginFetch} from "/js/login-manager.js";
 
 export class ForgetPassword extends HTMLComponent {
     resetPasswordToken;
+    usernameInput;
+    firstAnswerInput;
+    secondAnswerInput;
+    passwordInput;
+    confirmPasswordInput;
 
     constructor() {
         super("forget-password-popup", ["html", "css"]);
     }
 
     onSetupCompleted = () => {
+        this.firstAnswerInput = this.shadowRoot.getElementById("first-answer-input").input_answer;
+        this.secondAnswerInput = this.shadowRoot.getElementById("second-answer-input").input_answer;
+        this.usernameInput = this.shadowRoot.getElementById("username-input").input_answer;
+        this.passwordInput = this.shadowRoot.getElementById("new-password-input").input_answer;
+        this.confirmPasswordInput = this.shadowRoot.getElementById("confirm-password-input").input_answer;
+
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("change-popup", {
                 detail: {name: "sign-in", display: true}
@@ -37,48 +48,43 @@ export class ForgetPassword extends HTMLComponent {
     };
 
     #usernameCheck() {
-        const username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
-        username.setCustomValidity("");
-        if (!username.validity.valid)
-            username.setCustomValidity("Username must be at least 3 characters long and less than 20.");
-        username.reportValidity();
-        return username.validity.valid;
+        this.usernameInput.setCustomValidity("");
+        if (!this.usernameInput.validity.valid)
+            this.usernameInput.setCustomValidity("Username must be at least 3 characters long and less than 20.");
+        this.usernameInput.reportValidity();
+        return this.usernameInput.validity.valid;
     }
 
     #answersCheck() {
-        const firstAnswer = this.shadowRoot.getElementById("first-answer-input").shadowRoot.getElementById("answer");
-        const secondAnswer = this.shadowRoot.getElementById("second-answer-input").shadowRoot.getElementById("answer");
-        firstAnswer.setCustomValidity("");
-        secondAnswer.setCustomValidity("");
+        this.firstAnswerInput.setCustomValidity("");
+        this.secondAnswerInput.setCustomValidity("");
 
-        if (!firstAnswer.validity.valid)
-            firstAnswer.setCustomValidity("Answer cannot be empty");
+        if (!this.firstAnswerInput.validity.valid)
+            this.firstAnswerInput.setCustomValidity("Answer cannot be empty");
 
-        if (!secondAnswer.validity.valid)
-            secondAnswer.setCustomValidity("Answer cannot be empty");
+        if (!this.secondAnswerInput.validity.valid)
+            this.secondAnswerInput.setCustomValidity("Answer cannot be empty");
 
-        secondAnswer.reportValidity();
-        firstAnswer.reportValidity();
+        this.secondAnswerInput.reportValidity();
+        this.firstAnswerInput.reportValidity();
 
-        return firstAnswer.validity.valid && secondAnswer.validity.valid;
+        return this.firstAnswerInput.validity.valid && this.secondAnswerInput.validity.valid;
     }
 
     #passwordsCheck() {
-        const newPassword = this.shadowRoot.getElementById("new-password-input").shadowRoot.getElementById("answer");
-        const confirmPassword = this.shadowRoot.getElementById("confirm-password-input").shadowRoot.getElementById("answer");
-        newPassword.setCustomValidity("");
-        confirmPassword.setCustomValidity("");
-        if (!newPassword.validity.valid)
-            newPassword.setCustomValidity("Password must be at least 6 characters long and less than 20.");
-        if (newPassword.value !== confirmPassword.value)
-            confirmPassword.setCustomValidity("Passwords do not match.");
-        confirmPassword.reportValidity();
-        newPassword.reportValidity();
-        return newPassword.validity.valid && confirmPassword.validity.valid;
+        this.passwordInput.setCustomValidity("");
+        this.confirmPasswordInput.setCustomValidity("");
+        if (!this.passwordInput.validity.valid)
+            this.passwordInput.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        if (this.passwordInput.value !== this.confirmPasswordInput.value)
+            this.confirmPasswordInput.setCustomValidity("Passwords do not match.");
+        this.confirmPasswordInput.reportValidity();
+        this.passwordInput.reportValidity();
+        return this.passwordInput.validity.valid && this.confirmPasswordInput.validity.valid;
     }
 
     async #fetchSecurityQuestionsForUser() {
-        const username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer").value;
+        const username = this.usernameInput.value;
         const body = JSON.stringify({username});
         const data = await loginFetch("security-questions", body);
         if (data) {
@@ -90,9 +96,9 @@ export class ForgetPassword extends HTMLComponent {
     }
 
     async #verifyAnswers() {
-        const username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer").value;
-        const firstAnswer = this.shadowRoot.getElementById("first-answer-input").shadowRoot.getElementById("answer").value;
-        const secondAnswer = this.shadowRoot.getElementById("second-answer-input").shadowRoot.getElementById("answer").value;
+        const username = this.usernameInput.value;
+        const firstAnswer = this.firstAnswerInput.value;
+        const secondAnswer = this.secondAnswerInput.value;
         const body = JSON.stringify({username, answers: [firstAnswer, secondAnswer]});
         const data = await loginFetch("verify-answers", body);
         if (data) {
@@ -102,8 +108,8 @@ export class ForgetPassword extends HTMLComponent {
     }
 
     async #resetPassword() {
-        const newPassword = this.shadowRoot.getElementById("new-password-input").shadowRoot.getElementById("answer").value;
-        const body = JSON.stringify({newPassword});
+        const password = this.passwordInput.value;
+        const body = JSON.stringify({newPassword: password});
         const data = await loginFetch("reset-password", body, this.resetPasswordToken);
         if (data) {
             document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;

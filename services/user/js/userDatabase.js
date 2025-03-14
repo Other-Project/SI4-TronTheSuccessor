@@ -84,7 +84,7 @@ async function verifyAnswers(username, answers) {
     if (!user)
         return {error: "Could not find user with this username : " + username};
     const hashedAnswers = answers.map(hash);
-    if (user.securityQuestions.every((question, i) => question.answer === hashedAnswers[i]))
+    if (!user.securityQuestions.every((question, i) => question.answer === hashedAnswers[i]))
         return {error: "Wrong answers"};
     const userInfo = {username: user.username};
     const resetPasswordToken = jwt.sign(userInfo, secretKeyPasswordReset, {expiresIn: resetPasswordTokenDuration});

@@ -31,8 +31,7 @@ let server = http.createServer(async (request, response) => {
 const io = new Server(server, {
     cors: {
         origin: "*"
-    },
-    path: "/api/game/ws"
+    }
 });
 
 io.on("connection", (socket) => {

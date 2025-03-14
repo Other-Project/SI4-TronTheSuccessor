@@ -10,7 +10,6 @@ const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
-
     try {
         switch (filePath[3]) {
             case "elo":
@@ -32,7 +31,8 @@ let server = http.createServer(async (request, response) => {
 const io = new Server(server, {
     cors: {
         origin: "*"
-    }
+    },
+    path: "/api/game/ws"
 });
 
 io.on("connection", (socket) => {

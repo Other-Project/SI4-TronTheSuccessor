@@ -76,5 +76,6 @@ exports.handleAddElo = async function (request, response) {
  */
 exports.handleGetElo = async function (request, response, playerId) {
     const elo = await statsDatabase.getElo(playerId);
-    sendResponse(response, HTTP_STATUS.OK, elo);
+    if (!elo) sendResponse(response, HTTP_STATUS.NOT_FOUND);
+    else sendResponse(response, HTTP_STATUS.OK, elo);
 };

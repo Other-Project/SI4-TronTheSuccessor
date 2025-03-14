@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {getCookie} from "../../js/login-manager.js";
 
 export class ProfileOverview extends HTMLComponent {
 
@@ -6,13 +7,18 @@ export class ProfileOverview extends HTMLComponent {
         super("profile-overview", ["html", "css"]);
     }
 
-    onSetupCompleted = () => {
+    onSetupCompleted = async () => {
         this.rankIcon = this.shadowRoot.querySelector('app-profile-rank [slot="rank-icon"]');
-        //TODO: Fetch user the rank from the backend
+        this.rank = this.shadowRoot.querySelector("app-profile-rank [slot=\"rank\"]");
+
         const userName = location.search.split("=")[1];
-
-
-        this.#createPolygonSVG(4);
+        const rank = await fetch(`/api/game/elo/${userName}`, {
+            headers: {
+                "Authorization": `Bearer ${getCookie("accessToken")}`
+            }
+        }).then(response => response.text());
+        this.rank.textContent = rank;
+        this.#createPolygonSVG(rank);
     };
 
     #createPolygonSVG(vertices) {

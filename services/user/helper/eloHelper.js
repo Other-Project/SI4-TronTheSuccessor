@@ -47,8 +47,6 @@ async function addElo(playerId, elo) {
     return makeHttpRequest('POST', '/api/game/elo', data);
 }
 
-module.exports = {addElo};
-
 /**
  * Get the ELO of a player.
  * @param {string} playerId

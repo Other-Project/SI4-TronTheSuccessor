@@ -53,7 +53,7 @@ async function getAllElo() {
  * @param {string} playerId The id of the player.
  * @returns {Promise<number>} The number of games.
  */
-export async function addGame(playerId) {
+async function addGame(playerId) {
     return (await statsCollection.findOneAndUpdate({playerId},
             {$inc: {games: 1}},
             {returnDocument: "after"})
@@ -65,7 +65,7 @@ export async function addGame(playerId) {
  * @param {string} playerId The id of the player.
  * @returns {Promise<number>} The number of wins.
  */
-export async function addLoss(playerId) {
+async function addLoss(playerId) {
     return (await statsCollection.findOneAndUpdate({playerId},
             {$inc: {losses: 1}},
             {returnDocument: "after"})
@@ -77,7 +77,7 @@ export async function addLoss(playerId) {
  * @param {string} playerId The id of the player.
  * @returns {Promise<number>} The number of wins.
  */
-export async function addWin(playerId) {
+async function addWin(playerId) {
     return (await statsCollection.findOneAndUpdate({playerId},
             {$inc: {wins: 1}},
             {returnDocument: "after"})
@@ -89,11 +89,11 @@ export async function addWin(playerId) {
  * @param {string} playerId The id of the player.
  * @returns {Promise<number>} The number of draws.
  */
-export async function addDraw(playerId) {
+async function addDraw(playerId) {
     return (await statsCollection.findOneAndUpdate({playerId},
             {$inc: {draws: 1}},
             {returnDocument: "after"})
     ).value.draws;
 }
 
-module.exports = {addElo, getElo, updateElo, getAllElo};
+module.exports = {addElo, getElo, updateElo, getAllElo, addLoss, addDraw, addWin, addGame};

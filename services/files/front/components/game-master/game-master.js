@@ -115,7 +115,7 @@ export class GameMaster extends HTMLComponent {
             extraHeaders: {
                 authorization: "Bearer " + getCookie("accessToken")
             },
-            path: "/api/game"
+            path: "/api/game/ws"
         });
 
         this.gameBoard.clear();

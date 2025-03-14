@@ -48,7 +48,7 @@ const io = new Server(server, {
     cors: {
         origin: "*"
     },
-    path: "/api/game"
+    path: "/api/game/ws"
 });
 
 io.on("connection", (socket) => {

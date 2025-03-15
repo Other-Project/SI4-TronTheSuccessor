@@ -3,6 +3,8 @@ const userDatabase = require("./js/userDatabase.js");
 const {addElo, getElo} = require("./helper/eloHelper.js");
 const {getRequestBody, sendResponse} = require("./js/utils.js");
 
+const BASE_ELO = 300;
+
 const HTTP_STATUS = {
     OK: 200,
     CREATED: 201,
@@ -38,7 +40,7 @@ async function handleSignUp(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
-    await addElo(parsedBody.username, 1000);
+    await addElo(parsedBody.username, BASE_ELO);
     sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.CREATED, result);
 }
 

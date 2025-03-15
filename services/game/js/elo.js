@@ -1,6 +1,6 @@
 const statsDatabase = require("./eloDatabase.js");
 const {HTTP_STATUS, getRequestBody, sendResponse} = require("./utils.js");
-const BASE_ELO = 1000;
+const BASE_ELO = 300;
 
 /**
  * Calculate the ELO points won.
@@ -17,12 +17,12 @@ function calculateEloPoints(elo, k, w, d) {
 }
 
 /**
- * Update the elo of both players
+ * Update the stats of both players after a game.
  * @param {Player[]} players
  * @param {{elapsed: number, winner: (string|undefined), grid: number[][], ended: boolean, draw: (boolean|undefined), playerStates: {pos: [number,number], dead: boolean, direction: "right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"}[]}} gameInfo
  * @returns {Promise<void>}
  */
-exports.updateElos = async function (players, gameInfo) {
+exports.updateStats = async function (players, gameInfo) {
     const eloP1 = await statsDatabase.getElo(players[0].name) ?? BASE_ELO;
     const eloP2 = await statsDatabase.getElo(players[1].name) ?? BASE_ELO;
     const pointP1 = gameInfo.draw ? 0.5 : players[0].name === gameInfo.winner ? 1 : 0;
@@ -32,7 +32,9 @@ exports.updateElos = async function (players, gameInfo) {
     switch (pointP1) {
         case 0:
             await statsDatabase.addWin(players[1].name);
+            await statsDatabase.addWinStreak(players[1].name);
             await statsDatabase.addLoss(players[0].name);
+            await statsDatabase.resetWinStreak(players[0].name);
             break;
         case 0.5:
             await statsDatabase.addDraw(players[0].name);
@@ -40,11 +42,15 @@ exports.updateElos = async function (players, gameInfo) {
             break;
         case 1:
             await statsDatabase.addWin(players[0].name);
+            await statsDatabase.addWinStreak(players[0].name);
             await statsDatabase.addLoss(players[1].name);
+            await statsDatabase.resetWinStreak(players[1].name);
             break;
     }
     await statsDatabase.addGame(players[0].name);
     await statsDatabase.addGame(players[1].name);
+    await statsDatabase.updatePlayTime(players[0].name, gameInfo.elapsed);
+    await statsDatabase.updatePlayTime(players[1].name, gameInfo.elapsed);
 
     const newEloP1 = Math.max(calculateEloPoints(eloP1, 32, pointP1, diff), 0);
     const newEloP2 = Math.max(calculateEloPoints(eloP2, 32, pointP2, -diff), 0);
@@ -78,4 +84,17 @@ exports.handleGetElo = async function (request, response, playerId) {
     const elo = await statsDatabase.getElo(playerId);
     if (!elo) sendResponse(response, HTTP_STATUS.NOT_FOUND);
     else sendResponse(response, HTTP_STATUS.OK, elo);
+};
+
+/**
+ * Handle a request to get all stats from the database
+ * @param request The request
+ * @param response The response
+ * @param playerId The ID of the player
+ * @returns {Promise<{wins: number, losses: number, draws: number, games: number, winStreak: number, rank: string, eloInRank: number, timePlayed: number}>}
+ */
+exports.handleGetAllStats = async function (request, response, playerId) {
+    const stats = await statsDatabase.getAllStats(playerId);
+    if (!stats) sendResponse(response, HTTP_STATUS.NOT_FOUND);
+    else sendResponse(response, HTTP_STATUS.OK, stats);
 };

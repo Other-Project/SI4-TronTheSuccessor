@@ -30,11 +30,5 @@ async function getFriends(playerId) {
  * @returns {Promise<void>}
  */
 async function removeFriend(playerId, otherId) {
-    socialCollection.deleteOne({player, otherId});
+    return socialCollection.deleteOne({playerId, otherId});
 }
-
-
-
-
-
-

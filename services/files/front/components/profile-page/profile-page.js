@@ -2,7 +2,7 @@ import {HTMLComponent} from "/js/component.js";
 
 export class ProfilePage extends HTMLComponent {
     constructor() {
-        super("/components/profile-page", "profile-page.html");
+        super("profile-page", ["html", "css"]);
     }
 
     onSetupCompleted = () => {

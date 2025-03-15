@@ -109,13 +109,15 @@ export class GameMaster extends HTMLComponent {
         this.pauseWindow.style.display = "none";
         this.stopGame();
 
-        let wsUrl = new URL('/', window.location.href);
-        wsUrl.protocol = wsUrl.protocol.replace('http', 'ws');
-        this.socket = io(wsUrl.href, {
-            extraHeaders: {
-                authorization: "Bearer " + getCookie("accessToken")
-            },
-            path: "/api/game"
+        this.socket = io("/api/game", {
+            extraHeaders: {authorization: "Bearer " + getCookie("accessToken")},
+            path: "/ws"
+        });
+        this.socket.on("connect_error", async (err) => {
+            if (err.message === "Authentication needed") {
+                await renewAccessToken();
+                this.#gameWithServer();
+            } else console.error(err.message);
         });
 
         this.gameBoard.clear();
@@ -147,13 +149,6 @@ export class GameMaster extends HTMLComponent {
             const directions = Object.keys(directionToAngle);
             const direction = reverse ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
             this.socket.emit("game-action", {direction});
-        });
-
-        this.socket.on("error", async (msg) => {
-            if (msg.status === 401) {
-                await renewAccessToken();
-                this.#gameWithServer();
-            } else console.error(msg);
         });
     }
 

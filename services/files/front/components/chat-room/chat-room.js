@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fetchApi, getUserInfo} from "/js/login-manager.js";
+import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login-manager.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -21,12 +21,11 @@ export class ChatRoom extends HTMLComponent {
 
     onVisible = () => {
         this.#refresh();
-        this.loopId = setInterval(() => this.#refresh(), 5000);
     };
 
     onHidden = () => {
-        if (this.loopId) clearInterval(this.loopId);
-        this.loopId = null;
+        this.socket.disconnect();
+        this.socket = null;
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -37,19 +36,38 @@ export class ChatRoom extends HTMLComponent {
     #refresh() {
         if (!this.messagePanel) return;
         this.getMessages().then(messages => this.#displayMessages(messages));
+        this.#openWebSocket().then();
     }
 
     #displayMessages(messages) {
         this.messagePanel.innerHTML = "";
-        for (const message of messages) {
-            const messageElement = document.createElement("app-chat-room-message");
-            messageElement.setAttribute("author", message.author);
-            messageElement.setAttribute("content", message.content);
-            messageElement.setAttribute("date", message.date);
-            messageElement.setAttribute("type", message.type);
-            messageElement.setAttribute("you", (message.author === getUserInfo()?.username).toString());
-            this.messagePanel.appendChild(messageElement);
-        }
+        for (const message of messages) this.#displayMessage(message);
+    }
+
+    #displayMessage(message) {
+        const messageElement = document.createElement("app-chat-room-message");
+        messageElement.setAttribute("author", message.author);
+        messageElement.setAttribute("content", message.content);
+        messageElement.setAttribute("date", message.date);
+        messageElement.setAttribute("type", message.type);
+        messageElement.setAttribute("you", (message.author === getUserInfo()?.username).toString());
+        this.messagePanel.appendChild(messageElement);
+    }
+
+    async #openWebSocket(retry = true) {
+        if (this.socket) this.socket.disconnect();
+        this.socket = io("/api/chat", {
+            extraHeaders: {authorization: "Bearer " + await getAccessToken()},
+            path: "/ws"
+        });
+        this.socket.on("connect_error", async (err) => {
+            if (retry && err.message === "Authentication needed") {
+                await renewAccessToken();
+                this.#openWebSocket(false).then();
+            } else console.error(err.message);
+        });
+        this.socket.on("message", (message) => this.#displayMessage(message));
+        this.socket.emit("join", this.room);
     }
 
     async getMessages() {
@@ -58,18 +76,16 @@ export class ChatRoom extends HTMLComponent {
     }
 
     async sendMessage() {
-        const message = this.messageInput.value;
-        if (!message) return;
+        const messageContent = this.messageInput.value;
+        if (!messageContent) return;
 
-        const response = await fetchApi(`/api/chat/${this.room}`, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                type: "text",
-                content: message
-            })
-        });
-        if (response.ok) this.messageInput.value = "";
+        const message = {
+            type: "text",
+            content: messageContent
+        };
+
+        const ok = await new Promise(resolve => this.socket.timeout(5000).emit("message", message, (err, ack) => resolve(!err && ack)));
+        if (ok) this.messageInput.value = "";
         else alert("Failed to send message");
     }
 }

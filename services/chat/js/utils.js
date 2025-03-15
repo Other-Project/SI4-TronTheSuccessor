@@ -20,10 +20,10 @@ exports.getRequestBody = async function (request) {
         request.on("end", () => resolve(body));
         request.on("error", reject);
     });
-}
+};
 
 /**
- * @param { ServerResponse } response The response object
+ * @param {ServerResponse} response The response object
  * @param {number} statusCode The status code to send
  * @param {*} data The data to send
  */
@@ -33,7 +33,7 @@ exports.sendResponse = function (response, statusCode, data = null) {
         response.setHeader("Content-Type", "application/json");
         response.end(JSON.stringify(data));
     } else response.end();
-}
+};
 
 /**
  * Get the user from the request
@@ -43,5 +43,6 @@ exports.sendResponse = function (response, statusCode, data = null) {
 exports.getUser = function (request) {
     const authHeader = request.headers.authorization?.split(" ");
     if (!authHeader || authHeader.length !== 2 || authHeader[0] !== "Bearer") return null;
+    // noinspection JSValidateTypes
     return jwt.decode(authHeader[1]);
-}
+};

@@ -1,8 +1,8 @@
 export function getCookie(name) {
-    return document.cookie.split('; ').reduce((r, v) => {
-        const parts = v.split('=')
-        return parts[0] === name ? decodeURIComponent(parts[1]) : r
-    }, '');
+    return document.cookie.split("; ").reduce((r, v) => {
+        const parts = v.split("=");
+        return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+    }, "");
 }
 
 export async function renewAccessToken() {
@@ -26,6 +26,19 @@ export async function renewAccessToken() {
 }
 
 /**
+ * Get the access token (renewing it if necessary)
+ * @return {Promise<string|null>} The access token or null if the user is not logged in
+ */
+export async function getAccessToken() {
+    if (!getCookie("refreshToken")) return null;
+
+    const accessToken = getCookie("accessToken");
+    if (accessToken) return accessToken;
+    await renewAccessToken();
+    return getCookie("accessToken");
+}
+
+/**
  * Fetch API with Authorization header
  * @param url The URL to fetch
  * @param options The options to pass to fetch
@@ -33,15 +46,9 @@ export async function renewAccessToken() {
  * @returns {Promise<Response>} The response
  */
 export async function fetchApi(url, options = undefined, retry = true) {
-    let accessToken = getCookie("accessToken");
-    if (!accessToken) {
-        await renewAccessToken();
-        accessToken = getCookie("accessToken");
-    }
-
     options ??= {};
     options.headers ??= {};
-    options.headers["Authorization"] = `Bearer ${accessToken}`;
+    options.headers["Authorization"] = `Bearer ${await getAccessToken()}`;
     const response = await fetch(url, options);
     if (retry && response.status === 401) {
         await renewAccessToken();
@@ -57,8 +64,8 @@ export async function fetchApi(url, options = undefined, retry = true) {
 export function getUserInfo() {
     const token = getCookie("refreshToken");
     if (!token) return null;
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
     return JSON.parse(jsonPayload);
 }

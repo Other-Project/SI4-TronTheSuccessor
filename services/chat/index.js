@@ -1,9 +1,11 @@
 const http = require("http");
+const {Server} = require("socket.io");
 const chatDatabase = require("./js/chatDatabase.js");
 const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
+const {getRoomId} = require("./js/chatDatabase.js");
 
 
-http.createServer(async (request, response) => {
+const server = http.createServer(async (request, response) => {
     // noinspection HttpUrlsUsage
     const requestUrl = new URL(request.url, `http://${request.headers.host}`);
     const user = getUser(request);
@@ -11,8 +13,7 @@ http.createServer(async (request, response) => {
 
     const endpoint = /^\/api\/chat\/([a-zA-Z0-9]+)\/?$/;
     if (endpoint.test(requestUrl.pathname)) {
-        let roomId = endpoint.exec(requestUrl.pathname)[1];
-        if (roomId !== "global") roomId = user.username + "-" + roomId;
+        const roomId = getRoomId(user.username, endpoint.exec(requestUrl.pathname)[1]);
 
         if (request.method === "GET") {
             const from = requestUrl.searchParams.get("from");
@@ -20,8 +21,42 @@ http.createServer(async (request, response) => {
             return sendResponse(response, HTTP_STATUS.OK, messages);
         } else if (request.method === "POST") {
             const message = JSON.parse(await getRequestBody(request));
-            await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
+            if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
+            io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
             return sendResponse(response, HTTP_STATUS.CREATED);
         }
     } else return sendResponse(response, HTTP_STATUS.NOT_FOUND);
 }).listen(8006);
+
+
+const io = new Server(server);
+io.on("connection", (socket) => {
+    const user = getUser(socket.request);
+    if (!user) {
+        socket.disconnect();
+        return;
+    }
+
+    let roomId = null;
+    socket.on("join", (room) => {
+        roomId = getRoomId(user.username, room);
+        socket.join(roomId);
+    });
+
+    socket.on("message", async (message, callback) => {
+        if (!roomId) {
+            console.error("No room joined");
+            callback?.(false);
+            return;
+        }
+
+        if (!chatDatabase.verifyMessage(message)) {
+            console.error("Invalid message");
+            callback?.(false);
+            return;
+        }
+
+        io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
+        callback?.(true);
+    });
+});

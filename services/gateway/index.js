@@ -155,13 +155,13 @@ function registerWebsocket(io, namespace, serviceUrl) {
         socket.on("disconnect", () => serviceSocket.disconnect());
         serviceSocket.on("disconnect", () => socket.disconnect());
 
-        socket.onAny((event, msg) => {
-            console.log("Transmitting " + event + " event to the service");
-            serviceSocket.emit(event, msg);
+        socket.onAny((event, ...args) => {
+            console.log("Transmitting " + event + " event to " + serviceUrl);
+            serviceSocket.emit(event, ...args);
         });
-        serviceSocket.onAny((event, msg) => {
+        serviceSocket.onAny((event, ...args) => {
             console.log("Transmitting " + event + " event to the client");
-            socket.emit(event, msg);
+            socket.emit(event, ...args);
         });
     });
 }

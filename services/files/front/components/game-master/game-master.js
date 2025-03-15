@@ -4,7 +4,7 @@ import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
 import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
-import {getCookie, renewAccessToken} from "/js/login-manager.js";
+import {getAccessToken, getCookie, renewAccessToken} from "/js/login-manager.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -51,7 +51,7 @@ export class GameMaster extends HTMLComponent {
     onHidden = () => this.stopGame();
 
     #launchGame() {
-        this.against === "local" ? this.newGame() : this.#gameWithServer();
+        this.against === "local" ? this.newGame() : this.#gameWithServer().then();
     }
 
     newGame() {
@@ -100,7 +100,7 @@ export class GameMaster extends HTMLComponent {
         this.game.resume();
     }
 
-    #gameWithServer() {
+    async #gameWithServer(retry = true) {
         if (!getCookie("refreshToken")) {
             alert("You need to be logged in to play against the server");
             location.reload();
@@ -110,13 +110,13 @@ export class GameMaster extends HTMLComponent {
         this.stopGame();
 
         this.socket = io("/api/game", {
-            extraHeaders: {authorization: "Bearer " + getCookie("accessToken")},
+            extraHeaders: {authorization: "Bearer " + await getAccessToken()},
             path: "/ws"
         });
         this.socket.on("connect_error", async (err) => {
-            if (err.message === "Authentication needed") {
+            if (retry && err.message === "Authentication needed") {
                 await renewAccessToken();
-                this.#gameWithServer();
+                this.#gameWithServer(false).then();
             } else console.error(err.message);
         });
 

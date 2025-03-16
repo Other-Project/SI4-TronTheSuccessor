@@ -15,9 +15,34 @@ export class ProfileOverview extends HTMLComponent {
         super("profile-overview", ["html", "css"]);
     }
 
+    async #sendFriendRequest(currentUser, friend, token) {
+        await fetch(`/api/user/friends/add`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: currentUser,
+                friends: friend,
+            })
+        });
+        this.#showNotification("Friend request sent!", 2000, "#4CAF50");
+    }
+
+    #showNotification(message, duration, background) {
+        const notification = document.createElement('app-notification');
+        notification.message = message;
+        notification.duration = duration;
+        notification.background = background;
+        document.body.appendChild(notification);
+        notification.show();
+    }
+
     onSetupCompleted = async () => {
         const userName = location.search.split("=")[1];
         const token = getCookie("accessToken");
+
         let jwt;
         if (token !== "") jwt = parseJwt(token);
         if (jwt && jwt.username === userName)
@@ -28,8 +53,22 @@ export class ProfileOverview extends HTMLComponent {
         this.profileStats = this.shadowRoot.getElementById("profiles-stats");
         this.profilePfp = this.shadowRoot.getElementById("profile-pfp");
 
-        this.shadowRoot.querySelector('[slot="name"]').textContent = userName;
+        this.shadowRoot.getElementById("modify-password").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "modify-password"}));
+        });
+        this.shadowRoot.getElementById("share").addEventListener("click", () => {
+            navigator.clipboard.writeText(location.href).then(() => {
+                this.#showNotification("Profile URL copied to clipboard!", 2000, "#8E24AA");
+            });
+        });
+        this.shadowRoot.getElementById("add-friend").addEventListener("click", async () => {
+            if (!token) {
+                localStorage.setItem("redirectAfterLogin", window.location.href);
+                window.location.href = "#login";
+            } else await this.#sendFriendRequest(jwt.username, userName, token);
+        });
 
+        this.shadowRoot.querySelector('[slot="name"]').textContent = userName;
         const stats = await fetch(`/api/game/stats/${userName}`, {
             headers: {
                 "Authorization": `Bearer ${token}`

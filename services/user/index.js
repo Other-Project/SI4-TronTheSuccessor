@@ -2,16 +2,10 @@ const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
 const {addElo, getElo} = require("./helper/eloHelper.js");
 const {getRequestBody, sendResponse} = require("./js/utils.js");
+const {handleGetFriends, handleAddFriend, handleDeleteFriend} = require("./js/social.js");
+const {HTTP_STATUS} = require("./js/utils.js");
 
 const BASE_ELO = 300;
-
-const HTTP_STATUS = {
-    OK: 200,
-    CREATED: 201,
-    BAD_REQUEST: 400,
-    UNAUTHORIZED_STATUS_CODE: 401,
-    NOT_FOUND: 404
-};
 
 http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
@@ -26,6 +20,15 @@ http.createServer(async (request, response) => {
                 break;
             case "renew-access-token":
                 await handleRenewToken(request, response);
+                break;
+            case "friends":
+                if (request.method === "GET")
+                    await handleGetFriends(request, response, filePath[4]);
+                else if (filePath[4] === "add" && request.method === "POST")
+                    await handleAddFriend(request, response);
+
+                else if (filePath[4] === "delete" && request.method === "POST")
+                    await handleDeleteFriend(request, response);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

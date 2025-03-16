@@ -187,7 +187,7 @@ async function updatePlayTime(playerId, time) {
  * @returns {Promise<{wins: number, losses: number, draws: number, games: number, winStreak: number, rank: string, eloInRank: number, timePlayed: number}>}
  */
 async function getAllStats(playerId) {
-    const stats = await statsCollection.findOne({playerId});
+    const stats = await statsCollection.findOne({playerId}) ?? {};
 
     const updatedStats = {
         wins: stats.wins ?? 0,

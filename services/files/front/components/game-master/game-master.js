@@ -4,7 +4,7 @@ import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
 import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
-import {getCookie, renewAccessToken} from "/js/login-manager.js";
+import {getAccessToken, getCookie, renewAccessToken} from "/js/login-manager.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -51,7 +51,7 @@ export class GameMaster extends HTMLComponent {
     onHidden = () => this.stopGame();
 
     #launchGame() {
-        this.against === "local" ? this.newGame() : this.#gameWithServer();
+        this.against === "local" ? this.newGame() : this.#gameWithServer().then();
     }
 
     newGame() {
@@ -100,7 +100,7 @@ export class GameMaster extends HTMLComponent {
         this.game.resume();
     }
 
-    #gameWithServer() {
+    async #gameWithServer(retry = true) {
         if (!getCookie("refreshToken")) {
             alert("You need to be logged in to play against the server");
             location.reload();
@@ -109,13 +109,15 @@ export class GameMaster extends HTMLComponent {
         this.pauseWindow.style.display = "none";
         this.stopGame();
 
-        let wsUrl = new URL('/', window.location.href);
-        wsUrl.protocol = wsUrl.protocol.replace('http', 'ws');
-        this.socket = io(wsUrl.href, {
-            extraHeaders: {
-                authorization: "Bearer " + getCookie("accessToken")
-            },
-            path: "/api/game/ws"
+        this.socket = io("/api/game", {
+            extraHeaders: {authorization: "Bearer " + await getAccessToken()},
+            path: "/ws"
+        });
+        this.socket.on("connect_error", async (err) => {
+            if (retry && err.message === "Authentication needed") {
+                await renewAccessToken();
+                this.#gameWithServer(false).then();
+            } else console.error(err.message);
         });
 
         this.gameBoard.clear();
@@ -147,13 +149,6 @@ export class GameMaster extends HTMLComponent {
             const directions = Object.keys(directionToAngle);
             const direction = reverse ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
             this.socket.emit("game-action", {direction});
-        });
-
-        this.socket.on("error", async (msg) => {
-            if (msg.status === 401) {
-                await renewAccessToken();
-                this.#gameWithServer();
-            } else console.error(msg);
         });
     }
 

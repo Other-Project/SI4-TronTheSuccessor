@@ -13,7 +13,7 @@ export class ChatTab extends HTMLComponent {
     }
 
     openChatRoom(room) {
-        const chatPage = document.createElement("app-chat");
+        const chatPage = document.createElement("app-chat-room");
         this.dataset.tabTitle = room.name;
         chatPage.setAttribute("room", room.id);
         this.shadowRoot.replaceChildren(chatPage);

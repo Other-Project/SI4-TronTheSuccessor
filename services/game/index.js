@@ -10,6 +10,7 @@ const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
+
     try {
         switch (filePath[3]) {
             case "elo":
@@ -28,12 +29,7 @@ let server = http.createServer(async (request, response) => {
     }
 }).listen(8003);
 
-const io = new Server(server, {
-    cors: {
-        origin: "*"
-    }
-});
-
+const io = new Server(server);
 io.on("connection", (socket) => {
     socket.on("game-start", async (msg) => {
         await findGame(socket, msg);

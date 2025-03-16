@@ -57,3 +57,10 @@ export function fakePageReload() {
         }));
     }, 10);
 }
+
+export function storeTokens(data) {
+    document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
+    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+}
+
+export const popupEvent = new EventTarget();

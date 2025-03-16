@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {loginFetch} from "/js/login-manager.js";
+import {loginFetch, popupEvent, storeTokens} from "/js/login-manager.js";
 
 export class ForgetPassword extends HTMLComponent {
     resetPasswordToken;
@@ -21,7 +21,7 @@ export class ForgetPassword extends HTMLComponent {
         this.confirmPasswordInput = this.shadowRoot.getElementById("confirm-password-input").input_answer;
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("change-popup", {
+            popupEvent.dispatchEvent(new CustomEvent("change-popup", {
                 detail: {name: "sign-in", display: true}
             }));
         });
@@ -112,8 +112,7 @@ export class ForgetPassword extends HTMLComponent {
         const body = JSON.stringify({newPassword: password});
         const data = await loginFetch("reset-password", body, this.resetPasswordToken);
         if (data) {
-            document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
-            document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+            storeTokens(data);
             this.shadowRoot.getElementById("password-reset-popup").style.display = "block";
         } else {
             this.showPart("username");

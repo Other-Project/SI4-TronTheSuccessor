@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {disconnect} from "/js/login-manager.js";
+import {disconnect, popupEvent} from "/js/login-manager.js";
 
 export class LoginContainer extends HTMLComponent {
     ids = ["sign-in", "sign-up", "forget-password", "disconnect"];
@@ -12,15 +12,15 @@ export class LoginContainer extends HTMLComponent {
     onSetupCompleted = () => {
         this.popupContainer = this.shadowRoot.getElementById("popup-container");
 
-        document.addEventListener("change-popup", (event) => {
+        popupEvent.addEventListener("change-popup", (event) => {
             this.#changePopup(event.detail.name, event.detail.display);
         });
 
-        document.addEventListener("show-popup-container", () => {
+        popupEvent.addEventListener("show-popup-container", () => {
             this.popupContainer.style.display = "block";
         });
 
-        document.addEventListener("hide-popup", () => {
+        popupEvent.addEventListener("hide-popup", () => {
             this.popupContainer.style.display = "none";
         });
 

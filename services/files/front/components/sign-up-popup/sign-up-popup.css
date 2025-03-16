@@ -51,11 +51,7 @@ p {
     right: -15px;
 }
 
-#first-page.active ~ #right-arrow {
-    display: block;
-}
-
-#second-page.active ~ #left-arrow {
+#first-page.active ~ #right-arrow, #second-page.active ~ #left-arrow {
     display: block;
 }
 

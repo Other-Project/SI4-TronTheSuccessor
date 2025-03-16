@@ -6,7 +6,7 @@ export class ChatSelection extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.shadowRoot.getElementById("Global").addEventListener("click", () => this.openChatRoom("Global", "Global"));
+        this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
     }
 

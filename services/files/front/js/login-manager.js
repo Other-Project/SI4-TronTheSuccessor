@@ -63,4 +63,49 @@ export function storeTokens(data) {
     document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
 }
 
-export const popupEvent = new EventTarget();
+/**
+ * Get the access token (renewing it if necessary)
+ * @return {Promise<string|null>} The access token or null if the user is not logged in
+ */
+export async function getAccessToken() {
+    if (!getCookie("refreshToken")) return null;
+
+    const accessToken = getCookie("accessToken");
+    if (accessToken) return accessToken;
+    await renewAccessToken();
+    return getCookie("accessToken");
+}
+
+/**
+ * Fetch API with Authorization header
+ * @param url The URL to fetch
+ * @param options The options to pass to fetch
+ * @param retry Whether to retry the request if it fails due to an expired access token (internal)
+ * @returns {Promise<Response>} The response
+ */
+export async function fetchApi(url, options = undefined, retry = true) {
+    options ??= {};
+    options.headers ??= {};
+    options.headers["Authorization"] = `Bearer ${await getAccessToken()}`;
+    const response = await fetch(url, options);
+    if (retry && response.status === 401) {
+        await renewAccessToken();
+        return await fetchApi(url, options, false);
+    }
+    return response;
+}
+
+/**
+ * Get the user info
+ * @returns {{username: string}|null}
+ */
+export function getUserInfo() {
+    const token = getCookie("refreshToken");
+    if (!token) return null;
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+    return JSON.parse(jsonPayload);
+}
+
+export const popupEvent = new EventTarget()

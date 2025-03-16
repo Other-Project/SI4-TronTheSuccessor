@@ -20,6 +20,8 @@ import {TabNavigation} from "/components/tab-navigation/tab-navigation.js";
 import {ChatTab} from "/components/chat-tab/chat-tab.js";
 import {ChatSelection} from "/components/chat-selection/chat-selection.js";
 import {ChatRoomButton} from "/components/chat-room-button/chat-room-button.js";
+import {ChatRoom} from "/components/chat-room/chat-room.js";
+import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
 
 customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-choice", GameChoice);
@@ -43,3 +45,6 @@ customElements.define("app-chat-drawer", ChatDrawer);
 customElements.define("app-chat-tab", ChatTab);
 customElements.define("app-chat-selection", ChatSelection);
 customElements.define("app-chat-room-button", ChatRoomButton);
+customElements.define("app-chat-room", ChatRoom);
+customElements.define("app-chat-room-message", ChatRoomMessage);
+

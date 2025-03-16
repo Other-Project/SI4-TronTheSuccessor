@@ -37,14 +37,14 @@ async function makeHttpRequest(method, path, data = null) {
 }
 
 /**
- * Add ELO to a player.
+ * Add ELO and initialize his stats
  * @param {string} playerId
  * @param {number} elo
  * @returns {Promise<unknown>}
  */
-async function addElo(playerId, elo) {
+async function addStats(playerId, elo) {
     const data = {playerId, elo};
-    return makeHttpRequest('POST', '/api/game/elo', data);
+    return makeHttpRequest('POST', '/api/game/stats', data);
 }
 
 /**
@@ -56,4 +56,4 @@ async function getElo(playerId) {
     return makeHttpRequest('GET', `/api/game/elo/${playerId}`);
 }
 
-module.exports = {addElo, getElo};
+module.exports = {addElo: addStats, getElo};

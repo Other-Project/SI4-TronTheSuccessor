@@ -13,11 +13,11 @@ let server = http.createServer(async (request, response) => {
     try {
         switch (filePath[3]) {
             case "elo":
-                if (request.method === "POST") await handleAddElo(request, response);
-                else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
+                if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
                 break;
             case "stats":
-                if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
+                if (request.method === "POST") await handleAddElo(request, response);
+                else if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

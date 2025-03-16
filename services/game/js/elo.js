@@ -49,8 +49,8 @@ exports.updateStats = async function (players, gameInfo) {
     }
     await statsDatabase.addGame(players[0].name);
     await statsDatabase.addGame(players[1].name);
-    await statsDatabase.updatePlayTime(players[0].name, gameInfo.elapsed);
-    await statsDatabase.updatePlayTime(players[1].name, gameInfo.elapsed);
+    await statsDatabase.updatePlayTime(players[0].name, gameInfo.elapsed / 1000);
+    await statsDatabase.updatePlayTime(players[1].name, gameInfo.elapsed / 1000);
 
     const newEloP1 = Math.max(calculateEloPoints(eloP1, 32, pointP1, diff), 0);
     const newEloP2 = Math.max(calculateEloPoints(eloP2, 32, pointP2, -diff), 0);

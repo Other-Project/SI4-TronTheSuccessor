@@ -5,32 +5,23 @@ export class ProfileStats extends HTMLComponent {
         super("profile-stats", ["html", "css"]);
     }
 
-    onSetupCompleted = () => {
-        this.games = this.shadowRoot.getElementById("games");
-        this.winrate = this.shadowRoot.getElementById("winrate");
-        this.time = this.shadowRoot.getElementById("time");
-        this.streak = this.shadowRoot.getElementById("streak");
-        this.#fetchStats();
-    };
-
-    #fetchStats() {
-        // TODO: Fetch stats from the backend
-
-        const data = {
-            games: 10,
-            winrate: 50,
-            time: 5,
-            streak: 3
-        };
-
-        this.#updateStats(data);
-
+    static get observedAttributes() {
+        return ["data-games", "data-time", "data-streak", "data-winrate"];
     }
 
-    #updateStats(data) {
-        this.games.childNodes[0].nodeValue = data.games || "NA";
-        this.winrate.childNodes[0].nodeValue = `${data.winrate || "NA"}%`;
-        this.time.childNodes[0].nodeValue = `${data.time || "NA"}h`;
-        this.streak.childNodes[0].nodeValue = data.streak || "NA";
+    attributeChangedCallback(name, oldValue, newValue) {
+        this.updateTextContentFromAttributes();
+    }
+
+    updateTextContentFromAttributes() {
+        const gamesElement = this.shadowRoot.getElementById("games");
+        const timeElement = this.shadowRoot.getElementById("time");
+        const streakElement = this.shadowRoot.getElementById("streak");
+        const winrateElement = this.shadowRoot.getElementById("winrate");
+
+        gamesElement.childNodes[0].textContent = this.getAttribute("data-games");
+        timeElement.childNodes[0].textContent = this.getAttribute("data-time");
+        streakElement.childNodes[0].textContent = this.getAttribute("data-streak");
+        winrateElement.childNodes[0].textContent = this.getAttribute("data-winrate");
     }
 }

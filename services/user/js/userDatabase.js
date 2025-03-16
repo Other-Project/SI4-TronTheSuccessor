@@ -27,6 +27,43 @@ async function getUser(username, password) {
     return getJwt(user);
 }
 
+/**
+ * Add a friend to a user
+ * @param {string} playerId The id of the player
+ * @param {string} otherId The id of the friend to add
+ * @returns {Promise<void>}
+ */
+async function addFriend(playerId, otherId) {
+    await userCollection.updateOne(
+        {username: playerId},
+        {$addToSet: {friends: otherId}},
+        {upsert: true}
+    );
+}
+
+/**
+ * Get the friends of a player
+ * @param {string} playerId The id of the player
+ * @returns {Promise<string[]>}
+ */
+async function getFriends(playerId) {
+    const user = await userCollection.findOne({username: playerId});
+    return user ? user.friends : [];
+}
+
+/**
+ * Remove a friend from a player
+ * @param {string} playerId The id of the player
+ * @param {string} otherId The id of the friend to remove
+ * @returns {Promise<void>}
+ */
+async function removeFriend(playerId, otherId) {
+    await userCollection.updateOne(
+        {_id: playerId},
+        {$pull: {friends: otherId}}
+    );
+}
+
 async function renewToken(refreshToken) {
     if (!refreshToken)
         return {error: "Refresh token is missing"};
@@ -69,4 +106,4 @@ function hash(str) {
     return hash.digest('hex');
 }
 
-module.exports = {addUser, getUser, renewToken};
+module.exports = {addUser, getUser, renewToken, addFriend, getFriends, removeFriend};

@@ -20,14 +20,28 @@ const eloToRank = {
 };
 
 /**
- * Add a new ELO to the database.
- * @param {string} playerId The ID of the player.
+ * Add elo and default stats to a player.
+ * @param {string} playerId The id of the player.
  * @param {number} elo The ELO of the player.
- * @returns {Promise<number>}
+ * @returns {Promise<number>} The ELO of the player.
  */
-async function addElo(playerId, elo) {
-    await statsCollection.insertOne({playerId, elo});
-    return elo;
+async function addStats(playerId, elo) {
+    const result = await statsCollection.findOneAndUpdate(
+        {playerId},
+        {
+            $setOnInsert: {
+                wins: 0,
+                losses: 0,
+                draws: 0,
+                games: 0,
+                winStreak: 0,
+                elo: elo,
+                timePlayed: 0
+            }
+        },
+        {returnDocument: "after", upsert: true}
+    );
+    return result.value?.elo ?? elo;
 }
 
 /**
@@ -69,10 +83,12 @@ async function getAllElo() {
  * @returns {Promise<number>} The number of games.
  */
 async function addGame(playerId) {
-    return (await statsCollection.findOneAndUpdate({playerId},
-            {$inc: {games: 1}},
-            {returnDocument: "after", upsert: true})
-    ).value.games;
+    const result = await statsCollection.findOneAndUpdate(
+        {playerId},
+        {$inc: {games: 1}},
+        {returnDocument: "after", upsert: true}
+    );
+    return result.value?.games ?? 1;
 }
 
 /**
@@ -81,22 +97,12 @@ async function addGame(playerId) {
  * @returns {Promise<number>} The number of wins.
  */
 async function addLoss(playerId) {
-    return (await statsCollection.findOneAndUpdate({playerId},
-            {$inc: {losses: 1}},
-            {returnDocument: "after", upsert: true})
-    ).value.losses;
-}
-
-/**
- * Add a win to the player's stats.
- * @param {string} playerId The id of the player.
- * @returns {Promise<number>} The number of wins.
- */
-async function addWin(playerId) {
-    return (await statsCollection.findOneAndUpdate({playerId},
-            {$inc: {wins: 1}},
-            {returnDocument: "after", upsert: true})
-    ).value.wins;
+    const result = await statsCollection.findOneAndUpdate(
+        {playerId},
+        {$inc: {losses: 1}},
+        {returnDocument: "after", upsert: true}
+    );
+    return result.value?.losses ?? 1;
 }
 
 /**
@@ -105,10 +111,12 @@ async function addWin(playerId) {
  * @returns {Promise<number>} The number of draws.
  */
 async function addDraw(playerId) {
-    return (await statsCollection.findOneAndUpdate({playerId},
-            {$inc: {draws: 1}},
-            {returnDocument: "after", upsert: true})
-    ).value.draws;
+    const result = await statsCollection.findOneAndUpdate(
+        {playerId},
+        {$inc: {draws: 1}},
+        {returnDocument: "after", upsert: true}
+    );
+    return result.value?.draws ?? 1;
 }
 
 /**
@@ -116,11 +124,22 @@ async function addDraw(playerId) {
  * @param playerId
  * @returns {Promise<number|*>}
  */
+async function addWin(playerId) {
+    const result = await statsCollection.findOneAndUpdate(
+        {playerId},
+        {$inc: {wins: 1}},
+        {returnDocument: "after", upsert: true}
+    );
+    return result.value?.wins ?? 1;
+}
+
 async function addWinStreak(playerId) {
-    return (await statsCollection.findOneAndUpdate({playerId},
-            {$inc: {winStreak: 1}},
-            {returnDocument: "after", upsert: true})
-    ).value.winStreak;
+    const result = await statsCollection.findOneAndUpdate(
+        {playerId},
+        {$inc: {winStreak: 1}},
+        {returnDocument: "after", upsert: true}
+    );
+    return result.value?.winStreak ?? 1;
 }
 
 /**
@@ -129,10 +148,12 @@ async function addWinStreak(playerId) {
  * @returns {Promise<number|*>}
  */
 async function resetWinStreak(playerId) {
-    return (await statsCollection.findOneAndUpdate({playerId},
-            {$set: {winStreak: 0}},
-            {returnDocument: "after", upsert: true})
-    ).value.winStreak;
+    const result = await statsCollection.findOneAndUpdate(
+        {playerId},
+        {$set: {winStreak: 0}},
+        {returnDocument: "after", upsert: true}
+    );
+    return result.value?.winStreak ?? 0;
 }
 
 /**
@@ -143,6 +164,7 @@ async function resetWinStreak(playerId) {
 function getRank(elo) {
     for (let rankElo of Object.keys(eloToRank).reverse())
         if (elo >= rankElo) return {rank: eloToRank[rankElo], eloInRank: elo - rankElo};
+    return {rank: "Triangle III", eloInRank: elo};
 }
 
 /**
@@ -166,24 +188,27 @@ async function updatePlayTime(playerId, time) {
  */
 async function getAllStats(playerId) {
     const stats = await statsCollection.findOne({playerId});
-    if (!stats) return {
-        wins: 0,
-        losses: 0,
-        draws: 0,
-        games: 0,
-        winStreak: 0,
-        rank: "Triangle III",
-        eloInRank: 0,
-        timePlayed: 0
-    };
-    const {wins, losses, draws, games, winStreak, timePlayed} = stats;
-    const {rank, eloInRank} = getRank(stats.elo);
-    return {wins, losses, draws, games, winStreak, rank, eloInRank, timePlayed};
 
+    const updatedStats = {
+        wins: stats.wins ?? 0,
+        losses: stats.losses ?? 0,
+        draws: stats.draws ?? 0,
+        games: stats.games ?? 0,
+        winStreak: stats.winStreak ?? 0,
+        timePlayed: stats.timePlayed ?? 0,
+    };
+
+    await statsCollection.updateOne(
+        {playerId},
+        {$set: updatedStats}
+    );
+
+    const {rank, eloInRank} = getRank(stats.elo);
+    return {...updatedStats, rank, eloInRank};
 }
 
 module.exports = {
-    addElo,
+    addElo: addStats,
     getElo,
     updateElo,
     addLoss,

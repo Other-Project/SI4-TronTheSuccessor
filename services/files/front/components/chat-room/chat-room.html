@@ -1,0 +1,14 @@
+<div class="chat-room">
+
+    <div id="messages-wrap">
+        <div id="messages"></div>
+    </div>
+
+    <div id="input-panel">
+        <textarea id="message-input" placeholder="Type your message here" aria-label="Message"
+                  oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+        <app-button id="send">
+            <img src="/assets/send.svg" alt="Send" class="icon"/>
+        </app-button>
+    </div>
+</div>

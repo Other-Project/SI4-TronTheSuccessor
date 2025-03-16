@@ -22,7 +22,7 @@ export class ChatDrawer extends HTMLComponent {
     };
 
     onVisible = () => {
-        this.style.display = getCookie("refreshToken") ? undefined : "none";
+        this.style.visibility = getCookie("refreshToken") ? "visible" : "hidden";
         this.hide();
     };
 

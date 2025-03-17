@@ -15,6 +15,16 @@ export class ProfileOverview extends HTMLComponent {
         super("profile-overview", ["html", "css"]);
     }
 
+    #showNotification(message, duration, background, color) {
+        const notification = document.createElement("app-notification");
+        notification.message = message;
+        notification.duration = duration;
+        notification.background = background;
+        notification.color = color;
+        this.shadowRoot.appendChild(notification);
+        notification.show();
+    }
+
     async #sendFriendRequest(currentUser, friend, token) {
         await fetch(`/api/user/friends/add`, {
             method: "POST",
@@ -27,16 +37,7 @@ export class ProfileOverview extends HTMLComponent {
                 friends: friend,
             })
         });
-        this.#showNotification("Friend request sent!", 2000, "#4CAF50");
-    }
-
-    #showNotification(message, duration, background) {
-        const notification = document.createElement('app-notification');
-        notification.message = message;
-        notification.duration = duration;
-        notification.background = background;
-        document.body.appendChild(notification);
-        notification.show();
+        this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
     }
 
     onSetupCompleted = async () => {
@@ -58,7 +59,7 @@ export class ProfileOverview extends HTMLComponent {
         });
         this.shadowRoot.getElementById("share").addEventListener("click", () => {
             navigator.clipboard.writeText(location.href).then(() => {
-                this.#showNotification("Profile URL copied to clipboard!", 2000, "#8E24AA");
+                this.#showNotification("Profile URL copied to clipboard!", 2000, "#8E24AA", "white");
             });
         });
         this.shadowRoot.getElementById("add-friend").addEventListener("click", async () => {

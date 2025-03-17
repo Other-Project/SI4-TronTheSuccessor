@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fakePageReload, fetchApi, storeTokens} from "/js/login-manager.js";
+import {fakePageReload, fetchPostApi, storeTokens} from "/js/login-manager.js";
 
 export class SignInPopup extends HTMLComponent {
     username;
@@ -10,8 +10,8 @@ export class SignInPopup extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
-        this.password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
+        this.username = this.shadowRoot.getElementById("username-input").input_answer;
+        this.password = this.shadowRoot.getElementById("password-input").input_answer;
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             this.dispatchEvent(new CustomEvent("change-popup", {detail: "sign-up", bubbles: true, composed: true}));
@@ -34,20 +34,16 @@ export class SignInPopup extends HTMLComponent {
     async #loginFetch() {
         const username_value = this.username.value;
         const password_value = this.password.value;
-        const body = JSON.stringify({username: username_value, password: password_value});
-        const response = await fetchApi("/api/user/sign-in", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: body
-        });
+        const body = {username: username_value, password: password_value};
+        const response = await fetchPostApi("/api/user/sign-in", body);
         const data = await response.json();
-        if (data.error) {
-            alert(data.error);
-            return;
+        if (response.ok) {
+            storeTokens(data);
+            fakePageReload();
+            this.#clearInputs();
+        } else {
+            alert(data?.error ?? response.statusText);
         }
-        storeTokens(data);
-        fakePageReload();
-        this.#clearInputs();
     }
 
     correctInputs() {

@@ -6,12 +6,8 @@ export function getCookie(name) {
 }
 
 export async function renewAccessToken() {
-    const body = JSON.stringify({refreshToken: getCookie("refreshToken")});
-    const response = await fetchApi("/api/user/renew-access-token", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: body
-    });
+    const body = {refreshToken: getCookie("refreshToken")};
+    const response = await fetchPostApi("/api/user/renew-access-token", body);
     const data = await response.json();
     storeTokens(data);
 }
@@ -62,6 +58,22 @@ export async function fetchApi(url, options = undefined, retry = true) {
         return await fetchApi(url, options, false);
     }
     return response;
+}
+
+/**
+ * Fetch API with POST method and with Authorization header
+ * @param url The URL to fetch
+ * @param body The body to send
+ * @param options The options to pass to fetch
+ * @returns {Promise<Response>} The response
+ */
+export async function fetchPostApi(url, body, options = undefined) {
+    options ??= {};
+    options.headers ??= {};
+    options.method ??= "POST";
+    options.headers["Content-Type"] = "application/json";
+    options.body = JSON.stringify(body);
+    return await fetchApi(url, options);
 }
 
 /**

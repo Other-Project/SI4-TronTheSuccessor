@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fakePageReload, fetchApi, storeTokens} from "/js/login-manager.js";
+import {fakePageReload, fetchApi, fetchPostApi, storeTokens} from "/js/login-manager.js";
 
 export class SignUpPopup extends HTMLComponent {
     firstQuestion;
@@ -16,12 +16,12 @@ export class SignUpPopup extends HTMLComponent {
 
     onSetupCompleted = async () => {
         this.firstQuestion = this.shadowRoot.getElementById("first-security-question");
-        this.firstAnswer = this.shadowRoot.getElementById("first-answer-input").shadowRoot.getElementById("answer");
+        this.firstAnswer = this.shadowRoot.getElementById("first-answer-input").input_answer;
         this.secondQuestion = this.shadowRoot.getElementById("second-security-question");
-        this.secondAnswer = this.shadowRoot.getElementById("second-answer-input").shadowRoot.getElementById("answer");
-        this.username = this.shadowRoot.getElementById("username-input").shadowRoot.getElementById("answer");
-        this.password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
-        this.confirmPassword = this.shadowRoot.getElementById("confirm-password-input").shadowRoot.getElementById("answer");
+        this.secondAnswer = this.shadowRoot.getElementById("second-answer-input").input_answer;
+        this.username = this.shadowRoot.getElementById("username-input").input_answer;
+        this.password = this.shadowRoot.getElementById("password-input").input_answer;
+        this.confirmPassword = this.shadowRoot.getElementById("confirm-password-input").input_answer;
 
         await this.#injectSecurityQuestions();
 
@@ -51,7 +51,7 @@ export class SignUpPopup extends HTMLComponent {
     async #fetchLogin() {
         const firstQuestionText = this.firstQuestion.options[this.firstQuestion.selectedIndex].text;
         const secondQuestionText = this.secondQuestion.options[this.secondQuestion.selectedIndex].text;
-        const body = JSON.stringify({
+        const body = {
             username: this.username.value,
             password: this.password.value,
             securityQuestions: [
@@ -64,12 +64,8 @@ export class SignUpPopup extends HTMLComponent {
                     answer: this.secondAnswer.value
                 }
             ]
-        });
-        const response = await fetchApi("/api/user/sign-up", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: body
-        });
+        };
+        const response = await fetchPostApi("/api/user/sign-up", body);
         const data = await response.json();
         if (data.error) {
             alert(data.error);
@@ -104,9 +100,9 @@ export class SignUpPopup extends HTMLComponent {
         this.password.reportValidity();
         this.username.reportValidity();
 
-        return this.username.validity.valid &&
-            this.password.validity.valid &&
-            this.confirmPassword.validity.valid;
+        return this.username.validity.valid
+            && this.password.validity.valid
+            && this.confirmPassword.validity.valid;
     }
 
     #checkSecondPageInputs() {
@@ -135,7 +131,9 @@ export class SignUpPopup extends HTMLComponent {
         this.secondAnswer.reportValidity();
         this.firstAnswer.reportValidity();
 
-        return this.firstAnswer.validity.valid && this.secondAnswer.validity.valid && this.firstQuestion.validity.valid;
+        return this.firstAnswer.validity.valid
+            && this.secondAnswer.validity.valid
+            && this.firstQuestion.validity.valid;
     }
 
     #showPage(page_name) {

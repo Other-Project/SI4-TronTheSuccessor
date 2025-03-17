@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fetchApi, storeTokens} from "/js/login-manager.js";
+import {fakePageReload, fetchPostApi, storeTokens} from "/js/login-manager.js";
 
 export class ResetPassword extends HTMLComponent {
     resetPasswordToken;
@@ -37,6 +37,11 @@ export class ResetPassword extends HTMLComponent {
         this.shadowRoot.getElementById("password-button").addEventListener("click", async () => {
             if (!this.#passwordsCheck()) return;
             await this.#resetPassword();
+        });
+
+        this.shadowRoot.getElementById("reset-ok-button").addEventListener("click", () => {
+            fakePageReload();
+            this.shadowRoot.getElementById("password-reset-popup").style.display = "none";
         });
     };
 
@@ -83,13 +88,14 @@ export class ResetPassword extends HTMLComponent {
 
     async #fetchSecurityQuestionsForUser() {
         const username = this.usernameInput.value;
-        const body = JSON.stringify({username});
-        const data = await this.#fetchLogin("/api/user/security-questions", body);
-        if (data) {
-            for (let i = 0; i < data.length; i++) {
+        const response = await fetchPostApi("/api/user/security-questions", {username});
+        const data = await response.json();
+        if (response.ok) {
+            for (let i = 0; i < data.length; i++)
                 this.shadowRoot.getElementById(`question-${i}`).innerText = data[i].question;
-            }
             this.showPart("question");
+        } else {
+            alert(data?.error ?? response.statusText);
         }
     }
 
@@ -97,11 +103,14 @@ export class ResetPassword extends HTMLComponent {
         const username = this.usernameInput.value;
         const firstAnswer = this.firstAnswerInput.value;
         const secondAnswer = this.secondAnswerInput.value;
-        const body = JSON.stringify({username, answers: [firstAnswer, secondAnswer]});
-        const data = await this.#fetchLogin("/api/user/verify-answers", body);
-        if (data) {
+        const body = {username, answers: [firstAnswer, secondAnswer]};
+        const response = await fetchPostApi("/api/user/verify-answers", body);
+        const data = await response.json();
+        if (response.ok) {
             this.resetPasswordToken = data.resetPasswordToken;
             this.showPart("password");
+        } else {
+            alert(data?.error ?? response.statusText);
         }
     }
 
@@ -117,10 +126,11 @@ export class ResetPassword extends HTMLComponent {
             body: body
         });
         const data = await response.json();
-        if (data) {
+        if (response.ok) {
             storeTokens(data);
             this.shadowRoot.getElementById("password-reset-popup").style.display = "block";
         } else {
+            alert(data?.error ?? response.statusText);
             this.showPart("username");
             this.clearInputs();
         }
@@ -137,20 +147,5 @@ export class ResetPassword extends HTMLComponent {
         this.shadowRoot.querySelectorAll("app-input").forEach(element => {
             if (element.input_answer) element.input_answer.value = "";
         });
-    }
-
-    async #fetchLogin(url, body) {
-        const response = await fetchApi(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: body
-        });
-        const data = await response.json();
-        if (data.error)
-            alert(data.error);
-        else
-            return data;
     }
 }

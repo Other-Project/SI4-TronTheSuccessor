@@ -119,6 +119,8 @@ export class ProfileOverview extends HTMLComponent {
         this.profileStats.setAttribute("data-games", stats.games);
         this.profileStats.setAttribute("data-time", Math.round(stats.timePlayed / 60));
         this.profileStats.setAttribute("data-streak", stats.winStreak);
-        this.profileStats.setAttribute("data-winrate", Math.round((stats.wins * 100 / (stats.games - stats.draws))));
+        const totalGames = stats.games - stats.draws;
+        if (totalGames === 0) this.profileStats.setAttribute("data-winrate", "-");
+        else this.profileStats.setAttribute("data-winrate", Math.round((stats.wins * 100 / totalGames)));
     }
 }

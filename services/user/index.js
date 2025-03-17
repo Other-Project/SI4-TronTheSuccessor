@@ -1,11 +1,8 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
-const {addElo, getElo} = require("./helper/eloHelper.js");
 const {getRequestBody, sendResponse} = require("./js/utils.js");
 const {handleGetFriends, handleAddFriend, handleDeleteFriend} = require("./js/social.js");
 const {HTTP_STATUS} = require("./js/utils.js");
-
-const BASE_ELO = 300;
 
 http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
@@ -43,7 +40,6 @@ async function handleSignUp(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.addUser(parsedBody.username, parsedBody.password);
-    await addElo(parsedBody.username, BASE_ELO);
     sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.CREATED, result);
 }
 

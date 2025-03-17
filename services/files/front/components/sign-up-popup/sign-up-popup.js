@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fakePageReload, loginFetch, storeTokens} from "/js/login-manager.js";
+import {fakePageReload, fetchApi, storeTokens} from "/js/login-manager.js";
 
 export class SignUpPopup extends HTMLComponent {
     firstQuestion;
@@ -65,12 +65,19 @@ export class SignUpPopup extends HTMLComponent {
                 }
             ]
         });
-        const data = await loginFetch("sign-up", body);
-        if (data) {
-            storeTokens(data);
-            fakePageReload();
-            this.#clearInputs();
+        const response = await fetchApi("/api/user/sign-up", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: body
+        });
+        const data = await response.json();
+        if (data.error) {
+            alert(data.error);
+            return;
         }
+        storeTokens(data);
+        fakePageReload();
+        this.#clearInputs();
     }
 
     #checkFirstPageInputs() {
@@ -138,7 +145,8 @@ export class SignUpPopup extends HTMLComponent {
     }
 
     async #injectSecurityQuestions() {
-        const securityQuestions = await loginFetch("security-questions", null);
+        const response = await fetchApi("/api/user/security-questions");
+        const securityQuestions = await response.json();
 
         for (let i = 0; i < securityQuestions.length; i++) {
             let opt = document.createElement("option");

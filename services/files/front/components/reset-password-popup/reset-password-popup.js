@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {loginFetch, storeTokens} from "/js/login-manager.js";
+import {fetchApi, storeTokens} from "/js/login-manager.js";
 
 export class ResetPassword extends HTMLComponent {
     resetPasswordToken;
@@ -84,7 +84,7 @@ export class ResetPassword extends HTMLComponent {
     async #fetchSecurityQuestionsForUser() {
         const username = this.usernameInput.value;
         const body = JSON.stringify({username});
-        const data = await loginFetch("security-questions", body);
+        const data = await this.#fetchLogin("/api/user/security-questions", body);
         if (data) {
             for (let i = 0; i < data.length; i++) {
                 this.shadowRoot.getElementById(`question-${i}`).innerText = data[i].question;
@@ -98,7 +98,7 @@ export class ResetPassword extends HTMLComponent {
         const firstAnswer = this.firstAnswerInput.value;
         const secondAnswer = this.secondAnswerInput.value;
         const body = JSON.stringify({username, answers: [firstAnswer, secondAnswer]});
-        const data = await loginFetch("verify-answers", body);
+        const data = await this.#fetchLogin("/api/user/verify-answers", body);
         if (data) {
             this.resetPasswordToken = data.resetPasswordToken;
             this.showPart("password");
@@ -108,7 +108,15 @@ export class ResetPassword extends HTMLComponent {
     async #resetPassword() {
         const password = this.passwordInput.value;
         const body = JSON.stringify({newPassword: password});
-        const data = await loginFetch("reset-password", body, this.resetPasswordToken);
+        const response = await fetch("/api/user/reset-password", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + this.resetPasswordToken
+            },
+            body: body
+        });
+        const data = await response.json();
         if (data) {
             storeTokens(data);
             this.shadowRoot.getElementById("password-reset-popup").style.display = "block";
@@ -129,5 +137,20 @@ export class ResetPassword extends HTMLComponent {
         this.shadowRoot.querySelectorAll("app-input").forEach(element => {
             if (element.input_answer) element.input_answer.value = "";
         });
+    }
+
+    async #fetchLogin(url, body) {
+        const response = await fetchApi(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: body
+        });
+        const data = await response.json();
+        if (data.error)
+            alert(data.error);
+        else
+            return data;
     }
 }

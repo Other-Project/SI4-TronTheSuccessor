@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fakePageReload, loginFetch, storeTokens} from "/js/login-manager.js";
+import {fakePageReload, fetchApi, storeTokens} from "/js/login-manager.js";
 
 export class SignInPopup extends HTMLComponent {
     username;
@@ -35,12 +35,19 @@ export class SignInPopup extends HTMLComponent {
         const username_value = this.username.value;
         const password_value = this.password.value;
         const body = JSON.stringify({username: username_value, password: password_value});
-        const data = await loginFetch("sign-in", body);
-        if (data) {
-            storeTokens(data);
-            fakePageReload();
-            this.#clearInputs();
+        const response = await fetchApi("/api/user/sign-in", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: body
+        });
+        const data = await response.json();
+        if (data.error) {
+            alert(data.error);
+            return;
         }
+        storeTokens(data);
+        fakePageReload();
+        this.#clearInputs();
     }
 
     correctInputs() {

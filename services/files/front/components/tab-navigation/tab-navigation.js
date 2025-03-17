@@ -25,6 +25,11 @@ export class TabNavigation extends HTMLComponent {
         };
         this.newtabBtn = this.shadowRoot.getElementById("new-tab-btn");
         this.newtabBtn.addEventListener("click", () => this.newTab());
+
+        this.panelSlot = this.panels.querySelector("slot");
+        this.panelSlot.addEventListener("slotchange", () => this.#recreateTabs());
+        this.#refresh();
+        this.#recreateTabs();
     };
 
     onVisible = () => {
@@ -43,6 +48,15 @@ export class TabNavigation extends HTMLComponent {
         this.tabsContainer.classList.toggle("readonly", this.readonly);
     }
 
+    #getTabs() {
+        return [...this.panelSlot.assignedElements(), ...this.panels.querySelectorAll(":not(slot)")];
+    }
+
+    #recreateTabs() {
+        this.tabs.innerHTML = "";
+        this.#getTabs().forEach(tabPanel => this.#createTabBtn(tabPanel));
+    }
+
     /**
      * Navigate to a specific page
      * @param {string} tabId The tab id to display
@@ -51,7 +65,7 @@ export class TabNavigation extends HTMLComponent {
         const tabToActivate = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
         if (!tabToActivate) return;
         for (let tab of this.tabs.querySelectorAll("[data-tab-id]")) tab.classList.toggle("active", tab.dataset.tabId === tabId);
-        for (let panel of this.panels.querySelectorAll(":not(slot)")) panel.classList.toggle("active", panel.id === "tab-" + tabId);
+        for (let panel of this.#getTabs()) panel.classList.toggle("active", panel.id === tabId);
         tabToActivate.scrollIntoView({behavior: "smooth"});
     }
 
@@ -61,13 +75,21 @@ export class TabNavigation extends HTMLComponent {
      */
     newTab(navigateTo = true) {
         if (this.readonly) return;
-        const tabId = (this.tabIdCounter++).toString();
 
         const tabPanel = this.panelTemplate.assignedElements()?.[0]?.cloneNode(true);
         if (!tabPanel) return;
-        tabPanel.id = "tab-" + tabId;
+        tabPanel.id = "tab-" + (this.tabIdCounter++).toString();
         this.panels.appendChild(tabPanel);
+        this.#createTabBtn(tabPanel);
+        if (navigateTo) this.changeTab(tabPanel.id);
+    }
 
+    /**
+     * Create a tab button for a tab panel
+     * @param tabPanel The tab panel to create a tab button for
+     */
+    #createTabBtn(tabPanel) {
+        const tabId = tabPanel.id;
         const tabBtn = document.createElement("button");
         const tabBtnText = document.createElement("span");
         tabBtnText.textContent = tabPanel.dataset.tabTitle ?? "New Tab";
@@ -89,7 +111,6 @@ export class TabNavigation extends HTMLComponent {
         tabBtn.appendChild(tabCloseBtn);
 
         this.#setupTabTitleObserver(tabPanel, tabBtnText);
-        if (navigateTo) this.changeTab(tabId);
     }
 
     #setupTabTitleObserver(tabPanel, tabBtnText) {
@@ -106,7 +127,7 @@ export class TabNavigation extends HTMLComponent {
     closeTab(tabId) {
         if (this.readonly) return;
         const tab = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
-        const panel = this.panels.querySelector(`#tab-${tabId}`);
+        const panel = this.panels.querySelector(`#${tabId}`);
 
         if (tab?.classList.contains("active")) {
             const nextTab = tab.nextElementSibling ?? tab.previousElementSibling;

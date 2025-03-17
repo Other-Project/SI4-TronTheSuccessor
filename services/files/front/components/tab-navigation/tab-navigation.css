@@ -55,14 +55,14 @@ button {
 #panels {
     overflow: hidden;
 
-    :not(slot) {
+    :not(slot), ::slotted(*) {
         display: block;
         height: calc(100% - 1em);
         padding: .5em;
+    }
 
-        &:not(.active) {
-            display: none;
-        }
+    :not(slot):not(.active), ::slotted(:not(.active)) {
+        display: none;
     }
 
     #panel-template {

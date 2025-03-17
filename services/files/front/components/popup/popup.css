@@ -29,6 +29,8 @@ slot[name="actions"] {
 }
 
 .popup-container {
+    z-index: 100;
+
     position: fixed;
     inset: 0;
     align-content: center;

@@ -1,7 +1,7 @@
 import {HTMLComponent} from "/js/component.js";
-import {loginFetch, popupEvent, storeTokens} from "/js/login-manager.js";
+import {loginFetch, storeTokens} from "/js/login-manager.js";
 
-export class ForgetPassword extends HTMLComponent {
+export class ResetPassword extends HTMLComponent {
     resetPasswordToken;
     usernameInput;
     firstAnswerInput;
@@ -10,7 +10,7 @@ export class ForgetPassword extends HTMLComponent {
     confirmPasswordInput;
 
     constructor() {
-        super("forget-password-popup", ["html", "css"]);
+        super("reset-password-popup", ["html", "css"]);
     }
 
     onSetupCompleted = () => {
@@ -21,9 +21,7 @@ export class ForgetPassword extends HTMLComponent {
         this.confirmPasswordInput = this.shadowRoot.getElementById("confirm-password-input").input_answer;
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
-            popupEvent.dispatchEvent(new CustomEvent("change-popup", {
-                detail: {name: "sign-in", display: true}
-            }));
+            this.dispatchEvent(new CustomEvent("change-popup", {detail: "sign-in", bubbles: true, composed: true}));
         });
 
         this.shadowRoot.getElementById("username-button").addEventListener("click", async () => {
@@ -129,8 +127,7 @@ export class ForgetPassword extends HTMLComponent {
 
     clearInputs() {
         this.shadowRoot.querySelectorAll("app-input").forEach(element => {
-            if (element.shadowRoot.getElementById("answer"))
-                element.shadowRoot.getElementById("answer").value = "";
+            if (element.input_answer) element.input_answer.value = "";
         });
     }
 }

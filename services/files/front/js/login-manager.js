@@ -29,13 +29,6 @@ export async function loginFetch(url, body, authorizationToken) {
     return data;
 }
 
-export async function parseJwt(token) {
-    const base64Url = token.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
-    return JSON.parse(jsonPayload);
-}
-
 export function disconnect() {
     document.cookie = "accessToken=; path=/; max-age=0;";
     document.cookie = "refreshToken=; path=/; max-age=0;";
@@ -43,24 +36,13 @@ export function disconnect() {
 }
 
 export function fakePageReload() {
-    document.dispatchEvent(new CustomEvent("hide-popup"));
-    document.dispatchEvent(new CustomEvent("menu-selection", {
-        detail: {
-            name: ""
-        }
-    }));
-    setTimeout(() => {
-        document.dispatchEvent(new CustomEvent("menu-selection", {
-            detail: {
-                name: "home"
-            }
-        }));
-    }, 10);
+    document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: ""}}));
+    setTimeout(() => document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: "home"}})), 10);
 }
 
 export function storeTokens(data) {
-    document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
-    document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+    if (data.refreshToken) document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
+    if (data.accessToken) document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
 }
 
 /**
@@ -107,5 +89,3 @@ export function getUserInfo() {
     const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
     return JSON.parse(jsonPayload);
 }
-
-export const popupEvent = new EventTarget()

@@ -1,8 +1,7 @@
 import {HTMLComponent} from "/js/component.js";
-import {disconnect, popupEvent} from "/js/login-manager.js";
+import {disconnect} from "/js/login-manager.js";
 
 export class LoginContainer extends HTMLComponent {
-    ids = ["sign-in", "sign-up", "forget-password", "disconnect"];
     popupContainer;
 
     constructor() {
@@ -12,31 +11,16 @@ export class LoginContainer extends HTMLComponent {
     onSetupCompleted = () => {
         this.popupContainer = this.shadowRoot.getElementById("popup-container");
 
-        popupEvent.addEventListener("change-popup", (event) => {
-            this.#changePopup(event.detail.name, event.detail.display);
-        });
+        this.addEventListener("change-popup", (event) => this.show(event.detail));
+        this.addEventListener("hide-popup", () => this.show());
 
-        popupEvent.addEventListener("show-popup-container", () => {
-            this.popupContainer.style.display = "block";
-        });
-
-        popupEvent.addEventListener("hide-popup", () => {
-            this.popupContainer.style.display = "none";
-        });
-
-        this.shadowRoot.getElementById("disconnect-button").addEventListener("click", () => {
-            disconnect();
-        });
-
-        this.shadowRoot.getElementById("cancel-button").addEventListener("click", () => {
-            this.popupContainer.style.display = "none";
-        });
+        this.shadowRoot.getElementById("disconnect-button").addEventListener("click", () => disconnect());
+        this.shadowRoot.getElementById("cancel-button").addEventListener("click", () => this.show());
     };
 
-    #changePopup(name, shouldDisplay) {
-        this.popupContainer.style.display = shouldDisplay ? "block" : "none";
-        this.ids.forEach((id) => {
-            this.shadowRoot.getElementById(id).style.display = id === name ? "block" : "none";
-        });
+    onVisible = () => this.show();
+
+    show(name = null) {
+        this.shadowRoot.querySelectorAll(".popup").forEach(popup => popup.style.display = popup.id === name ? "block" : "none");
     }
 }

@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fakePageReload, loginFetch, popupEvent, storeTokens} from "/js/login-manager.js";
+import {fakePageReload, loginFetch, storeTokens} from "/js/login-manager.js";
 
 export class SignInPopup extends HTMLComponent {
     username;
@@ -14,20 +14,14 @@ export class SignInPopup extends HTMLComponent {
         this.password = this.shadowRoot.getElementById("password-input").shadowRoot.getElementById("answer");
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
-            popupEvent.dispatchEvent(new CustomEvent("change-popup", {
-                detail: {
-                    name: "sign-up",
-                    display: true
-                }
-            }));
+            this.dispatchEvent(new CustomEvent("change-popup", {detail: "sign-up", bubbles: true, composed: true}));
         });
 
         this.shadowRoot.getElementById("password-link").addEventListener("click", () => {
-            popupEvent.dispatchEvent(new CustomEvent("change-popup", {
-                detail: {
-                    name: "forget-password",
-                    display: true
-                }
+            this.dispatchEvent(new CustomEvent("change-popup", {
+                detail: "forget-password",
+                bubbles: true,
+                composed: true
             }));
         });
 

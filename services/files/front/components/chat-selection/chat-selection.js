@@ -23,7 +23,7 @@ export class ChatSelection extends HTMLComponent {
         this.friendListPanel.innerHTML = "";
         for (let friend of this.friendList) {
             const friendButton = document.createElement("app-chat-room-button");
-            friendButton.setAttribute("icon", friend.icon ?? "/assets/profil.svg");
+            friendButton.setAttribute("icon", friend.icon ?? "/assets/profile.svg");
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name));

@@ -7,7 +7,7 @@ img {
     }
 }
 
-#profil {
+#container {
     position: relative;
     display: flex;
     justify-content: right;
@@ -46,7 +46,7 @@ ul {
 }
 
 .connected {
-    #disconnected {
+    #connect {
         display: none;
     }
 

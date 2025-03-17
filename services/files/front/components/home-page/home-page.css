@@ -31,7 +31,7 @@ header {
     }
 }
 
-#profil-display, #settings {
+#profile-display {
     grid-column: 3;
 }
 

@@ -18,9 +18,10 @@ export class Popup extends HTMLComponent {
         const popupContainer = this.shadowRoot.getElementById("popup-container");
         this.shadowRoot.getElementById("popup-panel").style.background = this.background;
         popupContainer.addEventListener("click", (event) => {
-            if (event.target === popupContainer) {
-                document.dispatchEvent(new CustomEvent("hide-popup"));
-            }
+            if (event.target === popupContainer) this.dispatchEvent(new CustomEvent("hide-popup", {
+                bubbles: true,
+                composed: true
+            }));
         });
     };
 

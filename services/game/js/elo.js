@@ -1,6 +1,6 @@
 const statsDatabase = require("./eloDatabase.js");
 const {HTTP_STATUS, getRequestBody, sendResponse} = require("./utils.js");
-const BASE_ELO = 300;
+const {BASE_ELO} = require("./eloDatabase.js");
 
 /**
  * Calculate the ELO points won.

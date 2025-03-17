@@ -10,11 +10,20 @@ services:
       context: services/gateway
     ports:
       - "8000:8000"
+      - "443:8443"
     restart: unless-stopped
     environment:
       FILES_SERVICE_URL: "http://files:8001"
       GAME_SERVICE_URL: "http://game:8003"
       USER_SERVICE_URL: "http://user:8004"
+      CHAT_SERVICE_URL: "http://chat:8006"
+
+      SSL_ENABLED: "true"
+      SSL_KEY: "/ssl/privkey.pem"
+      SSL_CERT: "/ssl/fullchain.pem"
+      HTTPS_PORT: "443"
+    volumes:
+      - ./ssl:/ssl
   files:
     image: tron-the-successor/files
     build:
@@ -34,6 +43,13 @@ services:
       - mongodb
     environment:
       GAME_SERVICE_URL: "http://game:8003"
+  chat:
+    image: tron-the-successor/chat
+    build:
+      context: services/chat
+    restart: unless-stopped
+    depends_on:
+      - mongodb
 
 volumes:
   mongo-data:

@@ -4,8 +4,8 @@ const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
-const {randomUUID} = require('crypto');
-const {updateStats, handleAddElo, handleGetElo, handleGetAllStats} = require("./js/elo.js");
+const {randomUUID} = require("crypto");
+const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
 const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
 let server = http.createServer(async (request, response) => {
@@ -16,8 +16,7 @@ let server = http.createServer(async (request, response) => {
                 if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
                 break;
             case "stats":
-                if (request.method === "POST") await handleAddElo(request, response);
-                else if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
+                if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
@@ -28,12 +27,7 @@ let server = http.createServer(async (request, response) => {
     }
 }).listen(8003);
 
-const io = new Server(server, {
-    cors: {
-        origin: "*"
-    }
-});
-
+const io = new Server(server);
 io.on("connection", (socket) => {
     socket.on("game-start", async (msg) => {
         await findGame(socket, msg);

@@ -24,6 +24,13 @@ h2, p {
     #board {
         grid-column: 1 / span 3;
         align-self: normal;
+        height: 100%;
+    }
+
+    &:not(.online-multiplayer) {
+        #players, #emote-display, #emote-list {
+            display: none;
+        }
     }
 
     #players {

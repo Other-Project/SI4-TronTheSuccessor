@@ -8,7 +8,7 @@ import {getAccessToken, getCookie, renewAccessToken} from "/js/login-manager.js"
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
-    against = "local";
+    /** @type {"local"|"computer"|string} */ against = "local";
     paused = false;
     socket;
 
@@ -29,6 +29,8 @@ export class GameMaster extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
+        this.container = this.shadowRoot.querySelector(".container");
+
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.waitingWindow = this.shadowRoot.getElementById("waiting-panel");
         this.waitingWindow.style.display = "none";
@@ -51,10 +53,10 @@ export class GameMaster extends HTMLComponent {
         this.emoteImg = this.shadowRoot.getElementById("emote-img");
 
         document.addEventListener("keypress", e => {
-            if (!this.socket) return;
             let emote = /^Digit(\d)$/.exec(e.code)?.[1];
             if (!emote) return;
             e.preventDefault();
+            if (!this.socket || this.against === "computer") return;
             if (emote === "0") emote = "10";
             if (emotes[emote - 1]) this.socket.emit("emote", {emote: emotes[emote - 1]});
         });
@@ -64,6 +66,7 @@ export class GameMaster extends HTMLComponent {
     onHidden = () => this.stopGame();
 
     #launchGame() {
+        this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
         this.against === "local" ? this.newGame() : this.#gameWithServer().then();
     }
 

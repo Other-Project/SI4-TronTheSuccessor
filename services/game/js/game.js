@@ -14,6 +14,7 @@ exports.Game = class Game extends EventTarget {
     #startTime;
     #turnDuration;
     #gameLife;
+    gameActions = [];
 
     /**
      * @param {number} w Width of the game map
@@ -98,10 +99,11 @@ exports.Game = class Game extends EventTarget {
             if (player.dead) return;
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
+            this.gameActions.push(player.direction);
         });
         this.players.forEach((player) => this.#updateGrid(player));
         let winner = this.#isGameEnded();
-        this.dispatchEvent(new CustomEvent("game-turn", { detail: this.#getInfo(winner) }));
+        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
         if (winner) this.stop();
     }
 
@@ -124,7 +126,7 @@ exports.Game = class Game extends EventTarget {
     }
 
     setPlayerStates(playerStates) {
-        playerStates.forEach((state, i) => this.players[i] = { ...this.players[i], ...state });
+        playerStates.forEach((state, i) => this.players[i] = {...this.players[i], ...state});
     }
 
     /**
@@ -147,4 +149,4 @@ exports.Game = class Game extends EventTarget {
                 return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] + 1] : [currentPosition[0] - 1, currentPosition[1] + 1];
         }
     }
-}
+};

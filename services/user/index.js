@@ -1,7 +1,7 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
 const {addElo, getElo} = require("./helper/eloHelper.js");
-const {getRequestBody, sendResponse} = require("./js/utils.js");
+const {getRequestBody, sendResponse, getAuthorizationToken} = require("./js/utils.js");
 
 const HTTP_STATUS = {
     OK: 200,
@@ -63,9 +63,8 @@ async function handleSignIn(request, response) {
 }
 
 async function handleRenewToken(request, response) {
-    const body = await getRequestBody(request);
-    const parsedBody = JSON.parse(body);
-    const result = await userDatabase.renewToken(parsedBody.refreshToken);
+    const refreshToken = await getAuthorizationToken(request);
+    const result = await userDatabase.renewToken(refreshToken);
     sendResponse(response, result.error ? HTTP_STATUS.UNAUTHORIZED_STATUS_CODE : HTTP_STATUS.OK, result);
 }
 

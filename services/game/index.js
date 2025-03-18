@@ -6,6 +6,7 @@ const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require("crypto");
 const {updateElos, handleAddElo, handleGetElo} = require("./js/elo.js");
+const {updateHistories, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
 let server = http.createServer(async (request, response) => {
@@ -18,6 +19,11 @@ let server = http.createServer(async (request, response) => {
                 else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
                 else {
                     sendResponse(response, HTTP_STATUS.NOT_FOUND);
+                }
+                break;
+            case "history":
+                if (request.method === "GET") {
+                    await handleGetHistory(request, response, filePath[4]);
                 }
                 break;
             default:
@@ -79,6 +85,7 @@ async function startGame(p1s, p2s = null) {
         if (event.detail.ended) {
             io.in(id).disconnectSockets();
             if (p2s) updateElos(game.players, event.detail);
+            updateHistories(game.players, game.gameActions, event.detail.winner, event.detail.elapsed);
         }
     });
     game.init();
@@ -97,7 +104,12 @@ function joinGame(socket, gameId) {
     const game = games[gameId];
     socket.emit("game-start", {
         yourNumber: game.players.findIndex(player => player.id === socket.id) + 1,
-        players: game.players.map(player => ({name: player.name, color: player.color, avatar: player.avatar, number: player.number})),
+        players: game.players.map(player => ({
+            name: player.name,
+            color: player.color,
+            avatar: player.avatar,
+            number: player.number
+        })),
         grid: game.grid,
         playerStates: game.getPlayerStates()
     });

@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {getUserInfo} from "/js/login-manager.js";
+import {fetchApi, getUserInfo} from "/js/login-manager.js";
 
 export class ProfileDisplay extends HTMLComponent {
     dropDownMenu;
@@ -21,6 +21,15 @@ export class ProfileDisplay extends HTMLComponent {
 
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
+
+        this.shadowRoot.getElementById("settings").addEventListener("click", async () => {
+            const user = getUserInfo();
+            if (user) {
+                const response = await fetchApi("/api/game/history/" + user.username, null);
+                const data = await response.json();
+                console.log(data);
+            }
+        });
     };
 
     onVisible = async () => {

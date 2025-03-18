@@ -11,7 +11,13 @@ const refreshTokenDuration = "7d";
 const usernameMinLength = 3;
 const passwordMinLength = 6;
 
-async function addUser(username, password) {
+/**
+ * Register a new user
+ * @param username The username
+ * @param password The password
+ * @returns {Promise<{error: string}|{accessToken: (*), refreshToken: (*)}|{error: string}|{error: string}|{error: string}|{error: string}|{error: string}>}
+ */
+exports.addUser = async function (username, password) {
     const error = checkValue(username, password);
     if (error) return error;
     if (await userCollection.findOne({username}))
@@ -21,11 +27,26 @@ async function addUser(username, password) {
     return getJwt(user);
 }
 
-async function getUser(username, password) {
+/**
+ * Login a user
+ * @param username The username
+ * @param password The password
+ * @returns {Promise<{error: string}|{accessToken: (*), refreshToken: (*)}>}
+ */
+exports.loginUser = async function loginUser(username, password) {
     const user = await userCollection.findOne({username, password: hash(password)});
     if (!user) return {error: "Wrong username or password"};
     return getJwt(user);
 }
+
+/**
+ * Get a user by username
+ * @param username The username
+ * @returns {Promise<Document>}
+ */
+exports.getUser = async function (username) {
+    return await userCollection.findOne({username: username});
+};
 
 /**
  * Add a friend to a user
@@ -33,7 +54,7 @@ async function getUser(username, password) {
  * @param {string} otherId The id of the friend to add
  * @returns {Promise<void>}
  */
-async function addFriend(playerId, otherId) {
+exports.addFriend = async function (playerId, otherId) {
     await userCollection.updateOne(
         {username: playerId},
         {$addToSet: {friends: otherId}},
@@ -46,7 +67,7 @@ async function addFriend(playerId, otherId) {
  * @param {string} playerId The id of the player
  * @returns {Promise<string[]>}
  */
-async function getFriends(playerId) {
+exports.getFriends = async function (playerId) {
     const user = await userCollection.findOne({username: playerId});
     return user ? user.friends : [];
 }
@@ -57,14 +78,14 @@ async function getFriends(playerId) {
  * @param {string} otherId The id of the friend to remove
  * @returns {Promise<void>}
  */
-async function removeFriend(playerId, otherId) {
+exports.removeFriend = async function (playerId, otherId) {
     await userCollection.updateOne(
-        {_id: playerId},
+        {username: playerId},
         {$pull: {friends: otherId}}
     );
 }
 
-async function renewToken(refreshToken) {
+exports.renewToken = async function (refreshToken) {
     if (!refreshToken)
         return {error: "Refresh token is missing"};
     if (!jwt.verify(refreshToken, secretKey))
@@ -105,5 +126,3 @@ function hash(str) {
     hash.update(str);
     return hash.digest('hex');
 }
-
-module.exports = {addUser, getUser, renewToken, addFriend, getFriends, removeFriend};

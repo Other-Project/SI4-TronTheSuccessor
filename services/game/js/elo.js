@@ -1,6 +1,7 @@
 const statsDatabase = require("./eloDatabase.js");
 const {HTTP_STATUS, getRequestBody, sendResponse} = require("./utils.js");
 const {BASE_ELO} = require("./eloDatabase.js");
+const {getUser} = require("../helper/userHelper.js");
 
 /**
  * Calculate the ELO points won.
@@ -91,10 +92,14 @@ exports.handleGetElo = async function (request, response, playerId) {
  * @param request The request
  * @param response The response
  * @param playerId The ID of the player
- * @returns {Promise<{wins: number, losses: number, draws: number, games: number, winStreak: number, rank: string, eloInRank: number, timePlayed: number}>}
+ * @returns {Promise<{wins: number, losses: number, draws: number, games: number, winStreak: number, rank: string, eloInRank: number, timePlayed: number} | void>}
  */
 exports.handleGetAllStats = async function (request, response, playerId) {
+    const result = await getUser(playerId);
+    if (!result) {
+        sendResponse(response, HTTP_STATUS.NOT_FOUND);
+        return;
+    }
     const stats = await statsDatabase.getAllStats(playerId);
-    if (!stats) sendResponse(response, HTTP_STATUS.NOT_FOUND);
-    else sendResponse(response, HTTP_STATUS.OK, stats);
+    sendResponse(response, HTTP_STATUS.OK, stats);
 };

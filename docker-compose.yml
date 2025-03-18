@@ -34,6 +34,8 @@ services:
     build:
       context: services/game
     restart: unless-stopped
+    environment:
+      USER_SERVICE_URL: "http://user:8004"
   user:
     image: tron-the-successor/user
     build:

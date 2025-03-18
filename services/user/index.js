@@ -18,6 +18,10 @@ http.createServer(async (request, response) => {
             case "renew-access-token":
                 await handleRenewToken(request, response);
                 break;
+            case "check":
+                if (request.method === "GET")
+                    await handleGetUser(request, response, filePath[4]);
+                break;
             case "friends":
                 if (request.method === "GET")
                     await handleGetFriends(request, response, filePath[4]);

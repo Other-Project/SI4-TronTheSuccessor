@@ -42,6 +42,7 @@ export class ProfileOverview extends HTMLComponent {
 
     onSetupCompleted = async () => {
         const userName = location.search.split("=")[1];
+        const response = await fetch(`/api/game/stats/${userName}`);
         const token = getCookie("accessToken");
 
         let jwt;
@@ -53,6 +54,14 @@ export class ProfileOverview extends HTMLComponent {
         this.rank = this.shadowRoot.querySelector('app-profile-rank [slot="rank"]');
         this.profileStats = this.shadowRoot.getElementById("profiles-stats");
         this.profilePfp = this.shadowRoot.getElementById("profile-pfp");
+
+        if (response.status === 404) {
+            this.shadowRoot.innerHTML = `<h1 class=not-found>${userName} does not exist or has deleted his account</h1>`;
+            return;
+        } else {
+            const stats = await response.json();
+            if (stats) this.#updateProfileStats(stats);
+        }
 
         this.shadowRoot.getElementById("modify-password").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "modify-password"}));
@@ -70,12 +79,6 @@ export class ProfileOverview extends HTMLComponent {
         });
 
         this.shadowRoot.querySelector('[slot="name"]').textContent = userName;
-        const stats = await fetch(`/api/game/stats/${userName}`, {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        }).then(response => response.json());
-        if (stats) this.#updateProfileStats(stats);
     };
 
     #createPolygonSVG(vertices) {

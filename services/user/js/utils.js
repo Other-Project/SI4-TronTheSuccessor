@@ -1,8 +1,10 @@
-const HTTP_STATUS = {
+const jwt = require("jsonwebtoken");
+
+exports.HTTP_STATUS = {
     OK: 200,
     CREATED: 201,
     BAD_REQUEST: 400,
-    UNAUTHORIZED_STATUS_CODE: 401,
+    UNAUTHORIZED: 401,
     NOT_FOUND: 404
 };
 
@@ -11,7 +13,7 @@ const HTTP_STATUS = {
  * @param {IncomingMessage} request
  * @returns {Promise<string>}
  */
-async function getRequestBody(request) {
+exports.getRequestBody = async function (request) {
     return new Promise((resolve, reject) => {
         let body = "";
         request.on("data", chunk => body += chunk.toString());
@@ -20,7 +22,7 @@ async function getRequestBody(request) {
     });
 }
 
-function sendResponse(response, statusCode, data = null) {
+exports.sendResponse = function (response, statusCode, data = null) {
     response.statusCode = statusCode;
     if (data) {
         response.setHeader("Content-Type", "application/json");
@@ -28,4 +30,14 @@ function sendResponse(response, statusCode, data = null) {
     } else response.end();
 }
 
-module.exports = {HTTP_STATUS, getRequestBody, sendResponse};
+/**
+ * Get the user from the request
+ * @param request The request object
+ * @returns {{username: string}|null}
+ */
+exports.getUser = function (request) {
+    const authHeader = request.headers.authorization?.split(" ");
+    if (!authHeader || authHeader.length !== 2 || authHeader[0] !== "Bearer") return null;
+    // noinspection JSValidateTypes
+    return jwt.decode(authHeader[1]);
+};

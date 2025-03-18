@@ -9,3 +9,27 @@ h2, p {
     grid-auto-flow: column;
     gap: 2rem;
 }
+
+.container {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-template-rows: minmax(0, 100%) auto;
+    gap: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+    height: 100vh;
+
+    justify-items: start;
+    margin: 0 auto;
+    width: max-content;
+
+    #board {
+        grid-column: 1 / span 2;
+    }
+
+    #emote-list {
+        grid-column: 2;
+        grid-row: 2;
+        justify-self: end;
+    }
+}

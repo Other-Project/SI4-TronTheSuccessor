@@ -1,27 +1,33 @@
 import {HTMLComponent} from "/js/component.js";
 
 export class ProfileStats extends HTMLComponent {
+    static get observedAttributes() {
+        return ["games", "time", "streak", "winrate"];
+    }
+
     constructor() {
         super("profile-stats", ["html", "css"]);
     }
 
-    static get observedAttributes() {
-        return ["data-games", "data-time", "data-streak", "data-winrate"];
+    onSetupCompleted = () => {
+        this.gamesElement = this.shadowRoot.getElementById("games");
+        this.timeElement = this.shadowRoot.getElementById("time");
+        this.streakElement = this.shadowRoot.getElementById("streak");
+        this.winrateElement = this.shadowRoot.getElementById("winrate");
     }
+
+    onVisible = () => this.#refresh();
 
     attributeChangedCallback(name, oldValue, newValue) {
-        this.updateTextContentFromAttributes();
+        super.attributeChangedCallback(name, oldValue, newValue);
+        this.#refresh();
     }
 
-    updateTextContentFromAttributes() {
-        const gamesElement = this.shadowRoot.getElementById("games");
-        const timeElement = this.shadowRoot.getElementById("time");
-        const streakElement = this.shadowRoot.getElementById("streak");
-        const winrateElement = this.shadowRoot.getElementById("winrate");
-
-        gamesElement.childNodes[0].textContent = this.getAttribute("data-games");
-        timeElement.childNodes[0].textContent = this.getAttribute("data-time");
-        streakElement.childNodes[0].textContent = this.getAttribute("data-streak");
-        winrateElement.childNodes[0].textContent = this.getAttribute("data-winrate");
+    #refresh() {
+        if (!this.gamesElement) return;
+        this.gamesElement.childNodes[0].textContent = this.games;
+        this.timeElement.childNodes[0].textContent = this.time;
+        this.streakElement.childNodes[0].textContent = this.streak;
+        this.winrateElement.childNodes[0].textContent = this.winrate;
     }
 }

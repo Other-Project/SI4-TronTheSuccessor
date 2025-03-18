@@ -3,14 +3,6 @@ import {getCookie} from "../../js/login-manager.js";
 import {parseJwt} from "../../components/login/login.js";
 
 export class ProfileOverview extends HTMLComponent {
-    rankToVertices = {
-        "Line": 2,
-        "Triangle": 3,
-        "Square": 4,
-        "Pentagon": 5,
-        "Hexagon": 6,
-    };
-
     constructor() {
         super("profile-overview", ["html", "css"]);
     }
@@ -49,8 +41,7 @@ export class ProfileOverview extends HTMLComponent {
         if (jwt && jwt.username === userName)
             this.shadowRoot.querySelectorAll('app-button').forEach(button => button.classList.toggle("hidden"));
 
-        this.rankIcon = this.shadowRoot.querySelector('app-profile-rank [slot="rank-icon"]');
-        this.rank = this.shadowRoot.querySelector('app-profile-rank [slot="rank"]');
+        this.rank = this.shadowRoot.getElementById("profile-rank");
         this.profileStats = this.shadowRoot.getElementById("profiles-stats");
         this.profilePfp = this.shadowRoot.getElementById("profile-pfp");
 
@@ -59,7 +50,8 @@ export class ProfileOverview extends HTMLComponent {
             return;
         } else {
             const stats = await response.json();
-            if (stats) this.#updateProfileStats(stats);
+            stats.username = userName;
+            if (stats) this.#updateProfile(stats);
         }
 
         this.shadowRoot.getElementById("modify-password").addEventListener("click", () => {
@@ -76,54 +68,18 @@ export class ProfileOverview extends HTMLComponent {
                 window.location.href = "#login";
             } else await this.#sendFriendRequest(jwt.username, userName, token);
         });
-
-        this.shadowRoot.querySelector('[slot="name"]').textContent = userName;
     };
 
-    #createPolygonSVG(vertices) {
-        const svgNS = "http://www.w3.org/2000/svg";
-        const svg = document.createElementNS(svgNS, "svg");
-        svg.setAttribute("viewBox", "0 0 100 85");
-        svg.setAttribute("fill", "none");
-
-        const polygon = document.createElementNS(svgNS, "polygon");
-        polygon.setAttribute("points", this.#calculatePolygonPoints(vertices));
-        polygon.setAttribute("stroke", "white");
-        polygon.setAttribute("stroke-width", "2");
-        polygon.setAttribute("fill", "none");
-
-        svg.appendChild(polygon);
-        this.rankIcon.appendChild(svg);
-    }
-
-    #calculatePolygonPoints(vertices) {
-        if (vertices < 1) return "";
-
-        const angleStep = (2 * Math.PI) / vertices;
-        const radius = 48;
-        const centerX = 50;
-        const centerY = 50;
-        let points = "";
-
-        for (let i = 0; i < vertices; i++) {
-            const angle = i * angleStep - Math.PI / 2;
-            const x = centerX + radius * Math.cos(angle);
-            const y = centerY + radius * Math.sin(angle);
-            points += `${x},${y} `;
-        }
-
-        return points.trim();
-    }
-
-    #updateProfileStats(stats) {
-        const rankBase = stats.rank.replace(/\s*\d+|\s*I{1,3}/g, ''); // Remove numbers and Roman numerals
-        this.rank.textContent = `${stats.rank} (${stats.eloInRank} TP)`;
-        this.#createPolygonSVG(this.rankToVertices[rankBase]);
-        this.profileStats.setAttribute("data-games", stats.games);
-        this.profileStats.setAttribute("data-time", Math.round(stats.timePlayed / 60));
-        this.profileStats.setAttribute("data-streak", stats.winStreak);
+    #updateProfile(stats) {
+        this.profilePfp.setAttribute("src", "../../assets/profil.svg");
+        this.profilePfp.setAttribute("username", stats.username);
+        this.rank.setAttribute("Rank", stats.rank);
+        this.rank.setAttribute("points", stats.eloInRank);
+        this.profileStats.setAttribute("games", stats.games);
+        this.profileStats.setAttribute("time", Math.round(stats.timePlayed / 60));
+        this.profileStats.setAttribute("streak", stats.winStreak);
         const totalGames = stats.games - stats.draws;
-        if (totalGames === 0) this.profileStats.setAttribute("data-winrate", "-");
-        else this.profileStats.setAttribute("data-winrate", Math.round((stats.wins * 100 / totalGames)));
+        if (totalGames === 0) this.profileStats.setAttribute("winrate", "-");
+        else this.profileStats.setAttribute("winrate", Math.round((stats.wins * 100 / totalGames)));
     }
 }

@@ -1,9 +1,6 @@
 <div id="profile-overview">
     <div class="column-1">
-        <app-profile-pfp id="profile-pfp">
-            <p slot="name">Name</p>
-            <img src="../../assets/profil.svg" alt="Profile" slot="pfp">
-        </app-profile-pfp>
+        <app-profile-pfp id="profile-pfp"></app-profile-pfp>
         <div class="profile-buttons">
             <app-button id="modify-password" class="hidden">Modify Password</app-button>
             <app-button id="share" class="hidden">Share Profile</app-button>
@@ -14,9 +11,6 @@
         <app-profile-stats id="profiles-stats"></app-profile-stats>
     </div>
     <div class="column-3">
-        <app-profile-rank>
-            <div slot="rank-icon"></div>
-            <p slot="rank"></p>
-        </app-profile-rank>
+        <app-profile-rank id="profile-rank"></app-profile-rank>
     </div>
 </div>

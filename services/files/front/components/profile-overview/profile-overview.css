@@ -10,19 +10,6 @@
         grid-column: 1;
         gap: 10px;
 
-        p {
-            padding: 0.25em 0;
-            margin: 0;
-        }
-
-        img {
-            width: 75%;
-            height: 75%;
-            border-radius: 50%;
-            display: block;
-            margin: 0 auto;
-        }
-
         .profile-buttons {
             display: flex;
             flex-direction: column;
@@ -42,10 +29,4 @@
 
 #profile-overview .column-3 {
     grid-column: 3;
-
-    p {
-        margin: 0;
-        font-size: 2em;
-        text-align: center;
-    }
 }

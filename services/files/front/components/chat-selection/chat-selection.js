@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {fetchApi} from "../../js/login-manager.js";
 
 export class ChatSelection extends HTMLComponent {
     constructor() {
@@ -32,10 +33,13 @@ export class ChatSelection extends HTMLComponent {
     }
 
     async #getFriendList() {
-        // TODO: Fetch friend list
-        return Array.from(Array(15), (_, i) => ({
-            id: i,
-            name: `Friend ${i}`,
+        let friends = await fetchApi(
+            "/api/user/friends",
+            {method: "GET"}
+        ).then(response => response.json());
+        return friends.map(friend => ({
+            id: friend,
+            name: friend,
             preview: "Hello there!",
             icon: null
         }));

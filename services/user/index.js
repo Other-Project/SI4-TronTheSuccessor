@@ -1,7 +1,7 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
 const {getRequestBody, sendResponse} = require("./js/utils.js");
-const {handleGetFriends, handleAddFriend, handleDeleteFriend} = require("./js/social.js");
+const {handleGetFriends, handleModifyFriendList, handleGetUser} = require("./js/social.js");
 const {HTTP_STATUS} = require("./js/utils.js");
 
 http.createServer(async (request, response) => {
@@ -24,12 +24,11 @@ http.createServer(async (request, response) => {
                 break;
             case "friends":
                 if (request.method === "GET")
-                    await handleGetFriends(request, response, filePath[4]);
+                    await handleGetFriends(request, response);
                 else if (filePath[4] === "add" && request.method === "POST")
-                    await handleAddFriend(request, response);
-
+                    await handleModifyFriendList(request, response, true);
                 else if (filePath[4] === "delete" && request.method === "POST")
-                    await handleDeleteFriend(request, response);
+                    await handleModifyFriendList(request, response, false);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
@@ -50,7 +49,7 @@ async function handleSignUp(request, response) {
 async function handleSignIn(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
-    const result = await userDatabase.getUser(parsedBody.username, parsedBody.password);
+    const result = await userDatabase.loginUser(parsedBody.username, parsedBody.password);
     sendResponse(response, result.error ? HTTP_STATUS.BAD_REQUEST : HTTP_STATUS.OK, result);
 }
 
@@ -58,5 +57,5 @@ async function handleRenewToken(request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const result = await userDatabase.renewToken(parsedBody.refreshToken);
-    sendResponse(response, result.error ? HTTP_STATUS.UNAUTHORIZED_STATUS_CODE : HTTP_STATUS.OK, result);
+    sendResponse(response, result.error ? HTTP_STATUS.UNAUTHORIZED : HTTP_STATUS.OK, result);
 }

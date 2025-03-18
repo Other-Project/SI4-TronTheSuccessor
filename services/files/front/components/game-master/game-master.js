@@ -56,22 +56,24 @@ export class GameMaster extends HTMLComponent {
             let emote = /^Digit(\d)$/.exec(e.code)?.[1];
             if (!emote) return;
             e.preventDefault();
-            if (!this.socket || this.against === "computer") return;
             if (emote === "0") emote = "10";
-            if (emotes[emote - 1]) this.socket.emit("emote", {emote: emotes[emote - 1]});
+            if (emotes[emote - 1]) this.#sendEmote(emotes[emote - 1]);
         });
+        this.shadowRoot.getElementById("emote-list").addEventListener("emote", e => this.#sendEmote(e.detail.emote));
     };
 
     onVisible = () => this.#launchGame();
     onHidden = () => this.stopGame();
 
     #launchGame() {
+        this.container.style.visibility = "hidden";
         this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
         this.against === "local" ? this.newGame() : this.#gameWithServer().then();
     }
 
     newGame() {
         this.pauseWindow.style.display = "none";
+        this.container.style.visibility = "visible";
         this.stopGame();
         const opponent = this.against === "computer" ? new FlowBird() : new HumanPlayer("Player 2");
         this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1"), opponent, 500);
@@ -150,6 +152,7 @@ export class GameMaster extends HTMLComponent {
             this.game.players.forEach((player, i) => player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse)));
             this.#applyMessage(msg, reverse);
             this.waitingWindow.style.display = "none";
+            this.container.style.visibility = "visible";
         });
 
         this.socket.on("game-turn", (msg) => {
@@ -193,5 +196,10 @@ export class GameMaster extends HTMLComponent {
             direction: directions[(directions.indexOf(state.direction) + 3) % 6],
             dead: state.dead
         }));
+    }
+
+    #sendEmote(emote) {
+        if (!this.socket || this.against === "computer") return;
+        this.socket.emit("emote", {emote: emote});
     }
 }

@@ -1,11 +1,17 @@
-#home {
-    max-width: 60px;
-    max-height: 60px;
-    position: absolute;
-    right: 1em;
-    top: 1em;
-}
-
 #profile-page {
     height: 100vh;
+
+    .hidden {
+        display: none;
+    }
+
+    #not-found {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-size: 3em;
+        color: #ff00ff;
+        text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 80px #ff00ff;
+    }
 }

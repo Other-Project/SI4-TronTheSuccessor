@@ -1,8 +1,11 @@
 import {HTMLComponent} from "/js/component.js";
-import {getCookie} from "../../js/login-manager.js";
-import {parseJwt} from "../../components/login/login.js";
+import {fetchApi} from "/js/login-manager.js";
 
 export class ProfileOverview extends HTMLComponent {
+    static get observedAttributes() {
+        return ["stats"];
+    }
+
     constructor() {
         super("profile-overview", ["html", "css"]);
     }
@@ -17,13 +20,9 @@ export class ProfileOverview extends HTMLComponent {
         notification.show();
     }
 
-    async #sendFriendRequest(currentUser, friend, token) {
-        await fetch(`/api/user/friends/add`, {
+    async #sendFriendRequest(friend) {
+        await fetchApi(`/api/user/friends/add`, {
             method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
             body: JSON.stringify({
                 friends: friend,
             })
@@ -32,27 +31,9 @@ export class ProfileOverview extends HTMLComponent {
     }
 
     onSetupCompleted = async () => {
-        const userName = location.search.split("=")[1];
-        const response = await fetch(`/api/game/stats/${userName}`);
-        const token = getCookie("accessToken");
-
-        let jwt;
-        if (token !== "") jwt = parseJwt(token);
-        if (jwt && jwt.username === userName)
-            this.shadowRoot.querySelectorAll('app-button').forEach(button => button.classList.toggle("hidden"));
-
         this.rank = this.shadowRoot.getElementById("profile-rank");
         this.profileStats = this.shadowRoot.getElementById("profiles-stats");
         this.profilePfp = this.shadowRoot.getElementById("profile-pfp");
-
-        if (response.status === 404) {
-            this.shadowRoot.innerHTML = `<h1 class=not-found>${userName} does not exist or has deleted his account</h1>`;
-            return;
-        } else {
-            const stats = await response.json();
-            stats.username = userName;
-            if (stats) this.#updateProfile(stats);
-        }
 
         this.shadowRoot.getElementById("modify-password").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "modify-password"}));
@@ -62,24 +43,37 @@ export class ProfileOverview extends HTMLComponent {
                 this.#showNotification("Profile URL copied to clipboard!", 2000, "#8E24AA", "white");
             });
         });
-        this.shadowRoot.getElementById("add-friend").addEventListener("click", async () => {
-            if (!token) {
-                localStorage.setItem("redirectAfterLogin", window.location.href);
-                window.location.href = "#login";
-            } else await this.#sendFriendRequest(jwt.username, userName, token);
-        });
     };
 
-    #updateProfile(stats) {
+    onVisible = () => this.#refresh();
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        super.attributeChangedCallback(name, oldValue, newValue);
+        this.#refresh();
+    }
+
+    #refresh() {
+        if (!this.rank) return;
+        this.stats = JSON.parse(this.stats);
+
+        if (this.stats.loggedusername && this.stats.loggedusername === this.stats.username)
+            this.shadowRoot.querySelectorAll('app-button').forEach(button => button.classList.toggle("hidden"));
+        this.shadowRoot.getElementById("add-friend").addEventListener("click", async () => {
+            if (!this.stats.loggedusername) {
+                localStorage.setItem("redirectAfterLogin", window.location.href);
+                window.location.href = "#login";
+            } else await this.#sendFriendRequest(this.stats.username);
+        });
+
         this.profilePfp.setAttribute("src", "../../assets/profil.svg");
-        this.profilePfp.setAttribute("username", stats.username);
-        this.rank.setAttribute("Rank", stats.rank);
-        this.rank.setAttribute("points", stats.eloInRank);
-        this.profileStats.setAttribute("games", stats.games);
-        this.profileStats.setAttribute("time", Math.round(stats.timePlayed / 60));
-        this.profileStats.setAttribute("streak", stats.winStreak);
-        const totalGames = stats.games - stats.draws;
+        this.profilePfp.setAttribute("username", this.stats.username);
+        this.rank.setAttribute("Rank", this.stats.rank);
+        this.rank.setAttribute("points", this.stats.eloInRank);
+        this.profileStats.setAttribute("games", this.stats.games);
+        this.profileStats.setAttribute("time", Math.round(this.stats.timePlayed / 60));
+        this.profileStats.setAttribute("streak", this.stats.winStreak);
+        const totalGames = this.stats.games - this.stats.draws;
         if (totalGames === 0) this.profileStats.setAttribute("winrate", "-");
-        else this.profileStats.setAttribute("winrate", Math.round((stats.wins * 100 / totalGames)));
+        else this.profileStats.setAttribute("winrate", Math.round((this.stats.wins * 100 / totalGames)));
     }
 }

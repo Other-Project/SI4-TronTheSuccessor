@@ -5,20 +5,18 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require('crypto');
-const {updateStats, handleAddElo, handleGetElo, handleGetAllStats} = require("./js/elo.js");
+const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
 const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
-
     try {
         switch (filePath[3]) {
             case "elo":
                 if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
                 break;
             case "stats":
-                if (request.method === "POST") await handleAddElo(request, response);
-                else if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
+                if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

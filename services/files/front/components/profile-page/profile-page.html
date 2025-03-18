@@ -1,11 +1,8 @@
 <div id="profile-page">
-    <app-tab-navigation>
-        <button slot="tabs" data-tab-id="overview">Overview</button>
-        <button slot="tabs" data-tab-id="history">History</button>
-        <button slot="tabs" data-tab-id="ranking">Ranking</button>
-        <app-profile-overview slot="panels" id="overview" data-tab-title="Overview"></app-profile-overview>
-        <app-profile-history slot="panels" id="history" data-tab-title="History"></app-profile-history>
-        <app-profile-leaderboard slot="panels" id="ranking" data-tab-title="Ranking"></app-profile-leaderboard>
+    <app-tab-navigation readonly="true">
+        <app-profile-overview id="overview" data-tab-title="Overview"></app-profile-overview>
+        <app-profile-history id="history" data-tab-title="History"></app-profile-history>
+        <app-profile-leaderboard id="ranking" data-tab-title="Ranking"></app-profile-leaderboard>
     </app-tab-navigation>
     <img alt="home" id="home" src="/assets/home.svg">
 </div>

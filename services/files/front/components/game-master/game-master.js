@@ -150,6 +150,13 @@ export class GameMaster extends HTMLComponent {
             const direction = reverse ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
             this.socket.emit("game-action", {direction});
         });
+
+        this.socket.on("error", async (msg) => {
+            if (msg.status === 401) {
+                await renewAccessToken();
+                this.#gameWithServer();
+            } else console.error(msg);
+        });
     }
 
     #applyMessage(msg, reverse = false) {

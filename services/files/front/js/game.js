@@ -6,7 +6,7 @@ export class Game extends EventTarget {
     gridSize;
     /** @type {Player[]} */ players;
     grid;
-    #startTime;
+    startTime;
     #turnDuration;
     #gameLife;
 
@@ -44,13 +44,13 @@ export class Game extends EventTarget {
 
     start() {
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
-        this.#startTime = +new Date();
+        this.startTime = +new Date();
     }
 
     stop() {
         if (this.isPaused()) return;
         const details = this.#getInfo();
-        this.#startTime -= new Date();
+        this.startTime -= new Date();
         clearInterval(this.#gameLife);
         this.#gameLife = null;
         return details;
@@ -58,7 +58,7 @@ export class Game extends EventTarget {
 
     resume() {
         if (!this.isPaused()) return;
-        this.#startTime += +new Date();
+        this.startTime += +new Date();
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
     }
 
@@ -72,7 +72,7 @@ export class Game extends EventTarget {
             ended: !!winner,
             draw: winner ? winner === true : undefined,
             winner: winner && winner instanceof Player ? winner.name : undefined,
-            elapsed: new Date() - this.#startTime
+            elapsed: new Date() - this.startTime
         };
     }
 

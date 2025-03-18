@@ -48,6 +48,10 @@ export class GameMaster extends HTMLComponent {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
         });
 
+        this.playersName = [this.shadowRoot.getElementById("p1"), this.shadowRoot.getElementById("p2")];
+
+        this.timerDisplay = this.shadowRoot.getElementById("timer");
+
         this.emoteDisplay = this.shadowRoot.getElementById("emote-display");
         this.emoteSender = this.shadowRoot.getElementById("emote-sender");
         this.emoteImg = this.shadowRoot.getElementById("emote-img");
@@ -83,6 +87,7 @@ export class GameMaster extends HTMLComponent {
         });
         this.game.init();
         this.game.start();
+        this.#startTimer();
         this.gameBoard.draw(this.game);
     }
 
@@ -92,6 +97,7 @@ export class GameMaster extends HTMLComponent {
     }
 
     endScreen(details) {
+        clearInterval(this.timer);
         this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = "none";
         this.pauseTitle.innerText = details.draw ? "Draw" : details.winner + " won";
@@ -149,7 +155,12 @@ export class GameMaster extends HTMLComponent {
             const msgPlayers = reverse ? msg.players.toReversed() : msg.players;
             const players = msgPlayers.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
-            this.game.players.forEach((player, i) => player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse)));
+            this.game.startTime = Date.now();
+            this.#startTimer();
+            this.game.players.forEach((player, i) => {
+                this.playersName[i].innerText = player.name;
+                player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse))
+            });
             this.#applyMessage(msg, reverse);
             this.waitingWindow.style.display = "none";
             this.container.style.visibility = "visible";
@@ -201,5 +212,13 @@ export class GameMaster extends HTMLComponent {
     #sendEmote(emote) {
         if (!this.socket || this.against === "computer") return;
         this.socket.emit("emote", {emote: emote});
+    }
+
+    #startTimer() {
+        this.timerDisplay.innerText = "00:00";
+        this.timer = setInterval(() => {
+            const elapsed = Date.now() - this.game.startTime;
+            this.timerDisplay.innerText = `${String(Math.floor((elapsed / 1000) / 60)).padStart(2, "0")}'${String(Math.floor((elapsed / 1000) % 60)).padStart(2, "0")}"`;
+        }, 1000);
     }
 }

@@ -47,6 +47,9 @@ export class GameMaster extends HTMLComponent {
         });
 
         this.emoteDisplay = this.shadowRoot.getElementById("emote-display");
+        this.emoteSender = this.shadowRoot.getElementById("emote-sender");
+        this.emoteImg = this.shadowRoot.getElementById("emote-img");
+
         document.addEventListener("keypress", e => {
             if (!this.socket) return;
             let emote = /^Digit(\d)$/.exec(e.code)?.[1];
@@ -156,7 +159,13 @@ export class GameMaster extends HTMLComponent {
         });
 
         this.socket.on("emote", (msg) => {
-            this.emoteDisplay.innerText = `${msg.player} sent an emote ${msg.emote}`;
+            clearTimeout(this.emoteTimeout);
+            this.emoteDisplay.classList.add("visible");
+            this.emoteImg.title = this.emoteSender.alt = msg.player;
+            this.emoteSender.src = `/api/user/${msg.player}/avatar`;
+            this.emoteImg.title = this.emoteImg.alt = msg.emote;
+            this.emoteImg.src = `/assets/emotes/${msg.emote}.png`;
+            this.emoteTimeout = setTimeout(() => this.emoteDisplay.classList.remove("visible"), 3000);
         });
 
         document.addEventListener("player-direction", (event) => {

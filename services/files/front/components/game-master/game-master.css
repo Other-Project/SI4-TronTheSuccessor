@@ -49,6 +49,22 @@ h2, p {
         grid-column: 1;
         grid-row: 3;
         justify-self: start;
+        font-size: 1.1em;
+
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s 2s, opacity 2s linear;
+
+        &.visible {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.25s linear;
+        }
+
+        img {
+            vertical-align: middle;
+            width: 50px;
+        }
     }
 
     #timer {

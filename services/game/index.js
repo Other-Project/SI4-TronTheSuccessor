@@ -12,9 +12,6 @@ let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
     try {
         switch (filePath[3]) {
-            case "elo":
-                if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
-                break;
             case "stats":
                 if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
                 break;

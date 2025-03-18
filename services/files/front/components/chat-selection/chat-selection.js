@@ -16,8 +16,8 @@ export class ChatSelection extends HTMLComponent {
         this.#updateFriendListPanel();
     };
 
-    openChatRoom(roomId, roomName) {
-        this.dispatchEvent(new CustomEvent("room-selected", {detail: {id: roomId, name: roomName}}));
+    openChatRoom(roomId, roomName, pending) {
+        this.dispatchEvent(new CustomEvent("room-selected", {detail: {id: roomId, name: roomName, pending: pending}}));
     }
 
     #updateFriendListPanel() {
@@ -27,21 +27,22 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("icon", friend.icon ?? "/assets/profil.svg");
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
-            friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name));
+            friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending));
             this.friendListPanel.appendChild(friendButton);
         }
     }
 
     async #getFriendList() {
-        let friends = await fetchApi(
-            "/api/user/friends",
+        let chatRooms = await fetchApi(
+            `/api/chat`,
             {method: "GET"}
         ).then(response => response.json());
-        return friends.map(friend => ({
-            id: friend,
-            name: friend,
-            preview: "Hello there!",
-            icon: null
+        return chatRooms.map(friend => ({
+            id: friend.username,
+            name: friend.username,
+            preview: friend.last,
+            icon: null,
+            pending: friend.pending
         }));
     }
 }

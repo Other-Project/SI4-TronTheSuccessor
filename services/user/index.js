@@ -1,7 +1,12 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
 const {getRequestBody, sendResponse} = require("./js/utils.js");
-const {handleGetFriends, handleModifyFriendList, handleGetUser} = require("./js/social.js");
+const {
+    handleGetFriends,
+    handleModifyFriendList,
+    handleGetUser,
+    handleAddToPendingFriendRequests
+} = require("./js/social.js");
 const {HTTP_STATUS} = require("./js/utils.js");
 
 http.createServer(async (request, response) => {
@@ -25,6 +30,8 @@ http.createServer(async (request, response) => {
             case "friends":
                 if (request.method === "GET")
                     await handleGetFriends(request, response);
+                if (filePath[4] === "send" && request.method === "POST")
+                    await handleAddToPendingFriendRequests(request, response);
                 else if (filePath[4] === "add" && request.method === "POST")
                     await handleModifyFriendList(request, response, true);
                 else if (filePath[4] === "delete" && request.method === "POST")

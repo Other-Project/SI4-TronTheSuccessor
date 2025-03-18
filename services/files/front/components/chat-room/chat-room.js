@@ -5,7 +5,7 @@ export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
 
     static get observedAttributes() {
-        return ["room"];
+        return ["room", "pending"];
     }
 
     constructor() {
@@ -16,7 +16,13 @@ export class ChatRoom extends HTMLComponent {
         this.messagePanel = this.shadowRoot.getElementById("messages");
         this.messageInput = this.shadowRoot.getElementById("message-input");
         this.sendButton = this.shadowRoot.getElementById("send");
+        this.notification = this.shadowRoot.getElementById("notification");
+        this.notificationMessage = this.shadowRoot.getElementById("notification-message");
+        this.acceptRequestButton = this.shadowRoot.getElementById("accept-request");
+        this.refuseRequestButton = this.shadowRoot.getElementById("refuse-request");
         this.sendButton.onclick = () => this.sendMessage();
+        this.acceptRequestButton.onclick = () => this.acceptRequest();
+        this.refuseRequestButton.onclick = () => this.refuseRequest();
     };
 
     onVisible = () => {
@@ -36,7 +42,19 @@ export class ChatRoom extends HTMLComponent {
     #refresh() {
         if (!this.messagePanel) return;
         this.getMessages().then(messages => this.#displayMessages(messages));
-        this.#openWebSocket().then();
+        this.messageInput.disabled = this.sendButton.disabled = this.pending;
+        if (this.pending) {
+            this.messageInput.title = this.sendButton.title = "You need to be friends to send messages";
+            this.notificationMessage.textContent = this.pending === getUserInfo()?.username
+                ? `Your friend request has not been accepted yet,  You can't send messages until they accept it.`
+                : `${this.pending} has sent you a friend request. You can't send messages until you accept it.`;
+            this.notification.classList.add("active");
+            this.pending === getUserInfo()?.username ? this.acceptRequestButton.classList.remove("active") : this.acceptRequestButton.classList.add("active");
+            this.pending === getUserInfo()?.username ? this.refuseRequestButton.classList.remove("active") : this.refuseRequestButton.classList.add("active");
+        } else {
+            this.notification.classList.remove("active");
+            this.#openWebSocket().then();
+        }
     }
 
     #displayMessages(messages) {
@@ -87,5 +105,15 @@ export class ChatRoom extends HTMLComponent {
         const ok = await new Promise(resolve => this.socket.timeout(5000).emit("message", message, (err, ack) => resolve(!err && ack)));
         if (ok) this.messageInput.value = "";
         else alert("Failed to send message");
+    }
+
+    async acceptRequest() {
+        // Implement the logic to accept the friend request
+        alert("Friend request accepted");
+    }
+
+    async refuseRequest() {
+        // Implement the logic to refuse the friend request
+        alert("Friend request refused");
     }
 }

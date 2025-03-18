@@ -21,13 +21,19 @@ export class ProfileOverview extends HTMLComponent {
     }
 
     async #sendFriendRequest(friend) {
-        await fetchApi(`/api/user/friends/add`, {
+        const response = await fetchApi(`/api/user/friends/send`, {
             method: "POST",
             body: JSON.stringify({
                 friends: friend,
             })
         });
-        this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
+
+        if (response.ok)
+            this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
+        else {
+            const error = await response.json();
+            this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
+        }
     }
 
     onSetupCompleted = async () => {

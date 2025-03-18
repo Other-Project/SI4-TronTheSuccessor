@@ -6,17 +6,19 @@ const chatCollection = database.collection("chat");
 
 /**
  * Gets the chat messages
- * @param {string} roomId The id of the chat room
+ * @param {string | string[] } roomId The id of the chat room
  * @param {string} from The timestamp from which to get the messages (optional)
  * @param {number} limit The number of messages to get (optional)
+ * @param {number} order The order of the messages (optional)
  * @returns {Promise<{date: Date, author: string, type: string, content: string}[]>}
  */
-exports.getChat = async function (roomId, from = undefined, limit = 25) {
-    let query = {roomId};
+exports.getChat = async function (roomId, from = undefined, limit = 25, order = 1) {
+    let query;
+    if (Array.isArray(roomId)) query = {roomId: roomId.sort()};
+    else query = {roomId};
     if (from) query.timestamp = {$gt: from};
-    const result = await chatCollection.find(query).sort({timestamp: 1}).limit(limit).toArray();
+    const result = await chatCollection.find(query).sort({timestamp: order}).limit(limit).toArray();
     console.debug(result);
-    // noinspection JSValidateTypes
     return result;
 };
 
@@ -45,13 +47,48 @@ exports.verifyMessage = function (message) {
 };
 
 /**
+ * Gets all the users with whom the user has a chat
+ * @param username The username of the user
+ * @returns {Promise<string[]>} The list of usernames
+ */
+exports.getAllRoom = async function (username) {
+    const friendsRoom = await chatCollection.aggregate([
+        {
+            $match: {
+                roomId: {$in: [username]},
+                $expr: {$eq: [{$size: "$roomId"}, 2]}
+            }
+        },
+        {$unwind: "$roomId"},
+        {
+            $match: {
+                roomId: {$ne: username}
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                users: {$addToSet: "$roomId"}
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                users: 1
+            }
+        }
+    ]).toArray();
+    console.debug(friendsRoom);
+    return friendsRoom.length > 0 ? friendsRoom[0].users : [];
+};
+
+/**
  * Gets the room id
  * @param username The username of the user
  * @param room The asked room
- * @return {string} The room id
+ * @return {string | string[]} The room id
  */
 exports.getRoomId = function (username, room) {
     if (room === "global") return room;
-    // TODO: fetch user's friends and check if the "room" is one of them
-    return [username, room].sort().join("-");
+    return [username, room].sort();
 };

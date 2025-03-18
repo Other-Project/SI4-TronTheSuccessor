@@ -45,6 +45,7 @@ services:
       - mongodb
     environment:
       GAME_SERVICE_URL: "http://game:8003"
+      CHAT_SERVICE_URL: "http://chat:8006"
   chat:
     image: tron-the-successor/chat
     build:
@@ -52,6 +53,8 @@ services:
     restart: unless-stopped
     depends_on:
       - mongodb
+    environment:
+      USER_SERVICE_URL: "http://user:8004"
 
 volumes:
   mongo-data:

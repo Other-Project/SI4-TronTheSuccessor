@@ -49,18 +49,44 @@ exports.getUser = async function (username) {
 };
 
 /**
- * Add a friend to a user
- * @param {string} playerId The id of the player
- * @param {string} otherId The id of the friend to add
- * @returns {Promise<void>}
+ * Add a friend to a player
+ * @param playerId The id of the player
+ * @param otherId The id of the friend to add
+ * @returns {Promise<null|void>} If the friend could not be added
  */
 exports.addFriend = async function (playerId, otherId) {
+    const user = await userCollection.findOne({username: playerId, pendingFriendRequests: otherId});
+    if (!user) return null;
     await userCollection.updateOne(
         {username: playerId},
-        {$addToSet: {friends: otherId}},
+        {
+            $addToSet: {friends: otherId},
+            $pull: {pendingFriendRequests: otherId}
+        },
         {upsert: true}
     );
-}
+};
+
+/**
+ * Add a friend to a player's pending friend requests
+ * @param username The username of the player
+ * @param friend The username of the friend
+ * @returns {Promise<string|void>} Returns the user if the friend request already exists
+ */
+exports.addToPendingFriendRequests = async function (username, friend) {
+    const user = await userCollection.findOne({
+        $or: [
+            {username: username, pendingFriendRequests: friend},
+            {username: friend, pendingFriendRequests: username}
+        ]
+    });
+    if (user) return user.username;
+    await userCollection.updateOne(
+        {username: username},
+        {$addToSet: {pendingFriendRequests: friend}},
+        {upsert: true}
+    );
+};
 
 /**
  * Get the friends of a player

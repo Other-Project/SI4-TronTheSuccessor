@@ -5,6 +5,87 @@
     height: 100%;
 }
 
+.friend-request-notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f5f5f5;
+    border-left: 4px solid #0078d7;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    max-width: 100%;
+}
+
+.friend-request-notification:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+#notification-message {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    color: #323130;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+#notification-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: 16px;
+}
+
+.action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background-color: transparent;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    font-size: 14px;
+}
+
+.action-button:hover {
+    background-color: #f0f0f0;
+    border-color: #d0d0d0;
+}
+
+#accept-request {
+    color: #107c10;
+    border-color: #107c10;
+}
+
+#accept-request:hover {
+    background-color: rgba(16, 124, 16, 0.1);
+}
+
+#accept-request:active {
+    background-color: rgba(16, 124, 16, 0.2);
+    transform: scale(0.98);
+}
+
+#refuse-request {
+    color: #d83b01;
+    border-color: #d83b01;
+}
+
+#refuse-request:hover {
+    background-color: rgba(216, 59, 1, 0.1);
+}
+
+#refuse-request:active {
+    background-color: rgba(216, 59, 1, 0.2);
+    transform: scale(0.98);
+}
+
 #messages-wrap {
     flex: 1;
     overflow-y: auto;

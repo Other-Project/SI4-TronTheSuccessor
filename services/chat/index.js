@@ -2,6 +2,7 @@ const http = require("http");
 const {Server} = require("socket.io");
 const chatDatabase = require("./js/chatDatabase.js");
 const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
+const {getFriendsList} = require("./helper/userHelper.js");
 const {getRoomId} = require("./js/chatDatabase.js");
 
 
@@ -25,7 +26,24 @@ const server = http.createServer(async (request, response) => {
             io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
             return sendResponse(response, HTTP_STATUS.CREATED);
         }
-    } else return sendResponse(response, HTTP_STATUS.NOT_FOUND);
+    } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
+        if (request.method === "GET") {
+            const messages = await chatDatabase.getAllRoom(user.username);
+            const friends = await getFriendsList(request.headers.authorization?.split(" ")[1]) ?? [];
+            const chatBox = await Promise.all(messages.map(async username => {
+                const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, 1);
+                const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
+                return {
+                    username: username,
+                    pending: !friends.includes(username) ? lastMessage?.author : null,
+                    last: lastMessage.content
+                };
+            }));
+            return sendResponse(response, HTTP_STATUS.OK, chatBox);
+        }
+    } else {
+        return sendResponse(response, HTTP_STATUS.NOT_FOUND);
+    }
 }).listen(8006);
 
 
@@ -52,6 +70,14 @@ io.on("connection", (socket) => {
 
         if (!chatDatabase.verifyMessage(message)) {
             console.error("Invalid message");
+            callback?.(false);
+            return;
+        }
+
+        const friendUsername = roomId[0] === user.username ? roomId[1] : roomId[0];
+        const friends = await getFriendsList(user.username) ?? [];
+        if (!friends.includes(friendUsername)) {
+            console.error("Cannot send message to pending friend");
             callback?.(false);
             return;
         }

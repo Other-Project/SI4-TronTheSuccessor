@@ -1,8 +1,8 @@
 import {HTMLComponent} from "/js/component.js";
 
-export class ProfilPage extends HTMLComponent {
+export class ProfilePage extends HTMLComponent {
     constructor() {
-        super("/components/profil-page/app-profil-page", "profil-page.html");
+        super("/components/profile-page/app-profile-page", "profile-page.html");
     }
 
     onSetupCompleted = () => {

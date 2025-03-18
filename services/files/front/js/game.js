@@ -1,4 +1,6 @@
-import { Player } from "/js/player.js";
+import {Player} from "/js/player.js";
+
+export const emotes = await fetch("/api/game/emotes").then(res => res.json()).then(data => data.emotes);
 
 export class Game extends EventTarget {
     gridSize;

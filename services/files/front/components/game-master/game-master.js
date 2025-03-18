@@ -1,4 +1,4 @@
-import {Game} from "/js/game.js";
+import {emotes, Game} from "/js/game.js";
 import {HumanPlayer} from "/js/human-player.js";
 import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
@@ -44,6 +44,16 @@ export class GameMaster extends HTMLComponent {
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => {
             document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
+        });
+
+        this.emoteDisplay = this.shadowRoot.getElementById("emote-display");
+        document.addEventListener("keypress", e => {
+            if (!this.socket) return;
+            let emote = /^Digit(\d)$/.exec(e.code)?.[1];
+            if (!emote) return;
+            e.preventDefault();
+            if (emote === "0") emote = "10";
+            if (emotes[emote - 1]) this.socket.emit("emote", {emote: emotes[emote - 1]});
         });
     };
 
@@ -143,6 +153,10 @@ export class GameMaster extends HTMLComponent {
         this.socket.on("game-end", (msg) => {
             this.endScreen(msg);
             this.socket.disconnect();
+        });
+
+        this.socket.on("emote", (msg) => {
+            this.emoteDisplay.innerText = `${msg.player} sent an emote ${msg.emote}`;
         });
 
         document.addEventListener("player-direction", (event) => {

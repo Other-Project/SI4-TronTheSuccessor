@@ -43,8 +43,7 @@ export class HTMLComponent extends HTMLElement {
                 const sheet = new CSSStyleSheet();
                 sheet.replaceSync(await fetch(`${this.path}/${this.componentName}.css`).then(response => response.text()));
                 this.shadowRoot.adoptedStyleSheets.push(sheet);
-            } else this.innerHTML += `<link rel="stylesheet" href="${this.path}/${this.componentName}.css">`; // Fallback for older browsers
-
+            } else this.shadowRoot.innerHTML += `<link rel="stylesheet" href="${this.path}/${this.componentName}.css">`; // Fallback for older browsers
         }
 
         this.#setupCompleted = true;

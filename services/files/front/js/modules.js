@@ -23,6 +23,7 @@ import {ChatRoomButton} from "/components/chat-room-button/chat-room-button.js";
 import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
 import {GameResult} from "/components/game-result/game-result.js";
+import {ProfileHistory} from "/components/profile-history/profile-history.js";
 
 customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-choice", GameChoice);
@@ -49,3 +50,4 @@ customElements.define("app-chat-room-button", ChatRoomButton);
 customElements.define("app-chat-room", ChatRoom);
 customElements.define("app-chat-room-message", ChatRoomMessage);
 customElements.define("app-game-result", GameResult);
+customElements.define("app-profile-history", ProfileHistory);

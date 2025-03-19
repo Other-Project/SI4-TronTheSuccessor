@@ -14,10 +14,11 @@
     background: #191919;
 }
 
-#main {
+.game-results-container {
     grid-row: 2;
     display: flex;
     justify-content: center;
+    flex-direction: column;
     align-items: center;
 }
 

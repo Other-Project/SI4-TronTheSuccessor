@@ -14,7 +14,8 @@ exports.addGame = async function (playerName, playerNum, opponentName, gameActio
         opponentId: opponentName,
         result: gameActions,
         winner: winner,
-        timeElapsed: timeElapsed
+        timeElapsed: timeElapsed,
+        date: new Date()
     });
 };
 

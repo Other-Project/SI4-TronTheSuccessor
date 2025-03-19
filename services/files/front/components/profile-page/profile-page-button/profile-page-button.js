@@ -2,6 +2,6 @@ import {HTMLComponent} from "/js/component.js";
 
 export class ProfilePageButton extends HTMLComponent {
     constructor() {
-        super("/components/profile-page/profile-page-button", "profile-page-button.html");
+        super("profile-page-button", ["html"], "/components/profile-page/profile-page-button");
     }
 }

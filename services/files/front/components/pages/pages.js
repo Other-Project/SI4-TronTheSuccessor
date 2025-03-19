@@ -2,7 +2,7 @@ import {HTMLComponent} from "/js/component.js";
 
 export class Pages extends HTMLComponent {
     constructor() {
-        super("/components/pages", "pages.html");
+        super("pages", ["html"]);
         document.addEventListener("menu-selection", (event) => {
             if (event.detail && typeof event.detail === "object") this.#showElement(event.detail.name, event.detail.attr);
             else this.#showElement(event.detail);

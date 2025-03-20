@@ -9,10 +9,10 @@ const historyCollection = database.collection("history");
  */
 exports.addGame = async function (playerName, playerNum, opponentName, gameActions, winner, timeElapsed) {
     await historyCollection.insertOne({
-        playerId: playerName,
+        playerName: playerName,
         playerNum: playerNum,
-        opponentId: opponentName,
-        result: gameActions,
+        opponentName: opponentName,
+        gameActions: gameActions,
         winner: winner,
         timeElapsed: timeElapsed,
         date: new Date()
@@ -23,5 +23,5 @@ exports.addGame = async function (playerName, playerNum, opponentName, gameActio
  * Get the player's history.
  */
 exports.getHistory = async function (playerName) {
-    return await historyCollection.find({playerId: playerName}).toArray();
+    return await historyCollection.find({playerName: playerName}).toArray();
 };

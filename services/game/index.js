@@ -6,7 +6,7 @@ const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require("crypto");
 const {updateElos, handleAddElo, handleGetElo} = require("./js/elo.js");
-const {updateHistories, handleGetHistory} = require("./js/history.js");
+const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
 
 let server = http.createServer(async (request, response) => {
@@ -84,8 +84,13 @@ async function startGame(p1s, p2s = null) {
         io.to(id).emit("game-turn", event.detail);
         if (event.detail.ended) {
             io.in(id).disconnectSockets();
-            if (p2s) updateElos(game.players, event.detail);
-            updateHistories(game.players, game.gameActions, event.detail.winner, event.detail.elapsed);
+            game.gameActions.push(event.detail.playerStates);
+            if (p2s) {
+                updateElos(game.players, event.detail);
+                game.players.forEach((player, index) => updateHistory(player.name, index + 1, game.players[game.players.length - 1 - index].name, game.gameActions, event.detail.winner, event.detail.elapsed));
+            } else {
+                updateHistory(p1s.username, 1, "flowbird", game.gameActions, event.detail.winner, event.detail.elapsed);
+            }
         }
     });
     game.init();

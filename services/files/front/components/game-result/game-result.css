@@ -8,6 +8,10 @@
     box-sizing: border-box;
     transition: transform 0.2s ease;
     align-items: center;
+
+    :hover {
+        cursor: pointer;
+    }
 }
 
 .game-result:hover {
@@ -64,4 +68,12 @@ p {
     font-size: 16px;
     color: #aaa;
     text-align: right;
+}
+
+.show {
+    display: block;
+}
+
+app-game-board {
+    display: none;
 }

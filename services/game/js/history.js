@@ -9,7 +9,7 @@ const {getUser, sendResponse, HTTP_STATUS} = require("./utils.js");
  * @returns {Promise<void>}
  */
 exports.handleGetHistory = async function (request, response, username) {
-    let user = await getUser(request);
+    let user = getUser(request);
     if (!user || user.username !== username) {
         await sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
         return;
@@ -23,15 +23,15 @@ exports.handleGetHistory = async function (request, response, username) {
 };
 
 /**
- * Update the histories of the players
- * @param players Array of players
- * @param gameActions Array of the actions the players made
+ * Update the history of a player
+ * @param playerName The player's name
+ * @param playerNum The player's number
+ * @param opponentName The name of the opponent
+ * @param gameActions The actions of both players during the game
  * @param winner The winner of the game
- * @param timeElapsed The time it took to finish the game
+ * @param timeElapsed The game's duration
  * @returns {Promise<void>}
  */
-exports.updateHistories = async function (players, gameActions, winner, timeElapsed) {
-    for (let i = 0; i < players.length; i++) {
-        await historyDatabase.addGame(players[i].name, i + 1, players[1 - i].name, gameActions, winner ? winner === players[i].name : undefined, timeElapsed);
-    }
+exports.updateHistory = async function (playerName, playerNum, opponentName, gameActions, winner, timeElapsed) {
+    await historyDatabase.addGame(playerName, playerNum, opponentName, gameActions, winner, timeElapsed);
 };

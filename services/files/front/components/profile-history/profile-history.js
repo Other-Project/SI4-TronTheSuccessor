@@ -17,10 +17,8 @@ export class ProfileHistory extends HTMLComponent {
             const response = await fetchApi("/api/game/history/" + user.username, null);
             const data = await response.json();
             const gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
-
             gameResultsContainer.innerHTML = "";
-
-            for (const game of data) {
+            for (const game of data.toReversed()) {
                 const gameResult = document.createElement("app-game-result");
                 gameResult.gameData = game;
                 gameResultsContainer.appendChild(gameResult);

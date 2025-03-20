@@ -95,11 +95,11 @@ exports.Game = class Game extends EventTarget {
     }
 
     #gameTurn() {
+        this.gameActions.push(this.getPlayerStates());
         this.players.forEach((player) => {
             if (player.dead) return;
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
-            this.gameActions.push(player.direction);
         });
         this.players.forEach((player) => this.#updateGrid(player));
         let winner = this.#isGameEnded();

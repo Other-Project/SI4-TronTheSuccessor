@@ -73,7 +73,7 @@ export class GameBoard extends HTMLComponent {
                 -this.playerSize / 2,
                 this.playerSize,
                 this.playerSize);
-        }
+        };
         playerImg.src = player.avatar ?? "";
     }
 }

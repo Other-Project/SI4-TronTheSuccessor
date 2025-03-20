@@ -1,4 +1,4 @@
-import { Player } from "/js/player.js";
+import {Player} from "/js/player.js";
 
 export class Game extends EventTarget {
     gridSize;
@@ -37,7 +37,7 @@ export class Game extends EventTarget {
         ];
 
         this.players.forEach((player, i) => player.init(i + 1, playerStates, this));
-        this.players.forEach(player => this.#updateGrid(player));
+        this.players.forEach(player => this.updateGrid(player));
     }
 
     start() {
@@ -74,7 +74,7 @@ export class Game extends EventTarget {
         };
     }
 
-    #updateGrid(player) {
+    updateGrid(player) {
         if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) player.dead = true;
         else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) player.dead = true;
         else this.grid[player.pos[1]][player.pos[0]] = player.number;
@@ -86,9 +86,9 @@ export class Game extends EventTarget {
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
         });
-        this.players.forEach((player) => this.#updateGrid(player));
+        this.players.forEach((player) => this.updateGrid(player));
         let winner = this.#isGameEnded();
-        this.dispatchEvent(new CustomEvent("game-turn", { detail: this.#getInfo(winner) }));
+        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
         if (winner) this.stop();
     }
 

@@ -8,8 +8,7 @@
 async function makeHttpRequest(method, path, data = null) {
     let url = new URL(process.env.USER_SERVICE_URL || 'http://localhost:8003');
     url += path;
-    const response = await fetch(
-        url,
+    const response = await fetch(url,
         {
             method: method,
             headers: {

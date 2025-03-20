@@ -5,7 +5,8 @@ const {
     handleGetFriends,
     handleModifyFriendList,
     handleGetUser,
-    handleAddToPendingFriendRequests
+    handleAddToPendingFriendRequests,
+    handleRefuseFriendRequest,
 } = require("./js/social.js");
 const {HTTP_STATUS} = require("./js/utils.js");
 
@@ -32,7 +33,9 @@ http.createServer(async (request, response) => {
                     await handleGetFriends(request, response);
                 if (filePath[4] === "send" && request.method === "POST")
                     await handleAddToPendingFriendRequests(request, response);
-                else if (filePath[4] === "add" && request.method === "POST")
+                else if (filePath[4] === "refuse" && request.method === "POST")
+                    await handleRefuseFriendRequest(request, response);
+                else if (filePath[4] === "accept" && request.method === "POST")
                     await handleModifyFriendList(request, response, true);
                 else if (filePath[4] === "delete" && request.method === "POST")
                     await handleModifyFriendList(request, response, false);

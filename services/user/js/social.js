@@ -45,25 +45,13 @@ exports.handleAddToPendingFriendRequests = async function (request, response) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const user = getUser(request);
-    if (!user) {
-        sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
-        return;
-    }
-    const friends = await userDatabase.getUser(parsedBody.friends);
-    if (!friends) {
-        sendResponse(response, HTTP_STATUS.NOT_FOUND);
-        return;
-    }
-    if (user.username === parsedBody.friends) {
-        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "You cannot add yourself as a friend"});
-        return;
-    }
+    if (!await checkValidity(response, user, parsedBody.friends)) return;
     const pending = await userDatabase.addToPendingFriendRequests(user.username, parsedBody.friends);
     if (pending) {
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Friend requests already sent"});
         return;
     }
-    const result = await sendFriendRequest(user.username, parsedBody.friends, request.headers.authorization?.split(" ")[1]);
+    const result = await sendFriendRequest(user.username, parsedBody.friends, request.headers);
     sendResponse(response, HTTP_STATUS.OK, result);
 };
 
@@ -78,21 +66,51 @@ exports.handleModifyFriendList = async function (request, response, add) {
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
     const user = getUser(request);
-    if (!user) {
-        sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
-        return;
-    }
-    const friends = await userDatabase.getUser(parsedBody.friends);
-    if (!friends) {
-        sendResponse(response, HTTP_STATUS.NOT_FOUND);
-        return;
-    }
-    if (user.username === parsedBody.friends) {
-        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "You cannot add or remove yourself as a friend"});
-        return;
-    }
+    if (!await checkValidity(response, user, parsedBody.friends)) return;
     const result = add
         ? await userDatabase.addFriend(user.username, parsedBody.friends)
         : await userDatabase.removeFriend(user.username, parsedBody.friends);
+    if (!result) {
+        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request"});
+        return;
+    }
     sendResponse(response, HTTP_STATUS.OK, result);
+}
+/**
+ * Handles refusing a friend request
+ * @param request The request
+ * @param response The response
+ * @returns {Promise<void>}
+ */
+exports.handleRefuseFriendRequest = async function (request, response) {
+    const body = await getRequestBody(request);
+    const parsedBody = JSON.parse(body);
+    const user = getUser(request);
+    if (!await checkValidity(response, user, parsedBody.friends)) return;
+    const result = await userDatabase.removePendingFriendRequests(user.username, parsedBody.friends);
+    sendResponse(response, HTTP_STATUS.OK, result);
+};
+
+/**
+ * Checks if the request is valid for adding or removing friends
+ * @param response The response
+ * @param user The user
+ * @param friend The friend
+ * @returns {Promise<boolean>} Whether the request is valid
+ */
+async function checkValidity(response, user, friend) {
+    if (!user) {
+        sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
+        return false;
+    }
+    const friends = await userDatabase.getUser(friend);
+    if (!friends) {
+        sendResponse(response, HTTP_STATUS.NOT_FOUND);
+        return false;
+    }
+    if (user.username === friend) {
+        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "You cannot add or remove yourself as a friend"});
+        return false;
+    }
+    return true;
 }

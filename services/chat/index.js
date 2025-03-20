@@ -29,13 +29,13 @@ const server = http.createServer(async (request, response) => {
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
         if (request.method === "GET") {
             const messages = await chatDatabase.getAllRoom(user.username);
-            const friends = await getFriendsList(request.headers.authorization?.split(" ")[1]) ?? [];
+            const friends = await getFriendsList(request.headers) ?? [];
             const chatBox = await Promise.all(messages.map(async username => {
                 const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, 1);
                 const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
                 return {
                     username: username,
-                    pending: !friends.includes(username) ? lastMessage?.author : null,
+                    pending: !friends.includes(username) && username !== "global" ? lastMessage?.author : null,
                     last: lastMessage.content
                 };
             }));

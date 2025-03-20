@@ -16,13 +16,14 @@ export class ChatRoom extends HTMLComponent {
         this.messagePanel = this.shadowRoot.getElementById("messages");
         this.messageInput = this.shadowRoot.getElementById("message-input");
         this.sendButton = this.shadowRoot.getElementById("send");
-        this.notification = this.shadowRoot.getElementById("notification");
+        this.notificationBanner = this.shadowRoot.getElementById("notification-banner");
         this.notificationMessage = this.shadowRoot.getElementById("notification-message");
         this.acceptRequestButton = this.shadowRoot.getElementById("accept-request");
         this.refuseRequestButton = this.shadowRoot.getElementById("refuse-request");
+        this.notificationActionButton = this.shadowRoot.getElementById("notification-actions");
         this.sendButton.onclick = () => this.sendMessage();
-        this.acceptRequestButton.onclick = () => this.acceptRequest();
-        this.refuseRequestButton.onclick = () => this.refuseRequest();
+        this.acceptRequestButton.onclick = () => this.handleFriendRequest("accept");
+        this.refuseRequestButton.onclick = () => this.handleFriendRequest("refuse");
     };
 
     onVisible = () => {
@@ -45,16 +46,13 @@ export class ChatRoom extends HTMLComponent {
         this.messageInput.disabled = this.sendButton.disabled = this.pending;
         if (this.pending) {
             this.messageInput.title = this.sendButton.title = "You need to be friends to send messages";
-            this.notificationMessage.textContent = this.pending === getUserInfo()?.username
-                ? `Your friend request has not been accepted yet,  You can't send messages until they accept it.`
-                : `${this.pending} has sent you a friend request. You can't send messages until you accept it.`;
-            this.notification.classList.add("active");
-            this.pending === getUserInfo()?.username ? this.acceptRequestButton.classList.remove("active") : this.acceptRequestButton.classList.add("active");
-            this.pending === getUserInfo()?.username ? this.refuseRequestButton.classList.remove("active") : this.refuseRequestButton.classList.add("active");
-        } else {
-            this.notification.classList.remove("active");
-            this.#openWebSocket().then();
-        }
+            this.notificationBanner.classList.remove("hidden");
+            if (this.pending === getUserInfo()?.username) this.notificationMessage.textContent = `Your friend request has not been accepted yet,  You can't send messages until they accept it.`;
+            else {
+                this.notificationMessage.textContent = `${this.pending} has sent you a friend request. You can't send messages until you accept it.`;
+                this.notificationActionButton.classList.remove("hidden");
+            }
+        } else this.#openWebSocket().then();
     }
 
     #displayMessages(messages) {
@@ -107,13 +105,30 @@ export class ChatRoom extends HTMLComponent {
         else alert("Failed to send message");
     }
 
-    async acceptRequest() {
-        // Implement the logic to accept the friend request
-        alert("Friend request accepted");
+    #showNotification(message, duration, background, color) {
+        const notification = document.createElement("app-notification");
+        notification.message = message;
+        notification.duration = duration;
+        notification.background = background;
+        notification.color = color;
+        this.shadowRoot.appendChild(notification);
+        notification.show();
     }
 
-    async refuseRequest() {
-        // Implement the logic to refuse the friend request
-        alert("Friend request refused");
+    async handleFriendRequest(action) {
+        this.notificationBanner.classList.add("hidden");
+        const endpoint = `/api/user/friends/${action}`;
+        const response = await fetchApi(endpoint, {
+            method: "POST",
+            body: JSON.stringify({
+                friends: this.pending,
+            })
+        });
+        if (response.ok)
+            this.#showNotification(`Friend request ${action}ed!`, 2000, "#8E24AA", "white");
+        else {
+            const error = await response.json();
+            this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
+        }
     }
 }

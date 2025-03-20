@@ -55,13 +55,20 @@ exports.getUser = async function (username) {
  * @returns {Promise<null|void>} If the friend could not be added
  */
 exports.addFriend = async function (playerId, otherId) {
-    const user = await userCollection.findOne({username: playerId, pendingFriendRequests: otherId});
+    const user = await userCollection.findOne({username: otherId, pendingFriendRequests: {$in: [playerId]}});
     if (!user) return null;
     await userCollection.updateOne(
         {username: playerId},
         {
             $addToSet: {friends: otherId},
-            $pull: {pendingFriendRequests: otherId}
+        },
+        {upsert: true}
+    );
+    await userCollection.updateOne(
+        {username: otherId},
+        {
+            $addToSet: {friends: playerId},
+            $pull: {pendingFriendRequests: playerId}
         },
         {upsert: true}
     );
@@ -124,6 +131,16 @@ exports.renewToken = async function (refreshToken) {
 
     return getJwt(user);
 }
+
+exports.removePendingFriendRequests = async function (username, friends) {
+    const user = await userCollection.findOne({username: username, pendingFriendRequests: friends});
+    if (!user) return null;
+    await userCollection.updateOne(
+        {username: username},
+        {$pull: {pendingFriendRequests: friends}}
+    );
+    return friends;
+};
 
 function getJwt(user) {
     const userInfo = {username: user.username};

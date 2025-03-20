@@ -45,7 +45,7 @@ export class TabNavigation extends HTMLComponent {
 
     #refresh() {
         if (!this.tabsContainer) return;
-        this.tabsContainer.classList.toggle("readonly", this.readonly);
+        this.tabsContainer.classList.toggle("readonly", this.readonly === "true");
     }
 
     #getTabs() {
@@ -74,8 +74,7 @@ export class TabNavigation extends HTMLComponent {
      * @param {boolean} navigateTo If true, navigate to the new tab
      */
     newTab(navigateTo = true) {
-        if (this.readonly) return;
-
+        if (this.readonly === "true") return;
         const tabPanel = this.panelTemplate.assignedElements()?.[0]?.cloneNode(true);
         if (!tabPanel) return;
         tabPanel.id = "tab-" + (this.tabIdCounter++).toString();

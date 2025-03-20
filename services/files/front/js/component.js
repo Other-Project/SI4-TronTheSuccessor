@@ -36,8 +36,6 @@ export class HTMLComponent extends HTMLElement {
     async #setup() {
         if (this.#setupCompleted) return;
 
-        if (this.fileDependencies.includes("html"))
-            this.shadowRoot.innerHTML = await fetch(`${this.path}/${this.componentName}.html`).then(response => response.text());
         if (this.fileDependencies.includes("css")) {
             if ("adoptedStyleSheets" in this.shadowRoot) {
                 const sheet = new CSSStyleSheet();
@@ -45,8 +43,11 @@ export class HTMLComponent extends HTMLElement {
                 this.shadowRoot.adoptedStyleSheets.push(sheet);
             } else this.shadowRoot.innerHTML += `<link rel="stylesheet" href="${this.path}/${this.componentName}.css">`; // Fallback for older browsers
         }
+        if (this.fileDependencies.includes("html"))
+            this.shadowRoot.innerHTML += await fetch(`${this.path}/${this.componentName}.html`).then(response => response.text());
 
         this.#setupCompleted = true;
+        await new Promise(res => setTimeout(res, 10)); // Workaround for letting the component initialize
         this.#callEvent(this.onSetupCompleted);
     }
 

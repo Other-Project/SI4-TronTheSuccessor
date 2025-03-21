@@ -46,12 +46,11 @@ exports.handleAddToPendingFriendRequests = async function (request, response) {
     const parsedBody = JSON.parse(body);
     const user = getUser(request);
     if (!await checkValidity(response, user, parsedBody.friends)) return;
-    const pending = await userDatabase.addToPendingFriendRequests(user.username, parsedBody.friends);
-    if (pending) {
+    if (!await userDatabase.addToPendingFriendRequests(user.username, parsedBody.friends)) {
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Friend requests already sent"});
         return;
     }
-    const result = await sendFriendRequest(user.username, parsedBody.friends, request.headers);
+    const result = await sendFriendRequest(user.username, parsedBody.friends, request.headers.authorization);
     sendResponse(response, HTTP_STATUS.OK, result);
 };
 
@@ -71,7 +70,7 @@ exports.handleModifyFriendList = async function (request, response, add) {
         ? await userDatabase.addFriend(user.username, parsedBody.friends)
         : await userDatabase.removeFriend(user.username, parsedBody.friends);
     if (!result) {
-        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request"});
+        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request or you are already friends"});
         return;
     }
     sendResponse(response, HTTP_STATUS.OK, result);

@@ -2,16 +2,19 @@
  * Make an HTTP request.
  * @param {string} method The HTTP method (e.g., 'GET', 'POST').
  * @param {string} path The request path.
- * @param {Headers} headers The headers
+ * @param {string} authorization The authorization
  * @param {Object} [data] The request payload (for 'POST' or 'PUT' methods).
  * @returns {Promise<unknown>}
  */
-async function makeHttpRequest(method, path, headers, data = null) {
+async function makeHttpRequest(method, path, authorization, data = null) {
     let url = new URL(process.env.USER_SERVICE_URL || "http://localhost:8004");
     url += path;
     const response = await fetch(url, {
         method: method,
-        headers: headers,
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authorization
+        },
         body: data ? JSON.stringify(data) : null
     });
     if (!response.ok) {
@@ -23,6 +26,6 @@ async function makeHttpRequest(method, path, headers, data = null) {
     return JSON.parse(text);
 }
 
-exports.getFriendsList = async function (headers) {
-    return makeHttpRequest("GET", `api/friends`, headers);
+exports.getFriendsList = async function (authorization) {
+    return makeHttpRequest("GET", `api/user/friends`, authorization);
 };

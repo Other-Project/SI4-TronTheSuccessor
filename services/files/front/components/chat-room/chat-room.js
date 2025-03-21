@@ -31,7 +31,7 @@ export class ChatRoom extends HTMLComponent {
     };
 
     onHidden = () => {
-        this.socket.disconnect();
+        if (this.socket) this.socket.disconnect();
         this.socket = null;
     };
 
@@ -43,8 +43,8 @@ export class ChatRoom extends HTMLComponent {
     #refresh() {
         if (!this.messagePanel) return;
         this.getMessages().then(messages => this.#displayMessages(messages));
-        this.messageInput.disabled = this.sendButton.disabled = this.pending;
-        if (this.pending) {
+        this.messageInput.disabled = this.sendButton.disabled = this.pending !== "undefined";
+        if (this.pending !== "undefined") {
             this.messageInput.title = this.sendButton.title = "You need to be friends to send messages";
             this.notificationBanner.classList.remove("hidden");
             if (this.pending === getUserInfo()?.username) this.notificationMessage.textContent = `Your friend request has not been accepted yet,  You can't send messages until they accept it.`;
@@ -130,5 +130,10 @@ export class ChatRoom extends HTMLComponent {
             const error = await response.json();
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
+        this.dispatchEvent(new CustomEvent('friendRequestHandled', {
+            bubbles: true,
+            composed: true,
+            detail: {friend: this.pending, action: action}
+        }));
     }
 }

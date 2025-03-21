@@ -9,6 +9,7 @@ export class ChatSelection extends HTMLComponent {
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
+        document.addEventListener('friendRequestHandled', this.#refresh);
     }
 
     onVisible = async () => {
@@ -19,6 +20,14 @@ export class ChatSelection extends HTMLComponent {
     openChatRoom(roomId, roomName, pending) {
         this.dispatchEvent(new CustomEvent("room-selected", {detail: {id: roomId, name: roomName, pending: pending}}));
     }
+
+    #refresh = async (event) => {
+        const friend = event?.detail?.friend;
+        const action = event?.detail?.action;
+        this.friendList = await this.#getFriendList();
+        this.#updateFriendListPanel();
+        if (action === "accept") this.openChatRoom(friend, friend, "undefined");
+    };
 
     #updateFriendListPanel() {
         this.friendListPanel.innerHTML = "";

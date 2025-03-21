@@ -52,11 +52,11 @@ exports.getUser = async function (username) {
  * Add a friend to a player
  * @param playerId The id of the player
  * @param otherId The id of the friend to add
- * @returns {Promise<null|void>} If the friend could not be added
+ * @returns {Promise<boolean>} If the friend could be added
  */
 exports.addFriend = async function (playerId, otherId) {
     const user = await userCollection.findOne({username: otherId, pendingFriendRequests: {$in: [playerId]}});
-    if (!user) return null;
+    if (!user) return false;
     await userCollection.updateOne(
         {username: playerId},
         {
@@ -72,13 +72,14 @@ exports.addFriend = async function (playerId, otherId) {
         },
         {upsert: true}
     );
+    return true;
 };
 
 /**
  * Add a friend to a player's pending friend requests
  * @param username The username of the player
  * @param friend The username of the friend
- * @returns {Promise<string|void>} Returns the user if the friend request already exists
+ * @returns {Promise<boolean>} Returns if the friend request could be added
  */
 exports.addToPendingFriendRequests = async function (username, friend) {
     const user = await userCollection.findOne({
@@ -87,12 +88,13 @@ exports.addToPendingFriendRequests = async function (username, friend) {
             {username: friend, pendingFriendRequests: username}
         ]
     });
-    if (user) return user.username;
+    if (user) return false;
     await userCollection.updateOne(
         {username: username},
         {$addToSet: {pendingFriendRequests: friend}},
         {upsert: true}
     );
+    return true;
 };
 
 /**
@@ -109,13 +111,21 @@ exports.getFriends = async function (playerId) {
  * Remove a friend from a player
  * @param {string} playerId The id of the player
  * @param {string} otherId The id of the friend to remove
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>} If the friend could be removed
  */
 exports.removeFriend = async function (playerId, otherId) {
+    const user = await userCollection.findOne({username: playerId, friends: otherId});
+    const friend = await userCollection.findOne({username: otherId, friends: playerId});
+    if (!user || !friend) return false;
     await userCollection.updateOne(
         {username: playerId},
         {$pull: {friends: otherId}}
     );
+    await userCollection.updateOne(
+        {username: otherId},
+        {$pull: {friends: playerId}}
+    );
+    return true;
 }
 
 exports.renewToken = async function (refreshToken) {
@@ -139,6 +149,7 @@ exports.removePendingFriendRequests = async function (username, friends) {
         {username: username},
         {$pull: {pendingFriendRequests: friends}}
     );
+
     return friends;
 };
 

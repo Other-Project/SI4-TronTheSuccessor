@@ -29,13 +29,13 @@ const server = http.createServer(async (request, response) => {
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
         if (request.method === "GET") {
             const messages = await chatDatabase.getAllRoom(user.username);
-            const friends = await getFriendsList(request.headers) ?? [];
+            const friends = await getFriendsList(request.headers.authorization) ?? [];
             const chatBox = await Promise.all(messages.map(async username => {
                 const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, 1);
                 const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
                 return {
                     username: username,
-                    pending: !friends.includes(username) && username !== "global" ? lastMessage?.author : null,
+                    pending: !friends.includes(username) && username !== "global" ? lastMessage?.author : undefined,
                     last: lastMessage.content
                 };
             }));
@@ -70,14 +70,6 @@ io.on("connection", (socket) => {
 
         if (!chatDatabase.verifyMessage(message)) {
             console.error("Invalid message");
-            callback?.(false);
-            return;
-        }
-
-        const friendUsername = roomId[0] === user.username ? roomId[1] : roomId[0];
-        const friends = await getFriendsList(user.username) ?? [];
-        if (!friends.includes(friendUsername)) {
-            console.error("Cannot send message to pending friend");
             callback?.(false);
             return;
         }

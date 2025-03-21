@@ -2,17 +2,20 @@
  * Make an HTTP request.
  * @param {string} method The HTTP method (e.g., 'GET', 'POST').
  * @param {string} path The request path.
- * @param {Headers} headers The headers
+ * @param {string} authorization The authorization
  * @param {Object} [data] The request payload (for 'POST' or 'PUT' methods).
  * @returns {Promise<unknown>}
  */
-async function makeHttpRequest(method, path, headers, data = null,) {
+async function makeHttpRequest(method, path, authorization, data = null,) {
     let url = new URL(process.env.CHAT_SERVICE_URL || "http://localhost:8006");
     url += path;
     const response = await fetch(url,
         {
             method: method,
-            headers: headers,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authorization
+            },
             body: data ? JSON.stringify(data) : null,
         });
     if (!response.ok) {
@@ -24,9 +27,9 @@ async function makeHttpRequest(method, path, headers, data = null,) {
     return JSON.parse(text);
 }
 
-exports.sendFriendRequest = async function (username, friend, headers) {
+exports.sendFriendRequest = async function (username, friend, authorization) {
     const message = {
         type: "friend-request", content: "Hey, let's be friends!"
     };
-    return makeHttpRequest('POST', `api/chat/${friend}`, headers, message);
+    return makeHttpRequest('POST', `api/chat/${friend}`, authorization, message);
 };

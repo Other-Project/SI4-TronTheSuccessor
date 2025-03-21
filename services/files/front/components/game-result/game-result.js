@@ -12,6 +12,7 @@ export class GameResult extends HTMLComponent {
     #gameReplayInterval = 500;
     width = 16;
     height = 9;
+    replayIndex = 0;
 
     constructor() {
         super("game-result", ["html", "css"]);
@@ -22,15 +23,15 @@ export class GameResult extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        if (this.#gameData) {
+        if (this.#gameData)
             this.updateDisplay();
-        }
+
 
         this.gameBoard = this.shadowRoot.getElementById("board");
+        this.boardContainer = this.shadowRoot.getElementById("board-container");
         this.shadowRoot.getElementById("game-result").addEventListener("click", () => {
-            this.gameBoard.classList.toggle("show") ? this.#updateGameBoard() : clearInterval(this.replayTimer);
+            this.boardContainer.classList.toggle("show") ? this.#updateGameBoard() : clearInterval(this.replayTimer);
         });
-
         this.player1 = new Player("Test 1");
         this.player2 = new Player("Test 2");
         this.game = new Game(this.width, this.height, this.player1, this.player2, 0);
@@ -52,6 +53,7 @@ export class GameResult extends HTMLComponent {
         gameLengthValue.textContent = this.formatGameLength(this.#gameData.timeElapsed);
         dateElement.textContent = new Date(this.#gameData.date).toLocaleDateString();
         this.gameActions = this.#gameData.gameActions;
+        this.shadowRoot.getElementById("game-result-container").style.display = "grid";
     }
 
     formatGameLength(durationInMsSeconds) {
@@ -65,17 +67,10 @@ export class GameResult extends HTMLComponent {
     }
 
     #updateGameBoard() {
+        this.#clearReplay();
         this.#initializePlayers();
-        let currentTurn = 0;
-        this.#renderGameState(currentTurn);
-
-        this.replayTimer = setInterval(() => {
-            currentTurn++;
-            this.#renderGameState(currentTurn);
-            if (currentTurn >= this.gameActions.length - 1) {
-                clearInterval(this.replayTimer);
-            }
-        }, this.#gameReplayInterval);
+        this.replayIndex = 0;
+        this.#drawTillTurn(this.gameActions.length - 1);
     }
 
     #initializePlayers() {
@@ -84,6 +79,17 @@ export class GameResult extends HTMLComponent {
         const initialState = this.gameActions[0];
         this.player1.init(1, initialState);
         this.player2.init(2, initialState);
+    }
+
+    #drawTillTurn(turn) {
+        this.#renderGameState(this.replayIndex);
+        this.replayTimer = setInterval(() => {
+            this.replayIndex++;
+            this.#renderGameState(this.replayIndex);
+            if (this.replayIndex >= turn) {
+                clearInterval(this.replayTimer);
+            }
+        }, this.#gameReplayInterval);
     }
 
     #renderGameState(turnIndex) {

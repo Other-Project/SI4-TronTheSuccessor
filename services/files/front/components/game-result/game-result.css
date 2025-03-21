@@ -1,3 +1,7 @@
+#game-result-container {
+    display: none;
+}
+
 .game-result {
     display: grid;
     grid-template-columns: 250px 60px auto 130px 100px;
@@ -8,15 +12,12 @@
     box-sizing: border-box;
     transition: transform 0.2s ease;
     align-items: center;
-
-    :hover {
-        cursor: pointer;
-    }
 }
 
 .game-result:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
 }
 
 .status {
@@ -52,7 +53,6 @@ p {
 .game-length {
     display: flex;
     flex-direction: column;
-    margin-right: 30px;
 }
 
 .game-length-label {
@@ -60,20 +60,19 @@ p {
     color: #aaa;
 }
 
-.game-length-value {
-    font-size: 16px;
-}
-
 .date {
-    font-size: 16px;
     color: #aaa;
-    text-align: right;
 }
 
-.show {
-    display: block;
-}
-
-app-game-board {
+#board-container {
     display: none;
+    border-radius: 10px;
+    background-color: #1C1A1AFF;
+    padding: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+    &.show {
+        display: block;
+    }
 }

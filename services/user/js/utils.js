@@ -28,16 +28,15 @@ exports.sendResponse = function (response, statusCode, data = null) {
         response.setHeader("Content-Type", "application/json");
         response.end(JSON.stringify(data));
     } else response.end();
-}
+};
 
 /**
- * Get the user from the request
+ * Get the authorization token from the request
  * @param request The request object
- * @returns {{username: string}|null}
+ * @returns {string|null}
  */
-exports.getUser = function (request) {
+exports.getAuthorizationToken = function (request) {
     const authHeader = request.headers.authorization?.split(" ");
     if (!authHeader || authHeader.length !== 2 || authHeader[0] !== "Bearer") return null;
-    // noinspection JSValidateTypes
-    return jwt.decode(authHeader[1]);
+    return authHeader[1];
 };

@@ -39,7 +39,7 @@ if (HTTPS_CONFIG) {
         key: fs.readFileSync(HTTPS_CONFIG.key),
         cert: fs.readFileSync(HTTPS_CONFIG.cert)
     }, requestHandler).listen(8443);
-} else http.createServer(requestHandler).listen(8000);
+} else server = http.createServer(requestHandler).listen(8000);
 
 // Register the websocket connections
 const io = new Server(server, {path: "/ws"});

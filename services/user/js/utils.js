@@ -5,7 +5,8 @@ exports.HTTP_STATUS = {
     CREATED: 201,
     BAD_REQUEST: 400,
     UNAUTHORIZED: 401,
-    NOT_FOUND: 404
+    NOT_FOUND: 404,
+    INTERNAL_SERVER_ERROR: 500
 };
 
 /**
@@ -39,4 +40,10 @@ exports.getAuthorizationToken = function (request) {
     const authHeader = request.headers.authorization?.split(" ");
     if (!authHeader || authHeader.length !== 2 || authHeader[0] !== "Bearer") return null;
     return authHeader[1];
+};
+
+exports.getUser = function (request) {
+    const token = exports.getAuthorizationToken(request);
+    if (!token) return null;
+    return jwt.decode(token);
 };

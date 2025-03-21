@@ -30,17 +30,13 @@ import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
 
-customElements.define("app-game-board", GameBoard);
-customElements.define("app-game-choice", GameChoice);
-customElements.define("app-home-page", HomePage);
-customElements.define("app-profile-page", ProfilePage);
-customElements.define("app-pages", Pages);
 // General components
 customElements.define("app-button", Button);
 customElements.define("app-tab-navigation", TabNavigation);
 customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
+customElements.define('app-notification', Notification);
 
 // Home components
 customElements.define("app-home-page", HomePage);
@@ -58,7 +54,12 @@ customElements.define("app-game-emotes", GameEmotes);
 
 // Profile components
 customElements.define("app-profile-page", ProfilePage);
-customElements.define("app-profile-page-button", ProfilePageButton);
+customElements.define("app-profile-overview", ProfileOverview);
+customElements.define("app-profile-history", ProfileHistory);
+customElements.define("app-profile-leaderboard", ProfileLeaderboard);
+customElements.define("app-profile-pfp", ProfilePfp);
+customElements.define("app-profile-stats", ProfileStats);
+customElements.define("app-profile-rank", ProfileRank);
 
 // Login components
 customElements.define("app-login-container", LoginContainer);
@@ -71,12 +72,5 @@ customElements.define("app-chat-drawer", ChatDrawer);
 customElements.define("app-chat-tab", ChatTab);
 customElements.define("app-chat-selection", ChatSelection);
 customElements.define("app-chat-room-button", ChatRoomButton);
-customElements.define("app-profile-overview", ProfileOverview);
-customElements.define("app-profile-history", ProfileHistory);
-customElements.define("app-profile-leaderboard", ProfileLeaderboard);
-customElements.define("app-profile-pfp", ProfilePfp);
-customElements.define("app-profile-stats", ProfileStats);
-customElements.define("app-profile-rank", ProfileRank);
-customElements.define('app-notification', Notification);
 customElements.define("app-chat-room", ChatRoom);
 customElements.define("app-chat-room-message", ChatRoomMessage);

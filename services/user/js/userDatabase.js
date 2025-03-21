@@ -33,16 +33,8 @@ const securityQuestionsArray = ["What was the name of your favorite teacher in e
     "What is the name of the first foreign country you visited ?",
     "What was the name of your favorite childhood cartoon character ?"];
 
-async function addUser(username, password, securityQuestions) {
+exports.addUser = async function (username, password, securityQuestions) {
     const error = checkValue(username, password, securityQuestions);
-/**
- * Register a new user
- * @param username The username
- * @param password The password
- * @returns {Promise<{error: string}|{accessToken: (*), refreshToken: (*)}|{error: string}|{error: string}|{error: string}|{error: string}|{error: string}>}
- */
-exports.addUser = async function (username, password) {
-    const error = checkValue(username, password);
     if (error) return error;
     if (await userCollection.findOne({username}))
         return {error: `User ${username} already exists`};
@@ -170,7 +162,7 @@ exports.renewToken = async function (refreshToken) {
     return getJwt(user);
 }
 
-async function getSecurityQuestions(username) {
+exports.getSecurityQuestions = async function (username) {
     if (username) {
         const user = await userCollection.findOne({username});
         if (!user)
@@ -180,7 +172,7 @@ async function getSecurityQuestions(username) {
     return getSecurityQuestionsFromArray();
 }
 
-async function verifyAnswers(username, answers) {
+exports.verifyAnswers = async function (username, answers) {
     if (!username || !answers || !Array.isArray(answers) || answers.length !== 2)
         return {error: "Username or answers are missing"};
     const user = await userCollection.findOne({username});
@@ -194,7 +186,7 @@ async function verifyAnswers(username, answers) {
     return {resetPasswordToken};
 }
 
-async function resetPassword(newPassword, resetPasswordToken) {
+exports.resetPassword = async function (newPassword, resetPasswordToken) {
     if (!newPassword)
         return {error: "New password is missing"};
     if (typeof newPassword !== "string" || newPassword.length < passwordMinLength || newPassword.length > maxLength)

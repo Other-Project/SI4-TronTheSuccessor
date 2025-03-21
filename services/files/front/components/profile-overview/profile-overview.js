@@ -71,7 +71,7 @@ export class ProfileOverview extends HTMLComponent {
             } else await this.#sendFriendRequest(this.stats.username);
         });
 
-        this.profilePfp.setAttribute("src", "../../assets/profil.svg");
+        this.profilePfp.setAttribute("src", "../../assets/profile.svg");
         this.profilePfp.setAttribute("username", this.stats.username);
         this.rank.setAttribute("Rank", this.stats.rank);
         this.rank.setAttribute("points", this.stats.eloInRank);

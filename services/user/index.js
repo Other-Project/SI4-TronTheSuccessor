@@ -79,7 +79,7 @@ async function handleSignIn(request, response) {
 async function handleRenewToken(request, response) {
     const refreshToken = getAuthorizationToken(request);
     const result = await userDatabase.renewToken(refreshToken);
-    sendResponse(response, result.error ? HTTP_STATUS.UNAUTHORIZED_STATUS_CODE : HTTP_STATUS.OK, result);
+    sendResponse(response, result.error ? HTTP_STATUS.UNAUTHORIZED : HTTP_STATUS.OK, result);
 }
 
 async function handleSecurityQuestions(request, response) {

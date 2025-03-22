@@ -126,7 +126,7 @@ export class TabNavigation extends HTMLComponent {
     closeTab(tabId) {
         if (this.readonly) return;
         const tab = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
-        const panel = this.panels.querySelector(`#${tabId}`);
+        const panel = tabId ? this.panels.querySelector(`#${tabId}`) : null;
 
         if (tab?.classList.contains("active")) {
             const nextTab = tab.nextElementSibling ?? tab.previousElementSibling;

@@ -9,6 +9,7 @@ export class GamePage extends HTMLComponent {
         document.addEventListener("keyup", async (event) => {
             if (event.code === "Space" && !this.inGame) this.startGame();
         });
+        document.addEventListener("touchend", () => this.startGame());
         window.addEventListener("popstate", this.onVisible);
 
     }

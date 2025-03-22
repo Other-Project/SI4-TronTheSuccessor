@@ -25,9 +25,10 @@ export class GameResult extends HTMLComponent {
     onSetupCompleted = () => {
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.boardContainer = this.shadowRoot.getElementById("board-container");
-
-        this.shadowRoot.getElementById("game-result").addEventListener("click", () => {
+        this.chevron = this.shadowRoot.getElementById("chevron");
+        this.shadowRoot.getElementById("game-result-container").addEventListener("click", () => {
             if (!this.boardContainer.classList.toggle("show")) clearInterval(this.replayTimer);
+            this.chevron.classList.toggle("rotate");
         });
 
         this.boardRange = this.shadowRoot.getElementById("board-range");
@@ -87,7 +88,7 @@ export class GameResult extends HTMLComponent {
         this.boardRange.max = this.gameActions.length - 1;
         this.#initializePlayers();
         this.#drawTillTurn(this.boardRange.value);
-        this.shadowRoot.getElementById("game-result-container").style.display = "grid";
+        this.shadowRoot.getElementById("container").style.display = "block";
     }
 
     formatGameLength(durationInMsSeconds) {

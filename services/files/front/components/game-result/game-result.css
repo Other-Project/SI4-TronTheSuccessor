@@ -1,4 +1,4 @@
-#game-result-container {
+#container {
     display: none;
 }
 
@@ -7,17 +7,20 @@
     grid-template-columns: 250px 60px auto 130px 100px;
     background-color: #444;
     border-radius: 10px;
-    margin-bottom: 20px;
     padding: 15px 20px;
     box-sizing: border-box;
-    transition: transform 0.2s ease;
     align-items: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-.game-result:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
+#game-result-container {
+    margin-bottom: 5px;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        transform: translateY(-5px);
+        cursor: pointer;
+    }
 }
 
 .status {
@@ -117,6 +120,16 @@ label {
     background: transparent;
     border-radius: 3px;
     cursor: pointer;
+}
+
+#chevron {
+    filter: invert();
+    height: 35px;
+    cursor: pointer;
+
+    &.rotate {
+        transform: rotate(180deg);
+    }
 }
 
 /* This is the CSS for Chromium based browsers */

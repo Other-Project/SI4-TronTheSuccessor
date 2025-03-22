@@ -12,7 +12,7 @@ export class GameResult extends HTMLComponent {
     #gameReplayInterval = 500;
     width = 16;
     height = 9;
-    replayIndex = 0;
+    replayTimer;
 
     constructor() {
         super("game-result", ["html", "css"]);
@@ -23,18 +23,50 @@ export class GameResult extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        if (this.#gameData)
-            this.updateDisplay();
-
-
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.boardContainer = this.shadowRoot.getElementById("board-container");
+
         this.shadowRoot.getElementById("game-result").addEventListener("click", () => {
-            this.boardContainer.classList.toggle("show") ? this.#updateGameBoard() : clearInterval(this.replayTimer);
+            if (!this.boardContainer.classList.toggle("show")) clearInterval(this.replayTimer);
         });
+
+        this.boardRange = this.shadowRoot.getElementById("board-range");
+        this.boardRange.addEventListener("input", () => {
+            this.#drawTillTurn(this.boardRange.value);
+        });
+
+        this.playPauseBtn = this.shadowRoot.getElementById("play-pause");
+        this.playPauseBtnImg = this.playPauseBtn.querySelector("img");
+        this.playPauseBtn.addEventListener("click", () => {
+            if (this.playPauseBtn.classList.toggle("playing")) {
+                if (this.boardRange.value >= this.gameActions.length - 1) {
+                    this.#clearReplay();
+                    this.boardRange.value = -1;
+                }
+                this.#playTillEnd();
+                this.playPauseBtnImg.src = "/assets/pause.svg";
+            } else {
+                clearInterval(this.replayTimer);
+                this.playPauseBtnImg.src = "/assets/play.svg";
+            }
+        });
+
+        this.shadowRoot.getElementById("previous-btn").addEventListener("click", () => {
+            if (this.boardRange.value <= 0) return;
+            this.#handleReplayControls(-1);
+        });
+
+        this.shadowRoot.getElementById("next-btn").addEventListener("click", () => {
+            if (this.boardRange.value >= this.gameActions.length - 1) return;
+            this.#handleReplayControls(1);
+        });
+
         this.player1 = new Player("Test 1");
         this.player2 = new Player("Test 2");
         this.game = new Game(this.width, this.height, this.player1, this.player2, 0);
+
+        if (this.#gameData)
+            this.updateDisplay();
     };
 
     updateDisplay() {
@@ -43,16 +75,18 @@ export class GameResult extends HTMLComponent {
         const gameLengthValue = this.shadowRoot.querySelector(".game-length-value");
         const dateElement = this.shadowRoot.querySelector(".date");
 
-        const opponent = this.#gameData.opponentName;
         const result = !this.#gameData.winner ? "Draw" : this.#gameData.winner === this.#gameData.opponentName ? "Defeat" : "Victory";
 
         statusElement.textContent = result;
         statusElement.className = "status " + result.toLowerCase();
 
-        opponentElement.textContent = opponent;
+        opponentElement.textContent = this.#gameData.opponentName;
         gameLengthValue.textContent = this.formatGameLength(this.#gameData.timeElapsed);
         dateElement.textContent = new Date(this.#gameData.date).toLocaleDateString();
         this.gameActions = this.#gameData.gameActions;
+        this.boardRange.max = this.gameActions.length - 1;
+        this.#initializePlayers();
+        this.#drawTillTurn(this.boardRange.value);
         this.shadowRoot.getElementById("game-result-container").style.display = "grid";
     }
 
@@ -66,13 +100,6 @@ export class GameResult extends HTMLComponent {
         this.game.grid = Array.from(Array(this.height), (_, i) => Array(i % 2 === 0 ? this.width : this.width - 1).fill(0));
     }
 
-    #updateGameBoard() {
-        this.#clearReplay();
-        this.#initializePlayers();
-        this.replayIndex = 0;
-        this.#drawTillTurn(this.gameActions.length - 1);
-    }
-
     #initializePlayers() {
         if (!this.gameActions || !this.gameActions.length) return;
 
@@ -81,15 +108,41 @@ export class GameResult extends HTMLComponent {
         this.player2.init(2, initialState);
     }
 
+    #handleReplayControls(step) {
+        clearInterval(this.replayTimer);
+        this.playPauseBtnImg.src = "/assets/play.svg";
+        this.playPauseBtn.classList.remove("playing");
+        this.boardRange.value = parseInt(this.boardRange.value) + step;
+        this.#drawTillTurn(this.boardRange.value);
+    }
+
+    #playTillEnd() {
+        clearInterval(this.replayTimer);
+        this.#renderNextTurn();
+        this.playPauseBtnImg.src = "/assets/pause.svg";
+        this.replayTimer = setInterval(this.#renderNextTurn, this.#gameReplayInterval);
+    }
+
+    #renderNextTurn() {
+        this.#renderGameState(++this.boardRange.value);
+
+        if (this.boardRange.value >= this.gameActions.length - 1) {
+            clearInterval(this.replayTimer);
+            this.playPauseBtnImg.src = "/assets/play.svg";
+            this.playPauseBtn.classList.remove("playing");
+        }
+    }
+
+
     #drawTillTurn(turn) {
-        this.#renderGameState(this.replayIndex);
-        this.replayTimer = setInterval(() => {
-            this.replayIndex++;
-            this.#renderGameState(this.replayIndex);
-            if (this.replayIndex >= turn) {
-                clearInterval(this.replayTimer);
-            }
-        }, this.#gameReplayInterval);
+        clearInterval(this.replayTimer);
+        turn = Math.min(Math.max(0, turn), this.gameActions.length - 1);
+        this.playPauseBtnImg.src = "/assets/play.svg";
+        if (this.playPauseBtn.classList.contains("playing")) this.playPauseBtn.classList.remove("playing");
+        this.#clearReplay();
+        for (let i = 0; i <= turn; i++) {
+            this.#renderGameState(i);
+        }
     }
 
     #renderGameState(turnIndex) {
@@ -98,6 +151,6 @@ export class GameResult extends HTMLComponent {
         this.game.players.forEach(player => {
             this.game.updateGrid(player);
         });
-        this.gameBoard.draw(this.game);
+        setTimeout(() => this.gameBoard.draw(this.game), 5);
     }
 }

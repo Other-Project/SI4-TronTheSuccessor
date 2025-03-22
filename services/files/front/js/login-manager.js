@@ -6,7 +6,7 @@ export function getCookie(name) {
 }
 
 export async function renewAccessToken() {
-    const response = await fetchApi("/api/user/renew-access-token", {
+    const response = await fetch("/api/user/renew-access-token", {
         headers: {
             "Authorization": `Bearer ${getCookie("refreshToken")}`
         }

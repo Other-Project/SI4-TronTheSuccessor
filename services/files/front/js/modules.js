@@ -22,27 +22,42 @@ import {ChatSelection} from "/components/chat-selection/chat-selection.js";
 import {ChatRoomButton} from "/components/chat-room-button/chat-room-button.js";
 import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
+import {GameEmotes} from "/components/game-emotes/game-emotes.js";
 import {GameResult} from "/components/game-result/game-result.js";
 import {ProfileHistory} from "/components/profile-history/profile-history.js";
 
-customElements.define("app-game-board", GameBoard);
-customElements.define("app-game-choice", GameChoice);
-customElements.define("app-home-page", HomePage);
-customElements.define("app-profile-page", ProfilePage);
-customElements.define("app-pages", Pages);
+// General components
 customElements.define("app-button", Button);
-customElements.define("app-profile-page-button", ProfilePageButton);
+customElements.define("app-tab-navigation", TabNavigation);
+customElements.define("app-pages", Pages);
+customElements.define("app-popup", Popup);
+customElements.define("app-input", Input);
+
+// Home components
+customElements.define("app-home-page", HomePage);
+customElements.define("app-profile-display", ProfileDisplay);
+
+// Game help components
 customElements.define("app-help-page", HelpPage);
 customElements.define("app-control", Control);
+
+// Game components
+customElements.define("app-game-board", GameBoard);
+customElements.define("app-game-choice", GameChoice);
 customElements.define("app-game-master", GameMaster);
-customElements.define("app-popup", Popup);
+customElements.define("app-game-emotes", GameEmotes);
+
+// Profile components
+customElements.define("app-profile-page", ProfilePage);
+customElements.define("app-profile-page-button", ProfilePageButton);
+
+// Login components
+customElements.define("app-login-container", LoginContainer);
 customElements.define("app-sign-up-popup", SignUpPopup);
 customElements.define("app-sign-in-popup", SignInPopup);
-customElements.define("app-input", Input);
 customElements.define("app-reset-password-popup", ResetPassword);
-customElements.define("app-profile-display", ProfileDisplay);
-customElements.define("app-login-container", LoginContainer);
-customElements.define("app-tab-navigation", TabNavigation);
+
+// Chat components
 customElements.define("app-chat-drawer", ChatDrawer);
 customElements.define("app-chat-tab", ChatTab);
 customElements.define("app-chat-selection", ChatSelection);

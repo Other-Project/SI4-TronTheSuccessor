@@ -42,3 +42,15 @@ exports.getUser = function (request) {
     // noinspection JSValidateTypes
     return jwt.decode(authHeader[1]);
 };
+
+/**
+ * Get the user from the request
+ * @param request The request object
+ * @returns {{username: string}|null}
+ */
+exports.getUser = function (request) {
+    const authHeader = request.headers.authorization?.split(" ");
+    if (!authHeader || authHeader.length !== 2 || authHeader[0] !== "Bearer") return null;
+    // noinspection JSValidateTypes
+    return jwt.decode(authHeader[1]);
+};

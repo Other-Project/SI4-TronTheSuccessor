@@ -9,3 +9,82 @@ h2, p {
     grid-auto-flow: column;
     gap: 2rem;
 }
+
+.container {
+    box-sizing: border-box;
+    height: 100vh;
+    padding: 10px;
+
+    display: grid;
+    grid-template: minmax(0, 100%) auto auto / repeat(3, 1fr);
+    gap: 10px;
+    justify-items: center;
+    align-items: center;
+
+    #board {
+        grid-column: 1 / span 3;
+        align-self: normal;
+        height: 100%;
+    }
+
+    &:not(.online-multiplayer) {
+        #players, #emote-display, #emote-list {
+            display: none;
+        }
+    }
+
+    #players {
+        grid-row: 2;
+        grid-column: 1 / span 3;
+
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+
+        p {
+            text-align: left;
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        p:last-child {
+            text-align: right;
+        }
+    }
+
+    #emote-display {
+        grid-column: 1;
+        grid-row: 3;
+        justify-self: start;
+        font-size: 1.1em;
+
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s 2s, opacity 2s linear;
+
+        &.visible {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.25s linear;
+        }
+
+        img {
+            vertical-align: middle;
+            width: 50px;
+        }
+    }
+
+    #timer {
+        grid-column: 2;
+        grid-row: 3;
+
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    #emote-list {
+        grid-column: 3;
+        grid-row: 3;
+        justify-self: end;
+    }
+}

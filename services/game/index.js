@@ -1,5 +1,4 @@
 const http = require("http");
-const jwt = require("jsonwebtoken");
 const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
@@ -7,13 +6,18 @@ const {Player} = require("./js/player.js");
 const {randomUUID} = require("crypto");
 const {updateElos, handleAddElo, handleGetElo} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
-const {HTTP_STATUS, sendResponse} = require("./js/utils.js");
+const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
+
+const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"]
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
 
     try {
         switch (filePath[3]) {
+            case "emotes":
+                sendResponse(response, HTTP_STATUS.OK, {emotes});
+                break;
             case "elo":
                 if (request.method === "POST") await handleAddElo(request, response);
                 else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
@@ -44,6 +48,16 @@ io.on("connection", (socket) => {
     socket.on("game-action", (msg) => {
         const game = games[Array.from(socket.rooms).find(room => room !== socket.id)];
         game?.players.find(p => p.id === socket.id)?.setNextDirection(msg.direction);
+    });
+
+    socket.on("emote", (msg) => {
+        if (!emotes.includes(msg.emote)) {
+            console.warn("Invalid emote: " + msg.emote);
+            return;
+        }
+        const room = Array.from(socket.rooms).find(room => room !== socket.id);
+        const user = getUser(socket.request);
+        io.to(room).emit("emote", {emote: msg.emote, player: user.username});
     });
 
     socket.on("disconnect", () => {
@@ -99,7 +113,7 @@ async function startGame(p1s, p2s = null) {
 
 function createPlayer(socket) {
     if (!socket) return new FlowBird();
-    let user = jwt.decode(socket.request.headers.authorization?.split(" ")[1]);
+    const user = getUser(socket.request);
     return new Player(socket.id, user.username);
 }
 

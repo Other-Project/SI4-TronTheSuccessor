@@ -118,21 +118,18 @@ export class GameResult extends HTMLComponent {
 
     #playTillEnd() {
         clearInterval(this.replayTimer);
-        this.#renderNextTurn();
-        this.playPauseBtnImg.src = "/assets/pause.svg";
-        this.replayTimer = setInterval(this.#renderNextTurn, this.#gameReplayInterval);
-    }
-
-    #renderNextTurn() {
         this.#renderGameState(++this.boardRange.value);
+        this.playPauseBtnImg.src = "/assets/pause.svg";
 
-        if (this.boardRange.value >= this.gameActions.length - 1) {
-            clearInterval(this.replayTimer);
-            this.playPauseBtnImg.src = "/assets/play.svg";
-            this.playPauseBtn.classList.remove("playing");
-        }
+        this.replayTimer = setInterval(() => {
+            this.#renderGameState(++this.boardRange.value);
+            if (this.boardRange.value >= this.gameActions.length - 1) {
+                clearInterval(this.replayTimer);
+                this.playPauseBtnImg.src = "/assets/play.svg";
+                this.playPauseBtn.classList.remove("playing");
+            }
+        }, this.#gameReplayInterval);
     }
-
 
     #drawTillTurn(turn) {
         clearInterval(this.replayTimer);

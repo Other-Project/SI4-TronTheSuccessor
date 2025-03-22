@@ -1,3 +1,6 @@
+/**
+ * A class that represents a custom HTML element
+ */
 export class HTMLComponent extends HTMLElement {
     /** Called when the component finished loading */               onSetupCompleted;
     /** Called each time the component is visible on the page */    onVisible;
@@ -5,38 +8,46 @@ export class HTMLComponent extends HTMLElement {
 
     #setupCompleted = false;
 
-    constructor(path, html, css) {
+    /**
+     * Create a new HTMLComponent
+     * @param {string} componentName The name of the component
+     * @param {("html"|"css")[]} fileDependencies The files that the component depends on and should be loaded
+     * @param {string} path The path to the component files
+     */
+    constructor(componentName, fileDependencies = undefined, path = undefined) {
         super();
+        if (!RegExp(/^[a-z-]+$/).exec(componentName)) throw new Error("Invalid component name");
         this.attachShadow({mode: "open"});
 
-        new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting)
-                this.#setup(path?.endsWith('/') ? path.slice(0, -1) : path, html, css).then(() => this.#callEvent(this.onVisible));
+        this.componentName = componentName;
+        this.fileDependencies = fileDependencies ?? [];
+        this.path = path ?? `/components/${componentName}`;
+
+        this.#setup().then(() => new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) this.#callEvent(this.onVisible);
             else this.#callEvent(this.onHidden);
-        }, {root: document}).observe(this);
+        }, {root: document}).observe(this));
     }
 
     #callEvent(event) {
         if (this.#setupCompleted && event) event();
     }
 
-    async #setup(path, html, css) {
+    async #setup() {
         if (this.#setupCompleted) return;
 
-        if (Array.isArray(html)) {
-            if (html.includes("css")) css = path + ".css";
-            if (html.includes("html")) html = path + ".html";
-            else html = null;
-            path = `/components/${path}`;
+        if (this.fileDependencies.includes("css")) {
+            if ("adoptedStyleSheets" in this.shadowRoot) {
+                const sheet = new CSSStyleSheet();
+                sheet.replaceSync(await fetch(`${this.path}/${this.componentName}.css`).then(response => response.text()));
+                this.shadowRoot.adoptedStyleSheets.push(sheet);
+            } else this.shadowRoot.innerHTML += `<link rel="stylesheet" href="${this.path}/${this.componentName}.css">`; // Fallback for older browsers
         }
+        if (this.fileDependencies.includes("html"))
+            this.shadowRoot.innerHTML += await fetch(`${this.path}/${this.componentName}.html`).then(response => response.text());
 
-        if (html) this.shadowRoot.innerHTML = await fetch(path + "/" + html).then(response => response.text());
-        if (css) {
-            const sheet = new CSSStyleSheet();
-            await sheet.replace(await fetch(path + "/" + css).then(response => response.text()));
-            this.shadowRoot.adoptedStyleSheets.push(sheet);
-        }
         this.#setupCompleted = true;
+        await new Promise(res => setTimeout(res, 10)); // Workaround for letting the component initialize
         this.#callEvent(this.onSetupCompleted);
     }
 

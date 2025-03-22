@@ -7,7 +7,7 @@ export class GameBoard extends HTMLComponent {
     unconqueredColor = "#242424";
 
     constructor() {
-        super("/components/game-board/", null, "game-board.css");
+        super("game-board", ["css"]);
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
         this.shadowRoot.appendChild(this.canvas);

@@ -12,7 +12,7 @@ export class Pages extends HTMLComponent {
     }
 
     constructor() {
-        super("/components/pages", "pages.html");
+        super("pages", ["html"]);
         window.addEventListener("popstate", this.onVisible);
     }
 

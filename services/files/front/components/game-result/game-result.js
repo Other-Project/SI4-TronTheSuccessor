@@ -42,7 +42,9 @@ export class GameResult extends HTMLComponent {
             if (this.playPauseBtn.classList.toggle("playing")) {
                 if (this.boardRange.value >= this.gameActions.length - 1) {
                     this.#clearReplay();
-                    this.boardRange.value = -1;
+                    this.boardRange.value = 0;
+                } else {
+                    this.boardRange.value = Math.min(parseInt(this.boardRange.value) + 1, this.gameActions.length - 1);
                 }
                 this.#playTillEnd();
                 this.playPauseBtnImg.src = "/assets/pause.svg";
@@ -87,7 +89,7 @@ export class GameResult extends HTMLComponent {
         this.gameActions = this.#gameData.gameActions;
         this.boardRange.max = this.gameActions.length - 1;
         this.#initializePlayers();
-        this.#drawTillTurn(this.boardRange.value);
+        this.#drawTillTurn(0);
         this.shadowRoot.getElementById("container").style.display = "block";
     }
 
@@ -119,22 +121,22 @@ export class GameResult extends HTMLComponent {
 
     #playTillEnd() {
         clearInterval(this.replayTimer);
-        this.#renderGameState(++this.boardRange.value);
+        this.#renderGameState(this.boardRange.value);
         this.playPauseBtnImg.src = "/assets/pause.svg";
 
         this.replayTimer = setInterval(() => {
-            this.#renderGameState(++this.boardRange.value);
-            if (this.boardRange.value >= this.gameActions.length - 1) {
+            if (++this.boardRange.value >= this.gameActions.length) {
                 clearInterval(this.replayTimer);
                 this.playPauseBtnImg.src = "/assets/play.svg";
                 this.playPauseBtn.classList.remove("playing");
+                return;
             }
+            this.#renderGameState(this.boardRange.value);
         }, this.#gameReplayInterval);
     }
 
     #drawTillTurn(turn) {
         clearInterval(this.replayTimer);
-        turn = Math.min(Math.max(0, turn), this.gameActions.length - 1);
         this.playPauseBtnImg.src = "/assets/play.svg";
         if (this.playPauseBtn.classList.contains("playing")) this.playPauseBtn.classList.remove("playing");
         this.#clearReplay();

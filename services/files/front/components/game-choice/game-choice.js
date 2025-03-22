@@ -16,9 +16,9 @@ export class GameChoice extends HTMLComponent {
             multiplayerButton.button.disabled = true;
         }
 
-        this.shadowRoot.getElementById("local-game").addEventListener("click", () => changePage("/help/local"));
-        computerButton.addEventListener("click", () => changePage("/help/computer"));
-        multiplayerButton.addEventListener("click", () => changePage("/help/any-player"));
+        this.shadowRoot.getElementById("local-game").addEventListener("click", () => changePage("/game/local"));
+        computerButton.addEventListener("click", () => changePage("/game/computer"));
+        multiplayerButton.addEventListener("click", () => changePage("/game/any-player"));
     };
 
     onVisible = () => {

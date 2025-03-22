@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class ProfilePage extends HTMLComponent {
     constructor() {
@@ -6,8 +7,6 @@ export class ProfilePage extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.shadowRoot.getElementById("home").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
-        });
+        this.shadowRoot.getElementById("home").addEventListener("click", () => changePage("/"));
     }
 }

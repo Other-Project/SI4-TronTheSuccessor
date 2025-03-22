@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {getCookie} from "/js/login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class GameChoice extends HTMLComponent {
     constructor() {
@@ -15,32 +16,9 @@ export class GameChoice extends HTMLComponent {
             multiplayerButton.button.disabled = true;
         }
 
-        this.shadowRoot.getElementById("local-game").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {
-                detail: {
-                    name: "help",
-                    attr: {"against": "local"}
-                }
-            }));
-        });
-
-        computerButton.addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {
-                detail: {
-                    name: "help",
-                    attr: {"against": "computer"}
-                }
-            }));
-        });
-
-        multiplayerButton.addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {
-                detail: {
-                    name: "help",
-                    attr: {"against": "any-player"}
-                }
-            }));
-        });
+        this.shadowRoot.getElementById("local-game").addEventListener("click", () => changePage("/help/local"));
+        computerButton.addEventListener("click", () => changePage("/help/computer"));
+        multiplayerButton.addEventListener("click", () => changePage("/help/any-player"));
     };
 
     onVisible = () => {

@@ -22,8 +22,12 @@ export function disconnect() {
 }
 
 export function fakePageReload() {
-    document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: ""}}));
-    setTimeout(() => document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: "home"}})), 10);
+    window.history.replaceState(null, "", "/reload");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    setTimeout(() => {
+        window.history.replaceState("/", "", "/");
+        window.dispatchEvent(new PopStateEvent("popstate", {state: "/"}));
+    }, 10);
 }
 
 export function storeTokens(data) {

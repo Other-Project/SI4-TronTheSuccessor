@@ -1,5 +1,3 @@
-// url will be used to parse the url (captain obvious at your service).
-const url = require('url');
 // fs stands for FileSystem, it's the module to use to manipulate files on the disk.
 const fs = require('fs/promises');
 // path is used only for its parse method, which creates an object containing useful information about the path.
@@ -37,7 +35,7 @@ async function manageRequest(request, response) {
     const url = new URL(request.url, `${request.scheme}://${request.headers.host}`);
     let pathName = `.${baseFrontPath}${url.pathname}`;
     const exist = await fs.access(pathName).then(() => true).catch(() => false); // Let's check if the file exists.
-    if (!exist) pathName = `.${baseFrontPath}/${defaultFileIfFolder}`;
+    if (!exist) pathName = `.${baseFrontPath}/${defaultFileIfFolder}`; // Since it's a SPA, we will return the default file if the requested one does not exist.
     else if ((await fs.stat(pathName)).isDirectory()) pathName += `/${defaultFileIfFolder}`;  // If it is a directory, we will return the default file.
     await sendFile(pathName, response);
 }

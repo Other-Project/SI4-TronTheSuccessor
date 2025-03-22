@@ -1,44 +1,53 @@
 import {HTMLComponent} from "/js/component.js";
 
+/**
+ * Component that manages the pages of the website.
+ * It reads the URL and shows the corresponding page.
+ */
 export class Pages extends HTMLComponent {
+    level = 1;
+
+    static get observedAttributes() {
+        return ["level"];
+    }
+
     constructor() {
         super("/components/pages", "pages.html");
-        document.addEventListener("menu-selection", (event) => {
-            if (event.detail && typeof event.detail === "object") this.#showElement(event.detail.name, event.detail.attr);
-            else this.#showElement(event.detail);
-        });
-
-        window.addEventListener("hashchange", () => {
-            this.#showElement(this.#readHash() ?? "home");
-        });
+        window.addEventListener("popstate", this.onVisible);
     }
 
-    onVisible = () => {
-        this.#showElement(this.#readHash() ?? "home");
-    };
-
-    #readHash() {
-        const hash = location.hash.substring(1);
-        return hash === "" ? null : hash;
+    onSetupCompleted = () => {
+        this.pageSlot = this.shadowRoot.getElementById("pages-slot");
+        this.errorPage = this.shadowRoot.getElementById("404");
     }
+
+    onVisible = () => this.#showElement(location.pathname.split("/")[this.level] ?? "");
 
     /**
-     * @param {string} elementId
-     * @param {{string: string}} attr
+     * @param {string} elementId The id of the page to show.
+     * @param {{string: string}} attr The attributes to set to the page.
      */
     #showElement(elementId, attr = undefined) {
-        const elements = this.shadowRoot.querySelectorAll("#pages > *");
-        const idExists = Array.from(elements.values()).some(el => el.id);
-        if (!idExists) return;
+        const elements = this.pageSlot.assignedElements();
+        const idExists = elements.some(el => el.id === elementId);
+        if (!idExists) elementId = "404";
 
-        elements.forEach(element => {
+        [...elements, this.errorPage].forEach(element => {
             if (element.id === elementId) {
                 element.style.display = "block";
                 if (attr) Object.entries(attr).forEach(([k, v]) => element.setAttribute(k, v));
             } else element.style.display = "none";
         });
-
-        if (history.state !== elementId)
-            history.pushState(elementId, "", `#${elementId}`);
     }
+}
+
+/**
+ * Change the page without reloading the website.
+ * @param {string} page URL of the page to show
+ */
+export function changePage(page) {
+    const state = page;
+    if (history.state === state) return;
+    history.pushState(state, "", page);
+    window.dispatchEvent(new PopStateEvent("popstate", {state: state}));
 }

@@ -68,9 +68,8 @@ exports.handleAddFriend = async function (request, response, friend) {
 exports.handleRemoveFriend = async function (request, response, friend) {
     const user = getUser(request);
     if (!await checkValidity(response, user, friend)) return;
-    if (await userDatabase.removePendingFriendRequests(user.username, friend)) {
-        const result = await removeFriendRequests(user.username, friend);
-        sendResponse(response, HTTP_STATUS.OK, result);
+    if (await userDatabase.removePendingFriendRequests(friend, user.username)) {
+        sendResponse(response, HTTP_STATUS.OK, friend);
         return;
     }
     if (await userDatabase.removeFriend(user.username, friend))

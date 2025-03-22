@@ -29,6 +29,11 @@ h3, small, p {
 #sender-name {
     grid-column: 2;
     grid-row: 1;
+
+    &:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
 }
 
 #message-date {

@@ -33,7 +33,3 @@ exports.sendFriendRequest = async function (username, friend, authorization) {
     };
     return makeHttpRequest('POST', `api/chat/${friend}`, authorization, message);
 };
-
-exports.removeFriendRequests = async function (username, friend, authorization) {
-    return makeHttpRequest('DELETE', `api/chat/${friend}`, authorization);
-};

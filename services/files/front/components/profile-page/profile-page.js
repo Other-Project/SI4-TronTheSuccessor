@@ -6,13 +6,15 @@ export class ProfilePage extends HTMLComponent {
         super("profile-page", ["html", "css"]);
     }
 
-    onSetupCompleted = async () => {
+    onSetupCompleted = () => {
         this.profilePage = this.shadowRoot.getElementById("profile-page");
         this.overview = this.shadowRoot.getElementById("overview");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
-        this.notFound = this.shadowRoot.getElementById("not-found-message");
+        this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
+    };
 
+    onVisible = async () => {
         const userName = new URLSearchParams(location.search).get("username");
         const loggedUser = getUserInfo()?.username ?? null;
         const response = await fetch(`/api/game/stats/${userName}`);
@@ -21,7 +23,7 @@ export class ProfilePage extends HTMLComponent {
             window.location.href = `?username=${loggedUser}#profile`;
         else if (response.status === 404) {
             this.profilePage.classList.toggle("not-found");
-            this.notFound.innerHTML = `The user "${userName}" does not exist or has deleted their account.`;
+            this.notFoundUser.textContent = userName;
         } else {
             const stats = await response.json();
             stats.username = userName;

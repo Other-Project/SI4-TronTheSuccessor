@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fetchApi} from "../../js/login-manager.js";
+import {fetchApi} from "/js/login-manager.js";
 
 export class ChatSelection extends HTMLComponent {
     constructor() {
@@ -33,7 +33,7 @@ export class ChatSelection extends HTMLComponent {
         const method = event?.detail?.method;
         this.friendList = await this.#getFriendList();
         this.#updateFriendListPanel();
-        if (method === "POST") this.openChatRoom(friend, friend, "undefined");
+        this.openChatRoom(friend, friend, "undefined", method === "POST" ? "true" : "false");
     };
 
     #updateFriendListPanel() {

@@ -43,6 +43,10 @@
             cursor: pointer;
             transition: all 0.2s ease;
             padding: 0;
+
+            &:hover {
+                transform: scale(1.2);
+            }
         }
 
         #accept-request {
@@ -52,7 +56,6 @@
 
             &:hover {
                 background-color: rgba(16, 124, 16, 0.1);
-                transform: scale(1.2);
             }
         }
 
@@ -63,7 +66,6 @@
 
             &:hover {
                 background-color: rgba(216, 59, 1, 0.1);
-                transform: scale(1.2);
             }
         }
     }

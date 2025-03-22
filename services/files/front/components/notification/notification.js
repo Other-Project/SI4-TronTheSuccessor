@@ -5,6 +5,7 @@ export class Notification extends HTMLComponent {
         super("notification", ["css"]);
     }
 
+    // noinspection JSUnusedGlobalSymbols
     connectedCallback() {
         document.addEventListener("show-notification", (event) => {
             const {message, duration, background, color} = event.detail;

@@ -33,28 +33,28 @@ export class ProfileStats extends HTMLComponent {
         this.winrateElement.childNodes[0].textContent = this.winrate;
     }
 
-    #formatTime(seconds) {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const remainingSeconds = seconds % 60;
-
-        if (hours > 0) {
-            const formattedHours = hours % 1 === 0 ?
-                hours.toFixed(0).padStart(3, '0') :
-                hours.toFixed(3 - Math.floor(hours).toString().length);
-            return {formattedTime: `${formattedHours}h`, unit: "hours"};
+    #formatTime(seconds, wantedLength = 4) {
+        const units = [
+            {unit: "seconds", shortenUnit: "s", max: 60},
+            {unit: "minutes", shortenUnit: "m", max: 60},
+            {unit: "hours", shortenUnit: "h", max: 24},
+            {unit: "days", shortenUnit: "d"}
+        ];
+        let value = parseInt(seconds);
+        if (isNaN(value)) value = 0;
+        let subValue = 0;
+        let subValueMaxLength = 0;
+        for (let unitInfo of units) {
+            if (!unitInfo.max || value < unitInfo.max) {
+                const valueString = value.toString();
+                if (wantedLength - 1 - valueString.length < subValueMaxLength) subValueMaxLength = 0;
+                const subValueString = subValueMaxLength > 0 ? subValue.toString().padStart(subValueMaxLength, "0") : "";
+                const formattedValue = valueString.padStart(wantedLength - 1 - subValueMaxLength, "0") + unitInfo.shortenUnit + subValueString;
+                return {formattedTime: formattedValue, unit: unitInfo.unit};
+            }
+            subValue = value % unitInfo.max;
+            value = Math.floor(value / unitInfo.max);
+            subValueMaxLength = unitInfo.max.toString().length;
         }
-
-        if (minutes > 0) {
-            const formattedMinutes = minutes % 1 === 0 ?
-                minutes.toFixed(0).padStart(3, '0') :
-                minutes.toFixed(3 - Math.floor(minutes).toString().length);
-            return {formattedTime: `${formattedMinutes}m`, unit: "minutes"};
-        }
-
-        const formattedSeconds = remainingSeconds % 1 === 0 ?
-            remainingSeconds.toFixed(0).padStart(3, '0') :
-            remainingSeconds.toFixed(3 - Math.floor(remainingSeconds).toString().length);
-        return {formattedTime: `${formattedSeconds}s`, unit: "seconds"};
     }
 }

@@ -11,9 +11,12 @@
         grid-column: 1;
         gap: 10px;
 
-        .profile-buttons.logged-in #modify-password,
-        .profile-buttons.logged-in #share,
-        .profile-buttons:not(.logged-in) #add-friend {
+        .profile-buttons:not(.logged-in) #modify-password,
+        .profile-buttons:not(.logged-in) #share,
+        .profile-buttons.logged-in #add-friend,
+        .profile-buttons.logged-in #remove-friend,
+        .profile-buttons:not(.add) #add-friend,
+        .profile-buttons.add #remove-friend {
             display: none;
         }
 

@@ -44,6 +44,8 @@ export class ChatRoom extends HTMLComponent {
         if (!this.messagePanel) return;
         this.getMessages().then(messages => this.#displayMessages(messages));
         this.messageInput.disabled = this.sendButton.button.disabled = this.friend === "false";
+        this.messageInput.title = this.sendButton.title = "";
+
         if (this.pending !== "undefined") {
             this.messageInput.title = this.sendButton.title = "You need to be friends to send messages";
             this.notificationBanner.classList.remove("hidden");
@@ -123,7 +125,7 @@ export class ChatRoom extends HTMLComponent {
     async handleFriendRequest(method) {
         this.notificationBanner.classList.add("hidden");
         const endpoint = `/api/user/friends/${this.pending}`;
-        const response = await fetchApi(endpoint, {method: method,});
+        const response = await fetchApi(endpoint, {method: method});
         const message = method === "POST" ? "Friend request accepted!" : "Friend request refused!";
 
         if (response.ok)

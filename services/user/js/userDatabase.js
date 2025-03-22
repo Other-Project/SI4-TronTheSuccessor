@@ -107,7 +107,8 @@ exports.addToPendingFriendRequests = async function (username, friend) {
     const user = await userCollection.findOne({
         $or: [
             {username: username, pendingFriendRequests: friend},
-            {username: friend, pendingFriendRequests: username}
+            {username: friend, pendingFriendRequests: username},
+            {username: username, friends: friend}
         ]
     });
     if (user) return false;

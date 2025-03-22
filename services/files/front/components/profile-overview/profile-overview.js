@@ -10,10 +10,14 @@ export class ProfileOverview extends HTMLComponent {
         return ["stats"];
     }
 
-    onVisible = () => this.#refresh();
+    onVisible = async () => {
+        this.friends = await this.#getFriends();
+        this.#refresh();
+    };
 
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);
+        if (name === "stats") this.stats = JSON.parse(newValue);
         this.#refresh();
     }
 
@@ -28,23 +32,26 @@ export class ProfileOverview extends HTMLComponent {
         }));
     }
 
-    async #sendFriendRequest(friend) {
+    async #manageFriend(friend, action) {
         const response = await fetchApi(`/api/user/friends/${friend}`, {
-            method: "POST"
+            method: action === "add" ? "POST" : "DELETE",
         });
-
         if (response.ok)
-            this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
+            this.#showNotification(action === "add"
+                ? "Friend request sent!" : "Friend removed", 2000, "#8E24AA", "white");
         else {
             const error = await response.json();
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
     }
 
-    onSetupCompleted = async () => {
+    onSetupCompleted = () => {
         this.rank = this.shadowRoot.getElementById("profile-rank");
         this.profileStats = this.shadowRoot.getElementById("profiles-stats");
         this.profilePfp = this.shadowRoot.getElementById("profile-pfp");
+        this.addFriend = this.shadowRoot.getElementById("add-friend");
+        this.removeFriend = this.shadowRoot.getElementById("remove-friend");
+        this.buttons = this.shadowRoot.getElementById("profile-buttons-container");
 
         this.shadowRoot.getElementById("modify-password").addEventListener("click", () => {
             // TODO: implement password change
@@ -56,16 +63,25 @@ export class ProfileOverview extends HTMLComponent {
         });
     };
 
+    #getFriends = async () => {
+        return await fetchApi("/api/user/friends", {method: "GET"}).then(response => response.json());
+    };
+
     #refresh() {
         if (!this.rank) return;
-        this.stats = JSON.parse(this.stats);
-
         if (this.stats.loggedusername && this.stats.loggedusername === this.stats.username)
-            this.shadowRoot.getElementById("profile-buttons-container").classList.toggle("logged-in");
-        this.shadowRoot.getElementById("add-friend").addEventListener("click", async () => {
+            this.buttons.classList.toggle("logged-in");
+
+        if (!this.friends.friends.includes(this.stats.username))
+            this.buttons.classList.toggle("add");
+
+        this.addFriend.addEventListener("click", async () => {
             if (!this.stats.loggedusername) {
                 // TODO: open login modal
-            } else await this.#sendFriendRequest(this.stats.username);
+            } else await this.#manageFriend(this.stats.username, "add");
+        });
+        this.removeFriend.addEventListener("click", async () => {
+            await this.#manageFriend(this.stats.username, "remove");
         });
 
         this.profilePfp.setAttribute("src", "/assets/profile.svg");

@@ -17,16 +17,23 @@ export class ChatSelection extends HTMLComponent {
         this.#updateFriendListPanel();
     };
 
-    openChatRoom(roomId, roomName, pending) {
-        this.dispatchEvent(new CustomEvent("room-selected", {detail: {id: roomId, name: roomName, pending: pending}}));
+    openChatRoom(roomId, roomName, pending, friend) {
+        this.dispatchEvent(new CustomEvent("room-selected", {
+            detail: {
+                id: roomId,
+                name: roomName,
+                pending: pending,
+                friend: friend
+            }
+        }));
     }
 
     #refresh = async (event) => {
         const friend = event?.detail?.friend;
-        const action = event?.detail?.action;
+        const method = event?.detail?.method;
         this.friendList = await this.#getFriendList();
         this.#updateFriendListPanel();
-        if (action === "accept") this.openChatRoom(friend, friend, "undefined");
+        if (method === "POST") this.openChatRoom(friend, friend, "undefined");
     };
 
     #updateFriendListPanel() {
@@ -36,7 +43,7 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("icon", friend.icon ?? "/assets/profile.svg");
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
-            friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending));
+            friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
         }
     }
@@ -51,7 +58,8 @@ export class ChatSelection extends HTMLComponent {
             name: friend.username,
             preview: friend.last,
             icon: null,
-            pending: friend.pending
+            pending: friend.pending,
+            friend: friend.friend
         }));
     }
 }

@@ -22,7 +22,11 @@ export class ProfileDisplay extends HTMLComponent {
 
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
-        this.profileMenu.addEventListener("click", () => window.location.href = `?username=${getUserInfo().username}#profile`);
+        this.shadowRoot.getElementById("profile-menu").addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent("menu-selection", {
+                detail: "profile"
+            }));
+        });
     };
 
     onVisible = async () => {

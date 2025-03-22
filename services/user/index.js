@@ -3,10 +3,10 @@ const userDatabase = require("./js/userDatabase.js");
 const {getRequestBody, sendResponse} = require("./js/utils.js");
 const {
     handleGetFriends,
-    handleModifyFriendList,
     handleGetUser,
-    handleAddToPendingFriendRequests,
-    handleRefuseFriendRequest,
+    handleRemoveFriend,
+    handleAddFriend,
+    handleGetPending
 } = require("./js/social.js");
 const {HTTP_STATUS} = require("./js/utils.js");
 const {getAuthorizationToken} = require("./js/utils.js");
@@ -42,16 +42,14 @@ http.createServer(async (request, response) => {
                     await handleGetUser(request, response, filePath[4]);
                 break;
             case "friends":
-                if (request.method === "GET")
+                if (request.method === "GET" && filePath[4] === "pending")
+                    await handleGetPending(request, response, filePath[5]);
+                else if (request.method === "GET")
                     await handleGetFriends(request, response);
-                if (filePath[4] === "send" && request.method === "POST")
-                    await handleAddToPendingFriendRequests(request, response);
-                else if (filePath[4] === "refuse" && request.method === "POST")
-                    await handleRefuseFriendRequest(request, response);
-                else if (filePath[4] === "accept" && request.method === "POST")
-                    await handleModifyFriendList(request, response, true);
-                else if (filePath[4] === "delete" && request.method === "POST")
-                    await handleModifyFriendList(request, response, false);
+                else if (request.method === "POST")
+                    await handleAddFriend(request, response, filePath[4]);
+                else if (request.method === "DELETE")
+                    await handleRemoveFriend(request, response, filePath[4]);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

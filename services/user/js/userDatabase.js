@@ -46,7 +46,7 @@ exports.addUser = async function (username, password, securityQuestions) {
     await userCollection.insertOne(user);
     const {accessToken, refreshToken} = getJwt(user);
     return {username, refreshToken, accessToken};
-}
+};
 
 /**
  * Login a user
@@ -59,7 +59,7 @@ exports.loginUser = async function loginUser(username, password) {
     if (!user) return {error: "Wrong username or password"};
     const {accessToken, refreshToken} = getJwt(user);
     return {username, refreshToken, accessToken};
-}
+};
 
 /**
  * Get a user by username
@@ -127,6 +127,16 @@ exports.addToPendingFriendRequests = async function (username, friend) {
 exports.getFriends = async function (playerId) {
     const user = await userCollection.findOne({username: playerId});
     return user ? user.friends : [];
+};
+
+/**
+ * Get the pending friend requests of a player
+ * @param playerId The id of the player
+ * @returns {Promise<string[]>} The pending friend requests
+ */
+exports.getPendingFriendRequests = async function (playerId) {
+    const user = await userCollection.findOne({username: playerId});
+    return user ? user.pendingFriendRequests : [];
 }
 
 /**
@@ -148,7 +158,7 @@ exports.removeFriend = async function (playerId, otherId) {
         {$pull: {friends: playerId}}
     );
     return true;
-}
+};
 
 exports.renewToken = async function (refreshToken) {
     if (!refreshToken)
@@ -160,7 +170,7 @@ exports.renewToken = async function (refreshToken) {
     if (!user)
         return {error: "Could not find user with this refresh token : " + refreshToken};
     return getJwt(user);
-}
+};
 
 exports.getSecurityQuestions = async function (username) {
     if (username) {
@@ -170,7 +180,7 @@ exports.getSecurityQuestions = async function (username) {
         return user.securityQuestions.map(question => ({question: question.question}));
     }
     return getSecurityQuestionsFromArray();
-}
+};
 
 exports.verifyAnswers = async function (username, answers) {
     if (!username || !answers || !Array.isArray(answers) || answers.length !== 2)
@@ -184,7 +194,7 @@ exports.verifyAnswers = async function (username, answers) {
     const userInfo = {username: user.username};
     const resetPasswordToken = jwt.sign(userInfo, secretKeyPasswordReset, {expiresIn: resetPasswordTokenDuration});
     return {resetPasswordToken};
-}
+};
 
 exports.resetPassword = async function (newPassword, resetPasswordToken) {
     if (!newPassword)
@@ -206,7 +216,7 @@ exports.resetPassword = async function (newPassword, resetPasswordToken) {
     await userCollection.updateOne({username}, {$set: {password: hash(newPassword)}});
     const {accessToken, refreshToken} = getJwt(user);
     return {message: "Password successfully reset", accessToken, refreshToken};
-}
+};
 
 exports.removePendingFriendRequests = async function (username, friends) {
     const user = await userCollection.findOne({username: username, pendingFriendRequests: friends});

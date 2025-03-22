@@ -159,7 +159,7 @@ export class GameMaster extends HTMLComponent {
             this.#startTimer();
             this.game.players.forEach((player, i) => {
                 this.playersName[i].innerText = player.name;
-                player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse))
+                player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse));
             });
             this.#applyMessage(msg, reverse);
             this.waitingWindow.style.display = "none";
@@ -189,13 +189,6 @@ export class GameMaster extends HTMLComponent {
             const directions = Object.keys(directionToAngle);
             const direction = reverse ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
             this.socket.emit("game-action", {direction});
-        });
-
-        this.socket.on("error", async (msg) => {
-            if (msg.status === 401) {
-                await renewAccessToken();
-                this.#gameWithServer();
-            } else console.error(msg);
         });
     }
 

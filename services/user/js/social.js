@@ -1,7 +1,7 @@
 const userDatabase = require("./userDatabase.js");
-const {getRequestBody, sendResponse, getUser} = require('./utils.js');
+const {sendResponse, getUser} = require('./utils.js');
 const {HTTP_STATUS} = require('./utils.js');
-const {sendFriendRequest} = require('../helper/chatHelper.js');
+const {sendFriendRequest, removeFriendRequests} = require('../helper/chatHelper.js');
 
 /**
  * Handles checking if the user exists
@@ -20,7 +20,7 @@ exports.handleGetUser = async function handleGetUser(request, response, username
 };
 
 /**
- * Handles getting the user's friends
+ * Handles getting the user's friends and the pending friend requests
  * @param request
  * @param response
  * @returns {Promise<void>}
@@ -31,64 +31,53 @@ exports.handleGetFriends = async function (request, response) {
         sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
         return;
     }
-    const result = await userDatabase.getFriends(user.username);
-    sendResponse(response, HTTP_STATUS.OK, result);
-}
-
-/**
- * Adds a friend to the user's pending friend requests
- * @param request The request
- * @param response The response
- * @returns {Promise<void>}
- */
-exports.handleAddToPendingFriendRequests = async function (request, response) {
-    const body = await getRequestBody(request);
-    const parsedBody = JSON.parse(body);
-    const user = getUser(request);
-    if (!await checkValidity(response, user, parsedBody.friends)) return;
-    if (!await userDatabase.addToPendingFriendRequests(user.username, parsedBody.friends)) {
-        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Friend requests already sent"});
-        return;
-    }
-    const result = await sendFriendRequest(user.username, parsedBody.friends, request.headers.authorization);
+    const friends = await userDatabase.getFriends(user.username);
+    const pending = await userDatabase.getPendingFriendRequests(user.username);
+    const result = {friends, pending};
     sendResponse(response, HTTP_STATUS.OK, result);
 };
 
-/**
- * Handles adding or removing friends from the user's friend list
- * @param request The request
- * @param response The response
- * @param add Whether to add or remove the friends
- * @returns {Promise<void>}
- */
-exports.handleModifyFriendList = async function (request, response, add) {
-    const body = await getRequestBody(request);
-    const parsedBody = JSON.parse(body);
+exports.handleGetPending = async function (request, response, username) {
     const user = getUser(request);
-    if (!await checkValidity(response, user, parsedBody.friends)) return;
-    const result = add
-        ? await userDatabase.addFriend(user.username, parsedBody.friends)
-        : await userDatabase.removeFriend(user.username, parsedBody.friends);
-    if (!result) {
-        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request or you are already friends"});
+    if (!user) {
+        sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
         return;
     }
-    sendResponse(response, HTTP_STATUS.OK, result);
-}
-/**
- * Handles refusing a friend request
- * @param request The request
- * @param response The response
- * @returns {Promise<void>}
- */
-exports.handleRefuseFriendRequest = async function (request, response) {
-    const body = await getRequestBody(request);
-    const parsedBody = JSON.parse(body);
-    const user = getUser(request);
-    if (!await checkValidity(response, user, parsedBody.friends)) return;
-    const result = await userDatabase.removePendingFriendRequests(user.username, parsedBody.friends);
-    sendResponse(response, HTTP_STATUS.OK, result);
+    const pending = await userDatabase.getPendingFriendRequests(username);
+    if (!pending) {
+        sendResponse(response, HTTP_STATUS.NOT_FOUND, {error: "User not found"});
+        return;
+    }
+    sendResponse(response, HTTP_STATUS.OK, pending);
 };
+
+exports.handleAddFriend = async function (request, response, friend) {
+    const user = getUser(request);
+    if (!await checkValidity(response, user, friend)) return;
+    if (await userDatabase.addToPendingFriendRequests(user.username, friend)) {
+        const result = await sendFriendRequest(user.username, friend, request.headers.authorization);
+        sendResponse(response, HTTP_STATUS.OK, result);
+        return;
+    }
+    if (await userDatabase.addFriend(user.username, friend))
+        sendResponse(response, HTTP_STATUS.OK, friend);
+    else
+        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Friend request already sent"});
+}
+
+exports.handleRemoveFriend = async function (request, response, friend) {
+    const user = getUser(request);
+    if (!await checkValidity(response, user, friend)) return;
+    if (await userDatabase.removePendingFriendRequests(user.username, friend)) {
+        const result = await removeFriendRequests(user.username, friend);
+        sendResponse(response, HTTP_STATUS.OK, result);
+        return;
+    }
+    if (await userDatabase.removeFriend(user.username, friend))
+        sendResponse(response, HTTP_STATUS.OK, friend);
+    else
+        sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request or you are not friends"});
+}
 
 /**
  * Checks if the request is valid for adding or removing friends

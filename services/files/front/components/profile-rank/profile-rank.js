@@ -1,14 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 
 export class ProfileRank extends HTMLComponent {
-    static get observedAttributes() {
-        return ["rank", "points"];
-    }
-
-    constructor() {
-        super("profile-rank", ["html", "css"]);
-    }
-
     rankToVertices = {
         "Line": 2,
         "Triangle": 3,
@@ -16,6 +8,14 @@ export class ProfileRank extends HTMLComponent {
         "Pentagon": 5,
         "Hexagon": 6,
     };
+
+    constructor() {
+        super("profile-rank", ["html", "css"]);
+    }
+
+    static get observedAttributes() {
+        return ["rank", "points", "baserank"];
+    }
 
     onSetupCompleted = () => {
         this.rankIcon = this.shadowRoot.getElementById("rank-icon");
@@ -31,9 +31,8 @@ export class ProfileRank extends HTMLComponent {
 
     #refresh() {
         if (!this.rankIcon) return;
-        const rankBase = this.rank.replace(/\s*\d+|\s*I{1,3}/g, ''); // Remove numbers and Roman numerals
-        this.rankPoints.textContent = this.rank + " ( " + this.points + " TP )";
-        this.#createPolygonSVG(this.rankToVertices[rankBase]);
+        this.rankPoints.textContent = this.rank + " ( " + Math.round(this.points) + " TP )";
+        this.#createPolygonSVG(this.rankToVertices[this.baserank]);
     }
 
     #createPolygonSVG(vertices) {

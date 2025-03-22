@@ -12,4 +12,6 @@
     border-radius: 50%;
     display: block;
     margin: 0 auto;
+    filter: invert(1);
+    object-fit: contain;
 }

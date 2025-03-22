@@ -26,6 +26,21 @@ async function makeHttpRequest(method, path, authorization, data = null) {
     return JSON.parse(text);
 }
 
+/**
+ * Get the friends list and the pending friend requests.
+ * @param authorization The authorization
+ * @returns {Promise<*>} The friends list and the pending friend requests
+ */
 exports.getFriendsList = async function (authorization) {
     return makeHttpRequest("GET", `api/user/friends`, authorization);
+};
+
+/**
+ * Get the pending friend requests.
+ * @param username The username
+ * @param authorization The authorization
+ * @returns {Promise<*>} The pending friend requests
+ */
+exports.getPendingFriendRequests = async function (username, authorization) {
+    return makeHttpRequest("GET", `api/user/friends/pending/${username}`, authorization);
 };

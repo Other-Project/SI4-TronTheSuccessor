@@ -47,6 +47,8 @@
 
         #accept-request {
             border-color: #107c10;
+            background-color: #164215;
+            color: #fff;
 
             &:hover {
                 background-color: rgba(16, 124, 16, 0.1);
@@ -55,7 +57,9 @@
         }
 
         #refuse-request {
+            color: #fff;
             border-color: #d83b01;
+            background-color: rgb(89, 29, 6);
 
             &:hover {
                 background-color: rgba(216, 59, 1, 0.1);

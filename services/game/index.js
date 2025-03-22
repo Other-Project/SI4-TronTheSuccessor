@@ -7,7 +7,7 @@ const {randomUUID} = require('crypto');
 const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
 
-const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"]
+const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
@@ -16,6 +16,7 @@ let server = http.createServer(async (request, response) => {
         switch (filePath[3]) {
             case "stats":
                 if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
+                break;
             case "emotes":
                 sendResponse(response, HTTP_STATUS.OK, {emotes});
                 break;

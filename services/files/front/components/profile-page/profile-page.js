@@ -7,22 +7,25 @@ export class ProfilePage extends HTMLComponent {
     }
 
     onSetupCompleted = async () => {
+        this.profilePage = this.shadowRoot.getElementById("profile-page");
         this.overview = this.shadowRoot.getElementById("overview");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
-        this.tab = this.shadowRoot.getElementById("tab-navigation");
-        this.notFound = this.shadowRoot.getElementById("not-found");
-        const userName = location.search.split("=")[1];
+        this.notFound = this.shadowRoot.getElementById("not-found-message");
+
+        const userName = new URLSearchParams(location.search).get("username");
+        const loggedUser = getUserInfo()?.username ?? null;
         const response = await fetch(`/api/game/stats/${userName}`);
 
-        if (response.status === 404) {
-            this.tab.remove();
-            this.notFound.classList.toggle("hidden");
+        if (!userName && loggedUser)
+            window.location.href = `?username=${loggedUser}#profile`;
+        else if (response.status === 404) {
+            this.profilePage.classList.toggle("not-found");
             this.notFound.innerHTML = `The user "${userName}" does not exist or has deleted their account.`;
         } else {
             const stats = await response.json();
             stats.username = userName;
-            stats.loggedusername = getUserInfo()?.username ?? null;
+            stats.loggedusername = loggedUser;
             if (stats) this.overview.setAttribute("stats", JSON.stringify(stats));
         }
     };

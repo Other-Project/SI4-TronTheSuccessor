@@ -30,28 +30,11 @@ exports.updateStats = async function (players, gameInfo) {
     const pointP2 = 1 - pointP1;
     const diff = eloP1 - eloP2;
 
-    switch (pointP1) {
-        case 0:
-            await statsDatabase.addWin(players[1].name);
-            await statsDatabase.addWinStreak(players[1].name);
-            await statsDatabase.addLoss(players[0].name);
-            await statsDatabase.resetWinStreak(players[0].name);
-            break;
-        case 0.5:
-            await statsDatabase.addDraw(players[0].name);
-            await statsDatabase.addDraw(players[1].name);
-            break;
-        case 1:
-            await statsDatabase.addWin(players[0].name);
-            await statsDatabase.addWinStreak(players[0].name);
-            await statsDatabase.addLoss(players[1].name);
-            await statsDatabase.resetWinStreak(players[1].name);
-            break;
-    }
-    await statsDatabase.addGame(players[0].name);
-    await statsDatabase.addGame(players[1].name);
-    await statsDatabase.updatePlayTime(players[0].name, gameInfo.elapsed / 1000);
-    await statsDatabase.updatePlayTime(players[1].name, gameInfo.elapsed / 1000);
+    if (gameInfo.draw) await statsDatabase.addDraw(players[0].name, players[1].name);
+    else if (players[0].name === gameInfo.winner) await statsDatabase.addWinAndLoss(players[0].name, players[1].name);
+    else await statsDatabase.addWinAndLoss(players[1].name, players[0].name);
+    await statsDatabase.addGame(players[0].name, gameInfo.elapsed / 1000);
+    await statsDatabase.addGame(players[1].name, gameInfo.elapsed / 1000);
 
     const newEloP1 = Math.max(calculateEloPoints(eloP1, 32, pointP1, diff), 0);
     const newEloP2 = Math.max(calculateEloPoints(eloP2, 32, pointP2, -diff), 0);

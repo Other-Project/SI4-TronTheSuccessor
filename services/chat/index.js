@@ -2,7 +2,7 @@ const http = require("http");
 const {Server} = require("socket.io");
 const chatDatabase = require("./js/chatDatabase.js");
 const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
-const {getFriendsList} = require("./helper/userHelper.js");
+const {getFriendsList, getPendingFriendRequests} = require("./helper/userHelper.js");
 const {getRoomId} = require("./js/chatDatabase.js");
 
 
@@ -29,13 +29,25 @@ const server = http.createServer(async (request, response) => {
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
         if (request.method === "GET") {
             const messages = await chatDatabase.getAllRoom(user.username);
-            const friends = await getFriendsList(request.headers.authorization) ?? [];
+            const allFriends = await getFriendsList(request.headers.authorization);
+            const friends = allFriends.friends ?? [];
+            const pending = allFriends.pending ?? [];
             const chatBox = await Promise.all(messages.map(async username => {
                 const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, 1);
                 const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
+
+                let pendingStatus;
+                if (friends.includes(username)) pendingStatus = undefined;
+                else if (pending.includes(username)) pendingStatus = user.username;
+                else {
+                    const userPendingRequests = await getPendingFriendRequests(username, request.headers.authorization) ?? [];
+                    pendingStatus = userPendingRequests.includes(user.username) ? username : undefined;
+                }
+
                 return {
                     username: username,
-                    pending: !friends.includes(username) && username !== "global" ? lastMessage?.author : undefined,
+                    friend: friends.includes(username),
+                    pending: pendingStatus,
                     last: lastMessage.content
                 };
             }));

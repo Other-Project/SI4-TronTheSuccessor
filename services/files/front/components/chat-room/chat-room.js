@@ -5,7 +5,7 @@ export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
 
     static get observedAttributes() {
-        return ["room", "pending"];
+        return ["room", "pending", "friend"];
     }
 
     constructor() {
@@ -22,8 +22,8 @@ export class ChatRoom extends HTMLComponent {
         this.refuseRequestButton = this.shadowRoot.getElementById("refuse-request");
         this.notificationActionButton = this.shadowRoot.getElementById("notification-actions");
         this.sendButton.onclick = () => this.sendMessage();
-        this.acceptRequestButton.onclick = () => this.handleFriendRequest("accept");
-        this.refuseRequestButton.onclick = () => this.handleFriendRequest("refuse");
+        this.acceptRequestButton.onclick = () => this.handleFriendRequest("POST");
+        this.refuseRequestButton.onclick = () => this.handleFriendRequest("DELETE");
     };
 
     onVisible = () => {
@@ -43,7 +43,7 @@ export class ChatRoom extends HTMLComponent {
     #refresh() {
         if (!this.messagePanel) return;
         this.getMessages().then(messages => this.#displayMessages(messages));
-        this.messageInput.disabled = this.sendButton.disabled = this.pending !== "undefined";
+        this.messageInput.disabled = this.sendButton.button.disabled = this.friend === "false";
         if (this.pending !== "undefined") {
             this.messageInput.title = this.sendButton.title = "You need to be friends to send messages";
             this.notificationBanner.classList.remove("hidden");
@@ -52,6 +52,10 @@ export class ChatRoom extends HTMLComponent {
                 this.notificationMessage.textContent = `${this.pending} has sent you a friend request. You can't send messages until you accept it.`;
                 this.notificationActionButton.classList.remove("hidden");
             }
+        } else if (this.friend === "false") {
+            this.messageInput.title = this.sendButton.title = "You need to be friends to send messages";
+            this.notificationBanner.classList.remove("hidden");
+            this.notificationMessage.textContent = `You need to be friends with ${this.room} to send messages.`;
         } else this.#openWebSocket().then();
     }
 
@@ -106,34 +110,33 @@ export class ChatRoom extends HTMLComponent {
     }
 
     #showNotification(message, duration, background, color) {
-        const notification = document.createElement("app-notification");
-        notification.message = message;
-        notification.duration = duration;
-        notification.background = background;
-        notification.color = color;
-        this.shadowRoot.appendChild(notification);
-        notification.show();
+        document.dispatchEvent(new CustomEvent("show-notification", {
+            detail: {
+                message: message,
+                duration: duration,
+                background: background,
+                color: color
+            }
+        }));
     }
 
-    async handleFriendRequest(action) {
+    async handleFriendRequest(method) {
         this.notificationBanner.classList.add("hidden");
-        const endpoint = `/api/user/friends/${action}`;
-        const response = await fetchApi(endpoint, {
-            method: "POST",
-            body: JSON.stringify({
-                friends: this.pending,
-            })
-        });
+        const endpoint = `/api/user/friends/${this.pending}`;
+        const response = await fetchApi(endpoint, {method: method,});
+        const message = method === "POST" ? "Friend request accepted!" : "Friend request refused!";
+
         if (response.ok)
-            this.#showNotification(`Friend request ${action}ed!`, 2000, "#8E24AA", "white");
+            this.#showNotification(message, 2000, "#8E24AA", "white");
         else {
             const error = await response.json();
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
+
         this.dispatchEvent(new CustomEvent('friendRequestHandled', {
             bubbles: true,
             composed: true,
-            detail: {friend: this.pending, action: action}
+            detail: {friend: this.pending, method: method}
         }));
     }
 }

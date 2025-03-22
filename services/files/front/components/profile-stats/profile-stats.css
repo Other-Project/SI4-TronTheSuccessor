@@ -8,13 +8,10 @@
         font-weight: bold;
         fill: white;
         text-anchor: middle;
-    }
 
-    .label {
-        font-size: 0.3em;
-        font-weight: bold;
-        fill: white;
-        text-anchor: middle;
+        .label {
+            font-size: 0.3em;
+        }
     }
 }
 

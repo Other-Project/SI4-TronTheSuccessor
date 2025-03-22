@@ -4,19 +4,19 @@ const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27
 const database = client.db("Tron-the-successor");
 const statsCollection = database.collection("stats");
 const eloToRank = {
-    0: "Line III",
-    100: "Line II",
-    200: "Line I",
-    300: "Triangle III",
-    400: "Triangle II",
-    500: "Triangle I",
-    600: "Square III",
-    700: "Square II",
-    800: "Square I",
-    900: "Pentagon III",
-    1000: "Pentagon II",
-    1100: "Pentagon I",
-    1200: "Hexagon",
+    0: {rank: "Line III", baseRank: "Line"},
+    100: {rank: "Line II", baseRank: "Line"},
+    200: {rank: "Line I", baseRank: "Line"},
+    300: {rank: "Triangle III", baseRank: "Triangle"},
+    400: {rank: "Triangle II", baseRank: "Triangle"},
+    500: {rank: "Triangle I", baseRank: "Triangle"},
+    600: {rank: "Square III", baseRank: "Square"},
+    700: {rank: "Square II", baseRank: "Square"},
+    800: {rank: "Square I", baseRank: "Square"},
+    900: {rank: "Pentagon III", baseRank: "Pentagon"},
+    1000: {rank: "Pentagon II", baseRank: "Pentagon"},
+    1100: {rank: "Pentagon I", baseRank: "Pentagon"},
+    1200: {rank: "Hexagon", baseRank: "Hexagon"},
 };
 exports.BASE_ELO = 300;
 
@@ -28,7 +28,7 @@ exports.BASE_ELO = 300;
 exports.getElo = async function (playerId) {
     const elo = await statsCollection.findOne({playerId});
     return elo?.elo ?? null;
-}
+};
 
 /**
  * Update the ELO of a player.
@@ -43,7 +43,7 @@ exports.updateElo = async function (playerId, newElo) {
         {upsert: true}
     );
     return newElo;
-}
+};
 
 /**
  * Get all ELOs.
@@ -51,110 +51,82 @@ exports.updateElo = async function (playerId, newElo) {
  */
 exports.getAllElo = async function () {
     return await statsCollection.find({}).toArray();
-}
+};
 
 /**
- * Add a game to the player's stats.
+ * Add a game to a Player
  * @param {string} playerId The id of the player.
- * @returns {Promise<number>} The number of games.
+ * @param {number} timePlayed The time of the game.
+ * @returns {Promise<number>}
  */
-exports.addGame = async function (playerId) {
-    const result = await statsCollection.findOneAndUpdate(
+exports.addGame = async function (playerId, timePlayed) {
+    await statsCollection.updateOne(
         {playerId},
-        {$inc: {games: 1}},
-        {returnDocument: "after", upsert: true}
+        {$inc: {games: 1, timePlayed: timePlayed}},
+        {upsert: true}
     );
-    return result.value?.games ?? 1;
-}
-
-/**
- * Add a win to the player's stats.
- * @param {string} playerId The id of the player.
- * @returns {Promise<number>} The number of wins.
- */
-exports.addLoss = async function (playerId) {
-    const result = await statsCollection.findOneAndUpdate(
-        {playerId},
-        {$inc: {losses: 1}},
-        {returnDocument: "after", upsert: true}
-    );
-    return result.value?.losses ?? 1;
-}
+};
 
 /**
  * Add a draw to the player's stats.
- * @param {string} playerId The id of the player.
- * @returns {Promise<number>} The number of draws.
+ * @param {string} playerId id of the player.
+ * @param {string} otherPlayerId The id of the other player.
+ * @returns {Promise<void>}
  */
-exports.addDraw = async function (playerId) {
-    const result = await statsCollection.findOneAndUpdate(
-        {playerId},
-        {$inc: {draws: 1}},
-        {returnDocument: "after", upsert: true}
-    );
-    return result.value?.draws ?? 1;
-}
+exports.addDraw = async function (playerId, otherPlayerId) {
+    await statsCollection.bulkWrite([
+        {
+            updateOne: {
+                filter: {playerId},
+                update: {$inc: {draws: 1}},
+                upsert: true
+            }
+        },
+        {
+            updateOne: {
+                filter: {playerId: otherPlayerId},
+                update: {$inc: {draws: 1}},
+                upsert: true
+            }
+        }
+    ]);
+};
 
 /**
- * Add a win streak to the player's stats.
- * @param playerId
- * @returns {Promise<number|*>}
+ * Add a win for the first player and a loss for the second player and update their win streaks.
+ * @param playerId The id of the player.
+ * @param otherPlayerId The id of the other player.
+ * @returns {Promise<void>}
  */
-exports.addWin = async function (playerId) {
-    const result = await statsCollection.findOneAndUpdate(
-        {playerId},
-        {$inc: {wins: 1}},
-        {returnDocument: "after", upsert: true}
-    );
-    return result.value?.wins ?? 1;
-}
-
-exports.addWinStreak = async function (playerId) {
-    const result = await statsCollection.findOneAndUpdate(
-        {playerId},
-        {$inc: {winStreak: 1}},
-        {returnDocument: "after", upsert: true}
-    );
-    return result.value?.winStreak ?? 1;
-}
-
-/**
- * Reset the win streak of the player.
- * @param playerId
- * @returns {Promise<number|*>}
- */
-exports.resetWinStreak = async function (playerId) {
-    const result = await statsCollection.findOneAndUpdate(
-        {playerId},
-        {$set: {winStreak: 0}},
-        {returnDocument: "after", upsert: true}
-    );
-    return result.value?.winStreak ?? 0;
-}
+exports.addWinAndLoss = async function (playerId, otherPlayerId) {
+    await statsCollection.bulkWrite([
+        {
+            updateOne: {
+                filter: {playerId},
+                update: {$inc: {wins: 1, winStreak: 1}},
+                upsert: true
+            }
+        },
+        {
+            updateOne: {
+                filter: {playerId: otherPlayerId},
+                update: {$inc: {losses: 1}, $set: {winStreak: 0}},
+                upsert: true
+            }
+        }
+    ]);
+};
 
 /**
  * Calculate the rank of a player based on their ELO.
  * @param elo The ELO of the player.
- * @returns {{rank: string, eloInRank: number}} The rank of the player and the ELO in that rank.
+ * @returns {*&{eloInRank: number}}
  */
 function getRank(elo) {
     for (let rankElo of Object.keys(eloToRank).reverse())
-        if (elo >= rankElo) return {rank: eloToRank[rankElo], eloInRank: elo - rankElo};
-    return {rank: "Triangle III", eloInRank: elo};
-}
-
-/**
- * Update the play time of a player.
- * @param playerId
- * @param time
- * @returns {Promise<void>}
- */
-exports.updatePlayTime = async function (playerId, time) {
-    await statsCollection.updateOne(
-        {playerId},
-        {$inc: {timePlayed: time}},
-        {upsert: true}
-    );
+        if (elo >= rankElo)
+            return {...eloToRank[rankElo], eloInRank: elo - rankElo};
+    return {...eloToRank[exports.BASE_ELO], eloInRank: elo}; // Default to "Triangle III"
 }
 
 /**
@@ -180,6 +152,6 @@ exports.getAllStats = async function (playerId) {
         {$set: updatedStats}
     );
 
-    const {rank, eloInRank} = getRank(updatedStats.elo);
-    return {...updatedStats, rank, eloInRank};
-}
+    const {rank, eloInRank, baseRank} = getRank(updatedStats.elo);
+    return {...updatedStats, rank, eloInRank, baseRank};
+};

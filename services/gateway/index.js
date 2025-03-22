@@ -81,12 +81,8 @@ function requestHandler(request, response) {
         return;
     }
 
-    try {
-        proxy.web(request, response, {target: service});
-        console.log(`Proxied ${request.url} to ${service}`);
-    } catch (error) {
-        responseError(request, response, "Proxy error", error, 502);
-    }
+    proxy.web(request, response, {target: service}, (error) => responseError(request, response, "Proxy error", error, 502));
+    console.log(`Proxying ${request.url} to ${service}`);
 }
 
 /**
@@ -98,7 +94,7 @@ function requestHandler(request, response) {
  * @param code The status code to send
  */
 function responseError(request, response, message, error, code) {
-    console.warn(`error while processing ${request.url}: ${error}`);
+    console.warn(`Error while processing ${request.url}: ${error}`);
     response.statusCode = code;
     response.end(message);
 }

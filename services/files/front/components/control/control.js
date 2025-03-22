@@ -23,7 +23,7 @@ export class Control extends HTMLComponent {
     gridSize = [4, 3];
 
     constructor() {
-        super();
+        super("control");
 
         this.gameBoard = document.createElement("app-game-board");
         this.shadowRoot.appendChild(this.gameBoard);

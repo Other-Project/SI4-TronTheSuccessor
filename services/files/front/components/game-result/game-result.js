@@ -90,7 +90,6 @@ export class GameResult extends HTMLComponent {
         this.boardRange.max = this.gameActions.length - 1;
         this.#initializePlayers();
         this.#drawTillTurn(0);
-        this.shadowRoot.getElementById("container").style.display = "block";
     }
 
     formatGameLength(durationInMsSeconds) {

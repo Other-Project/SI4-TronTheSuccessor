@@ -64,5 +64,7 @@ customElements.define("app-chat-selection", ChatSelection);
 customElements.define("app-chat-room-button", ChatRoomButton);
 customElements.define("app-chat-room", ChatRoom);
 customElements.define("app-chat-room-message", ChatRoomMessage);
+
+// History components
 customElements.define("app-game-result", GameResult);
 customElements.define("app-profile-history", ProfileHistory);

@@ -2,7 +2,6 @@ const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
 const {addElo, getElo} = require("./helper/eloHelper.js");
 const {getRequestBody, sendResponse, getAuthorizationToken} = require("./js/utils.js");
-const {getAuthorizationToken} = require("./js/utils.js");
 
 const HTTP_STATUS = {
     OK: 200,

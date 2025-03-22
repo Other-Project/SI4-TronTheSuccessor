@@ -76,8 +76,10 @@ export class Game extends EventTarget {
 
     updateGrid(player) {
         if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) player.dead = true;
-        else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) player.dead = true;
-        else this.grid[player.pos[1]][player.pos[0]] = player.number;
+        else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) {
+            player.dead = true;
+            this.grid[player.pos[1]][player.pos[0]] = -1;
+        } else this.grid[player.pos[1]][player.pos[0]] = player.number;
     }
 
     #gameTurn() {

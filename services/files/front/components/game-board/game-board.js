@@ -5,6 +5,7 @@ export class GameBoard extends HTMLComponent {
     cellSize = 100;
     playerSize = 75;
     unconqueredColor = "#242424";
+    collisionColor = "#f43535";
 
     constructor() {
         super("/components/game-board/", null, "game-board.css");
@@ -35,7 +36,7 @@ export class GameBoard extends HTMLComponent {
 
     #drawHexagons(game) {
         game.grid.forEach((row, y) => row.forEach((cell, x) => {
-            if (cell !== null) this.#drawHexagon(x, y, game.players[cell - 1]?.color || this.unconqueredColor);
+            if (cell !== null) this.#drawHexagon(x, y, game.players[cell - 1]?.color || (cell === 0 ? this.unconqueredColor : this.collisionColor));
         }));
     }
 

@@ -88,9 +88,8 @@ async function startGame(p1s, p2s = null) {
             if (p2s) {
                 updateElos(game.players, event.detail);
                 game.players.forEach((player, index) => updateHistory(player.name, index + 1, game.players[game.players.length - 1 - index].name, game.gameActions, event.detail.winner, event.detail.elapsed));
-            } else {
-                updateHistory(p1s.username, 1, "flowbird", game.gameActions, event.detail.winner, event.detail.elapsed);
-            }
+            } else
+                updateHistory(game.players[0].name, 1, "FlowBird", game.gameActions, event.detail.winner, event.detail.elapsed);
         }
     });
     game.init();

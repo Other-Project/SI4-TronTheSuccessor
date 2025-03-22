@@ -1,4 +1,4 @@
-import {Player} from "/js/player.js";
+import {directionToAngle, Player} from "/js/player.js";
 
 export class Game extends EventTarget {
     gridSize;
@@ -107,8 +107,9 @@ export class Game extends EventTarget {
         }));
     }
 
-    setPlayerStates(playerStates) {
-        playerStates.forEach((state, i) => this.players[i] = { ...this.players[i], ...state });
+    setPlayerStates(playerStates, reverse = false) {
+        if (reverse) playerStates = this.playerStatesTransform(playerStates, true);
+        playerStates.forEach((state, i) => this.players[i] = {...this.players[i], ...state});
     }
 
     /**
@@ -130,5 +131,15 @@ export class Game extends EventTarget {
             case "down-left":
                 return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] + 1] : [currentPosition[0] - 1, currentPosition[1] + 1];
         }
+    }
+
+    playerStatesTransform(playerStates, reverse = false) {
+        if (!reverse) return playerStates;
+        const directions = Object.keys(directionToAngle);
+        return playerStates.toReversed().map(state => ({
+            pos: [(state.pos[1] % 2 ? 14 : 15) - state.pos[0], 8 - state.pos[1]],
+            direction: directions[(directions.indexOf(state.direction) + 3) % 6],
+            dead: state.dead
+        }));
     }
 }

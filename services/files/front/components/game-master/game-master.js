@@ -131,7 +131,7 @@ export class GameMaster extends HTMLComponent {
             const msgPlayers = reverse ? msg.players.toReversed() : msg.players;
             const players = msgPlayers.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
-            this.game.players.forEach((player, i) => player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse)));
+            this.game.players.forEach((player, i) => player.init(i + 1, this.game.playerStatesTransform(msg.playerStates, reverse)));
             this.#applyMessage(msg, reverse);
             this.waitingWindow.style.display = "none";
         });
@@ -154,18 +154,8 @@ export class GameMaster extends HTMLComponent {
 
     #applyMessage(msg, reverse = false) {
         this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed()) : msg.grid;
-        this.game.setPlayerStates(this.#playerStatesTransform(msg.playerStates, reverse));
+        this.game.setPlayerStates(msg.playerStates, reverse);
         this.gameBoard.draw(this.game);
         if (msg.ended) this.endScreen(msg);
-    }
-
-    #playerStatesTransform(playerStates, reverse = false) {
-        if (!reverse) return playerStates;
-        const directions = Object.keys(directionToAngle);
-        return playerStates.toReversed().map(state => ({
-            pos: [(state.pos[1] % 2 ? 14 : 15) - state.pos[0], 8 - state.pos[1]],
-            direction: directions[(directions.indexOf(state.direction) + 3) % 6],
-            dead: state.dead
-        }));
     }
 }

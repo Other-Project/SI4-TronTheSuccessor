@@ -22,6 +22,6 @@ exports.addGame = async function (playerName, playerNum, opponentName, gameActio
 /**
  * Get the player's history.
  */
-exports.getHistory = async function (playerName) {
-    return await historyCollection.find({playerName: playerName}).toArray();
+exports.getHistory = async function (playerName, limit = 10) {
+    return await historyCollection.find({playerName: playerName}).sort({date: -1}).limit(limit).toArray();
 };

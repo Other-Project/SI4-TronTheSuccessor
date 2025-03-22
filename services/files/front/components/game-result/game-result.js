@@ -145,7 +145,7 @@ export class GameResult extends HTMLComponent {
 
     #renderGameState(turnIndex) {
         if (!this.gameActions || turnIndex >= this.gameActions.length) return;
-        this.game.setPlayerStates(this.gameActions[turnIndex]);
+        this.game.setPlayerStates(this.gameActions[turnIndex], this.#gameData.playerNum === 2);
         this.game.players.forEach(player => {
             this.game.updateGrid(player);
         });

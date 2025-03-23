@@ -1,0 +1,75 @@
+#board-container {
+    display: flex;
+    border-radius: 10px;
+    flex-direction: column;
+    align-items: center;
+    background-color: #1C1A1AFF;
+    padding: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+label {
+    visibility: hidden;
+}
+
+.controls-container {
+    display: flex;
+    margin-top: 15px;
+    gap: 15px;
+}
+
+#play-pause, #next-btn, #previous-btn {
+    background-color: #333;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: #555;
+    }
+}
+
+#play-pause img, #next-btn img, #previous-btn img {
+    height: 25px;
+}
+
+#board-range {
+    width: 50%;
+    height: 6px;
+    appearance: none;
+    background: transparent;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* This is the CSS for Chromium based browsers */
+#board-range::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #9578c1 0%, #7029ac 100%);
+    border-radius: 3px;
+}
+
+#board-range::-webkit-slider-thumb {
+    background: #fff;
+    border-radius: 50%;
+    border: 3px solid #000002;
+}
+
+/* This is the CSS for Firefox */
+#board-range::-moz-range-track {
+    background: linear-gradient(to right, #aa94cc 0%, #5c00ac 100%);
+    border-radius: 3px;
+}
+
+#board-range::-moz-range-thumb {
+    appearance: none;
+    background: #000002;
+    border-radius: 50%;
+    border: 2px solid rgb(102, 26, 113);
+}

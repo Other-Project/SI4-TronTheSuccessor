@@ -25,6 +25,7 @@ import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.j
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
 import {GameResult} from "/components/game-result/game-result.js";
 import {ProfileHistory} from "/components/profile-history/profile-history.js";
+import {Replay} from "/components/replay/replay.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -68,3 +69,4 @@ customElements.define("app-chat-room-message", ChatRoomMessage);
 // History components
 customElements.define("app-game-result", GameResult);
 customElements.define("app-profile-history", ProfileHistory);
+customElements.define("app-replay", Replay);

@@ -138,7 +138,16 @@ exports.getFriends = async function (playerId) {
 exports.getPendingFriendRequests = async function (playerId) {
     const user = await userCollection.findOne({username: playerId});
     return user ? user.pendingFriendRequests : [];
-}
+};
+
+/**
+ * Get the pending friend requests for a user
+ * @param username The username of the user
+ * @returns {Promise<string[]>} The username of the users who sent a friend request
+ */
+exports.getPendingFriendRequestsForUser = async function (username) {
+    return await userCollection.distinct("username", {pendingFriendRequests: username});
+};
 
 /**
  * Remove a friend from a player

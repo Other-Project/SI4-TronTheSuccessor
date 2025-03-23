@@ -34,13 +34,3 @@ async function makeHttpRequest(method, path, authorization, data = null) {
 exports.getFriendsList = async function (authorization) {
     return makeHttpRequest("GET", `api/user/friends`, authorization);
 };
-
-/**
- * Get the pending friend requests.
- * @param username The username
- * @param authorization The authorization
- * @returns {Promise<*>} The pending friend requests
- */
-exports.getPendingFriendRequests = async function (username, authorization) {
-    return makeHttpRequest("GET", `api/user/friends/pending/${username}`, authorization);
-};

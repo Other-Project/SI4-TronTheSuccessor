@@ -4,12 +4,12 @@ import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
 
-    static get observedAttributes() {
-        return ["room", "pending", "friend"];
-    }
-
     constructor() {
         super("chat-room", ["html", "css"]);
+    }
+
+    static get observedAttributes() {
+        return ["room", "pending", "friend"];
     }
 
     onSetupCompleted = () => {
@@ -47,17 +47,15 @@ export class ChatRoom extends HTMLComponent {
         const showNotification = this.pending !== "undefined" || this.friend === "false";
         this.messageInput.title = this.sendButton.title = showNotification ? "You need to be friends to send messages" : "";
         this.notificationBanner.classList.toggle("hidden", !showNotification);
-        this.notificationActionButton.classList.toggle("hidden", this.pending !== "undefined");
+        this.notificationActionButton.classList.toggle("hidden", this.pending === "undefined");
 
         if (this.pending !== "undefined")
             this.notificationMessage.textContent = this.pending === getUserInfo()?.username
                 ? `Your friend request has not been accepted yet,  You can't send messages until they accept it.`
                 : `${this.pending} has sent you a friend request. You can't send messages until you accept it.`;
-        else if (this.friend === "false") {
-            this.messageInput.title = this.sendButton.title = "You need to be friends to send messages";
-            this.notificationBanner.classList.remove("hidden");
+        else if (this.friend === "false")
             this.notificationMessage.textContent = `You need to be friends with ${this.room} to send messages.`;
-        } else this.#openWebSocket().then();
+        else this.#openWebSocket().then();
     }
 
     #displayMessages(messages) {

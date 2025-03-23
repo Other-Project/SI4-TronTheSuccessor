@@ -1,7 +1,7 @@
 const userDatabase = require("./userDatabase.js");
 const {sendResponse, getUser} = require('./utils.js');
 const {HTTP_STATUS} = require('./utils.js');
-const {sendFriendRequest, removeFriendRequests} = require('../helper/chatHelper.js');
+const {sendFriendRequest} = require('../helper/chatHelper.js');
 
 /**
  * Handles checking if the user exists
@@ -33,22 +33,9 @@ exports.handleGetFriends = async function (request, response) {
     }
     const friends = await userDatabase.getFriends(user.username);
     const pending = await userDatabase.getPendingFriendRequests(user.username);
-    const result = {friends, pending};
+    const pendingForUser = await userDatabase.getPendingFriendRequestsForUser(user.username);
+    const result = {friends, pending, pendingForUser};
     sendResponse(response, HTTP_STATUS.OK, result);
-};
-
-exports.handleGetPending = async function (request, response, username) {
-    const user = getUser(request);
-    if (!user) {
-        sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
-        return;
-    }
-    const pending = await userDatabase.getPendingFriendRequests(username);
-    if (!pending) {
-        sendResponse(response, HTTP_STATUS.NOT_FOUND, {error: "User not found"});
-        return;
-    }
-    sendResponse(response, HTTP_STATUS.OK, pending);
 };
 
 exports.handleAddFriend = async function (request, response, friend) {
@@ -63,7 +50,7 @@ exports.handleAddFriend = async function (request, response, friend) {
         sendResponse(response, HTTP_STATUS.OK, friend);
     else
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Friend request already sent"});
-}
+};
 
 exports.handleRemoveFriend = async function (request, response, friend) {
     const user = getUser(request);
@@ -76,7 +63,7 @@ exports.handleRemoveFriend = async function (request, response, friend) {
         sendResponse(response, HTTP_STATUS.OK, friend);
     else
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request or you are not friends"});
-}
+};
 
 /**
  * Checks if the request is valid for adding or removing friends

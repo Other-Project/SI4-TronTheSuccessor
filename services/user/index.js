@@ -5,8 +5,7 @@ const {
     handleGetFriends,
     handleGetUser,
     handleRemoveFriend,
-    handleAddFriend,
-    handleGetPending
+    handleAddFriend
 } = require("./js/social.js");
 const {HTTP_STATUS} = require("./js/utils.js");
 const {getAuthorizationToken} = require("./js/utils.js");
@@ -42,9 +41,7 @@ http.createServer(async (request, response) => {
                     await handleGetUser(request, response, filePath[4]);
                 break;
             case "friends":
-                if (request.method === "GET" && filePath[4] === "pending")
-                    await handleGetPending(request, response, filePath[5]);
-                else if (request.method === "GET")
+                if (request.method === "GET")
                     await handleGetFriends(request, response);
                 else if (request.method === "POST")
                     await handleAddFriend(request, response, filePath[4]);

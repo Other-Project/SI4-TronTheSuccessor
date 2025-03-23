@@ -6,6 +6,12 @@ const historyCollection = database.collection("history");
 
 /**
  * Add a new game to the player's history.
+ * @param playerName The player's name
+ * @param playerNum The player's number, if the player is player 1 or 2
+ * @param opponentName The name of the opponent
+ * @param gameActions The actions of both players during the game
+ * @param winner The winner of the game (undefined if draw)
+ * @param timeElapsed The game's duration
  */
 exports.addGame = async function (playerName, playerNum, opponentName, gameActions, winner, timeElapsed) {
     await historyCollection.insertOne({
@@ -21,6 +27,8 @@ exports.addGame = async function (playerName, playerNum, opponentName, gameActio
 
 /**
  * Get the player's history.
+ * @param playerName The player's name
+ * @param limit The maximum number of games to return
  */
 exports.getHistory = async function (playerName, limit = 10) {
     return await historyCollection.find({playerName: playerName}).sort({date: -1}).limit(limit).toArray();

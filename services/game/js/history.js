@@ -5,16 +5,15 @@ const {getUser, sendResponse, HTTP_STATUS} = require("./utils.js");
  * Get the history of a user
  * @param request The request
  * @param response The response
- * @param username The username of the user
  * @returns {Promise<void>}
  */
-exports.handleGetHistory = async function (request, response, username) {
+exports.handleGetHistory = async function (request, response) {
     let user = getUser(request);
-    if (!user || user.username !== username) {
+    if (!user) {
         await sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
         return;
     }
-    const histories = await historyDatabase.getHistory(username);
+    const histories = await historyDatabase.getHistory(user.username);
     if (!histories) {
         await sendResponse(response, HTTP_STATUS.NOT_FOUND);
         return;

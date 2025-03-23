@@ -13,16 +13,15 @@ export class ProfileHistory extends HTMLComponent {
 
     async #getUserHistory() {
         const user = getUserInfo();
-        if (user) {
-            const response = await fetchApi("/api/game/history/" + user.username, null);
-            const data = await response.json();
-            const gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
-            gameResultsContainer.innerHTML = "";
-            for (const game of data) {
-                const gameResult = document.createElement("app-game-result");
-                gameResult.gameData = game;
-                gameResultsContainer.appendChild(gameResult);
-            }
+        if (!user) return;
+        const response = await fetchApi("/api/game/history", null);
+        const data = await response.json();
+        const gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
+        gameResultsContainer.innerHTML = "";
+        for (const game of data) {
+            const gameResult = document.createElement("app-game-result");
+            gameResult.gameData = game;
+            gameResultsContainer.appendChild(gameResult);
         }
     }
 }

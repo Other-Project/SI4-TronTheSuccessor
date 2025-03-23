@@ -26,9 +26,8 @@ let server = http.createServer(async (request, response) => {
                 }
                 break;
             case "history":
-                if (request.method === "GET") {
-                    await handleGetHistory(request, response, filePath[4]);
-                }
+                if (request.method === "GET")
+                    await handleGetHistory(request, response);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

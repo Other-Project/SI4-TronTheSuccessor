@@ -4,13 +4,10 @@
     background-color: #444;
     border-radius: 10px;
     padding: 15px 20px;
+    margin-bottom: 15px;
     box-sizing: border-box;
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-#game-result-container {
-    margin-bottom: 5px;
     transition: transform 0.2s ease;
 
     &:hover {
@@ -56,15 +53,11 @@ p {
 .game-length {
     display: flex;
     flex-direction: column;
+    color: #aaa;
 }
 
 .game-length-label {
     font-size: 14px;
-    color: #aaa;
-}
-
-.date {
-    color: #aaa;
 }
 
 #board-container {
@@ -124,8 +117,12 @@ label {
 
 #chevron {
     filter: invert();
-    height: 35px;
+    height: 50px;
     cursor: pointer;
+    grid-column: 3;
+    justify-self: center;
+    margin-bottom: -20px;
+    margin-top: -15px;
 
     &.rotate {
         transform: rotate(180deg);

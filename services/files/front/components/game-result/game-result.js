@@ -26,7 +26,7 @@ export class GameResult extends HTMLComponent {
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.boardContainer = this.shadowRoot.getElementById("board-container");
         this.chevron = this.shadowRoot.getElementById("chevron");
-        this.shadowRoot.getElementById("game-result-container").addEventListener("click", () => {
+        this.shadowRoot.getElementById("game-result").addEventListener("click", () => {
             if (!this.boardContainer.classList.toggle("show")) clearInterval(this.replayTimer);
             this.chevron.classList.toggle("rotate");
         });

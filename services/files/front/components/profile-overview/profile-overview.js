@@ -36,10 +36,16 @@ export class ProfileOverview extends HTMLComponent {
         const response = await fetchApi(`/api/user/friends/${friend}`, {
             method: action === "add" ? "POST" : "DELETE",
         });
-        if (response.ok)
-            this.#showNotification(action === "add"
-                ? "Friend request sent!" : "Friend removed", 2000, "#8E24AA", "white");
-        else {
+        if (response.ok) {
+            if (action === "add") {
+                this.addFriend.button.disabled = true;
+                this.addFriend.title = "Friend request already sent";
+                this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
+            } else {
+                this.buttons.classList.toggle("add");
+                this.#showNotification("Friend removed", 2000, "#8E24AA", "white");
+            }
+        } else {
             const error = await response.json();
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }

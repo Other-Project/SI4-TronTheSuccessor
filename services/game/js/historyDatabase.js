@@ -28,8 +28,11 @@ exports.addGame = async function (playerName, playerNum, opponentName, gameActio
 /**
  * Get the player's history.
  * @param playerName The player's name
- * @param limit The maximum number of games to return
+ * @param {string} from The timestamp from which to get the messages (optional)
+ * @param limit The maximum number of games to return (Default: 10)
  */
-exports.getHistory = async function (playerName, limit = 10) {
-    return await historyCollection.find({playerName: playerName}).sort({date: -1}).limit(limit).toArray();
+exports.getHistory = async function (playerName, from = undefined, limit = 10) {
+    let query = {playerName};
+    if (from) query.date = {$gt: from};
+    return await historyCollection.find(query).sort({date: -1}).limit(limit).toArray();
 };

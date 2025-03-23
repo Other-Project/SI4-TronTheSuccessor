@@ -85,11 +85,29 @@ export class GameResult extends HTMLComponent {
 
         opponentElement.textContent = this.#gameData.opponentName;
         gameLengthValue.textContent = this.formatGameLength(this.#gameData.timeElapsed);
-        dateElement.textContent = new Date(this.#gameData.date).toLocaleDateString();
+        dateElement.textContent = this.formatDate(this.#gameData.date);
         this.gameActions = this.#gameData.gameActions;
         this.boardRange.max = this.gameActions.length - 1;
         this.#initializePlayers();
         this.#drawTillTurn(0);
+    }
+
+    formatDate(dateString) {
+        const date = new Date(dateString);
+
+        const dateFormatted = date.toLocaleDateString("fr-FR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+
+        const timeFormatted = date.toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
+
+        return `${dateFormatted}\n${timeFormatted}`;
     }
 
     formatGameLength(durationInMsSeconds) {

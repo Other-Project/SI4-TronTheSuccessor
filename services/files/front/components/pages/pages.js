@@ -21,16 +21,25 @@ export class Pages extends HTMLComponent {
         this.errorPage = this.shadowRoot.getElementById("404");
     };
 
-    onVisible = () => this.#showElement(location.pathname.split("/")[this.level] ?? "");
+    onVisible = () => {
+        const elemId = location.pathname.split("/")[this.level] ?? "";
+        if (elemId === this.currentPage) {
+            this.#showElement(null); // "Refresh" the page
+            setTimeout(() => this.#showElement(elemId), 0);
+        } else this.#showElement(elemId);
+    }
 
     /**
-     * @param {string} elementId The id of the page to show.
+     * @param {string|null} elementId The id of the page to show.
      * @param {{string: string}} attr The attributes to set to the page.
      */
     #showElement(elementId, attr = undefined) {
         const elements = this.pageSlot.assignedElements();
-        const idExists = elements.some(el => el.id === elementId);
-        if (!idExists) elementId = "404";
+        if (elementId !== null) {
+            const idExists = elements.some(el => el.id === elementId);
+            if (!idExists) elementId = "404";
+        }
+        this.currentPage = elementId;
 
         [...elements, this.errorPage].forEach(element => {
             if (element.id === elementId) {
@@ -45,10 +54,11 @@ export class Pages extends HTMLComponent {
  * Change the page without reloading the website.
  * @param {string} page URL of the page to show
  * @param {boolean} redirect If true, the history will be replaced instead of pushed
+ * @param {boolean} forceRefresh If true, the page will be refreshed even if it is the current page
  */
-export function changePage(page, redirect = false) {
+export function changePage(page, redirect = false, forceRefresh = undefined) {
     const state = page;
-    if (history.state === state) return;
+    if (!forceRefresh && history.state === state) return;
     if (redirect) history.replaceState(state, "", page);
     else history.pushState(state, "", page);
     window.dispatchEvent(new PopStateEvent("popstate", {state: state}));

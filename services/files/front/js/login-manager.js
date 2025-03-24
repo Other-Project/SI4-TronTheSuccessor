@@ -24,9 +24,7 @@ export function disconnect() {
 }
 
 export function fakePageReload() {
-    const path = location.pathname + location.search + location.hash;
-    changePage("/reload", true);
-    setTimeout(() => changePage(path, true), 10);
+    changePage(location.pathname + location.search + location.hash, true, true);
 }
 
 export function storeTokens(data) {

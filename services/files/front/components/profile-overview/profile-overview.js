@@ -70,7 +70,13 @@ export class ProfileOverview extends HTMLComponent {
     };
 
     #getFriends = async () => {
-        return await fetchApi("/api/user/friends", {method: "GET"}).then(response => response.json());
+        const response = await fetchApi("/api/user/friends", {method: "GET"});
+        const friends = await response.json();
+        return {
+            friends: friends?.friends ?? [],
+            pending: friends?.pending ?? [],
+            pendingForUser: friends?.pendingForUser ?? []
+        };
     };
 
     #refresh() {
@@ -80,6 +86,11 @@ export class ProfileOverview extends HTMLComponent {
 
         if (!this.friends.friends.includes(this.stats.username))
             this.buttons.classList.toggle("add");
+
+        if (this.friends.pending.includes(this.stats.username)) {
+            this.addFriend.button.disabled = true;
+            this.addFriend.title = "Friend request already sent";
+        }
 
         this.addFriend.addEventListener("click", async () => {
             if (!this.stats.loggedusername) {

@@ -16,6 +16,8 @@ export class ChatTab extends HTMLComponent {
         const chatPage = document.createElement("app-chat-room");
         this.dataset.tabTitle = room.name;
         chatPage.setAttribute("room", room.id);
+        chatPage.setAttribute("pending", room.pending);
+        chatPage.setAttribute("friend", room.friend);
         this.shadowRoot.replaceChildren(chatPage);
     }
 }

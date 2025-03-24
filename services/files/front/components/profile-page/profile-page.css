@@ -1,0 +1,23 @@
+#profile-page {
+    height: 100vh;
+
+    #not-found-message {
+        display: none;
+    }
+
+    &.not-found {
+        #not-found-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            font-size: 3em;
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 80px #ff00ff;
+        }
+
+        #tab-navigation {
+            display: none;
+        }
+    }
+}

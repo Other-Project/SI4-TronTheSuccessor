@@ -3,26 +3,22 @@ const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
-const {randomUUID} = require("crypto");
-const {updateElos, handleAddElo, handleGetElo} = require("./js/elo.js");
+const {randomUUID} = require('crypto');
+const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
 
-const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"]
+const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
 
     try {
         switch (filePath[3]) {
+            case "stats":
+                if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
+                break;
             case "emotes":
                 sendResponse(response, HTTP_STATUS.OK, {emotes});
-                break;
-            case "elo":
-                if (request.method === "POST") await handleAddElo(request, response);
-                else if (request.method === "GET") await handleGetElo(request, response, filePath[4]);
-                else {
-                    sendResponse(response, HTTP_STATUS.NOT_FOUND);
-                }
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
@@ -92,7 +88,7 @@ async function startGame(p1s, p2s = null) {
         io.to(id).emit("game-turn", event.detail);
         if (event.detail.ended) {
             io.in(id).disconnectSockets();
-            if (p2s) updateElos(game.players, event.detail);
+            if (p2s) updateStats(game.players, event.detail);
         }
     });
     game.init();

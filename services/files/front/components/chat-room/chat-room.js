@@ -4,19 +4,26 @@ import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
 
-    static get observedAttributes() {
-        return ["room"];
-    }
-
     constructor() {
         super("chat-room", ["html", "css"]);
+    }
+
+    static get observedAttributes() {
+        return ["room", "pending", "friend"];
     }
 
     onSetupCompleted = () => {
         this.messagePanel = this.shadowRoot.getElementById("messages");
         this.messageInput = this.shadowRoot.getElementById("message-input");
         this.sendButton = this.shadowRoot.getElementById("send");
+        this.notificationBanner = this.shadowRoot.getElementById("notification-banner");
+        this.notificationMessage = this.shadowRoot.getElementById("notification-message");
+        this.acceptRequestButton = this.shadowRoot.getElementById("accept-request");
+        this.refuseRequestButton = this.shadowRoot.getElementById("refuse-request");
+        this.notificationActionButton = this.shadowRoot.getElementById("notification-actions");
         this.sendButton.onclick = () => this.sendMessage();
+        this.acceptRequestButton.onclick = () => this.handleFriendRequest("POST");
+        this.refuseRequestButton.onclick = () => this.handleFriendRequest("DELETE");
     };
 
     onVisible = () => {
@@ -24,7 +31,7 @@ export class ChatRoom extends HTMLComponent {
     };
 
     onHidden = () => {
-        this.socket.disconnect();
+        if (this.socket) this.socket.disconnect();
         this.socket = null;
     };
 
@@ -36,7 +43,19 @@ export class ChatRoom extends HTMLComponent {
     #refresh() {
         if (!this.messagePanel) return;
         this.getMessages().then(messages => this.#displayMessages(messages));
-        this.#openWebSocket().then();
+        this.messageInput.disabled = this.sendButton.button.disabled = this.friend === "false";
+        const showNotification = this.pending !== "undefined" || this.friend === "false";
+        this.messageInput.title = this.sendButton.title = showNotification ? "You need to be friends to send messages" : "";
+        this.notificationBanner.classList.toggle("hidden", !showNotification);
+        this.notificationActionButton.classList.toggle("hidden", this.pending === "undefined" || this.pending === getUserInfo()?.username);
+
+        if (this.pending !== "undefined")
+            this.notificationMessage.textContent = this.pending === getUserInfo()?.username
+                ? `Your friend request has not been accepted yet,  You can't send messages until they accept it.`
+                : `${this.pending} has sent you a friend request. You can't send messages until you accept it.`;
+        else if (this.friend === "false")
+            this.notificationMessage.textContent = `You need to be friends with ${this.room} to send messages.`;
+        else this.#openWebSocket().then();
     }
 
     #displayMessages(messages) {
@@ -87,5 +106,36 @@ export class ChatRoom extends HTMLComponent {
         const ok = await new Promise(resolve => this.socket.timeout(5000).emit("message", message, (err, ack) => resolve(!err && ack)));
         if (ok) this.messageInput.value = "";
         else alert("Failed to send message");
+    }
+
+    #showNotification(message, duration, background, color) {
+        document.dispatchEvent(new CustomEvent("show-notification", {
+            detail: {
+                message: message,
+                duration: duration,
+                background: background,
+                color: color
+            }
+        }));
+    }
+
+    async handleFriendRequest(method) {
+        this.notificationBanner.classList.add("hidden");
+        const endpoint = `/api/user/friends/${this.pending}`;
+        const response = await fetchApi(endpoint, {method: method});
+        const message = method === "POST" ? "Friend request accepted!" : "Friend request refused!";
+
+        if (response.ok)
+            this.#showNotification(message, 2000, "#8E24AA", "white");
+        else {
+            const error = await response.json();
+            this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
+        }
+
+        this.dispatchEvent(new CustomEvent('friendRequestHandled', {
+            bubbles: true,
+            composed: true,
+            detail: {friend: this.pending, method: method}
+        }));
     }
 }

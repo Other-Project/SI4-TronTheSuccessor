@@ -159,7 +159,7 @@ export class GameMaster extends HTMLComponent {
             this.#startTimer();
             this.game.players.forEach((player, i) => {
                 this.playersName[i].innerText = player.name;
-                player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse))
+                player.init(i + 1, this.#playerStatesTransform(msg.playerStates, reverse));
             });
             this.#applyMessage(msg, reverse);
             this.waitingWindow.style.display = "none";

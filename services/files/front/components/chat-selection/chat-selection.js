@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {fetchApi} from "/js/login-manager.js";
 
 export class ChatSelection extends HTMLComponent {
     constructor() {
@@ -8,6 +9,7 @@ export class ChatSelection extends HTMLComponent {
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
+        document.addEventListener('friendRequestHandled', this.#refresh);
     }
 
     onVisible = async () => {
@@ -15,9 +17,24 @@ export class ChatSelection extends HTMLComponent {
         this.#updateFriendListPanel();
     };
 
-    openChatRoom(roomId, roomName) {
-        this.dispatchEvent(new CustomEvent("room-selected", {detail: {id: roomId, name: roomName}}));
+    openChatRoom(roomId, roomName, pending, friend) {
+        this.dispatchEvent(new CustomEvent("room-selected", {
+            detail: {
+                id: roomId,
+                name: roomName,
+                pending: pending,
+                friend: friend
+            }
+        }));
     }
+
+    #refresh = async (event) => {
+        const friend = event?.detail?.friend;
+        const method = event?.detail?.method;
+        this.friendList = await this.#getFriendList();
+        this.#updateFriendListPanel();
+        this.openChatRoom(friend, friend, "undefined", method === "POST" ? "true" : "false");
+    };
 
     #updateFriendListPanel() {
         this.friendListPanel.innerHTML = "";
@@ -26,18 +43,23 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("icon", friend.icon ?? "/assets/profile.svg");
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
-            friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name));
+            friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
         }
     }
 
     async #getFriendList() {
-        // TODO: Fetch friend list
-        return Array.from(Array(15), (_, i) => ({
-            id: i,
-            name: `Friend ${i}`,
-            preview: "Hello there!",
-            icon: null
+        let chatRooms = await fetchApi(
+            `/api/chat`,
+            {method: "GET"}
+        ).then(response => response.json());
+        return chatRooms.map(friend => ({
+            id: friend.username,
+            name: friend.username,
+            preview: friend.last,
+            icon: null,
+            pending: friend.pending,
+            friend: friend.friend
         }));
     }
 }

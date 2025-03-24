@@ -21,6 +21,14 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement = this.shadowRoot.getElementById("sender-name");
         this.contentElement = this.shadowRoot.getElementById("message-content");
         this.dateElement = this.shadowRoot.getElementById("message-date");
+        this.authorElement.addEventListener("click", () => {
+            if (this.you)
+                document.dispatchEvent(new CustomEvent("menu-selection", {
+                    detail: "profile"
+                }));
+            else
+                window.location.href = `?username=${this.author}#profile`;
+        });
     };
 
     onVisible = () => this.#refresh();

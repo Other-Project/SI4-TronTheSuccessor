@@ -11,6 +11,7 @@ export class ProfileDisplay extends HTMLComponent {
     onSetupCompleted = async () => {
         this.dropDownMenu = this.shadowRoot.getElementById("dropdown-menu");
         this.loginContainer = this.shadowRoot.getElementById("login-container");
+        this.profileMenu = this.shadowRoot.getElementById("profile-menu");
         this.container = this.shadowRoot.getElementById("container");
         this.username = this.shadowRoot.getElementById("username");
 
@@ -21,9 +22,10 @@ export class ProfileDisplay extends HTMLComponent {
 
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
-
         this.shadowRoot.getElementById("profile-menu").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "profile"}));
+            document.dispatchEvent(new CustomEvent("menu-selection", {
+                detail: "profile"
+            }));
         });
     };
 

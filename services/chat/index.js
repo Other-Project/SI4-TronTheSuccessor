@@ -2,6 +2,7 @@ const http = require("http");
 const {Server} = require("socket.io");
 const chatDatabase = require("./js/chatDatabase.js");
 const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
+const {getFriendsList} = require("./helper/userHelper.js");
 const {getRoomId} = require("./js/chatDatabase.js");
 
 
@@ -25,7 +26,35 @@ const server = http.createServer(async (request, response) => {
             io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
             return sendResponse(response, HTTP_STATUS.CREATED);
         }
-    } else return sendResponse(response, HTTP_STATUS.NOT_FOUND);
+    } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
+        if (request.method === "GET") {
+            const messages = await chatDatabase.getAllRoom(user.username);
+            const allFriends = await getFriendsList(request.headers.authorization);
+            const friends = allFriends.friends ?? [];
+            const pendingFromUser = allFriends.pending ?? [];
+            const pendingForUser = allFriends.pendingForUser ?? [];
+
+            const chatBox = await Promise.all(messages.map(async username => {
+                const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, 1);
+                const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
+
+                let pendingStatus;
+                if (friends.includes(username)) pendingStatus = undefined;
+                else if (pendingFromUser.includes(username)) pendingStatus = user.username;
+                else pendingStatus = pendingForUser.includes(username) ? username : undefined;
+
+                return {
+                    username: username,
+                    friend: friends.includes(username),
+                    pending: pendingStatus,
+                    last: lastMessage.content
+                };
+            }));
+            return sendResponse(response, HTTP_STATUS.OK, chatBox);
+        }
+    } else {
+        return sendResponse(response, HTTP_STATUS.NOT_FOUND);
+    }
 }).listen(8006);
 
 

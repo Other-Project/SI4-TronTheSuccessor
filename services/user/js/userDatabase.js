@@ -33,7 +33,7 @@ const securityQuestionsArray = ["What was the name of your favorite teacher in e
     "What is the name of the first foreign country you visited ?",
     "What was the name of your favorite childhood cartoon character ?"];
 
-async function addUser(username, password, securityQuestions) {
+exports.addUser = async function (username, password, securityQuestions) {
     const error = checkValue(username, password, securityQuestions);
     if (error) return error;
     if (await userCollection.findOne({username}))
@@ -46,16 +46,131 @@ async function addUser(username, password, securityQuestions) {
     await userCollection.insertOne(user);
     const {accessToken, refreshToken} = getJwt(user);
     return {username, refreshToken, accessToken};
-}
+};
 
-async function getUser(username, password) {
+/**
+ * Login a user
+ * @param username The username
+ * @param password The password
+ * @returns {Promise<{error: string}|{accessToken: (*), refreshToken: (*)}>}
+ */
+exports.loginUser = async function loginUser(username, password) {
     const user = await userCollection.findOne({username, password: hash(password)});
     if (!user) return {error: "Wrong username or password"};
     const {accessToken, refreshToken} = getJwt(user);
     return {username, refreshToken, accessToken};
-}
+};
 
-async function renewToken(refreshToken) {
+/**
+ * Get a user by username
+ * @param username The username
+ * @returns {Promise<Document>}
+ */
+exports.getUser = async function (username) {
+    return await userCollection.findOne({username: username});
+};
+
+/**
+ * Add a friend to a player
+ * @param playerId The id of the player
+ * @param otherId The id of the friend to add
+ * @returns {Promise<boolean>} If the friend could be added
+ */
+exports.addFriend = async function (playerId, otherId) {
+    const user = await userCollection.findOne({username: otherId, pendingFriendRequests: {$in: [playerId]}});
+    if (!user) return false;
+    await userCollection.updateOne(
+        {username: playerId},
+        {
+            $addToSet: {friends: otherId},
+        },
+        {upsert: true}
+    );
+    await userCollection.updateOne(
+        {username: otherId},
+        {
+            $addToSet: {friends: playerId},
+            $pull: {pendingFriendRequests: playerId}
+        },
+        {upsert: true}
+    );
+    return true;
+};
+
+/**
+ * Add a friend to a player's pending friend requests
+ * @param username The username of the player
+ * @param friend The username of the friend
+ * @returns {Promise<boolean>} Returns if the friend request could be added
+ */
+exports.addToPendingFriendRequests = async function (username, friend) {
+    const user = await userCollection.findOne({
+        $or: [
+            {username: username, pendingFriendRequests: friend},
+            {username: friend, pendingFriendRequests: username},
+            {username: username, friends: friend}
+        ]
+    });
+    if (user) return false;
+    await userCollection.updateOne(
+        {username: username},
+        {$addToSet: {pendingFriendRequests: friend}},
+        {upsert: true}
+    );
+    return true;
+};
+
+/**
+ * Get the friends of a player
+ * @param {string} playerId The id of the player
+ * @returns {Promise<string[]>}
+ */
+exports.getFriends = async function (playerId) {
+    const user = await userCollection.findOne({username: playerId});
+    return user ? user.friends : [];
+};
+
+/**
+ * Get the pending friend requests of a player
+ * @param playerId The id of the player
+ * @returns {Promise<string[]>} The pending friend requests
+ */
+exports.getPendingFriendRequests = async function (playerId) {
+    const user = await userCollection.findOne({username: playerId});
+    return user ? user.pendingFriendRequests : [];
+};
+
+/**
+ * Get the pending friend requests for a user
+ * @param username The username of the user
+ * @returns {Promise<string[]>} The username of the users who sent a friend request
+ */
+exports.getPendingFriendRequestsForUser = async function (username) {
+    return await userCollection.distinct("username", {pendingFriendRequests: username});
+};
+
+/**
+ * Remove a friend from a player
+ * @param {string} playerId The id of the player
+ * @param {string} otherId The id of the friend to remove
+ * @returns {Promise<boolean>} If the friend could be removed
+ */
+exports.removeFriend = async function (playerId, otherId) {
+    const user = await userCollection.findOne({username: playerId, friends: otherId});
+    const friend = await userCollection.findOne({username: otherId, friends: playerId});
+    if (!user || !friend) return false;
+    await userCollection.updateOne(
+        {username: playerId},
+        {$pull: {friends: otherId}}
+    );
+    await userCollection.updateOne(
+        {username: otherId},
+        {$pull: {friends: playerId}}
+    );
+    return true;
+};
+
+exports.renewToken = async function (refreshToken) {
     if (!refreshToken)
         return {error: "Refresh token is missing"};
     if (!jwt.verify(refreshToken, secretKey))
@@ -65,9 +180,9 @@ async function renewToken(refreshToken) {
     if (!user)
         return {error: "Could not find user with this refresh token : " + refreshToken};
     return getJwt(user);
-}
+};
 
-async function getSecurityQuestions(username) {
+exports.getSecurityQuestions = async function (username) {
     if (username) {
         const user = await userCollection.findOne({username});
         if (!user)
@@ -75,9 +190,9 @@ async function getSecurityQuestions(username) {
         return user.securityQuestions.map(question => ({question: question.question}));
     }
     return getSecurityQuestionsFromArray();
-}
+};
 
-async function verifyAnswers(username, answers) {
+exports.verifyAnswers = async function (username, answers) {
     if (!username || !answers || !Array.isArray(answers) || answers.length !== 2)
         return {error: "Username or answers are missing"};
     const user = await userCollection.findOne({username});
@@ -89,9 +204,9 @@ async function verifyAnswers(username, answers) {
     const userInfo = {username: user.username};
     const resetPasswordToken = jwt.sign(userInfo, secretKeyPasswordReset, {expiresIn: resetPasswordTokenDuration});
     return {resetPasswordToken};
-}
+};
 
-async function resetPassword(newPassword, resetPasswordToken) {
+exports.resetPassword = async function (newPassword, resetPasswordToken) {
     if (!newPassword)
         return {error: "New password is missing"};
     if (typeof newPassword !== "string" || newPassword.length < passwordMinLength || newPassword.length > maxLength)
@@ -111,7 +226,18 @@ async function resetPassword(newPassword, resetPasswordToken) {
     await userCollection.updateOne({username}, {$set: {password: hash(newPassword)}});
     const {accessToken, refreshToken} = getJwt(user);
     return {message: "Password successfully reset", accessToken, refreshToken};
-}
+};
+
+exports.removePendingFriendRequests = async function (username, friends) {
+    const user = await userCollection.findOne({username: username, pendingFriendRequests: friends});
+    if (!user) return null;
+    await userCollection.updateOne(
+        {username: username},
+        {$pull: {pendingFriendRequests: friends}}
+    );
+
+    return friends;
+};
 
 function getJwt(user) {
     const userInfo = {username: user.username};
@@ -155,5 +281,3 @@ function hash(str) {
     hash.update(str);
     return hash.digest("hex");
 }
-
-module.exports = {addUser, getUser, renewToken, getSecurityQuestions, verifyAnswers, resetPassword};

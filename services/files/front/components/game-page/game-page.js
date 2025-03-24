@@ -10,15 +10,13 @@ export class GamePage extends HTMLComponent {
             if (event.code === "Space" && !this.inGame) this.startGame();
         });
         document.addEventListener("touchend", () => this.startGame());
-        window.addEventListener("popstate", this.onVisible);
-
     }
 
     onVisible = () => {
         this.inGame = false;
-        this.against = location.pathname.split("/")[this.level];
+        this.against = window.location.pathname.split("/")[this.level];
         if (!this.against) {
-            changePage("/");
+            changePage("/", true);
             return;
         }
 
@@ -26,7 +24,7 @@ export class GamePage extends HTMLComponent {
         const helpPage = document.createElement("app-help-page");
         helpPage.setAttribute("against", this.against);
         this.shadowRoot.appendChild(helpPage);
-    }
+    };
 
     onHidden = () => this.inGame = false;
 

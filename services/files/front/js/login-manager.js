@@ -1,3 +1,5 @@
+import {changePage} from "../components/pages/pages.js";
+
 export function getCookie(name) {
     return document.cookie.split("; ").reduce((r, v) => {
         const parts = v.split("=");
@@ -22,12 +24,9 @@ export function disconnect() {
 }
 
 export function fakePageReload() {
-    window.history.replaceState(null, "", "/reload");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-    setTimeout(() => {
-        window.history.replaceState("/", "", "/");
-        window.dispatchEvent(new PopStateEvent("popstate", {state: "/"}));
-    }, 10);
+    const path = location.pathname + location.search + location.hash;
+    changePage("/reload", true);
+    setTimeout(() => changePage(path, true), 10);
 }
 
 export function storeTokens(data) {

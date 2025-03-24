@@ -19,7 +19,7 @@ export class Pages extends HTMLComponent {
     onSetupCompleted = () => {
         this.pageSlot = this.shadowRoot.getElementById("pages-slot");
         this.errorPage = this.shadowRoot.getElementById("404");
-    }
+    };
 
     onVisible = () => this.#showElement(location.pathname.split("/")[this.level] ?? "");
 
@@ -44,10 +44,12 @@ export class Pages extends HTMLComponent {
 /**
  * Change the page without reloading the website.
  * @param {string} page URL of the page to show
+ * @param {boolean} redirect If true, the history will be replaced instead of pushed
  */
-export function changePage(page) {
+export function changePage(page, redirect = false) {
     const state = page;
     if (history.state === state) return;
-    history.pushState(state, "", page);
+    if (redirect) history.replaceState(state, "", page);
+    else history.pushState(state, "", page);
     window.dispatchEvent(new PopStateEvent("popstate", {state: state}));
 }

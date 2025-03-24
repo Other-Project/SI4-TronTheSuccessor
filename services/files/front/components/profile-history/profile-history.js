@@ -7,6 +7,10 @@ export class ProfileHistory extends HTMLComponent {
         super("profile-history", ["html", "css"]);
     }
 
+    onSetupCompleted = () => {
+        this.gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
+    };
+
     onVisible = async () => {
         await this.#getUserHistory();
     };
@@ -16,18 +20,17 @@ export class ProfileHistory extends HTMLComponent {
         if (!user) return;
         const response = await fetchApi("/api/game/history", null);
         const data = await response.json();
-        const gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
-        gameResultsContainer.innerHTML = "";
+        this.gameResultsContainer.innerHTML = "";
         if (data.length === 0) {
-            gameResultsContainer.innerHTML = "No game played yet.";
-            gameResultsContainer.style.textAlign = "center";
-            gameResultsContainer.style.fontSize = "1.5em";
+            this.gameResultsContainer.innerHTML = "No game played yet.";
+            this.gameResultsContainer.style.textAlign = "center";
+            this.gameResultsContainer.style.fontSize = "1.5em";
             return;
         }
         for (const game of data) {
             const gameResult = document.createElement("app-game-result");
             gameResult.gameData = game;
-            gameResultsContainer.appendChild(gameResult);
+            this.gameResultsContainer.appendChild(gameResult);
         }
     }
 }

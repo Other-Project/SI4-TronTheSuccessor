@@ -1,6 +1,6 @@
 .game-result {
     display: grid;
-    grid-template-columns: 250px 60px auto 130px 100px;
+    grid-template-columns: 250px 60px auto 130px 100px 45px;
     background-color: #444;
     border-radius: 10px;
     padding: 15px 20px;
@@ -62,14 +62,11 @@ p {
 
 #chevron {
     filter: invert();
-    height: 50px;
+    height: 45px;
     cursor: pointer;
-    grid-column: 1 / span 5;
     justify-self: center;
-    margin-bottom: -20px;
-    margin-top: -15px;
 
-    &.rotate {
+    &.up {
         transform: rotate(180deg);
     }
 }

@@ -14,8 +14,10 @@ export class GameResult extends HTMLComponent {
     onSetupCompleted = () => {
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.replay = this.shadowRoot.getElementById("replay");
+        this.chevron = this.shadowRoot.getElementById("chevron");
         this.shadowRoot.getElementById("game-result").addEventListener("click", () => {
             this.replay.classList.toggle("show");
+            this.chevron.classList.toggle("up");
         });
 
         this.statusElement = this.shadowRoot.querySelector(".status");

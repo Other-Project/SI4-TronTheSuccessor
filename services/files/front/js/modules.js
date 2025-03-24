@@ -30,6 +30,8 @@ import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
 import {GamePage} from "/components/game-page/game-page.js";
+import {GameResult} from "/components/game-result/game-result.js";
+import {Replay} from "/components/replay/replay.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -76,3 +78,7 @@ customElements.define("app-chat-selection", ChatSelection);
 customElements.define("app-chat-room-button", ChatRoomButton);
 customElements.define("app-chat-room", ChatRoom);
 customElements.define("app-chat-room-message", ChatRoomMessage);
+
+// History components
+customElements.define("app-game-result", GameResult);
+customElements.define("app-replay", Replay);

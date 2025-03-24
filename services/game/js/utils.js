@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const HTTP_STATUS = {
     OK: 200,
     BAD_REQUEST: 400,
+    UNAUTHORIZED: 401,
     NOT_FOUND: 404,
     INTERNAL_SERVER_ERROR: 500
 };
@@ -20,7 +21,7 @@ exports.getRequestBody = async function (request) {
         request.on("end", () => resolve(body));
         request.on("error", reject);
     });
-}
+};
 
 exports.sendResponse = function (response, statusCode, data = null) {
     response.statusCode = statusCode;
@@ -28,7 +29,7 @@ exports.sendResponse = function (response, statusCode, data = null) {
         response.setHeader("Content-Type", "application/json");
         response.end(JSON.stringify(data));
     } else response.end();
-}
+};
 
 /**
  * Get the user from the request

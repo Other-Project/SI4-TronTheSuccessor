@@ -14,6 +14,7 @@ exports.Game = class Game extends EventTarget {
     #startTime;
     #turnDuration;
     #gameLife;
+    gameActions = [];
 
     /**
      * @param {number} w Width of the game map
@@ -88,12 +89,17 @@ exports.Game = class Game extends EventTarget {
     }
 
     #updateGrid(player) {
-        if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) player.dead = true;
-        else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) player.dead = true;
-        else this.grid[player.pos[1]][player.pos[0]] = player.number;
+        if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) {
+            player.dead = true;
+            if (this.grid[player.pos[1]]) this.grid[player.pos[1]][player.pos[0]] = -1;
+        } else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) {
+            player.dead = true;
+            this.grid[player.pos[1]][player.pos[0]] = -1;
+        } else this.grid[player.pos[1]][player.pos[0]] = player.number;
     }
 
     #gameTurn() {
+        this.gameActions.push(this.getPlayerStates());
         this.players.forEach((player) => {
             if (player.dead) return;
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
@@ -101,7 +107,7 @@ exports.Game = class Game extends EventTarget {
         });
         this.players.forEach((player) => this.#updateGrid(player));
         let winner = this.#isGameEnded();
-        this.dispatchEvent(new CustomEvent("game-turn", { detail: this.#getInfo(winner) }));
+        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
         if (winner) this.stop();
     }
 
@@ -124,7 +130,7 @@ exports.Game = class Game extends EventTarget {
     }
 
     setPlayerStates(playerStates) {
-        playerStates.forEach((state, i) => this.players[i] = { ...this.players[i], ...state });
+        playerStates.forEach((state, i) => this.players[i] = {...this.players[i], ...state});
     }
 
     /**
@@ -147,4 +153,4 @@ exports.Game = class Game extends EventTarget {
                 return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] + 1] : [currentPosition[0] - 1, currentPosition[1] + 1];
         }
     }
-}
+};

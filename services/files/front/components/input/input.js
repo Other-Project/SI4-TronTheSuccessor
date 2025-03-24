@@ -41,7 +41,6 @@ export class Input extends HTMLComponent {
         this.#refresh();
     }
 
-
     #refresh() {
         if (!this.input_answer) return;
         if (this.pattern) this.input_answer.setAttribute("pattern", this.pattern);

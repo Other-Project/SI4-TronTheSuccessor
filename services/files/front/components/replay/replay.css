@@ -51,14 +51,25 @@ label {
 
 /* This is the CSS for Chromium based browsers */
 #board-range::-webkit-slider-runnable-track {
-    background: linear-gradient(to right, #9578c1 0%, #7029ac 100%);
+    background: linear-gradient(to right, #aa94cc 0%, #5c00ac 100%);
     border-radius: 3px;
+    height: 6px;
 }
 
 #board-range::-webkit-slider-thumb {
-    background: #fff;
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #000002;
     border-radius: 50%;
-    border: 3px solid #000002;
+    border: 2px solid #661a71;
+    margin-top: -3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease;
+}
+
+#board-range::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
 }
 
 /* This is the CSS for Firefox */

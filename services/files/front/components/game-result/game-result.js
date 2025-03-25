@@ -1,7 +1,9 @@
 import {HTMLComponent} from "/js/component.js";
+import {changePage} from "/components/pages/pages.js";
+import {getUserInfo} from "/js/login-manager.js";
 
 export class GameResult extends HTMLComponent {
-    #gameData;
+    /** @type {{players: {}, initialGrid: number[][], gameActions: {}[][], timeElapsed: number, date: string, winner: string}} */ #gameData;
 
     constructor() {
         super("game-result", ["html", "css"]);
@@ -9,10 +11,10 @@ export class GameResult extends HTMLComponent {
 
     set gameData(data) {
         this.#gameData = data;
+        this.updateDisplay();
     }
 
     onSetupCompleted = () => {
-        this.gameBoard = this.shadowRoot.getElementById("board");
         this.replay = this.shadowRoot.getElementById("replay");
         this.shadowRoot.getElementById("game-result").addEventListener("click", () => {
             this.shadowRoot.getElementById("container").classList.toggle("show");
@@ -22,20 +24,40 @@ export class GameResult extends HTMLComponent {
         this.opponentElement = this.shadowRoot.querySelector(".opponent");
         this.gameLengthValue = this.shadowRoot.querySelector(".game-length-value");
         this.dateElement = this.shadowRoot.querySelector(".date");
-        if (this.#gameData)
-            this.updateDisplay();
+
+        this.updateDisplay();
     };
 
     updateDisplay() {
-        const result = !this.#gameData.winner ? "Draw" : this.#gameData.winner === this.#gameData.opponentName ? "Defeat" : "Victory";
+        if (!this.#gameData || !this.replay) return;
 
+        const username = getUserInfo()?.username;
+        if (!username) {
+            console.error("User is not logged in");
+            return;
+        }
+
+        const result = !this.#gameData.winner ? "Draw" : this.#gameData.winner === username ? "Victory" : "Defeat";
         this.statusElement.textContent = result;
         this.statusElement.className = "status " + result.toLowerCase();
 
-        this.opponentElement.textContent = this.#gameData.opponentName;
+        this.opponentElement.innerHTML = "";
+        let first = true;
+        for (let player of this.#gameData.players) {
+            if (player.name === username) continue;
+            if (!first) this.opponentElement.appendChild(document.createTextNode(", "));
+            const playerSpan = document.createElement("span");
+            playerSpan.textContent = player.name;
+            playerSpan.classList.toggle("real-player", !player.bot);
+            if (!player.bot) playerSpan.onclick = () => changePage(`/profile/${player.name}`);
+            this.opponentElement.appendChild(playerSpan);
+            first = false;
+        }
+
         this.gameLengthValue.textContent = this.formatGameLength(this.#gameData.timeElapsed);
         this.dateElement.textContent = this.formatDate(this.#gameData.date);
         this.replay.gameData = this.#gameData;
+        this.replay.setAttribute("flipped", this.#gameData.players[0].name !== username);
     }
 
     formatDate(dateString) {

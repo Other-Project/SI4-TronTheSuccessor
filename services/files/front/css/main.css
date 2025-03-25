@@ -10,9 +10,3 @@ body {
 
     font-family: "Tomorrow", serif;
 }
-
-app-help-page, app-game-master {
-    display: block;
-    height: calc(100dvh - 2em);
-    padding: 1em;
-}

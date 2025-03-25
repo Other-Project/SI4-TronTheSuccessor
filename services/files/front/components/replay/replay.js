@@ -3,16 +3,15 @@ import {Player} from "/js/player.js";
 import {Game} from "/js/game.js";
 
 export class Replay extends HTMLComponent {
-    #gameData;
-    gameBoard;
-    gameActions;
-    game;
-    player1;
-    player2;
     #gameReplayInterval = 500;
-    width = 16;
-    height = 9;
-    replayTimer;
+
+    /** @type {{players: {}, initialGrid: number[][], gameActions: {}[][], timeElapsed: number, date: string, winner: string}} */ #gameData;
+    /** @type {Game} */ game;
+    flipped;
+
+    static get observedAttributes() {
+        return ["flipped"];
+    }
 
     constructor() {
         super("replay", ["html", "css"]);
@@ -20,29 +19,27 @@ export class Replay extends HTMLComponent {
 
     set gameData(data) {
         this.#gameData = data;
+        this.updateDisplay();
     }
 
     onSetupCompleted = () => {
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.boardRange = this.shadowRoot.getElementById("board-range");
-        this.boardRange.addEventListener("input", () => {
-            this.#drawTillTurn(this.boardRange.value);
-        });
+        this.boardRange.addEventListener("input", () => this.#drawTillTurn(this.boardRange.value));
 
         this.playPauseBtn = this.shadowRoot.getElementById("play-pause");
         this.playPauseBtnImg = this.playPauseBtn.querySelector("img");
         this.playPauseBtn.addEventListener("click", () => {
             if (this.playPauseBtn.classList.toggle("playing")) {
-                if (this.boardRange.value >= this.gameActions.length - 1) {
+                if (this.boardRange.value >= this.#gameData.gameActions.length - 1) {
                     this.#clearReplay();
                     this.boardRange.value = 0;
-                } else {
-                    this.boardRange.value = Math.min(parseInt(this.boardRange.value) + 1, this.gameActions.length - 1);
-                }
+                } else this.boardRange.value = Math.min(parseInt(this.boardRange.value) + 1, this.#gameData.gameActions.length - 1);
                 this.#playTillEnd();
                 this.playPauseBtnImg.src = "/assets/pause.svg";
             } else {
                 clearInterval(this.replayTimer);
+                this.replayTimer = null;
                 this.playPauseBtnImg.src = "/assets/play.svg";
             }
         });
@@ -53,47 +50,37 @@ export class Replay extends HTMLComponent {
         });
 
         this.shadowRoot.getElementById("next-btn").addEventListener("click", () => {
-            if (this.boardRange.value >= this.gameActions.length - 1) return;
+            if (this.boardRange.value >= this.#gameData.gameActions.length - 1) return;
             this.#handleReplayControls(1);
         });
 
-        this.player1 = new Player("Test 1");
-        this.player2 = new Player("Test 2");
-        this.game = new Game(this.width, this.height, this.player1, this.player2, 0);
-
-        if (this.#gameData)
-            this.updateDisplay();
+        this.updateDisplay();
     };
 
     onHidden = () => {
-        if (this.replayTimer) {
-            clearInterval(this.replayTimer);
-            this.playPauseBtnImg.src = "/assets/play.svg";
-            this.playPauseBtn.classList.remove("playing");
-        }
+        if (!this.replayTimer) return;
+        clearInterval(this.replayTimer);
+        this.replayTimer = null;
+        this.playPauseBtnImg.src = "/assets/play.svg";
+        this.playPauseBtn.classList.remove("playing");
     };
 
     updateDisplay() {
-        this.gameActions = this.#gameData.gameActions;
-        this.boardRange.max = this.gameActions.length - 1;
-        this.#initializePlayers();
+        if (!this.#gameData || !this.boardRange) return;
+        this.boardRange.max = this.#gameData.gameActions.length - 1;
+        const players = this.#gameData.players.map(player => new Player(player.name, player.color, player.avatar));
+        players.forEach((player, i) => player.init(i + 1, this.#gameData.gameActions[0]));
+        this.game = new Game(16, 9, players[0], players[1], 500);
         this.#drawTillTurn(0);
     }
 
     #clearReplay() {
-        this.game.grid = Array.from(Array(this.height), (_, i) => Array(i % 2 === 0 ? this.width : this.width - 1).fill(0));
-    }
-
-    #initializePlayers() {
-        if (!this.gameActions || !this.gameActions.length) return;
-
-        const initialState = this.gameActions[0];
-        this.player1.init(1, initialState);
-        this.player2.init(2, initialState);
+        this.game.grid = structuredClone(this.#gameData.initialGrid);
     }
 
     #handleReplayControls(step) {
         clearInterval(this.replayTimer);
+        this.replayTimer = null;
         this.playPauseBtnImg.src = "/assets/play.svg";
         this.playPauseBtn.classList.remove("playing");
         this.boardRange.value = parseInt(this.boardRange.value) + step;
@@ -106,7 +93,7 @@ export class Replay extends HTMLComponent {
         this.playPauseBtnImg.src = "/assets/pause.svg";
 
         this.replayTimer = setInterval(() => {
-            if (++this.boardRange.value >= this.gameActions.length) {
+            if (++this.boardRange.value >= this.#gameData.gameActions.length) {
                 clearInterval(this.replayTimer);
                 this.playPauseBtnImg.src = "/assets/play.svg";
                 this.playPauseBtn.classList.remove("playing");
@@ -118,20 +105,17 @@ export class Replay extends HTMLComponent {
 
     #drawTillTurn(turn) {
         clearInterval(this.replayTimer);
+        this.replayTimer = null;
         this.playPauseBtnImg.src = "/assets/play.svg";
         if (this.playPauseBtn.classList.contains("playing")) this.playPauseBtn.classList.remove("playing");
         this.#clearReplay();
-        for (let i = 0; i <= turn; i++) {
-            this.#renderGameState(i);
-        }
+        for (let i = 0; i <= turn; i++) this.#renderGameState(i);
     }
 
     #renderGameState(turnIndex) {
-        if (!this.gameActions || turnIndex >= this.gameActions.length) return;
-        this.game.setPlayerStates(this.gameActions[turnIndex], this.#gameData.playerNum === 2);
-        this.game.players.forEach(player => {
-            this.game.updateGrid(player);
-        });
+        if (!this.#gameData.gameActions || turnIndex >= this.#gameData.gameActions.length) return;
+        this.game.setPlayerStates(this.#gameData.gameActions[turnIndex], this.flipped === "true");
+        if (turnIndex > 0) this.game.players.forEach(player => this.game.updateGrid(player));
         setTimeout(() => this.gameBoard.draw(this.game), 5);
     }
 }

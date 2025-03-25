@@ -1,3 +1,5 @@
+import {changePage} from "../components/pages/pages.js";
+
 export function getCookie(name) {
     return document.cookie.split("; ").reduce((r, v) => {
         const parts = v.split("=");
@@ -22,8 +24,7 @@ export function disconnect() {
 }
 
 export function fakePageReload() {
-    document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: ""}}));
-    setTimeout(() => document.dispatchEvent(new CustomEvent("menu-selection", {detail: {name: "home"}})), 10);
+    changePage(location.pathname + location.search + location.hash, true, true);
 }
 
 export function storeTokens(data) {

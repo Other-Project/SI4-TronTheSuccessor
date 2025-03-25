@@ -5,6 +5,7 @@ import {FlowBird} from "/js/flowbird.js";
 import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
 import {getAccessToken, getCookie, renewAccessToken} from "/js/login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -44,9 +45,7 @@ export class GameMaster extends HTMLComponent {
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
-        this.shadowRoot.getElementById("home").addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent("menu-selection", {detail: "home"}));
-        });
+        this.shadowRoot.getElementById("home").addEventListener("click", () => changePage("/"));
 
         this.playersName = [this.shadowRoot.getElementById("p1"), this.shadowRoot.getElementById("p2")];
 

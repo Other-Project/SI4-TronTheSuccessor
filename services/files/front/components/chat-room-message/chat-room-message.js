@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class ChatRoomMessage extends HTMLComponent {
     /** @type {string} */ author;
@@ -21,14 +22,7 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement = this.shadowRoot.getElementById("sender-name");
         this.contentElement = this.shadowRoot.getElementById("message-content");
         this.dateElement = this.shadowRoot.getElementById("message-date");
-        this.authorElement.addEventListener("click", () => {
-            if (this.you)
-                document.dispatchEvent(new CustomEvent("menu-selection", {
-                    detail: "profile"
-                }));
-            else
-                window.location.href = `?username=${this.author}#profile`;
-        });
+        this.authorElement.addEventListener("click", () => changePage(`/profile/${this.author}`));
     };
 
     onVisible = () => this.#refresh();

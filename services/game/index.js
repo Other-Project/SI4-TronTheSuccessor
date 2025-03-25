@@ -93,15 +93,24 @@ async function startGame(p1s, p2s = null) {
         io.to(id).emit("game-turn", event.detail);
         if (event.detail.ended) {
             io.in(id).disconnectSockets();
-            game.gameActions.push(event.detail.playerStates);
-            if (p2s) {
+            if (p2s)
                 updateStats(game.players, event.detail);
-                game.players.forEach((player, index) => updateHistory(player.name, index + 1, game.players[game.players.length - 1 - index].name, game.gameActions, event.detail.winner, event.detail.elapsed));
-            } else
-                updateHistory(game.players[0].name, 1, game.players[1].name, game.gameActions, event.detail.winner, event.detail.elapsed);
+            updateHistory(gameInfo.players, gameInfo.grid, game.gameActions, event.detail.winner, event.detail.elapsed);
         }
     });
+
     game.init();
+    const gameInfo = {
+        players: game.players.map(player => ({
+            name: player.name,
+            color: player.color,
+            avatar: player.avatar,
+            number: player.number,
+            bot: player instanceof FlowBird
+        })),
+        grid: structuredClone(game.grid)
+    };
+
     game.start();
     return id;
 }

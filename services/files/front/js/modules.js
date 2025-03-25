@@ -29,6 +29,7 @@ import {Notification} from "/components/notification/notification.js";
 import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
+import {GamePage} from "/components/game-page/game-page.js";
 import {GameResult} from "/components/game-result/game-result.js";
 import {Replay} from "/components/replay/replay.js";
 
@@ -43,14 +44,15 @@ customElements.define('app-notification', Notification);
 // Home components
 customElements.define("app-home-page", HomePage);
 customElements.define("app-profile-display", ProfileDisplay);
+customElements.define("app-game-choice", GameChoice);
 
 // Game help components
 customElements.define("app-help-page", HelpPage);
 customElements.define("app-control", Control);
 
 // Game components
+customElements.define("app-game-page", GamePage);
 customElements.define("app-game-board", GameBoard);
-customElements.define("app-game-choice", GameChoice);
 customElements.define("app-game-master", GameMaster);
 customElements.define("app-game-emotes", GameEmotes);
 

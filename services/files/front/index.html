@@ -3,12 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Tron: The Successor</title>
-    <link href="css/main.css" type="text/css" rel="stylesheet">
+    <link href="/css/main.css" type="text/css" rel="stylesheet">
     <link rel="icon" href="/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<app-pages></app-pages>
-<script type="module" src="js/modules.js" async></script>
+<app-pages>
+    <app-home-page></app-home-page>
+    <app-profile-page id="profile"></app-profile-page>
+    <app-game-page id="game"></app-game-page>
+</app-pages>
+<script type="module" src="/js/modules.js" async></script>
 </body>
 </html>

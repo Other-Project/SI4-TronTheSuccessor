@@ -22,15 +22,13 @@ exports.handleGetHistory = async function (request, response) {
 };
 
 /**
- * Update the history of a player
- * @param playerName The player's name
- * @param playerNum The player's number
- * @param opponentName The name of the opponent
- * @param gameActions The actions of both players during the game
- * @param winner The winner of the game
+ * Update the history
+ * @param players The players of the game
+ * @param grid The grid of the game
+ * @param gameActions The actions of all players during the game
+ * @param winner The winner of the game (undefined if draw)
  * @param timeElapsed The game's duration
- * @returns {Promise<void>}
  */
-exports.updateHistory = async function (playerName, playerNum, opponentName, gameActions, winner, timeElapsed) {
-    await historyDatabase.addGame(playerName, playerNum, opponentName, gameActions, winner, timeElapsed);
+exports.updateHistory = async function (players, grid, gameActions, winner, timeElapsed) {
+    await historyDatabase.addGame(players, grid, gameActions, winner, timeElapsed);
 };

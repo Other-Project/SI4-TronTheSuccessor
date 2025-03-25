@@ -49,6 +49,7 @@ exports.Game = class Game extends EventTarget {
     }
 
     start() {
+        this.gameActions = [this.getPlayerStates()];
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
         this.#startTime = +new Date();
     }
@@ -99,13 +100,13 @@ exports.Game = class Game extends EventTarget {
     }
 
     #gameTurn() {
-        this.gameActions.push(this.getPlayerStates());
         this.players.forEach((player) => {
             if (player.dead) return;
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
         });
         this.players.forEach((player) => this.#updateGrid(player));
+        this.gameActions.push(this.getPlayerStates());
         let winner = this.#isGameEnded();
         this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
         if (winner) this.stop();

@@ -29,11 +29,9 @@ export class ProfilePage extends HTMLComponent {
         }
 
         const response = await fetch(`/api/game/stats/${userName}`);
-        if (response.status === 404) {
-            this.profilePage.classList.toggle("not-found");
-            this.notFoundUser.textContent = userName;
-            return;
-        }
+        this.profilePage.classList.toggle("not-found", !response.ok);
+        this.notFoundUser.textContent = userName;
+        if (!response.ok) return;
 
         const stats = await response.json();
         stats.username = userName;

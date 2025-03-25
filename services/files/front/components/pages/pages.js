@@ -25,7 +25,7 @@ export class Pages extends HTMLComponent {
         const elemId = location.pathname.split("/")[this.level] ?? "";
         if (elemId === this.currentPage) {
             this.#showElement(null); // "Refresh" the page
-            setTimeout(() => this.#showElement(elemId), 0);
+            setTimeout(() => this.#showElement(elemId), 10);
         } else this.#showElement(elemId);
     }
 

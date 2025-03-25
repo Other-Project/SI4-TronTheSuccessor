@@ -1,7 +1,8 @@
 import {HTMLComponent} from "/js/component.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class GameResult extends HTMLComponent {
-    #gameData;
+    /** @type {{opponentName: string, timeElapsed: number, date: string, winner: string}} */ #gameData;
 
     constructor() {
         super("game-result", ["html", "css"]);
@@ -22,6 +23,9 @@ export class GameResult extends HTMLComponent {
         this.opponentElement = this.shadowRoot.querySelector(".opponent");
         this.gameLengthValue = this.shadowRoot.querySelector(".game-length-value");
         this.dateElement = this.shadowRoot.querySelector(".date");
+
+        this.opponentElement.addEventListener("click", () => changePage(`/profile/${this.#gameData.opponentName}`));
+
         if (this.#gameData)
             this.updateDisplay();
     };

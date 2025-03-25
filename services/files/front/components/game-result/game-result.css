@@ -48,6 +48,11 @@ p {
     word-break: break-word;
     max-width: 100%;
     text-align: center;
+
+    &:hover {
+        cursor: pointer;
+        text-decoration: underline;
+    }
 }
 
 .game-length {

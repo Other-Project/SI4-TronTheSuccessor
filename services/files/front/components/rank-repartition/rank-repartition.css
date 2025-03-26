@@ -1,0 +1,19 @@
+#rank-distribution-container {
+    padding: 20px;
+    text-align: center;
+    color: white;
+
+    #rank-distribution-description {
+        padding: 20px;
+    }
+
+    #rank-repartition svg {
+        margin: 0 auto;
+        display: block;
+        max-height: 750px;
+
+        .bar:hover {
+            fill: rgb(191, 64, 191);
+        }
+    }
+}

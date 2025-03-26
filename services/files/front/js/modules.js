@@ -29,6 +29,9 @@ import {Notification} from "/components/notification/notification.js";
 import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
+import {NeonContainer} from "/components/neon-container/neon-container.js";
+import {RankRepartition} from "/components/rank-repartition/rank-repartition.js";
+import {RankListing} from "/components/rank-listing/rank-listing.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -37,6 +40,7 @@ customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
 customElements.define('app-notification', Notification);
+customElements.define("app-neon-container", NeonContainer);
 
 // Home components
 customElements.define("app-home-page", HomePage);
@@ -60,6 +64,8 @@ customElements.define("app-profile-leaderboard", ProfileLeaderboard);
 customElements.define("app-profile-pfp", ProfilePfp);
 customElements.define("app-profile-stats", ProfileStats);
 customElements.define("app-profile-rank", ProfileRank);
+customElements.define("app-rank-repartition", RankRepartition);
+customElements.define("app-rank-listing", RankListing);
 
 // Login components
 customElements.define("app-login-container", LoginContainer);

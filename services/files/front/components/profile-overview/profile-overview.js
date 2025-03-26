@@ -106,6 +106,7 @@ export class ProfileOverview extends HTMLComponent {
         this.rank.setAttribute("rank", this.stats.rank);
         this.rank.setAttribute("points", this.stats.eloInRank);
         this.rank.setAttribute("baserank", this.stats.baseRank);
+        this.rank.setAttribute("height", "400");
         this.profileStats.setAttribute("games", this.stats.games);
         this.profileStats.setAttribute("time", this.stats.timePlayed);
         this.profileStats.setAttribute("streak", this.stats.winStreak);

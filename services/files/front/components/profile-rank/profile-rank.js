@@ -14,7 +14,7 @@ export class ProfileRank extends HTMLComponent {
     }
 
     static get observedAttributes() {
-        return ["rank", "points", "baserank"];
+        return ["rank", "points", "baserank", "height"];
     }
 
     onSetupCompleted = () => {
@@ -40,6 +40,9 @@ export class ProfileRank extends HTMLComponent {
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", "0 0 100 85");
         svg.setAttribute("fill", "none");
+        svg.style.display = "block";
+        svg.style.maxHeight = this.height + "px";
+        svg.style.width = "100%";
 
         const polygon = document.createElementNS(svgNS, "polygon");
         polygon.setAttribute("points", this.#calculatePolygonPoints(vertices));
@@ -48,7 +51,7 @@ export class ProfileRank extends HTMLComponent {
         polygon.setAttribute("fill", "none");
 
         svg.appendChild(polygon);
-        this.rankIcon.innerHTML = '';
+        this.rankIcon.innerHTML = "";
         this.rankIcon.appendChild(svg);
     }
 

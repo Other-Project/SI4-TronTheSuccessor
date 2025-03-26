@@ -44,7 +44,7 @@ export class RankRepartition extends HTMLComponent {
         this.#createRankRepartitionHistogram();
     }
 
-    #createRankRepartitionHistogram(containerWidth = 400, containerHeight = 300, minGap = 10, minBarWidth = 30) {
+    #createRankRepartitionHistogram(containerWidth = 400, containerHeight = 300, maxGap = 10, maxBarWidth = 30) {
         const svgNS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
@@ -57,8 +57,8 @@ export class RankRepartition extends HTMLComponent {
 
         const barGroup = document.createElementNS(svgNS, "g");
 
-        const barWidth = Math.min(minGap, (containerWidth / ranks.length) * 0.6);
-        const gap = Math.min(minBarWidth, (containerWidth / ranks.length) * 0.4);
+        const barWidth = Math.min(maxBarWidth, (containerWidth / ranks.length) * 0.6);
+        const gap = Math.min(maxGap, (containerWidth / ranks.length) * 0.4);
         const totalWidth = ranks.length * (barWidth + gap) - gap;
         const startX = (containerWidth - totalWidth) / 2;
 

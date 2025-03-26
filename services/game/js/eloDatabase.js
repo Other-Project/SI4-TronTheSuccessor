@@ -118,6 +118,83 @@ exports.addWinAndLoss = async function (playerId, otherPlayerId) {
 };
 
 /**
+ * Get the usernames of the top players.
+ * @param limit The number of players to get.
+ * @param baseRank The base rank to get the players from.
+ * @returns {Promise<string[]>} The usernames of the top players.
+ */
+getTopPlayers = async function (limit = 10, baseRank = null) {
+    if (baseRank)
+        return await statsCollection.find({elo: {$eq: eloToRank[baseRank]}}, {
+            projection: {
+                playerId: 1,
+                _id: 0
+            }
+        }).sort({elo: -1}).limit(limit).toArray();
+    else
+        return await statsCollection.find({}, {
+            projection: {
+                playerId: 1,
+                _id: 0
+            }
+        }).sort({elo: -1}).limit(limit).toArray();
+};
+
+/**
+ * Get the number of players in each rank.
+ * @returns {Promise<{string : number}>}
+ */
+rankRepartition = async function () {
+    const rankBoundaries = Object.keys(eloToRank)
+        .map(Number)
+        .sort((a, b) => a - b);
+
+    return rankCounts = await statsCollection.aggregate([
+        {
+            $bucket: {
+                groupBy: "$elo",
+                boundaries: [...rankBoundaries, Infinity],
+                default: "Unranked",
+                output: {
+                    count: {$sum: 1}
+                }
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                count: 1,
+                rank: {
+                    $switch: {
+                        branches: rankBoundaries.map((boundary) => ({
+                            case: {$eq: ["$_id", boundary]},
+                            then: eloToRank[boundary].rank
+                        })),
+                        default: eloToRank[rankBoundaries[rankBoundaries.length - 1]].rank
+                    }
+                }
+            }
+        },
+        {
+            $group: {
+                _id: "$rank",
+                playerCount: {$first: "$count"}
+            }
+        },
+        {
+            $project: {
+                _id: 0,
+                rank: "$_id",
+                playerCount: 1
+            }
+        },
+        {
+            $sort: {playerCount: -1}
+        }
+    ]).toArray();
+};
+
+/**
  * Calculate the rank of a player based on their ELO.
  * @param elo The ELO of the player.
  * @returns {*&{eloInRank: number}}
@@ -153,5 +230,8 @@ exports.getAllStats = async function (playerId) {
     );
 
     const {rank, eloInRank, baseRank} = getRank(updatedStats.elo);
-    return {...updatedStats, rank, eloInRank, baseRank};
+    const topPlayers = await getTopPlayers(10, null);
+    const rankDistribution = await rankRepartition();
+
+    return {...updatedStats, rank, eloInRank, baseRank, topPlayers, rankDistribution};
 };

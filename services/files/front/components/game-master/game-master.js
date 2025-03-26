@@ -93,6 +93,8 @@ export class GameMaster extends HTMLComponent {
     stopGame() {
         if (this.game) this.game.stop();
         this.game = undefined;
+        if (this.socket) this.socket.disconnect();
+        clearInterval(this.timer);
     }
 
     endScreen(details) {

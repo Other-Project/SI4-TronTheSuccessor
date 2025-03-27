@@ -43,7 +43,7 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("icon", friend.icon ?? "/assets/profile.svg");
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
-            friendButton.setAttribute("fight", friend.friend);
+            friendButton.setAttribute("friend", friend.friend);
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
         }

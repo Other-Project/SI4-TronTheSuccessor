@@ -66,10 +66,28 @@ export class ChatRoom extends HTMLComponent {
     #displayMessage(message) {
         const messageElement = document.createElement("app-chat-room-message");
         messageElement.setAttribute("author", message.author);
-        messageElement.setAttribute("content", message.content);
-        messageElement.setAttribute("date", message.date);
         messageElement.setAttribute("type", message.type);
-        messageElement.setAttribute("you", (message.author === getUserInfo()?.username).toString());
+        messageElement.setAttribute("date", message.date);
+        const sameUser = message.author === getUserInfo()?.username;
+        messageElement.setAttribute("you", sameUser.toString());
+        switch (message.type) {
+            case "friend-request" :
+            case "text" || "friend-request":
+                messageElement.setAttribute("content", message.content);
+                break;
+            case "game-invitation":
+                if (sameUser) {
+                    messageElement.setAttribute("content", "You sent a game invitation");
+                } else {
+                    messageElement.setAttribute("content", `${message.author} sent you a game invitation`);
+                    messageElement.addEventListener("click", () => {
+                        alert(`Game invitation from ${message.author} clicked!`);
+                    });
+                }
+                break;
+            default:
+                console.warn(`Unknown message type: ${message.type}`);
+        }
         this.messagePanel.appendChild(messageElement);
     }
 
@@ -132,7 +150,7 @@ export class ChatRoom extends HTMLComponent {
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
 
-        this.dispatchEvent(new CustomEvent('friendRequestHandled', {
+        this.dispatchEvent(new CustomEvent("friendRequestHandled", {
             bubbles: true,
             composed: true,
             detail: {friend: this.pending, method: method}

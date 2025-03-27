@@ -1,8 +1,9 @@
 import {HTMLComponent} from "/js/component.js";
+import {fetchApi} from "/js/login-manager.js";
 
 export class ChatRoomButton extends HTMLComponent {
     static get observedAttributes() {
-        return ["icon", "name", "preview", "fight"];
+        return ["icon", "name", "preview", "friend"];
     }
 
     constructor() {
@@ -14,9 +15,19 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomName = this.shadowRoot.getElementById("room-name");
         this.roomPreview = this.shadowRoot.getElementById("room-preview");
         this.roomFightIcon = this.shadowRoot.getElementById("icon-fight");
-        this.roomFightIcon.addEventListener("click", e => {
+        this.roomFightIcon.addEventListener("click", async e => {
             e.stopPropagation();
-            alert("Challenge this friend ?");
+            const message = {
+                type: "game-invitation",
+                content: "Fight me!"
+            };
+            const response = await fetchApi(`/api/chat/${this.name}`, {
+                method: "POST",
+                body: JSON.stringify(message)
+            });
+            if (!response.ok) {
+                alert(`Failed to send game invitation: ${response.statusText}`);
+            }
         });
     };
 
@@ -32,6 +43,6 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomIcon.src = this.icon;
         this.roomName.textContent = this.name;
         this.roomPreview.textContent = this.preview;
-        this.roomFightIcon.style.display = this.fight === "true" ? "block" : "none";
+        this.roomFightIcon.style.display = this.friend === "true" ? "block" : "none";
     }
 }

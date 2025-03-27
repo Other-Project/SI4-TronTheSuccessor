@@ -3,7 +3,7 @@ const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
-const {randomUUID} = require('crypto');
+const {randomUUID} = require("crypto");
 const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
@@ -64,10 +64,15 @@ io.on("connection", (socket) => {
 async function findGame(socket, msg) {
     if (msg.against === "computer")
         joinGame(socket, await startGame(socket));
-    else socket.join("waiting-anyone");
+    else if (msg.against === "friend") {
+        //TODO : check if author and friend are friends
+        //TODO : check the username to make sure the person trying to join is either the author or the friend
+        socket.join("waiting-room-" + msg.author + "-" + msg.friend);
+    } else
+        socket.join("waiting-anyone");
 }
 
-async function transfertRoom(waitingRoom) {
+async function transferRoom(waitingRoom) {
     const sockets = await io.in(waitingRoom).fetchSockets();
     if (sockets.length < 2) return;
     const gameId = await startGame(sockets[0], sockets[1]);
@@ -79,7 +84,7 @@ async function transfertRoom(waitingRoom) {
 
 io.of("/").adapter.on("join-room", async (room, id) => {
     console.log(`socket ${id} has joined room ${room}`);
-    if (room === "waiting-anyone") await transfertRoom(room);
+    if (room === "waiting-anyone" || room.startsWith("waiting-room-")) await transferRoom(room);
 });
 
 const games = {};

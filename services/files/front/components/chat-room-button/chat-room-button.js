@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
-import {fetchApi} from "/js/login-manager.js";
+import {fetchApi, getUserInfo} from "/js/login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class ChatRoomButton extends HTMLComponent {
     static get observedAttributes() {
@@ -19,7 +20,7 @@ export class ChatRoomButton extends HTMLComponent {
             e.stopPropagation();
             const message = {
                 type: "game-invitation",
-                content: "Fight me!"
+                content: this.name
             };
             const response = await fetchApi(`/api/chat/${this.name}`, {
                 method: "POST",
@@ -28,6 +29,7 @@ export class ChatRoomButton extends HTMLComponent {
             if (!response.ok) {
                 alert(`Failed to send game invitation: ${response.statusText}`);
             }
+            changePage("/game/friend?author=" + getUserInfo()?.username + "&friend=" + this.name);
         });
     };
 

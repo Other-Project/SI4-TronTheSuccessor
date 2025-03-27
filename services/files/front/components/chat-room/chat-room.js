@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -76,12 +77,12 @@ export class ChatRoom extends HTMLComponent {
                 messageElement.setAttribute("content", message.content);
                 break;
             case "game-invitation":
-                if (sameUser) {
+                if (sameUser)
                     messageElement.setAttribute("content", "You sent a game invitation");
-                } else {
+                else {
                     messageElement.setAttribute("content", `${message.author} sent you a game invitation`);
                     messageElement.addEventListener("click", () => {
-                        alert(`Game invitation from ${message.author} clicked!`);
+                        changePage("/game/friend?author=" + message.author + "&friend=" + getUserInfo()?.username);
                     });
                 }
                 break;

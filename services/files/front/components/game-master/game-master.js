@@ -145,7 +145,12 @@ export class GameMaster extends HTMLComponent {
 
         this.gameBoard.clear();
         this.waitingWindow.style.display = "block";
-        this.socket.emit("game-start", {against: this.against});
+        let msg = {against: this.against};
+        if (this.against === "friend") {
+            this.#addUrlParamTo(msg, ["author", "friend"]);
+        }
+        console.log(msg);
+        this.socket.emit("game-start", msg);
 
         let reverse = false;
         this.socket.on("game-start", (msg) => {
@@ -189,6 +194,17 @@ export class GameMaster extends HTMLComponent {
             const direction = reverse ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
             this.socket.emit("game-action", {direction});
         });
+    }
+
+    #addUrlParamTo(map, names) {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        for (const name of names) {
+            const value = urlParams.get(name);
+            if (value)
+                map[name] = value;
+            else alert(`Missing parameter ${name} in URL`);
+        }
     }
 
     #applyMessage(msg, reverse = false) {

@@ -9,8 +9,8 @@ export class ChatSelection extends HTMLComponent {
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
-        document.addEventListener('friendRequestHandled', this.#refresh);
-    }
+        document.addEventListener("friendRequestHandled", this.#refresh);
+    };
 
     onVisible = async () => {
         this.friendList = await this.#getFriendList();
@@ -43,6 +43,7 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("icon", friend.icon ?? "/assets/profile.svg");
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
+            friendButton.setAttribute("fight", friend.friend);
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
         }

@@ -1,6 +1,6 @@
 #room-button {
     display: grid;
-    grid-template: 60px / 40px 1fr;
+    grid-template: 60px / 40px 1fr auto;
     gap: 10px;
     align-items: center;
 
@@ -28,5 +28,13 @@
 
     & > * {
         margin: 0;
+    }
+}
+
+#icon-fight {
+    height: 35px;
+
+    &:hover {
+        filter: invert();
     }
 }

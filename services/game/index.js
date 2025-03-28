@@ -73,7 +73,7 @@ async function findGame(socket, msg) {
             sendResponse("", HTTP_STATUS.UNAUTHORIZED, {error: "Authentication needed"});
             return;
         }
-        const roomName = [msg.against, user.username].sort().join("-");
+        const roomName = [atob(msg.against), user.username].sort().join("-");
         socket.join(roomName);
         await transferRoom(roomName);
     }

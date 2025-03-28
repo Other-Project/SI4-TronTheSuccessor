@@ -82,7 +82,7 @@ export class ChatRoom extends HTMLComponent {
                 else {
                     messageElement.setAttribute("content", `${message.author} sent you a game invitation`);
                     messageElement.addEventListener("click", () => {
-                        changePage("/game/" + message.author);
+                        changePage("/game/" + btoa(message.author));
                     });
                 }
                 break;

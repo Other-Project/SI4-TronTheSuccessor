@@ -20,7 +20,7 @@ export class ChatRoomButton extends HTMLComponent {
             e.stopPropagation();
             const message = {
                 type: "game-invitation",
-                content: this.name
+                content: "Fight me!"
             };
             const response = await fetchApi(`/api/chat/${this.name}`, {
                 method: "POST",
@@ -28,8 +28,9 @@ export class ChatRoomButton extends HTMLComponent {
             });
             if (!response.ok) {
                 alert(`Failed to send game invitation: ${response.statusText}`);
+                return;
             }
-            changePage("/game/" + this.name);
+            changePage("/game/" + btoa(this.name));
         });
     };
 

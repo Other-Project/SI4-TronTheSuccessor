@@ -146,10 +146,6 @@ export class GameMaster extends HTMLComponent {
         this.gameBoard.clear();
         this.waitingWindow.style.display = "block";
         let msg = {against: this.against};
-        if (this.against === "friend") {
-            this.#addUrlParamTo(msg, ["author", "friend"]);
-        }
-        console.log(msg);
         this.socket.emit("game-start", msg);
 
         let reverse = false;

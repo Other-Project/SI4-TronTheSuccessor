@@ -64,12 +64,19 @@ io.on("connection", (socket) => {
 async function findGame(socket, msg) {
     if (msg.against === "computer")
         joinGame(socket, await startGame(socket));
-    else if (msg.against === "friend") {
-        //TODO : check if author and friend are friends
-        //TODO : check the username to make sure the person trying to join is either the author or the friend
-        socket.join("waiting-room-" + msg.author + "-" + msg.friend);
-    } else
+    else if (msg.against === "any-player")
         socket.join("waiting-anyone");
+    else {
+        //TODO : check if author and friend are friends
+        const user = getUser(socket.request);
+        if (!user) {
+            sendResponse("", HTTP_STATUS.UNAUTHORIZED, {error: "Authentication needed"});
+            return;
+        }
+        const roomName = [msg.against, user.username].sort().join("-");
+        socket.join(roomName);
+        await transferRoom(roomName);
+    }
 }
 
 async function transferRoom(waitingRoom) {
@@ -84,7 +91,7 @@ async function transferRoom(waitingRoom) {
 
 io.of("/").adapter.on("join-room", async (room, id) => {
     console.log(`socket ${id} has joined room ${room}`);
-    if (room === "waiting-anyone" || room.startsWith("waiting-room-")) await transferRoom(room);
+    if (room === "waiting-anyone") await transferRoom(room);
 });
 
 const games = {};

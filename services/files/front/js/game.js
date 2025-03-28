@@ -48,11 +48,13 @@ export class Game extends EventTarget {
     }
 
     stop() {
-        if (this.isPaused()) return;
         const details = this.#getInfo();
-        this.startTime -= new Date();
-        clearInterval(this.#gameLife);
-        this.#gameLife = null;
+        this.players.forEach(player => player.unsubscribe?.());
+        if (!this.isPaused()) {
+            this.startTime -= new Date();
+            clearInterval(this.#gameLife);
+            this.#gameLife = null;
+        }
         return details;
     }
 
@@ -60,6 +62,7 @@ export class Game extends EventTarget {
         if (!this.isPaused()) return;
         this.startTime += +new Date();
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
+        this.players.forEach(player => player.subscribe?.());
     }
 
     isPaused() {

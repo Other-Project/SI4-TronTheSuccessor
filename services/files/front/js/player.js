@@ -10,7 +10,7 @@ export const directionToAngle = {
     "up-left": 315
 };
 
-export class Player {
+export class Player extends EventTarget {
     /** @type {string} */ name;
     /** @type {number} */ number;
     /** @type {[number, number]} */ pos;
@@ -26,6 +26,7 @@ export class Player {
      * @param {string} avatar The player's avatar
      */
     constructor(name, color = undefined, avatar = undefined) {
+        super();
         this.name = name;
         this.color = color;
         this.avatar = avatar;

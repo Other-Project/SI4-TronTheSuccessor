@@ -49,7 +49,6 @@ export class Game extends EventTarget {
 
     stop() {
         const details = this.#getInfo();
-        this.players.forEach(player => player.unsubscribe?.());
         if (!this.isPaused()) {
             this.startTime -= new Date();
             clearInterval(this.#gameLife);
@@ -62,7 +61,6 @@ export class Game extends EventTarget {
         if (!this.isPaused()) return;
         this.startTime += +new Date();
         this.#gameLife = setInterval(() => this.#gameTurn(), this.#turnDuration);
-        this.players.forEach(player => player.subscribe?.());
     }
 
     isPaused() {

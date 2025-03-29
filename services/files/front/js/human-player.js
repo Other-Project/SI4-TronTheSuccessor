@@ -37,12 +37,14 @@ export class HumanPlayer extends Player {
     }
 
     subscribe() {
+        super.subscribe();
         this.#keypressed.clear();
         document.addEventListener("keydown", this.#onKeyPressed);
         document.addEventListener("keyup", this.#onKeyReleased);
     }
 
     unsubscribe() {
+        super.unsubscribe();
         document.removeEventListener("keydown", this.#onKeyPressed);
         document.removeEventListener("keyup", this.#onKeyReleased);
     }

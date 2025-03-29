@@ -82,7 +82,10 @@ export class GameMaster extends HTMLComponent {
     }
 
     stopGame() {
-        if (this.game) this.game.stop();
+        if (this.game) {
+            this.game.players.forEach(player => player.removeEventListener("player-direction", this.#sendPlayerDirection));
+            this.game.stop();
+        }
         this.game = undefined;
         if (this.socket) this.socket.disconnect();
         clearInterval(this.timer);

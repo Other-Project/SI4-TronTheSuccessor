@@ -20,6 +20,8 @@ export class Player extends EventTarget {
     /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ nextDirection;
     /** @type {boolean} */ dead;
 
+    #subscriptionCount = 0;
+
     /**
      * @param {string} name The player's name
      * @param {string} color The player's color
@@ -47,8 +49,34 @@ export class Player extends EventTarget {
         this.dead = false;
     }
 
+    /**
+     * Update the direction that the player is going to take
+     * @param {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} direction The direction to set
+     */
     setNextDirection(direction) {
         if ((directionToAngle[direction] + 180) % 360 === directionToAngle[this.direction]) return; // U-turns are prohibited
         this.nextDirection = direction;
+    }
+
+    addEventListener(type, listener, options) {
+        super.addEventListener(type, listener, options);
+        this.#subscriptionCount++;
+        if (this.#subscriptionCount <= 1) this.subscribe();
+    }
+
+    removeEventListener(type, listener, options) {
+        super.removeEventListener(type, listener, options);
+        this.#subscriptionCount--;
+        if (this.#subscriptionCount <= 0) this.unsubscribe();
+    }
+
+    subscribe() {
+        this.#subscriptionCount = 1;
+        // To be implemented by subclasses
+    }
+
+    unsubscribe() {
+        this.#subscriptionCount = 0;
+        // To be implemented by subclasses
     }
 }

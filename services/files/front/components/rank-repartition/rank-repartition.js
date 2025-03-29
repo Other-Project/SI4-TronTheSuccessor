@@ -24,23 +24,7 @@ export class RankRepartition extends HTMLComponent {
     #refresh() {
         if (!this.rankRepartition || !this.stats) return;
         this.playerRank = this.stats.rank;
-        //TODO: Fetch the rank repartition data from the server
-
-        this.rankRepartitionData = {
-            "Line III": 1000,
-            "Line II": 700,
-            "Line I": 400,
-            "Triangle III": 1400,
-            "Triangle II": 1100,
-            "Triangle I": 500,
-            "Square III": 1100,
-            "Square II": 700,
-            "Square I": 500,
-            "Pentagon III": 700,
-            "Pentagon II": 400,
-            "Pentagon I": 300,
-            "Hexagon": 100,
-        };
+        this.rankRepartitionData = this.stats.rankDistribution;
         this.#createRankRepartitionHistogram();
     }
 

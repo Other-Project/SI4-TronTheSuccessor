@@ -54,10 +54,12 @@ export class GameMaster extends HTMLComponent {
 
     onVisible = () => {
         this.#launchGame();
-        document.addEventListener("keyup", this.#keyPressed);
+        document.addEventListener("keyup", this.#keyReleased);
+        document.addEventListener("keypress", this.#keyPressed);
     }
     onHidden = () => {
-        document.removeEventListener("keyup", this.#keyPressed);
+        document.removeEventListener("keypress", this.#keyPressed);
+        document.removeEventListener("keyup", this.#keyReleased);
         this.stopGame();
     }
 
@@ -113,6 +115,7 @@ export class GameMaster extends HTMLComponent {
         this.pauseTitle.innerText = "Pause";
         this.pauseTime.innerText = this.#timeToString(details.elapsed);
         this.pauseDescription.innerText = "";
+        clearInterval(this.timer);
     }
 
     #timeToString(time) {
@@ -121,6 +124,7 @@ export class GameMaster extends HTMLComponent {
 
     resume() {
         this.pauseWindow.style.display = "none";
+        this.#startTimer();
         this.game.resume();
     }
 
@@ -214,19 +218,20 @@ export class GameMaster extends HTMLComponent {
         }, 250);
     }
 
-    #keyPressed = (e) => {
+    #keyReleased = (e) => {
         if (e.code === "Escape" && this.against === "local") {
             e.preventDefault();
             if (this.game.isPaused()) this.resume();
             else this.pause();
         }
+    }
 
+    #keyPressed = (e) => {
         let emote = /^Digit(\d)$/.exec(e.code)?.[1];
-        if (emote) {
-            e.preventDefault();
-            if (emote === "0") emote = "10";
-            if (emotes[emote - 1]) this.#sendEmote(emotes[emote - 1]);
-        }
+        if (!emote) return;
+        e.preventDefault();
+        if (emote === "0") emote = "10";
+        if (emotes[emote - 1]) this.#sendEmote(emotes[emote - 1]);
     };
 
     #sendPlayerDirection = (event) => {

@@ -24,9 +24,14 @@ export class HTMLComponent extends HTMLElement {
         this.path = path ?? `/components/${componentName}`;
 
         this.#setup().then(() => new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) this.#callEvent(this.onVisible);
-            else this.#callEvent(this.onHidden);
+            this.#visibilityChanged(entries[0].isIntersecting);
         }, {root: document}).observe(this));
+    }
+
+    #visibilityChanged(visible) {
+        if (visible) this.#callEvent(this.onVisible);
+        else this.#callEvent(this.onHidden);
+        this.visible = visible;
     }
 
     #callEvent(event) {

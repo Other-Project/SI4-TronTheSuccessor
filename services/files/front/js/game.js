@@ -1,4 +1,4 @@
-import {Player} from "/js/player.js";
+import {directionToAngle, Player} from "/js/player.js";
 
 export const emotes = await fetch("/api/game/emotes").then(res => res.ok ? res.json() : null).then(data => data?.emotes);
 
@@ -39,7 +39,7 @@ export class Game extends EventTarget {
         ];
 
         this.players.forEach((player, i) => player.init(i + 1, playerStates, this));
-        this.players.forEach(player => this.#updateGrid(player));
+        this.players.forEach(player => this.updateGrid(player));
     }
 
     start() {
@@ -76,10 +76,15 @@ export class Game extends EventTarget {
         };
     }
 
-    #updateGrid(player) {
-        if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) player.dead = true;
-        else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) player.dead = true;
-        else this.grid[player.pos[1]][player.pos[0]] = player.number;
+    updateGrid(player) {
+        if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) {
+            player.dead = true;
+            if (this.grid[player.pos[1]]) this.grid[player.pos[1]][player.pos[0]] = -1;
+        }
+        else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) {
+            player.dead = true;
+            this.grid[player.pos[1]][player.pos[0]] = -1;
+        } else this.grid[player.pos[1]][player.pos[0]] = player.number;
     }
 
     #gameTurn() {
@@ -88,9 +93,9 @@ export class Game extends EventTarget {
             player.pos = this.#getNewPosition(player.pos, player.nextDirection);
             player.direction = player.nextDirection;
         });
-        this.players.forEach((player) => this.#updateGrid(player));
+        this.players.forEach((player) => this.updateGrid(player));
         let winner = this.#isGameEnded();
-        this.dispatchEvent(new CustomEvent("game-turn", { detail: this.#getInfo(winner) }));
+        this.dispatchEvent(new CustomEvent("game-turn", {detail: this.#getInfo(winner)}));
         if (winner) this.stop();
     }
 
@@ -109,8 +114,9 @@ export class Game extends EventTarget {
         }));
     }
 
-    setPlayerStates(playerStates) {
-        playerStates.forEach((state, i) => this.players[i] = { ...this.players[i], ...state });
+    setPlayerStates(playerStates, reverse = false) {
+        if (reverse) playerStates = this.playerStatesTransform(playerStates, true);
+        playerStates.forEach((state, i) => this.players[i] = {...this.players[i], ...state});
     }
 
     /**
@@ -132,5 +138,15 @@ export class Game extends EventTarget {
             case "down-left":
                 return currentPosition[1] % 2 ? [currentPosition[0], currentPosition[1] + 1] : [currentPosition[0] - 1, currentPosition[1] + 1];
         }
+    }
+
+    playerStatesTransform(playerStates, reverse = false) {
+        if (!reverse) return playerStates;
+        const directions = Object.keys(directionToAngle);
+        return playerStates.toReversed().map(state => ({
+            pos: [(state.pos[1] % 2 ? 14 : 15) - state.pos[0], 8 - state.pos[1]],
+            direction: directions[(directions.indexOf(state.direction) + 3) % 6],
+            dead: state.dead
+        }));
     }
 }

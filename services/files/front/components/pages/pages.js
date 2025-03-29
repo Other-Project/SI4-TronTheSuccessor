@@ -1,44 +1,65 @@
 import {HTMLComponent} from "/js/component.js";
 
+/**
+ * Component that manages the pages of the website.
+ * It reads the URL and shows the corresponding page.
+ */
 export class Pages extends HTMLComponent {
-    constructor() {
-        super("pages", ["html"]);
-        document.addEventListener("menu-selection", (event) => {
-            if (event.detail && typeof event.detail === "object") this.#showElement(event.detail.name, event.detail.attr);
-            else this.#showElement(event.detail);
-        });
+    level = 1;
 
-        window.addEventListener("hashchange", () => {
-            this.#showElement(this.#readHash() ?? "home");
-        });
+    static get observedAttributes() {
+        return ["level"];
     }
 
-    onVisible = () => {
-        this.#showElement(this.#readHash() ?? "home");
+    constructor() {
+        super("pages", ["html"]);
+        window.addEventListener("popstate", this.onVisible);
+    }
+
+    onSetupCompleted = () => {
+        this.pageSlot = this.shadowRoot.getElementById("pages-slot");
+        this.errorPage = this.shadowRoot.getElementById("404");
     };
 
-    #readHash() {
-        const hash = location.hash.substring(1);
-        return hash === "" ? null : hash;
+    onVisible = () => {
+        const elemId = location.pathname.split("/")[this.level] ?? "";
+        if (elemId === this.currentPage) {
+            this.#showElement(null); // "Refresh" the page
+            setTimeout(() => this.#showElement(elemId), 10);
+        } else this.#showElement(elemId);
     }
 
     /**
-     * @param {string} elementId
-     * @param {{string: string}} attr
+     * @param {string|null} elementId The id of the page to show.
+     * @param {{string: string}} attr The attributes to set to the page.
      */
     #showElement(elementId, attr = undefined) {
-        const elements = this.shadowRoot.querySelectorAll("#pages > *");
-        const idExists = Array.from(elements.values()).some(el => el.id);
-        if (!idExists) return;
+        const elements = this.pageSlot.assignedElements();
+        if (elementId !== null) {
+            const idExists = elements.some(el => el.id === elementId);
+            if (!idExists) elementId = "404";
+        }
+        this.currentPage = elementId;
 
-        elements.forEach(element => {
+        [...elements, this.errorPage].forEach(element => {
             if (element.id === elementId) {
                 element.style.display = "block";
                 if (attr) Object.entries(attr).forEach(([k, v]) => element.setAttribute(k, v));
             } else element.style.display = "none";
         });
-
-        if (history.state !== elementId)
-            history.pushState(elementId, "", `#${elementId}`);
     }
+}
+
+/**
+ * Change the page without reloading the website.
+ * @param {string} page URL of the page to show
+ * @param {boolean} redirect If true, the history will be replaced instead of pushed
+ * @param {boolean} forceRefresh If true, the page will be refreshed even if it is the current page
+ */
+export function changePage(page, redirect = false, forceRefresh = undefined) {
+    const state = page;
+    if (!forceRefresh && history.state === state) return;
+    if (redirect) history.replaceState(state, "", page);
+    else history.pushState(state, "", page);
+    window.dispatchEvent(new PopStateEvent("popstate", {state: state}));
 }

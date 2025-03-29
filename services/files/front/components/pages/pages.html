@@ -1,6 +1,8 @@
 <div id="pages">
-    <app-home-page id="home"></app-home-page>
-    <app-profile-page id="profile"></app-profile-page>
-    <app-help-page id="help"></app-help-page>
-    <app-game-master id="game"></app-game-master>
+    <slot id="pages-slot"></slot>
+
+    <div id="404">
+        <h1>404</h1>
+        <p>Page not found</p>
+    </div>
 </div>

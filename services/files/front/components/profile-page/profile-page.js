@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {getUserInfo} from "/js/login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class ProfilePage extends HTMLComponent {
     constructor() {
@@ -15,23 +16,29 @@ export class ProfilePage extends HTMLComponent {
     };
 
     onVisible = async () => {
-        const userName = new URLSearchParams(location.search).get("username");
+        let userName = window.location.pathname.split("/")[2];
         const loggedUser = getUserInfo()?.username ?? null;
-        const response = await fetch(`/api/game/stats/${userName}`);
+        if (!userName && loggedUser) {
+            changePage(`/profile/${loggedUser}`, true);
+            userName = loggedUser;
+        }
 
-        if (!userName && loggedUser)
-            window.location.href = `?username=${loggedUser}#profile`;
-        else if (response.status === 404) {
-            this.profilePage.classList.toggle("not-found");
-            this.notFoundUser.textContent = userName;
-        } else {
-            const stats = await response.json();
-            stats.username = userName;
-            stats.loggedusername = loggedUser;
-            if (stats) {
-                this.overview.setAttribute("stats", JSON.stringify(stats));
-                this.leaderboard.setAttribute("stats", JSON.stringify(stats));
-            }
+        if (!userName) {
+            changePage("/", true);
+            return;
+        }
+
+        const response = await fetch(`/api/game/stats/${userName}`);
+        this.profilePage.classList.toggle("not-found", !response.ok);
+        this.notFoundUser.textContent = userName;
+        if (!response.ok) return;
+
+        const stats = await response.json();
+        stats.username = userName;
+        stats.loggedusername = loggedUser;
+        if (stats) {
+            this.overview.setAttribute("stats", JSON.stringify(stats));
+            this.leaderboard.setAttribute("stats", JSON.stringify(stats));
         }
     };
 }

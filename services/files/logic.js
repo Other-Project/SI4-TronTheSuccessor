@@ -1,7 +1,5 @@
-// url will be used to parse the url (captain obvious at your service).
-const url = require('url');
 // fs stands for FileSystem, it's the module to use to manipulate files on the disk.
-const fs = require('fs');
+const fs = require('fs/promises');
 // path is used only for its parse method, which creates an object containing useful information about the path.
 const path = require('path');
 
@@ -33,41 +31,25 @@ const mimeTypes = {
 };
 
 // Main method, exported at the end of the file. It's the one that will be called when a file is requested.
-function manageRequest(request, response) {
-    // First let's parse the URL, extract the path, and parse it into an easy-to-use object.
-    // We add the baseFrontPath at the beginning to limit the places to search for files.
-    const parsedUrl = url.parse(baseFrontPath + request.url);
-    let pathName = `.${parsedUrl.pathname}`;
-    let extension = path.parse(pathName).ext;
-    // Uncomment the line below if you want to check in the console what url.parse() and path.parse() create.
-    //console.log(parsedUrl, pathName, path.parse(pathName));
+async function manageRequest(request, response) {
+    const url = new URL(request.url, `${request.scheme}://${request.headers.host}`);
+    let pathName = `.${baseFrontPath}${url.pathname}`;
+    const exist = await fs.access(pathName).then(() => true).catch(() => false); // Let's check if the file exists.
+    if (!exist) pathName = `.${baseFrontPath}/${defaultFileIfFolder}`; // Since it's a SPA, we will return the default file if the requested one does not exist.
+    else if ((await fs.stat(pathName)).isDirectory()) pathName += `/${defaultFileIfFolder}`;  // If it is a directory, we will return the default file.
+    await sendFile(pathName, response);
+}
 
-    // Let's check if the file exists.
-    fs.exists(pathName, async function (exist) {
-        if (!exist) {
-            send404(pathName, response);
-            return;
-        }
-
-        // If it is a directory, we will return the default file.
-        if (fs.statSync(pathName).isDirectory()) {
-            pathName += `/${defaultFileIfFolder}`;
-            extension = `.${defaultFileIfFolder.split(".")[1]}`;
-        }
-
-        // Let's read the file from the file system and send it to the user.
-        fs.readFile(pathName, function(error, data){
-            // The reading may fail if a folder was targeted but doesn't contain the default file.
-            if (error) {
-                console.log(`Error getting the file: ${pathName}: ${error}`);
-                send404(pathName, response);
-            } else {
-                // If the file is OK, let's set the MIME type and send it.
-                response.setHeader('Content-type', mimeTypes[extension] || mimeTypes['default'] );
-                response.end(data);
-            }
-        });
-    });
+async function sendFile(pathName, response) {
+    const extension = path.parse(pathName).ext ?? ".html";
+    try {
+        const data = await fs.readFile(pathName);
+        response.setHeader('Content-type', mimeTypes[extension] || mimeTypes['default']);
+        response.end(data);
+    } catch (error) {
+        console.log(`Error getting the file: ${pathName}: ${error.message}`);
+        send404(pathName, response);
+    }
 }
 
 function send404(path, response) {

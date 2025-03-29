@@ -5,6 +5,7 @@ const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require('crypto');
 const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
+const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
 
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
@@ -19,6 +20,10 @@ let server = http.createServer(async (request, response) => {
                 break;
             case "emotes":
                 sendResponse(response, HTTP_STATUS.OK, {emotes});
+                break;
+            case "history":
+                if (request.method === "GET")
+                    await handleGetHistory(request, response);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
@@ -88,10 +93,24 @@ async function startGame(p1s, p2s = null) {
         io.to(id).emit("game-turn", event.detail);
         if (event.detail.ended) {
             io.in(id).disconnectSockets();
-            if (p2s) updateStats(game.players, event.detail);
+            if (p2s)
+                updateStats(game.players, event.detail);
+            updateHistory(gameInfo.players, gameInfo.grid, game.gameActions, event.detail.winner, event.detail.elapsed);
         }
     });
+
     game.init();
+    const gameInfo = {
+        players: game.players.map(player => ({
+            name: player.name,
+            color: player.color,
+            avatar: player.avatar,
+            number: player.number,
+            bot: player instanceof FlowBird
+        })),
+        grid: structuredClone(game.grid)
+    };
+
     game.start();
     return id;
 }
@@ -107,7 +126,12 @@ function joinGame(socket, gameId) {
     const game = games[gameId];
     socket.emit("game-start", {
         yourNumber: game.players.findIndex(player => player.id === socket.id) + 1,
-        players: game.players.map(player => ({name: player.name, color: player.color, avatar: player.avatar, number: player.number})),
+        players: game.players.map(player => ({
+            name: player.name,
+            color: player.color,
+            avatar: player.avatar,
+            number: player.number
+        })),
         grid: game.grid,
         playerStates: game.getPlayerStates()
     });

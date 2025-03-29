@@ -1,4 +1,4 @@
-const playerImages = ["assets/player_1.png", "assets/player_2.png"];
+const playerImages = ["/assets/player_1.png", "/assets/player_2.png"];
 const playerColors = ["#D732A8", "#32BED7"];
 
 const directionToAngle = {
@@ -56,4 +56,3 @@ exports.Player = class Player {
         this.nextDirection = direction;
     }
 };
-

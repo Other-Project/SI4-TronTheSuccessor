@@ -9,28 +9,11 @@ export class HelpPage extends HTMLComponent {
 
     constructor() {
         super("help-page", ["html"]);
-
-        document.addEventListener("keyup", (event) => {
-            if (event.code === "Space") this.#next();
-        });
-        document.addEventListener("touchend", () => this.#next());
     }
 
-    #next() {
-        if (!this.checkVisibility()) return;
+    onSetupCompleted = () => this.controls = this.shadowRoot.getElementById("controls");
 
-        document.dispatchEvent(new CustomEvent("menu-selection", {
-            detail: {
-                name: "game",
-                attr: {against: this.against}
-            }
-        }));
-    }
-
-    onSetupCompleted = () => {
-        this.controls = this.shadowRoot.getElementById("controls");
-        this.#refresh();
-    };
+    onVisible = () => this.#refresh();
 
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);

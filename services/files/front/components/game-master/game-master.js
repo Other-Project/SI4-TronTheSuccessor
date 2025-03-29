@@ -81,8 +81,13 @@ export class GameMaster extends HTMLComponent {
             if (e.detail.ended) this.endScreen(e.detail);
         });
         this.game.init();
-        this.game.start();
-        this.#startTimer();
+        this.matchIntro.removeAttribute("opponent");
+        this.matchIntro.style.display = "block";
+        setTimeout(() => {
+            this.matchIntro.style.display = "none";
+            this.game.start();
+            this.#startTimer();
+        }, 3500);
         this.gameBoard.draw(this.game);
     }
 

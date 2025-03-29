@@ -25,6 +25,10 @@
     grid-template-columns: 1fr auto 1fr;
     gap: 50px;
     align-items: center;
+
+    &:not(.show) {
+        display: none;
+    }
 }
 
 .player {

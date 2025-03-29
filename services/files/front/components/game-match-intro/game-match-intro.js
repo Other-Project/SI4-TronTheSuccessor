@@ -12,12 +12,14 @@ export class GameMatchIntro extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
+        this.vsContainer = this.shadowRoot.querySelector(".vs-container");
         this.opponentName = this.shadowRoot.getElementById("opponent-name");
         this.countdown = this.shadowRoot.getElementById('countdown');
     }
 
     onVisible = () => {
         if (!this.countdown) return;
+        this.vsContainer.classList.toggle("show", !!this.opponent);
         this.opponentName.textContent = this.opponent;
 
         let countdown = 3;

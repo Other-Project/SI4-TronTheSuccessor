@@ -52,25 +52,15 @@ h2, p {
         }
     }
 
-    #emote-display {
-        grid-column: 1;
-        grid-row: 3;
-        justify-self: start;
-        font-size: 1.1em;
+    #emote-display-container {
+        display: flex;
+        flex-direction: column-reverse;
+        overflow-y: hidden;
+        height: 100px;
 
-        visibility: hidden;
-        opacity: 0;
-        transition: visibility 0s 2s, opacity 2s linear;
-
-        &.visible {
-            visibility: visible;
-            opacity: 1;
-            transition: opacity 0.25s linear;
-        }
-
-        img {
-            vertical-align: middle;
-            width: 50px;
+        &:has(#emote-display > :last-child:nth-child(1)), &:has(#emote-display > :last-child:nth-child(2)) {
+            /* If there's one or two emotes, center them */
+            justify-content: center;
         }
     }
 

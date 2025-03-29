@@ -43,7 +43,7 @@ export class GameMaster extends HTMLComponent {
 
         this.timerDisplay = this.shadowRoot.getElementById("timer");
 
-        this.emoteDisplay = this.shadowRoot.getElementById("emote-display");
+        this.emoteDisplayContainer = this.shadowRoot.getElementById("emote-display");
         this.emoteSender = this.shadowRoot.getElementById("emote-sender");
         this.emoteImg = this.shadowRoot.getElementById("emote-img");
 
@@ -61,6 +61,7 @@ export class GameMaster extends HTMLComponent {
 
     #launchGame() {
         this.container.style.visibility = "hidden";
+        this.emoteDisplayContainer.innerHTML = "";
         this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
         this.against === "local" ? this.newGame() : this.#gameWithServer().then();
     }
@@ -88,6 +89,7 @@ export class GameMaster extends HTMLComponent {
         }
         this.game = undefined;
         if (this.socket) this.socket.disconnect();
+        this.socket = undefined;
         clearInterval(this.timer);
     }
 
@@ -168,13 +170,10 @@ export class GameMaster extends HTMLComponent {
         this.socket.on("game-end", (msg) => this.endScreen(msg));
 
         this.socket.on("emote", (msg) => {
-            clearTimeout(this.emoteTimeout);
-            this.emoteDisplay.classList.add("visible");
-            this.emoteImg.title = this.emoteSender.alt = msg.player;
-            this.emoteSender.src = `/api/user/${msg.player}/avatar`;
-            this.emoteImg.title = this.emoteImg.alt = msg.emote;
-            this.emoteImg.src = `/assets/emotes/${msg.emote}.png`;
-            this.emoteTimeout = setTimeout(() => this.emoteDisplay.classList.remove("visible"), 3000);
+            const emoteDisplay = document.createElement("app-game-emote-display");
+            emoteDisplay.setAttribute("player", msg.player);
+            emoteDisplay.setAttribute("emote", msg.emote);
+            this.emoteDisplayContainer.appendChild(emoteDisplay);
         });
     }
 

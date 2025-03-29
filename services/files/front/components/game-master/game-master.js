@@ -29,6 +29,8 @@ export class GameMaster extends HTMLComponent {
         this.waitingWindow.style.display = "none";
         this.pauseWindow = this.shadowRoot.getElementById("pause-menu");
         this.pauseWindow.style.display = "none";
+        this.matchIntro = this.shadowRoot.getElementById("match-intro");
+        this.matchIntro.style.display = "none";
 
         this.pauseTitle = this.shadowRoot.getElementById("title");
         this.pauseTime = this.shadowRoot.getElementById("time");
@@ -163,11 +165,13 @@ export class GameMaster extends HTMLComponent {
 
             this.waitingWindow.style.display = "none";
             this.container.style.visibility = "visible";
-            // TODO: introduce the opponent
-            setTimeout(() => this.socket.emit("game-ready"), 3000);
+            this.matchIntro.setAttribute("opponent", players[1].name);
+            this.matchIntro.style.display = "block";
+            setTimeout(() => this.socket.emit("game-ready"), 3500);
         });
 
         this.socket.on("game-start", (msg) => {
+            this.matchIntro.style.display = "none";
             this.game.startTime = msg.startTime;
         });
 

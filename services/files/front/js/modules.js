@@ -33,6 +33,7 @@ import {GamePage} from "/components/game-page/game-page.js";
 import {GameResult} from "/components/game-result/game-result.js";
 import {Replay} from "/components/replay/replay.js";
 import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-display.js";
+import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -57,6 +58,7 @@ customElements.define("app-game-board", GameBoard);
 customElements.define("app-game-master", GameMaster);
 customElements.define("app-game-emotes", GameEmotes);
 customElements.define("app-game-emote-display", GameEmoteDisplay);
+customElements.define("app-game-match-intro", GameMatchIntro);
 
 // Profile components
 customElements.define("app-profile-page", ProfilePage);

@@ -62,6 +62,11 @@ h2, p {
             /* If there's one or two emotes, center them */
             justify-content: center;
         }
+
+        #emote-display > :not(:first-child) {
+            display: block;
+            animation: grow 5s ease-in-out forwards;
+        }
     }
 
     #timer {
@@ -76,5 +81,16 @@ h2, p {
         grid-column: 3;
         grid-row: 3;
         justify-self: end;
+    }
+}
+
+@keyframes grow {
+    0% {
+        height: 0; /* We grow the height from 0 so it will slowly push the other emotes */
+        transform: scale(0);
+    }
+    10% {
+        height: 50px;
+        transform: scale(1);
     }
 }

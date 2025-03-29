@@ -203,8 +203,10 @@ export class GameMaster extends HTMLComponent {
     #startTimer() {
         this.timerDisplay.innerText = "00'00\"";
         this.timer = setInterval(() => {
-            const elapsed = Date.now() - this.game.startTime;
-            this.timerDisplay.innerText = `${String(Math.floor((elapsed / 1000) / 60)).padStart(2, "0")}'${String(Math.floor((elapsed / 1000) % 60)).padStart(2, "0")}"`;
+            const elapsed = Math.max(this.game?.startTime ? Date.now() - this.game.startTime : 0, 0);
+            const minutes = String(Math.floor((elapsed / 1000) / 60)).padStart(2, "0");
+            const seconds = String(Math.floor((elapsed / 1000) % 60)).padStart(2, "0");
+            this.timerDisplay.innerText = `${minutes}'${seconds}"`;
         }, 250);
     }
 

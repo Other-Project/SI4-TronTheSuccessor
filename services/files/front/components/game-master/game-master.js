@@ -144,16 +144,15 @@ export class GameMaster extends HTMLComponent {
 
         this.gameBoard.clear();
         this.waitingWindow.style.display = "block";
-        this.socket.emit("game-start", {against: this.against});
+        this.socket.emit("game-join", {against: this.against});
 
-        this.socket.on("game-start", (msg) => {
+        this.socket.on("game-info", (msg) => {
             const reverse = msg.yourNumber === 2;
 
             const msgPlayers = reverse ? msg.players.toReversed() : msg.players;
             const players = msgPlayers.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
             this.game.reversed = reverse;
-            this.game.startTime = Date.now();
             this.#startTimer();
             this.game.players.forEach((player, i) => {
                 player.addEventListener("player-direction", this.#sendPlayerDirection);
@@ -161,8 +160,15 @@ export class GameMaster extends HTMLComponent {
                 player.init(i + 1, this.game.playerStatesTransform(msg.playerStates, this.game.reversed));
             });
             this.#applyMessage(msg, this.game.reversed);
+
             this.waitingWindow.style.display = "none";
             this.container.style.visibility = "visible";
+            // TODO: introduce the opponent
+            setTimeout(() => this.socket.emit("game-ready"), 3000);
+        });
+
+        this.socket.on("game-start", (msg) => {
+            this.game.startTime = msg.startTime;
         });
 
         this.socket.on("game-turn", (msg) => this.#applyMessage(msg, this.game.reversed));
@@ -195,11 +201,11 @@ export class GameMaster extends HTMLComponent {
     }
 
     #startTimer() {
-        this.timerDisplay.innerText = "00:00";
+        this.timerDisplay.innerText = "00'00\"";
         this.timer = setInterval(() => {
             const elapsed = Date.now() - this.game.startTime;
             this.timerDisplay.innerText = `${String(Math.floor((elapsed / 1000) / 60)).padStart(2, "0")}'${String(Math.floor((elapsed / 1000) % 60)).padStart(2, "0")}"`;
-        }, 1000);
+        }, 250);
     }
 
     #keyPressed = (e) => {

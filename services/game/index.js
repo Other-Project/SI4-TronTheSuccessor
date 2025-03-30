@@ -4,12 +4,14 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require("crypto");
+const jwt = require("jsonwebtoken");
 const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
 const {verifyFriendship} = require("./helper/userHelper.js");
 
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
+const gameInvitationSecretKey = "4c6d80d9ca8be043da7d58c97fd9e62b24daa659c2ace0111c68bc640d3d39f1";
 
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
@@ -86,6 +88,16 @@ async function joinFriendGame(socket, msg) {
     const user = getUser(socket.request);
     if (!user) {
         socket.emit("connect_error", {message: "Authentication needed"});
+        return;
+    }
+    const gameInvitationToken = msg.gameInvitationToken;
+    try {
+        jwt.verify(gameInvitationToken, gameInvitationSecretKey);
+    } catch (error) {
+        if (error.name === "TokenExpiredError")
+            socket.emit("unauthorized_room_access", {message: "Game invitation has expired. Please request a new invitation."});
+        else
+            socket.emit("unauthorized_room_access", {message: "You are not allowed to access this room"});
         return;
     }
     const opponentName = atob(msg.against);

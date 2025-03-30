@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fetchApi} from "/js/login-manager.js";
+import {fetchApi, storeTokens} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
 
 export class ChatRoomButton extends HTMLComponent {
@@ -30,6 +30,7 @@ export class ChatRoomButton extends HTMLComponent {
                 alert(`Failed to send game invitation: ${response.statusText}`);
                 return;
             }
+            storeTokens(await response.json());
             changePage("/game/" + btoa(this.name));
         });
     };

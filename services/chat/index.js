@@ -21,10 +21,10 @@ const server = http.createServer(async (request, response) => {
             const messages = await chatDatabase.getChat(roomId, from);
             return sendResponse(response, HTTP_STATUS.OK, messages);
         } else if (request.method === "POST") {
-            const message = JSON.parse(await getRequestBody(request));
+            let message = JSON.parse(await getRequestBody(request));
             if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
-            io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
-            return sendResponse(response, HTTP_STATUS.CREATED);
+            io.to(roomId).emit("message", message = await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
+            return sendResponse(response, HTTP_STATUS.CREATED, message.type === "game-invitation" ? {gameInvitationToken: message.gameInvitationToken} : null);
         }
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
         if (request.method === "GET") {

@@ -30,6 +30,7 @@ export function fakePageReload() {
 export function storeTokens(data) {
     if (data.refreshToken) document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
     if (data.accessToken) document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+    if (data.gameInvitationToken) document.cookie = `game-invitation=${data.gameInvitationToken}; path=/; max-age=${60 * 10};`;
 }
 
 /**

@@ -4,9 +4,10 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require('crypto');
-const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
+const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
+const {firstChoiceColors, spaceships, getCollection} = require("./js/customisation.js");
 
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
@@ -24,6 +25,9 @@ let server = http.createServer(async (request, response) => {
             case "history":
                 if (request.method === "GET")
                     await handleGetHistory(request, response);
+                break;
+            case "customisation":
+                sendResponse(response, HTTP_STATUS.OK, getCollection());
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
@@ -124,11 +128,7 @@ async function createGame(p1s, p2s = null) {
 function createPlayer(socket) {
     if (!socket) return new FlowBird();
     const user = getUser(socket.request);
-    return new Player(socket.id, user.username, user.colors?.[0] ?? {
-        "primary-color": "#ff4688",
-        "secondary-color": "#F2A3D4",
-        "cell-color": "#D732A8"
-    }, user.spaceship ?? "1");
+    return new Player(socket.id, user.username, user.colors?.[0] ?? firstChoiceColors[0], user.spaceship ?? spaceships[0].asset_url);
 }
 
 function joinGame(socket, gameId) {

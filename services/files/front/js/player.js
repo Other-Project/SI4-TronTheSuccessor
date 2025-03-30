@@ -1,29 +1,26 @@
 export const playerImages = ["1", "2", "3"];
-export const playerColors = [{
-    "primary-color": "#ff4688",
-    "secondary-color": "#F2A3D4",
-    "cell-color": "#D732A8"
-},
+export const playerColors = [
     {
-        "primary-color": "#f6b93b",
-        "secondary-color": "#f6e5b3",
-        "cell-color": "#d7c92a"
+        "cell-color": "#D732A8",
+        "primary-color": "#d99dc2",
+        "secondary-color": "#ffe5fe"
     },
     {
-        "primary-color": "#4caf50",
-        "secondary-color": "#a5d6a7",
-        "cell-color": "#388e3c"
+        "cell-color": "#32BED7",
+        "primary-color": "#0088a0",
+        "secondary-color": "#bffaff"
     },
     {
-        "primary-color": "#2196f3",
-        "secondary-color": "#90caf9",
-        "cell-color": "#1976d2"
+        "cell-color": "#F6B93B",
+        "primary-color": "#a7895a",
+        "secondary-color": "#ffedcb",
     },
     {
-        "primary-color": "#673ab7",
-        "secondary-color": "#d1c4e9",
-        "cell-color": "#512da8"
-    }];
+        "cell-color": "#4CAF50",
+        "primary-color": "#4a7247",
+        "secondary-color": "#dbf9d8",
+    }
+];
 
 export const directionToAngle = {
     "up-right": 45,

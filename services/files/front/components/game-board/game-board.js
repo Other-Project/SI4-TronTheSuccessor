@@ -1,6 +1,6 @@
 import {directionToAngle, Player} from "/js/player.js";
 import {HTMLComponent} from "/js/component.js";
-import {loadSpaceShip} from "/js/svg-utils.js";
+import {loadAndCustomiseSVG} from "/js/svg-utils.js";
 
 export class GameBoard extends HTMLComponent {
     cellSize = 200;
@@ -71,7 +71,7 @@ export class GameBoard extends HTMLComponent {
     async #drawPlayer(player) {
         if (player.dead) return;
         let [x, y] = this.cellCoordinates(player.pos[0], player.pos[1]);
-        const playerImg = await loadSpaceShip(player.avatar, player.color);
+        const playerImg = await loadAndCustomiseSVG(`/assets/spaceships/${player.avatar}.svg`, player.color);
 
         this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
         this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);

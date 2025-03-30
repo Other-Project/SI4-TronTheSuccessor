@@ -10,11 +10,11 @@
 
 .button-content {
     height: 100%;
-    display: grid;
-    grid-template-rows: 1fr auto;
-    justify-items: center;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
     font-size: 1.2em;
+    position: relative;
 
     .image {
         height: 100%;
@@ -27,4 +27,19 @@
             fill: #cfe0ee;
         }
     }
+}
+
+.selected .button-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 20px;
+    background-color: #6593ff;
+    border-radius: 50%;
+}
+
+.locked {
+    opacity: 0.5;
 }

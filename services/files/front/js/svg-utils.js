@@ -1,7 +1,8 @@
 const SVG_NS = "http://www.w3.org/2000/svg";
 
-export async function loadSpaceShip(url, colors) {
-    const svgElement = await loadSVG(`/assets/spaceships/${url}.svg`);
+export async function loadAndCustomiseSVG(url, colors) {
+    const svgElement = await loadSVG(url);
+    if (!svgElement) throw new Error(`SVG not found: ${url}`);
     for (const key in colors) svgElement.style.setProperty(`--custom-${key}`, colors[key]);
     return await SVGtoImage(svgElement);
 }
@@ -18,7 +19,7 @@ export async function loadSVG(url) {
 
     const parser = new DOMParser();
 
-    const svgString = await fetch(url).then(response => response.text());
+    const svgString = url.startsWith("data:image/svg+xml;base64,") ? atob(url.substring(26)) : await fetch(url).then(response => response.text());
     const doc = parser.parseFromString(svgString, "image/svg+xml");
     return cache[url] = doc.getElementsByTagNameNS(SVG_NS, "svg").item(0);
 }

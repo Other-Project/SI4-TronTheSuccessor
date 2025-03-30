@@ -1,27 +1,10 @@
 <div class="container">
-    <template>
-        <button>
-            <slot></slot>
-        </button>
+    <template id="item-template">
+        <app-button>
+            <div class="button-content">
+                <img class="image"/>
+                <span class="name">Spaceship</span>
+            </div>
+        </app-button>
     </template>
-
-
-    <app-button>
-        <div class="button-content">
-            <img class="image" id="1" alt="Spaceship"/>
-            <span>Spaceship</span>
-        </div>
-    </app-button>
-    <app-button>
-        <div class="button-content">
-            <img class="image" id="2" alt="Spaceship"/>
-            <span>Spaceship 2</span>
-        </div>
-    </app-button>
-    <app-button>
-        <div class="button-content">
-            <img class="image" id="3" alt="Spaceship"/>
-            <span>Spaceship 3</span>
-        </div>
-    </app-button>
 </div>

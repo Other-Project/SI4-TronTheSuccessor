@@ -4,9 +4,10 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require("crypto");
-const {updateStats, handleGetElo, handleGetAllStats} = require("./js/elo.js");
+const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
+const {verifyFriendship} = require("./helper/userHelper.js");
 
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
@@ -67,13 +68,22 @@ async function findGame(socket, msg) {
     else if (msg.against === "any-player")
         socket.join("waiting-anyone");
     else {
-        //TODO : check if author and friend are friends
         const user = getUser(socket.request);
         if (!user) {
-            sendResponse("", HTTP_STATUS.UNAUTHORIZED, {error: "Authentication needed"});
+            socket.emit("connect_error", {message: "Authentication needed"});
             return;
         }
-        const roomName = [atob(msg.against), user.username].sort().join("-");
+        const opponentName = atob(msg.against);
+        if (user.username === opponentName) {
+            socket.emit("unauthorized_room_access", {message: "You cannot play against yourself"});
+            return;
+        }
+        const response = await verifyFriendship(opponentName, socket.request.headers.authorization?.split(" ")[1]);
+        if (!response.isFriend) {
+            socket.emit("unauthorized_room_access", {message: "You are not friends with this user"});
+            return;
+        }
+        const roomName = [opponentName, user.username].sort().join("-");
         socket.join(roomName);
         await transferRoom(roomName);
     }

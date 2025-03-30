@@ -56,12 +56,12 @@ export class GameMaster extends HTMLComponent {
         this.#launchGame();
         document.addEventListener("keyup", this.#keyReleased);
         document.addEventListener("keypress", this.#keyPressed);
-    }
+    };
     onHidden = () => {
         document.removeEventListener("keypress", this.#keyPressed);
         document.removeEventListener("keyup", this.#keyReleased);
         this.stopGame();
-    }
+    };
 
     #launchGame() {
         this.container.style.visibility = "hidden";
@@ -152,6 +152,10 @@ export class GameMaster extends HTMLComponent {
                 this.#gameWithServer(false).then();
             } else console.error(err.message);
         });
+        this.socket.on("unauthorized_room_access", (err) => {
+            alert(err.message);
+            changePage("/", true);
+        });
 
         this.gameBoard.clear();
         this.waitingWindow.style.display = "block";
@@ -197,17 +201,6 @@ export class GameMaster extends HTMLComponent {
         });
     }
 
-    #addUrlParamTo(map, names) {
-        const queryString = window.location.search;
-        const urlParams = new URLSearchParams(queryString);
-        for (const name of names) {
-            const value = urlParams.get(name);
-            if (value)
-                map[name] = value;
-            else alert(`Missing parameter ${name} in URL`);
-        }
-    }
-
     #applyMessage(msg, reverse = false) {
         if (!this.game) {
             console.warn("Game not initialized");
@@ -241,7 +234,7 @@ export class GameMaster extends HTMLComponent {
             if (this.game.isPaused()) this.resume();
             else this.pause();
         }
-    }
+    };
 
     #keyPressed = (e) => {
         let emote = /^Digit(\d)$/.exec(e.code)?.[1];

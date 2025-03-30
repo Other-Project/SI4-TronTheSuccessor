@@ -64,50 +64,54 @@ io.on("connection", (socket) => {
 
 async function findGame(socket, msg) {
     if (msg.against === "computer")
-        joinGame(socket, await createGame(socket));
+        joinGame(socket, await createGame(socket, null, "computer"));
     else if (msg.against === "any-player")
         socket.join("waiting-anyone");
-    else {
-        const user = getUser(socket.request);
-        if (!user) {
-            socket.emit("connect_error", {message: "Authentication needed"});
-            return;
-        }
-        const opponentName = atob(msg.against);
-        if (user.username === opponentName) {
-            socket.emit("unauthorized_room_access", {message: "You cannot play against yourself"});
-            return;
-        }
-        const response = await verifyFriendship(opponentName, socket.request.headers.authorization?.split(" ")[1]);
-        if (!response.isFriend) {
-            socket.emit("unauthorized_room_access", {message: "You are not friends with this user"});
-            return;
-        }
-        const roomName = [opponentName, user.username].sort().join("-");
-        socket.join(roomName);
-        await transferRoom(roomName);
-    }
+    else
+        await joinFriendGame(socket, msg);
+
 }
 
-async function transferRoom(waitingRoom) {
+async function transferRoom(waitingRoom, gameType) {
     const sockets = await io.in(waitingRoom).fetchSockets();
     if (sockets.length < 2) return;
-    const gameId = await createGame(sockets[0], sockets[1]);
+    const gameId = await createGame(sockets[0], sockets[1], gameType);
     for (let socket of sockets) {
         socket.leave(waitingRoom);
         joinGame(socket, gameId);
     }
 }
 
+async function joinFriendGame(socket, msg) {
+    const user = getUser(socket.request);
+    if (!user) {
+        socket.emit("connect_error", {message: "Authentication needed"});
+        return;
+    }
+    const opponentName = atob(msg.against);
+    if (user.username === opponentName) {
+        socket.emit("unauthorized_room_access", {message: "You cannot play against yourself"});
+        return;
+    }
+    const response = await verifyFriendship(opponentName, socket.request.headers.authorization?.split(" ")[1]);
+    if (!response.isFriend) {
+        socket.emit("unauthorized_room_access", {message: "You are not friends with this user"});
+        return;
+    }
+    const roomName = [opponentName, user.username].sort().join("-");
+    socket.join(roomName);
+    await transferRoom(roomName, "friend");
+}
+
 io.of("/").adapter.on("join-room", async (room, id) => {
     console.log(`socket ${id} has joined room ${room}`);
-    if (room === "waiting-anyone") await transferRoom(room);
+    if (room === "waiting-anyone") await transferRoom(room, "multiplayer");
 });
 
 const games = {};
 
-async function createGame(p1s, p2s = null) {
-    const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), 500);
+async function createGame(p1s, p2s = null, gameType) {
+    const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), 500, gameType);
     const id = randomUUID();
     games[id] = game;
 
@@ -115,7 +119,7 @@ async function createGame(p1s, p2s = null) {
         io.to(id).emit("game-turn", event.detail);
         if (event.detail.ended) {
             io.in(id).disconnectSockets();
-            if (p2s)
+            if (p2s && game.gameType === "multiplayer")
                 updateStats(game.players, event.detail);
             updateHistory(gameInfo.players, gameInfo.grid, game.gameActions, event.detail.winner, event.detail.elapsed);
         }

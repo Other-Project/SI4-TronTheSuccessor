@@ -14,6 +14,7 @@ exports.Game = class Game extends EventTarget {
     startTime;
     #turnDuration;
     #gameLife;
+    gameType;
     gameActions = [];
 
     /**
@@ -22,13 +23,15 @@ exports.Game = class Game extends EventTarget {
      * @param {Player} player1 The first player of the game
      * @param {Player} player2 The second player of the game
      * @param {number} turnDuration The duration of a game turn
+     * @param {string} gameType The type of the game ["computer", "multiplayer", "friend"]
      */
-    constructor(w, h, player1, player2, turnDuration = 500) {
+    constructor(w, h, player1, player2, turnDuration = 500, gameType) {
         super();
         this.gridSize = [w, h];
         this.players = [player1, player2];
         this.grid = Array.from(Array(h), (_, i) => Array(i % 2 === 0 ? w : w - 1).fill(0));
         this.#turnDuration = turnDuration;
+        this.gameType = gameType;
     }
 
     init() {

@@ -3,18 +3,14 @@ import {loadAndCustomiseSVG} from "/js/svg-utils.js";
 import {playerColors} from "/js/player.js";
 
 export class SettingsCarousel extends HTMLComponent {
-    collection;
-
-    get observedAttributes() {
-        return ["collection"];
-    }
+    #collection;
 
     constructor() {
         super("settings-carousel", ["html", "css"], "settings");
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        super.attributeChangedCallback(name, oldValue, newValue);
+    set collection(collection) {
+        this.#collection = collection;
         this.#refresh().then();
     }
 
@@ -25,9 +21,9 @@ export class SettingsCarousel extends HTMLComponent {
     };
 
     async #refresh() {
-        if (!this.collection || !this.container) return;
+        if (!this.#collection || !this.container) return;
 
-        const nodes = await Promise.all(this.collection.map(async item => {
+        const nodes = await Promise.all(this.#collection.map(async item => {
             const clone = this.template.content.cloneNode(true).firstElementChild;
             clone.classList.toggle("selected", item.selected);
             clone.classList.toggle("locked", !item.owned);

@@ -1,6 +1,3 @@
-const playerImages = ["/assets/player_1.png", "/assets/player_2.png"];
-const playerColors = ["#D732A8", "#32BED7"];
-
 const directionToAngle = {
     "up-right": 45,
     "right": 90,
@@ -43,8 +40,6 @@ exports.Player = class Player {
      */
     init(number, playerStates) {
         this.number = number;
-        this.color ??= playerColors[number - 1];
-        this.avatar ??= playerImages[number - 1];
 
         this.pos = playerStates[number - 1].pos;
         this.direction = this.nextDirection = playerStates[number - 1].direction;

@@ -17,7 +17,7 @@ export class SettingsCarousel extends HTMLComponent {
 
         for (const svgImg of svgImgs) {
             const randomIndex = Math.floor(Math.random() * playerColors.length);
-            const img = await loadSpaceShip(svgImg.src, playerColors[randomIndex]["primary-color"]);
+            const img = await loadSpaceShip(svgImg.id, playerColors[randomIndex]);
             img.className = svgImg.className;
             svgImg.replaceWith(img);
         }

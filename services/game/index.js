@@ -124,7 +124,11 @@ async function createGame(p1s, p2s = null) {
 function createPlayer(socket) {
     if (!socket) return new FlowBird();
     const user = getUser(socket.request);
-    return new Player(socket.id, user.username);
+    return new Player(socket.id, user.username, user.colors?.[0] ?? {
+        "primary-color": "#ff4688",
+        "secondary-color": "#F2A3D4",
+        "cell-color": "#D732A8"
+    }, user.spaceship ?? "1");
 }
 
 function joinGame(socket, gameId) {

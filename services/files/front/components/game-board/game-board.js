@@ -36,8 +36,14 @@ export class GameBoard extends HTMLComponent {
 
     #drawHexagons(game) {
         game.grid.forEach((row, y) => row.forEach((cell, x) => {
-            if (cell !== null) this.#drawHexagon(x, y, game.players[cell - 1]?.color || (cell === 0 ? this.unconqueredColor : this.collisionColor));
+            if (cell !== null) this.#drawHexagon(x, y, this.#getHexagonColor(game, cell));
         }));
+    }
+
+    #getHexagonColor(game, cellValue) {
+        if (cellValue === 0) return this.unconqueredColor;
+        if (cellValue < 0) return this.collisionColor;
+        return game.players[cellValue - 1].color["cell-color"];
     }
 
     #drawHexagon(x, y, ownerColor) {

@@ -1,27 +1,28 @@
-export const playerImages = ["/assets/spaceship.svg", "/assets/spaceship2.svg", "/assets/spaceship3.svg"];
+export const playerImages = ["1", "2", "3"];
 export const playerColors = [{
-    "primary-color": "#f43535",
-    "secondary-color": "#f3b8b8"
+    "primary-color": "#ff4688",
+    "secondary-color": "#F2A3D4",
+    "cell-color": "#D732A8"
 },
     {
-        "primary-color": "#f4b835",
-        "secondary-color": "#f3e8b8"
+        "primary-color": "#f6b93b",
+        "secondary-color": "#f6e5b3",
+        "cell-color": "#d7c92a"
     },
     {
-        "primary-color": "#f4f435",
-        "secondary-color": "#e8f3b8"
+        "primary-color": "#4caf50",
+        "secondary-color": "#a5d6a7",
+        "cell-color": "#388e3c"
     },
     {
-        "primary-color": "#35f4a5",
-        "secondary-color": "#b8f3e8"
+        "primary-color": "#2196f3",
+        "secondary-color": "#90caf9",
+        "cell-color": "#1976d2"
     },
     {
-        "primary-color": "#35a5f4",
-        "secondary-color": "#b8e8f3"
-    },
-    {
-        "primary-color": "#354af4",
-        "secondary-color": "#b8b8f3"
+        "primary-color": "#673ab7",
+        "secondary-color": "#d1c4e9",
+        "cell-color": "#512da8"
     }];
 
 export const directionToAngle = {
@@ -65,7 +66,7 @@ export class Player extends EventTarget {
     init(number, playerStates) {
         this.number = number;
 
-        this.color ??= playerColors[Math.floor(Math.random() * playerColors.length)]["primary-color"];
+        this.color ??= playerColors[Math.floor(Math.random() * playerColors.length)];
         this.avatar ??= playerImages[Math.floor(Math.random() * playerImages.length)];
 
         this.pos = playerStates[number - 1].pos;

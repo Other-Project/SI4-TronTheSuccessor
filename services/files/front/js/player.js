@@ -1,5 +1,28 @@
-export const playerImages = ["/assets/player_1.png", "/assets/player_2.png"];
-export const playerColors = ["#D732A8", "#32BED7"];
+export const playerImages = ["/assets/spaceship.svg", "/assets/spaceship2.svg", "/assets/spaceship3.svg"];
+export const playerColors = [{
+    "primary-color": "#f43535",
+    "secondary-color": "#f3b8b8"
+},
+    {
+        "primary-color": "#f4b835",
+        "secondary-color": "#f3e8b8"
+    },
+    {
+        "primary-color": "#f4f435",
+        "secondary-color": "#e8f3b8"
+    },
+    {
+        "primary-color": "#35f4a5",
+        "secondary-color": "#b8f3e8"
+    },
+    {
+        "primary-color": "#35a5f4",
+        "secondary-color": "#b8e8f3"
+    },
+    {
+        "primary-color": "#354af4",
+        "secondary-color": "#b8b8f3"
+    }];
 
 export const directionToAngle = {
     "up-right": 45,
@@ -41,8 +64,9 @@ export class Player extends EventTarget {
      */
     init(number, playerStates) {
         this.number = number;
-        this.color ??= playerColors[number - 1];
-        this.avatar ??= playerImages[number - 1];
+
+        this.color ??= playerColors[Math.floor(Math.random() * playerColors.length)]["primary-color"];
+        this.avatar ??= playerImages[Math.floor(Math.random() * playerImages.length)];
 
         this.pos = playerStates[number - 1].pos;
         this.direction = this.nextDirection = playerStates[number - 1].direction;

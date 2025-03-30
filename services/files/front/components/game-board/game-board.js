@@ -1,5 +1,6 @@
 import {directionToAngle, Player} from "/js/player.js";
 import {HTMLComponent} from "/js/component.js";
+import {loadSpaceShip} from "/js/svg-utils.js";
 
 export class GameBoard extends HTMLComponent {
     cellSize = 200;
@@ -56,6 +57,7 @@ export class GameBoard extends HTMLComponent {
         this.ctx.fill();
     }
 
+
     /**
      * Draw a player on the game board
      * @param {Player} player The player to draw
@@ -63,7 +65,7 @@ export class GameBoard extends HTMLComponent {
     async #drawPlayer(player) {
         if (player.dead) return;
         let [x, y] = this.cellCoordinates(player.pos[0], player.pos[1]);
-        const playerImg = await this.#loadImage(player.avatar);
+        const playerImg = await loadSpaceShip(player.avatar, player.color);
 
         this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
         this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);
@@ -72,18 +74,5 @@ export class GameBoard extends HTMLComponent {
             -this.playerSize / 2,
             this.playerSize,
             this.playerSize);
-    }
-
-    /**
-     * Load an image from a given url
-     * @param {string} src The image url
-     * @returns {Promise<HTMLImageElement>} The loaded image
-     */
-    #loadImage(src) {
-        return new Promise((resolve) => {
-            const image = new Image();
-            image.src = src ?? "";
-            image.addEventListener("load", () => resolve(image));
-        });
     }
 }

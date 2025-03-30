@@ -25,7 +25,17 @@ export class ChatRoomMessage extends HTMLComponent {
         this.dateElement = this.shadowRoot.getElementById("message-date");
         this.gameInvitationElement = this.shadowRoot.getElementById("accept-game-invitation");
         this.gameInvitationElement.addEventListener("click", () => {
-            changePage("/game/" + btoa(this.author));
+            document.cookie = `game-invitation=${this.gameInvitationToken}; path=/; max-age=${60 * 10};`;
+            this.dispatchEvent(new CustomEvent("show-invitation", {
+                detail: {
+                    popupId: "accept-game-invitation",
+                    name: this.author,
+                    avatar: this.avatarElement.src,
+                    content: `Do you want to play a game with ${this.author}?`
+                },
+                bubbles: true,
+                composed: true
+            }));
         });
         this.authorElement.addEventListener("click", () => changePage(`/profile/${this.author}`));
     };

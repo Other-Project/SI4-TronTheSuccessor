@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fetchApi, getAccessToken, getUserInfo, renewAccessToken, storeTokens} from "/js/login-manager.js";
+import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login-manager.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -80,10 +80,10 @@ export class ChatRoom extends HTMLComponent {
                     messageElement.setAttribute("content", "You sent a game invitation");
                 else {
                     const invitationAvailable = message.expiresAt && new Date() < new Date(message.expiresAt);
-                    if (!invitationAvailable) {
+                    if (!invitationAvailable)
                         messageElement.setAttribute("content", "Game invitation expired");
-                        storeTokens(message);
-                    } else {
+                    else {
+                        messageElement.gameInvitationToken = message.gameInvitationToken;
                         messageElement.setAttribute("content", `${message.author} wants to play with you`);
                         messageElement.setAttribute("expired", "false");
                     }

@@ -90,9 +90,8 @@ async function joinFriendGame(socket, msg) {
         socket.emit("connect_error", {message: "Authentication needed"});
         return;
     }
-    const gameInvitationToken = msg.gameInvitationToken;
     try {
-        jwt.verify(gameInvitationToken, gameInvitationSecretKey);
+        jwt.verify(msg.gameInvitationToken, gameInvitationSecretKey);
     } catch (error) {
         if (error.name === "TokenExpiredError")
             socket.emit("unauthorized_room_access", {message: "Game invitation has expired. Please request a new invitation."});

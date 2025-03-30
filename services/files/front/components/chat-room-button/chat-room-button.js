@@ -1,6 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, storeTokens} from "/js/login-manager.js";
-import {changePage} from "/components/pages/pages.js";
 
 export class ChatRoomButton extends HTMLComponent {
     static get observedAttributes() {
@@ -31,7 +30,16 @@ export class ChatRoomButton extends HTMLComponent {
                 return;
             }
             storeTokens(await response.json());
-            changePage("/game/" + btoa(this.name));
+            this.dispatchEvent(new CustomEvent("show-invitation", {
+                detail: {
+                    popupId: "send-game-invitation",
+                    name: this.name,
+                    avatar: this.icon,
+                    content: `Do you want to play a game with ${this.name}?`
+                },
+                bubbles: true,
+                composed: true
+            }));
         });
     };
 

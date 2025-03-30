@@ -39,6 +39,8 @@ export class Control extends HTMLComponent {
                 if (x % (this.gridSize[0] - 1) === 0 && y % (this.gridSize[1] - 1) === 0)
                     game.grid[y][x] = null;
 
+        this.gameBoard.cellSize = 100;
+        this.gameBoard.playerSize = this.gameBoard.cellSize * 0.75;
         this.gameBoard.draw(game);
         this.gameBoard.ctx.font = "bold 36px Tomorrow";
         this.gameBoard.ctx.fillStyle = "white";

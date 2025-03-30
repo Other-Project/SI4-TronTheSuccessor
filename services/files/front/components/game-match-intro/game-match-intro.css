@@ -1,0 +1,137 @@
+.outer-container {
+    z-index: 1;
+    position: fixed;
+    inset: 0;
+    align-content: center;
+    background: #0007;
+    backdrop-filter: blur(1px);
+}
+
+.inner-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.vs-container {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 50px;
+    align-items: center;
+
+    &:not(.show) {
+        display: none;
+    }
+}
+
+.player {
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    background: #333;
+    transition: transform 0.3s;
+
+    h2 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    &:first-child {
+        animation: slideInLeft 1s forwards;
+    }
+
+    &:last-child {
+        animation: slideInRight 1s forwards;
+    }
+}
+
+.vs {
+    font-size: 40px;
+    font-weight: bold;
+    color: #ff0000;
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+}
+
+.countdown-container {
+    height: 200px;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    #countdown {
+        font-size: 150px;
+        font-weight: bold;
+        margin: 0;
+        color: #ffffff;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        opacity: 0;
+        transform: scale(2);
+
+        &.fight {
+            font-size: 50px;
+            color: #00ff00;
+            text-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+            animation: countdownFightAnimation 1s linear forwards;
+        }
+
+        &.show {
+            animation: countdownAnimation 1s linear forwards infinite;
+        }
+    }
+}
+
+@keyframes countdownAnimation {
+    0% {
+        opacity: 0;
+        transform: scale(2);
+    }
+    20%, 80% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+}
+
+@keyframes countdownFightAnimation {
+    0% {
+        opacity: 0;
+        transform: scale(2);
+    }
+    20%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInLeft {
+    0% {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    0% {
+        transform: translateX(50px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

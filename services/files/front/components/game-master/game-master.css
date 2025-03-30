@@ -52,25 +52,20 @@ h2, p {
         }
     }
 
-    #emote-display {
-        grid-column: 1;
-        grid-row: 3;
-        justify-self: start;
-        font-size: 1.1em;
+    #emote-display-container {
+        display: flex;
+        flex-direction: column-reverse;
+        overflow-y: hidden;
+        height: 100px;
 
-        visibility: hidden;
-        opacity: 0;
-        transition: visibility 0s 2s, opacity 2s linear;
-
-        &.visible {
-            visibility: visible;
-            opacity: 1;
-            transition: opacity 0.25s linear;
+        &:has(#emote-display > :last-child:nth-child(1)), &:has(#emote-display > :last-child:nth-child(2)) {
+            /* If there's one or two emotes, center them */
+            justify-content: center;
         }
 
-        img {
-            vertical-align: middle;
-            width: 50px;
+        #emote-display > :not(:first-child) {
+            display: block;
+            animation: grow 5s ease-in-out forwards;
         }
     }
 
@@ -86,5 +81,16 @@ h2, p {
         grid-column: 3;
         grid-row: 3;
         justify-self: end;
+    }
+}
+
+@keyframes grow {
+    0% {
+        height: 0; /* We grow the height from 0 so it will slowly push the other emotes */
+        transform: scale(0);
+    }
+    10% {
+        height: 50px;
+        transform: scale(1);
     }
 }

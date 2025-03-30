@@ -1,4 +1,4 @@
-import { Player } from "/js/player.js";
+import {Player} from "/js/player.js";
 
 export const player1_keys = {
     "up-left": ["Q", "Z"],
@@ -27,28 +27,36 @@ export class HumanPlayer extends Player {
      */
     constructor(name, color = undefined, avatar = undefined) {
         super(name, color, avatar);
-
         this.#keypressed = new Set();
-        document.addEventListener("keydown", e => {
-            this.#keypressed.add(e.key.toUpperCase());
-            this.#onKeyPressed();
-        });
-        document.addEventListener("keyup", e => {
-            this.#keypressed.delete(e.key.toUpperCase());
-        });
     }
 
     init(number, playerStates) {
         super.init(number, playerStates);
         this.keys = number === 1 ? player1_keys : player2_keys;
+        this.subscribe();
     }
 
-    #onKeyPressed(){
+    subscribe() {
+        super.subscribe();
+        this.#keypressed.clear();
+        document.addEventListener("keydown", this.#onKeyPressed);
+        document.addEventListener("keyup", this.#onKeyReleased);
+    }
+
+    unsubscribe() {
+        super.unsubscribe();
+        document.removeEventListener("keydown", this.#onKeyPressed);
+        document.removeEventListener("keyup", this.#onKeyReleased);
+    }
+
+    #onKeyPressed = e => {
+        if (e.repeat) return; // Ignore repeated key presses
+        this.#keypressed.add(e.key.toUpperCase());
         let direction = Object.entries(this.keys)
             .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
         if (direction) {
             super.setNextDirection(direction[0]);
-            document.dispatchEvent(new CustomEvent("player-direction", {
+            this.dispatchEvent(new CustomEvent("player-direction", {
                 detail: {
                     direction: direction[0],
                     number: this.number
@@ -56,4 +64,6 @@ export class HumanPlayer extends Player {
             }));
         }
     }
+
+    #onKeyReleased = e => this.#keypressed.delete(e.key.toUpperCase());
 }

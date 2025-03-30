@@ -13,20 +13,12 @@ export class GameMaster extends HTMLComponent {
     paused = false;
     socket;
 
-    // noinspection JSUnusedGlobalSymbols
     static get observedAttributes() {
         return ["gridSize", "against"];
     }
 
     constructor() {
         super("game-master", ["html", "css"]);
-
-        document.addEventListener("keyup", (event) => {
-            if (event.code === "Escape" && this.against === "local" && this.checkVisibility()) {
-                if (this.game.isPaused()) this.resume();
-                else this.pause();
-            }
-        });
     }
 
     onSetupCompleted = () => {
@@ -37,6 +29,8 @@ export class GameMaster extends HTMLComponent {
         this.waitingWindow.style.display = "none";
         this.pauseWindow = this.shadowRoot.getElementById("pause-menu");
         this.pauseWindow.style.display = "none";
+        this.matchIntro = this.shadowRoot.getElementById("match-intro");
+        this.matchIntro.style.display = "none";
 
         this.pauseTitle = this.shadowRoot.getElementById("title");
         this.pauseTime = this.shadowRoot.getElementById("time");
@@ -51,25 +45,27 @@ export class GameMaster extends HTMLComponent {
 
         this.timerDisplay = this.shadowRoot.getElementById("timer");
 
-        this.emoteDisplay = this.shadowRoot.getElementById("emote-display");
+        this.emoteDisplayContainer = this.shadowRoot.getElementById("emote-display");
         this.emoteSender = this.shadowRoot.getElementById("emote-sender");
         this.emoteImg = this.shadowRoot.getElementById("emote-img");
 
-        document.addEventListener("keypress", e => {
-            let emote = /^Digit(\d)$/.exec(e.code)?.[1];
-            if (!emote) return;
-            e.preventDefault();
-            if (emote === "0") emote = "10";
-            if (emotes[emote - 1]) this.#sendEmote(emotes[emote - 1]);
-        });
         this.shadowRoot.getElementById("emote-list").addEventListener("emote", e => this.#sendEmote(e.detail.emote));
     };
 
-    onVisible = () => this.#launchGame();
-    onHidden = () => this.stopGame();
+    onVisible = () => {
+        this.#launchGame();
+        document.addEventListener("keyup", this.#keyReleased);
+        document.addEventListener("keypress", this.#keyPressed);
+    }
+    onHidden = () => {
+        document.removeEventListener("keypress", this.#keyPressed);
+        document.removeEventListener("keyup", this.#keyReleased);
+        this.stopGame();
+    }
 
     #launchGame() {
         this.container.style.visibility = "hidden";
+        this.emoteDisplayContainer.innerHTML = "";
         this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
         this.against === "local" ? this.newGame() : this.#gameWithServer().then();
     }
@@ -81,22 +77,34 @@ export class GameMaster extends HTMLComponent {
         const opponent = this.against === "computer" ? new FlowBird() : new HumanPlayer("Player 2");
         this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1"), opponent, 500);
         this.game.addEventListener("game-turn", (e) => {
-            if (e.detail.ended) this.endScreen(e.detail);
             this.gameBoard.draw(this.game);
+            if (e.detail.ended) this.endScreen(e.detail);
         });
         this.game.init();
-        this.game.start();
-        this.#startTimer();
+        this.matchIntro.removeAttribute("opponent");
+        this.matchIntro.style.display = "block";
+        setTimeout(() => {
+            this.matchIntro.style.display = "none";
+            this.game.start();
+            this.#startTimer();
+        }, 3500);
         this.gameBoard.draw(this.game);
     }
 
     stopGame() {
-        if (this.game) this.game.stop();
+        if (this.game) {
+            this.game.players.forEach(player => player.removeEventListener("player-direction", this.#sendPlayerDirection));
+            this.game.stop();
+        }
         this.game = undefined;
+        if (this.socket) this.socket.disconnect();
+        this.socket = undefined;
+        clearInterval(this.timer);
     }
 
     endScreen(details) {
-        clearInterval(this.timer);
+        this.stopGame();
+
         this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = "none";
         this.pauseTitle.innerText = details.draw ? "Draw" : details.winner + " won";
@@ -112,6 +120,7 @@ export class GameMaster extends HTMLComponent {
         this.pauseTitle.innerText = "Pause";
         this.pauseTime.innerText = this.#timeToString(details.elapsed);
         this.pauseDescription.innerText = "";
+        clearInterval(this.timer);
     }
 
     #timeToString(time) {
@@ -120,6 +129,7 @@ export class GameMaster extends HTMLComponent {
 
     resume() {
         this.pauseWindow.style.display = "none";
+        this.#startTimer();
         this.game.resume();
     }
 
@@ -145,53 +155,53 @@ export class GameMaster extends HTMLComponent {
 
         this.gameBoard.clear();
         this.waitingWindow.style.display = "block";
-        this.socket.emit("game-start", {against: this.against});
+        this.socket.emit("game-join", {against: this.against});
 
-        let reverse = false;
-        this.socket.on("game-start", (msg) => {
-            reverse = msg.yourNumber === 2;
+        this.socket.on("game-info", (msg) => {
+            const reverse = msg.yourNumber === 2;
 
             const msgPlayers = reverse ? msg.players.toReversed() : msg.players;
             const players = msgPlayers.map(player => new (player.number === msg.yourNumber ? HumanPlayer : Player)(player.name, player.color, player.avatar));
             this.game = new Game(this.gridSize[0], this.gridSize[1], players[0], players[1], 500);
-            this.game.startTime = Date.now();
+            this.game.reversed = reverse;
             this.#startTimer();
             this.game.players.forEach((player, i) => {
+                player.addEventListener("player-direction", this.#sendPlayerDirection);
                 this.playersName[i].innerText = player.name;
-                player.init(i + 1, this.game.playerStatesTransform(msg.playerStates, reverse));
+                player.init(i + 1, this.game.playerStatesTransform(msg.playerStates, this.game.reversed));
             });
-            this.#applyMessage(msg, reverse);
+            this.#applyMessage(msg, this.game.reversed);
+
             this.waitingWindow.style.display = "none";
             this.container.style.visibility = "visible";
+            this.matchIntro.setAttribute("opponent", players[1].name);
+            this.matchIntro.style.display = "block";
+            setTimeout(() => this.socket.emit("game-ready"), 3500);
         });
 
-        this.socket.on("game-turn", (msg) => {
-            this.#applyMessage(msg, reverse);
+        this.socket.on("game-start", (msg) => {
+            this.matchIntro.style.display = "none";
+            this.game.startTime = msg.startTime;
         });
 
-        this.socket.on("game-end", (msg) => {
-            this.endScreen(msg);
-            this.socket.disconnect();
-        });
+        this.socket.on("game-turn", (msg) => this.#applyMessage(msg, this.game.reversed));
+
+        this.socket.on("game-end", (msg) => this.endScreen(msg));
 
         this.socket.on("emote", (msg) => {
-            clearTimeout(this.emoteTimeout);
-            this.emoteDisplay.classList.add("visible");
-            this.emoteImg.title = this.emoteSender.alt = msg.player;
-            this.emoteSender.src = `/api/user/${msg.player}/avatar`;
-            this.emoteImg.title = this.emoteImg.alt = msg.emote;
-            this.emoteImg.src = `/assets/emotes/${msg.emote}.png`;
-            this.emoteTimeout = setTimeout(() => this.emoteDisplay.classList.remove("visible"), 3000);
-        });
-
-        document.addEventListener("player-direction", (event) => {
-            const directions = Object.keys(directionToAngle);
-            const direction = reverse ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
-            this.socket.emit("game-action", {direction});
+            const emoteDisplay = document.createElement("app-game-emote-display");
+            emoteDisplay.setAttribute("player", msg.player);
+            emoteDisplay.setAttribute("emote", msg.emote);
+            this.emoteDisplayContainer.appendChild(emoteDisplay);
         });
     }
 
     #applyMessage(msg, reverse = false) {
+        if (!this.game) {
+            console.warn("Game not initialized");
+            this.socket.disconnect();
+            return;
+        }
         this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed()) : msg.grid;
         this.game.setPlayerStates(msg.playerStates, reverse);
         this.gameBoard.draw(this.game);
@@ -204,10 +214,35 @@ export class GameMaster extends HTMLComponent {
     }
 
     #startTimer() {
-        this.timerDisplay.innerText = "00:00";
+        this.timerDisplay.innerText = "00'00\"";
         this.timer = setInterval(() => {
-            const elapsed = Date.now() - this.game.startTime;
-            this.timerDisplay.innerText = `${String(Math.floor((elapsed / 1000) / 60)).padStart(2, "0")}'${String(Math.floor((elapsed / 1000) % 60)).padStart(2, "0")}"`;
-        }, 1000);
+            const elapsed = Math.max(this.game?.startTime ? Date.now() - this.game.startTime : 0, 0);
+            const minutes = String(Math.floor((elapsed / 1000) / 60)).padStart(2, "0");
+            const seconds = String(Math.floor((elapsed / 1000) % 60)).padStart(2, "0");
+            this.timerDisplay.innerText = `${minutes}'${seconds}"`;
+        }, 250);
     }
+
+    #keyReleased = (e) => {
+        if (e.code === "Escape" && this.against === "local") {
+            e.preventDefault();
+            if (this.game.isPaused()) this.resume();
+            else this.pause();
+        }
+    }
+
+    #keyPressed = (e) => {
+        let emote = /^Digit(\d)$/.exec(e.code)?.[1];
+        if (!emote) return;
+        e.preventDefault();
+        if (emote === "0") emote = "10";
+        if (emotes[emote - 1]) this.#sendEmote(emotes[emote - 1]);
+    };
+
+    #sendPlayerDirection = (event) => {
+        if (!this.socket || !this.game) return;
+        const directions = Object.keys(directionToAngle);
+        const direction = this.game.reversed ? directions[(directions.indexOf(event.detail.direction) + 3) % 6] : event.detail.direction;
+        this.socket.emit("game-action", {direction});
+    };
 }

@@ -2,8 +2,8 @@ import {directionToAngle, Player} from "/js/player.js";
 import {HTMLComponent} from "/js/component.js";
 
 export class GameBoard extends HTMLComponent {
-    cellSize = 100;
-    playerSize = 75;
+    cellSize = 200;
+    playerSize = this.cellSize * 0.75;
     unconqueredColor = "#242424";
     collisionColor = "#f43535";
 
@@ -18,14 +18,13 @@ export class GameBoard extends HTMLComponent {
         return [x * this.cellSize + (y * this.cellSize / 2) % this.cellSize + 2, y * this.cellSize * 3 / 4 + 2];
     }
 
-    draw(game) {
+    async draw(game) {
         if (!this.canvas) return;
         this.canvas.width = game.grid[0].length * this.cellSize + 4;
         this.canvas.height = this.cellSize + (game.grid.length - 1) * this.cellSize * 3 / 4 + 4;
         this.#drawHexagons(game);
-        game.players.forEach(player => {
-            if (player) this.#drawPlayer(player);
-        });
+        for (let player of game.players)
+            if (player) await this.#drawPlayer(player);
     }
 
     clear() {
@@ -58,23 +57,33 @@ export class GameBoard extends HTMLComponent {
     }
 
     /**
+     * Draw a player on the game board
      * @param {Player} player The player to draw
      */
-    #drawPlayer(player) {
+    async #drawPlayer(player) {
         if (player.dead) return;
         let [x, y] = this.cellCoordinates(player.pos[0], player.pos[1]);
-        let playerImg = new Image();
+        const playerImg = await this.#loadImage(player.avatar);
 
-        // // sets scale and origin
-        playerImg.onload = () => {
-            this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
-            this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);
-            this.ctx.drawImage(playerImg,
-                -this.playerSize / 2,
-                -this.playerSize / 2,
-                this.playerSize,
-                this.playerSize);
-        };
-        playerImg.src = player.avatar ?? "";
+        this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
+        this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);
+        this.ctx.drawImage(playerImg,
+            -this.playerSize / 2,
+            -this.playerSize / 2,
+            this.playerSize,
+            this.playerSize);
+    }
+
+    /**
+     * Load an image from a given url
+     * @param {string} src The image url
+     * @returns {Promise<HTMLImageElement>} The loaded image
+     */
+    #loadImage(src) {
+        return new Promise((resolve) => {
+            const image = new Image();
+            image.src = src ?? "";
+            image.addEventListener("load", () => resolve(image));
+        });
     }
 }

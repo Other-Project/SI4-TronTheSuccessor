@@ -81,8 +81,9 @@ function requestHandler(request, response) {
         return;
     }
 
+    const ip = getIpAddress(request);
     proxy.web(request, response, {target: service}, (error) => responseError(request, response, "Proxy error", error, 502));
-    console.log(`Proxying ${request.url} to ${service}`);
+    console.log(`Proxying ${request.url} from ${ip} to ${service}`);
 }
 
 /**
@@ -146,18 +147,28 @@ function registerWebsocket(io, namespace, serviceUrl) {
         const serviceSocket = Client(serviceUrl, {
             extraHeaders: {authorization: socket.request.headers.authorization}
         });
-        console.log("Websocket connection to " + serviceUrl + " established");
+        const ip = getIpAddress(socket.request);
+        console.log(`Websocket connection from ${ip} to ${serviceUrl} established`);
 
         socket.on("disconnect", () => serviceSocket.disconnect());
         serviceSocket.on("disconnect", () => socket.disconnect());
 
         socket.onAny((event, ...args) => {
-            console.log("Transmitting " + event + " event to " + serviceUrl);
+            console.log(`Transmitting ${event} event from ${ip} (${socket.id}) to ${serviceUrl} (${serviceSocket.id})`);
             serviceSocket.emit(event, ...args);
         });
         serviceSocket.onAny((event, ...args) => {
-            console.log("Transmitting " + event + " event to the client");
+            console.log(`Transmitting ${event} event from ${serviceUrl} (${serviceSocket.id}) to ${ip} (${socket.id})`);
             socket.emit(event, ...args);
         });
     });
+}
+
+/**
+ * Returns the IP address of the request.
+ * @param request The request to process
+ * @returns {string} The IP address of the request
+ */
+function getIpAddress(request) {
+    return request.headers["x-forwarded-for"] || request.socket.remoteAddress;
 }

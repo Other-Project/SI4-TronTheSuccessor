@@ -21,7 +21,8 @@ export class HTMLComponent extends HTMLElement {
 
         this.componentName = componentName;
         this.fileDependencies = fileDependencies ?? [];
-        this.path = path ?? `/components/${componentName}`;
+        if (path?.startsWith("/")) this.path = path;
+        else this.path = path ? `/components/${path}/${componentName}` : `/components/${componentName}`;
 
         this.#setup().then(() => new IntersectionObserver((entries) => {
             this.#visibilityChanged(entries[0].isIntersecting);

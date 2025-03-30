@@ -7,9 +7,10 @@ export class ChatRoomMessage extends HTMLComponent {
     /** @type {Date} */ date;
     /** @type {"text"|"friend-request"|"game-invitation"} */ type;
     /** @type {boolean} */ you;
+    /** @type {boolean} */ expired = true;
 
     static get observedAttributes() {
-        return ["author", "content", "date", "type", "you"];
+        return ["author", "content", "date", "type", "you", "expired"];
     }
 
     constructor() {
@@ -22,6 +23,10 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement = this.shadowRoot.getElementById("sender-name");
         this.contentElement = this.shadowRoot.getElementById("message-content");
         this.dateElement = this.shadowRoot.getElementById("message-date");
+        this.gameInvitationElement = this.shadowRoot.getElementById("accept-game-invitation");
+        this.gameInvitationElement.addEventListener("click", () => {
+            changePage("/game/" + btoa(this.author));
+        });
         this.authorElement.addEventListener("click", () => changePage(`/profile/${this.author}`));
     };
 
@@ -31,6 +36,7 @@ export class ChatRoomMessage extends HTMLComponent {
         super.attributeChangedCallback(name, oldValue, newValue);
         if (name === "date") this.date = new Date(newValue);
         if (name === "you") this.you = newValue === "true";
+        if (name === "expired") this.expired = newValue === "true";
         this.#refresh();
     }
 
@@ -41,5 +47,6 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement.textContent = this.you ? "You" : this.author;
         this.contentElement.textContent = this.content;
         this.dateElement.textContent = this.date.toLocaleString();
+        this.gameInvitationElement.classList.toggle("show", !this.expired);
     }
 }

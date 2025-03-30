@@ -1,6 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login-manager.js";
-import {changePage} from "/components/pages/pages.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -80,10 +79,13 @@ export class ChatRoom extends HTMLComponent {
                 if (sameUser)
                     messageElement.setAttribute("content", "You sent a game invitation");
                 else {
-                    messageElement.setAttribute("content", `${message.author} sent you a game invitation`);
-                    messageElement.addEventListener("click", () => {
-                        changePage("/game/" + btoa(message.author));
-                    });
+                    const invitationAvailable = message.expiresAt && new Date() < new Date(message.expiresAt);
+                    if (!invitationAvailable) {
+                        messageElement.setAttribute("content", "Game invitation expired");
+                    } else {
+                        messageElement.setAttribute("content", `${message.author} wants to play with you`);
+                        messageElement.setAttribute("expired", "false");
+                    }
                 }
                 break;
             default:

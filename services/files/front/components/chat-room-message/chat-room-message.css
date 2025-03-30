@@ -48,3 +48,18 @@ h3, small, p {
     word-break: break-word;
     white-space: pre-line;
 }
+
+#accept-game-invitation {
+    display: none;
+    height: 50px;
+    grid-row: 2;
+
+    &.show {
+        display: block;
+    }
+
+    &:hover {
+        cursor: pointer;
+        transform: scale(1.2);
+    }
+}

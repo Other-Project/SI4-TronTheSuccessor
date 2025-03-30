@@ -1,8 +1,11 @@
 const {MongoClient} = require("mongodb");
+const jwt = require("jsonwebtoken");
 
 const client = new MongoClient(process.env.MONGO_DB_URL ?? "mongodb://mongodb:27017");
 const database = client.db("Tron-the-successor");
 const chatCollection = database.collection("chat");
+const gameInvitationSecretKey = "4c6d80d9ca8be043da7d58c97fd9e62b24daa659c2ace0111c68bc640d3d39f1";
+const gameInvitationTokenExpiration = 60 * 10;
 
 /**
  * Gets the chat messages
@@ -32,6 +35,10 @@ exports.getChat = async function (roomId, from = undefined, limit = 25, order = 
  */
 exports.storeMessage = async function (roomId, author, type, content) {
     const message = {roomId, author, type, content, date: new Date()};
+    if (type === "game-invitation") {
+        message.expiresAt = new Date(Date.now() + gameInvitationTokenExpiration * 1000);
+        message.gameInvitationToken = jwt.sign({author}, gameInvitationSecretKey, {expiresIn: gameInvitationTokenExpiration});
+    }
     console.debug(message, await chatCollection.insertOne(message));
     return message;
 };

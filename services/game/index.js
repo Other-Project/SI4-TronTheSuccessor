@@ -7,7 +7,6 @@ const {randomUUID} = require('crypto');
 const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
-const {firstChoiceColors, spaceships, getCollection} = require("./js/customisation.js");
 
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
@@ -25,9 +24,6 @@ let server = http.createServer(async (request, response) => {
             case "history":
                 if (request.method === "GET")
                     await handleGetHistory(request, response);
-                break;
-            case "customisation":
-                sendResponse(response, HTTP_STATUS.OK, getCollection());
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

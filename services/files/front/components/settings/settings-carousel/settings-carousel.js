@@ -1,9 +1,15 @@
 import {HTMLComponent} from "/js/component.js";
 import {loadAndCustomiseSVG} from "/js/svg-utils.js";
 import {playerColors} from "/js/player.js";
+import {fetchPostApi} from "/js/login-manager.js";
 
 export class SettingsCarousel extends HTMLComponent {
     #collection;
+    category;
+
+    static get observedAttributes() {
+        return ["category"];
+    }
 
     constructor() {
         super("settings-carousel", ["html", "css"], "settings");
@@ -14,6 +20,11 @@ export class SettingsCarousel extends HTMLComponent {
         this.#refresh().then();
     }
 
+    attributeChangedCallback(name, oldValue, newValue) {
+        super.attributeChangedCallback(name, oldValue, newValue);
+        this.#refresh().then();
+    }
+
     onSetupCompleted = async () => {
         this.container = this.shadowRoot.querySelector(".container");
         this.template = this.shadowRoot.getElementById("item-template");
@@ -21,7 +32,7 @@ export class SettingsCarousel extends HTMLComponent {
     };
 
     async #refresh() {
-        if (!this.#collection || !this.container) return;
+        if (!this.#collection || !this.container || !this.category) return;
 
         const nodes = await Promise.all(this.#collection.map(async item => {
             const clone = this.template.content.cloneNode(true).firstElementChild;
@@ -33,9 +44,14 @@ export class SettingsCarousel extends HTMLComponent {
             img.classList.add("image");
             templateImg.replaceWith(img);
             clone.querySelector(".name").textContent = item.name;
+            clone.addEventListener("click", () => this.#selectItem(item));
             return clone;
         }));
         this.container.replaceChildren(this.template, ...nodes);
     };
 
+    async #selectItem(item) {
+        if (item.selected || !item.owned) return;
+        await fetchPostApi(`/api/inventory`, {[this.category]: item.id});
+    }
 }

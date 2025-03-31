@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {fetchApi} from "/js/login-manager.js";
 
 export class SettingsPage extends HTMLComponent {
 
@@ -14,9 +15,9 @@ export class SettingsPage extends HTMLComponent {
     };
 
     onVisible = async () => {
-        this.storeData = await fetch("/api/game/customisation").then(r => r.json());
+        this.storeData = await fetchApi("/api/inventory").then(r => r.json());
         this.avatarCarousel.collection = this.storeData.avatars.map(item => ({...item, asset_url: `/assets/profile.svg`}));
-        this.spaceShipCarousel.collection = this.storeData.spaceships.map(item => ({...item, asset_url: `/assets/spaceships/${item.asset_url}.svg`}));
+        this.spaceShipCarousel.collection = this.storeData.spaceships.map(item => ({...item, asset_url: `/assets/spaceships/${item.id}.svg`}));
         this.primaryColorCarousel.collection = this.storeData.firstChoiceColors.map(item => ({...item, asset_url: this.#colorToSVG(item)}));
         this.secondaryColorCarousel.collection = this.storeData.secondChoiceColors.map(item => ({...item, asset_url: this.#colorToSVG(item)}));
     };

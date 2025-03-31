@@ -1,4 +1,3 @@
-const {firstChoiceColors, spaceships} = require("./customisation.js");
 const directionToAngle = {
     "up-right": 45,
     "right": 90,
@@ -41,8 +40,8 @@ exports.Player = class Player {
      */
     init(number, playerStates) {
         this.number = number;
-        this.color ??= firstChoiceColors[number - 1];
-        this.avatar ??= spaceships[number - 1].asset_url;
+        //this.color ??= firstChoiceColors[number - 1];
+        //this.avatar ??= spaceships[number - 1].asset_url;
 
         this.pos = playerStates[number - 1].pos;
         this.direction = this.nextDirection = playerStates[number - 1].direction;

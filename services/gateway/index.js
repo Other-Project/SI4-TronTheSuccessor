@@ -10,6 +10,7 @@ const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A
 
 const SERVICES = {
     "/api/user": {url: process.env.USER_SERVICE_URL ?? "http://127.0.0.1:8004"},
+    "/api/inventory": {url: process.env.INVENTORY_SERVICE_URL ?? "http://127.0.0.1:8002"},
     "/api/game": {url: process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003", ws: true},
     "/api/chat": {url: process.env.CHAT_SERVICE_URL ?? "http://127.0.0.1:8006", ws: true},
     "/": {url: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001"}

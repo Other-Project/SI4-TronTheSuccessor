@@ -46,7 +46,7 @@ export class GameInvitation extends HTMLComponent {
             this.invitationPopups.forEach((popup) => popup.classList.remove("show"));
             await this.#updateGameInvitationStatus("refused");
             document.cookie = "gameInvitation=; path=/; max-age=0;";
-            this.invitationPopups.forEach((popup) => popup.classList.remove("show"));
+            this.dispatchEvent(new CustomEvent("hide-drawer"));
         });
     };
 

@@ -71,7 +71,7 @@ export class ProfileOverview extends HTMLComponent {
 
     #getFriends = async () => {
         const response = await fetchApi("/api/user/friends", {method: "GET"});
-        const friends = await response.json();
+        const friends = response.ok ? await response.json() : null;
         return {
             friends: friends?.friends ?? [],
             pending: friends?.pending ?? [],

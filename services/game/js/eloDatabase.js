@@ -18,13 +18,6 @@ const eloToRank = {
     1100: {rank: "Pentagon I", baseRank: "Pentagon"},
     1200: {rank: "Hexagon", baseRank: "Hexagon"},
 };
-const rankOrder = [
-    "Line III", "Line II", "Line I",
-    "Triangle III", "Triangle II", "Triangle I",
-    "Square III", "Square II", "Square I",
-    "Pentagon III", "Pentagon II", "Pentagon I",
-    "Hexagon"
-];
 exports.BASE_ELO = 300;
 
 /**
@@ -158,10 +151,14 @@ getTopPlayers = async function (limit = 10) {
  */
 rankRepartition = async function () {
     const repartition = {};
-    for (let rank of rankOrder) {
-        const eloThreshold = Object.keys(eloToRank).find(key => eloToRank[key].rank === rank);
-        repartition[rank] = await statsCollection.countDocuments({elo: {$gte: parseInt(eloThreshold)}});
+    for (let elo in eloToRank) {
+        const {rank} = eloToRank[elo];
+        const nextElo = parseInt(elo) + 100;
+        repartition[rank] = await statsCollection.countDocuments({
+            elo: {$gte: parseInt(elo), $lt: nextElo}
+        });
     }
+    repartition["Hexagon"] = await statsCollection.countDocuments({elo: {$gte: 1200}});
     return repartition;
 };
 

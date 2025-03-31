@@ -43,7 +43,7 @@ export class GameBoard extends HTMLComponent {
     #getHexagonColor(game, cellValue) {
         if (cellValue === 0) return this.unconqueredColor;
         if (cellValue < 0) return this.collisionColor;
-        return game.players[cellValue - 1].color["cell-color"];
+        return game.players[cellValue - 1].color["cell-color"] ?? game.players[cellValue - 1].color;
     }
 
     #drawHexagon(x, y, ownerColor) {
@@ -72,6 +72,7 @@ export class GameBoard extends HTMLComponent {
         if (player.dead) return;
         let [x, y] = this.cellCoordinates(player.pos[0], player.pos[1]);
         const playerImg = await loadAndCustomiseSVG(`/assets/spaceships/${player.avatar}.svg`, player.color);
+        if (!playerImg) return;
 
         this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
         this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);

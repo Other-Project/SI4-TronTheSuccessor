@@ -22,6 +22,19 @@ async function makeHttpRequest(method, path, data = null) {
     return await response.json();
 }
 
+/**
+ * Get all inventory items
+ * @returns {Promise<{avatars: *, spaceships: *, firstChoiceColors: *, secondChoiceColors: *}>}
+ */
+exports.getCollection = async function () {
+    return makeHttpRequest('GET', `api/inventory`);
+};
+
+/**
+ * Get the selected inventory items for a user
+ * @param {string} username The username of the user
+ * @returns {Promise<{avatars: *, spaceships: *, firstChoiceColors: *, secondChoiceColors: *}>}
+ */
 exports.getUserInventorySelection = async function (username) {
     return makeHttpRequest('GET', `api/inventory/${username}`);
 };

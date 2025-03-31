@@ -35,7 +35,7 @@ export class Player extends EventTarget {
     /** @type {string} */ name;
     /** @type {number} */ number;
     /** @type {[number, number]} */ pos;
-    /** @type {string} */ color;
+    /** @type {{"cell-color": string, "primary-color": string, "secondary-color": string}} */ color;
     /** @type {string} */ avatar;
     /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ direction;
     /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ nextDirection;
@@ -45,14 +45,14 @@ export class Player extends EventTarget {
 
     /**
      * @param {string} name The player's name
-     * @param {string} color The player's color
-     * @param {string} avatar The player's avatar
+     * @param {{"cell-color": string, "primary-color": string, "secondary-color": string}} color The player's color
+     * @param {string} spaceship The player's spaceship
      */
-    constructor(name, color = undefined, avatar = undefined) {
+    constructor(name, color, spaceship) {
         super();
         this.name = name;
         this.color = color;
-        this.avatar = avatar;
+        this.avatar = spaceship;
     }
 
     /**
@@ -62,9 +62,6 @@ export class Player extends EventTarget {
      */
     init(number, playerStates) {
         this.number = number;
-
-        this.color ??= playerColors[Math.floor(Math.random() * playerColors.length)];
-        this.avatar ??= playerImages[Math.floor(Math.random() * playerImages.length)];
 
         this.pos = playerStates[number - 1].pos;
         this.direction = this.nextDirection = playerStates[number - 1].direction;

@@ -87,6 +87,7 @@
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 
     h2 {
+        text-transform: uppercase;
         color: #33ccff;
     }
 
@@ -104,6 +105,7 @@
             height: calc(100% - 30px);
 
             h3 {
+                text-transform: uppercase;
                 color: #ff33cc;
             }
         }

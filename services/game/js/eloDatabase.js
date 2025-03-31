@@ -201,7 +201,5 @@ exports.getAllStats = async function (playerId) {
     const topPlayers = await getTopPlayers(10);
     const rankDistribution = await rankRepartition();
 
-    console.log(await statsCollection.find({}));
-
     return {...updatedStats, rank, eloInRank, baseRank, topPlayers, rankDistribution};
 };

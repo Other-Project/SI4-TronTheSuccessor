@@ -28,7 +28,7 @@ export class RankRepartition extends HTMLComponent {
         this.#createRankRepartitionHistogram();
     }
 
-    #createRankRepartitionHistogram(containerWidth = 400, containerHeight = 300, maxGap = 10, maxBarWidth = 30) {
+    #createRankRepartitionHistogram(containerWidth = 400, containerHeight = 260, maxGap = 10, maxBarWidth = 30) {
         const svgNS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
@@ -54,7 +54,7 @@ export class RankRepartition extends HTMLComponent {
 
             const rect = document.createElementNS(svgNS, "rect");
             rect.setAttribute("x", x);
-            rect.setAttribute("y", 230 - barHeight);
+            rect.setAttribute("y", containerHeight - barHeight - 75);
             rect.setAttribute("width", barWidth);
             rect.setAttribute("height", barHeight);
             rect.setAttribute("fill", "white");
@@ -67,15 +67,18 @@ export class RankRepartition extends HTMLComponent {
             if (rank === this.playerRank)
                 rect.setAttribute("fill", "rgb(128, 0, 128)");
 
-            rect.addEventListener("mouseover", () => this.hoverInfo.innerText = `${rank}: ${value} players (${percentage}%)`);
-            rect.addEventListener("mouseout", () => this.hoverInfo.innerText = "");
+            rect.addEventListener("mouseover", () => {
+                this.hoverInfo.innerText = `${rank}: ${value} players (${percentage}%)`;
+                this.hoverInfo.classList.toggle("active");
+            });
+            rect.addEventListener("mouseout", () => this.hoverInfo.classList.toggle("active"));
 
             barGroup.appendChild(rect);
 
             const text = document.createElementNS(svgNS, "text");
             text.setAttribute("x", x + barWidth / 2);
-            text.setAttribute("y", 250);
-            text.setAttribute("transform", `rotate(-45 ${x + barWidth / 2} 250)`);
+            text.setAttribute("y", containerHeight - 65);
+            text.setAttribute("transform", `rotate(-45 ${x + barWidth / 2} ${containerHeight - 65})`);
             text.setAttribute("text-anchor", "end");
             text.setAttribute("font-size", "10");
             text.setAttribute("fill", "white");

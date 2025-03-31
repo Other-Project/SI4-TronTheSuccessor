@@ -13,6 +13,9 @@ const {verifyFriendship} = require("./helper/userHelper.js");
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 const gameInvitationSecretKey = "4c6d80d9ca8be043da7d58c97fd9e62b24daa659c2ace0111c68bc640d3d39f1";
 
+const FRIEND_GAME_TIMEOUT = 10 * 60 * 1000;
+const waitingRoomTimers = {};
+
 let server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
 
@@ -61,6 +64,13 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         const gameId = Object.keys(socket.rooms).find(room => room !== socket.id);
         delete games[gameId];
+
+        for (const room of socket.rooms) {
+            if (waitingRoomTimers[room]) {
+                clearTimeout(waitingRoomTimers[room]);
+                delete waitingRoomTimers[room];
+            }
+        }
     });
 });
 
@@ -77,6 +87,10 @@ async function findGame(socket, msg) {
 async function transferRoom(waitingRoom, gameType) {
     const sockets = await io.in(waitingRoom).fetchSockets();
     if (sockets.length < 2) return;
+    if (waitingRoomTimers[waitingRoom]) {
+        clearTimeout(waitingRoomTimers[waitingRoom]);
+        delete waitingRoomTimers[waitingRoom];
+    }
     const gameId = await createGame(sockets[0], sockets[1], gameType);
     for (let socket of sockets) {
         socket.leave(waitingRoom);
@@ -111,6 +125,19 @@ async function joinFriendGame(socket, msg) {
     }
     const roomName = [opponentName, user.username].sort().join("-");
     socket.join(roomName);
+    const sockets = await io.in(roomName).fetchSockets();
+    if (sockets.length === 1) {
+        waitingRoomTimers[roomName] = setTimeout(async () => {
+            const socketsInRoom = await io.in(roomName).fetchSockets();
+            for (const s of socketsInRoom) {
+                s.emit("game_invitation_timeout", {
+                    message: "Game invitation has expired. Please send a new invitation."
+                });
+                s.leave(roomName);
+            }
+            delete waitingRoomTimers[roomName];
+        }, FRIEND_GAME_TIMEOUT);
+    }
     await transferRoom(roomName, "friend");
 }
 

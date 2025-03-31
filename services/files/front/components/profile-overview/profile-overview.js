@@ -80,7 +80,7 @@ export class ProfileOverview extends HTMLComponent {
     };
 
     #refresh() {
-        if (!this.rank || !this.stats) return;
+        if (!this.rank || !this.stats || !this.friends) return;
         if (this.stats.loggedusername && this.stats.loggedusername === this.stats.username)
             this.buttons.classList.toggle("logged-in");
 

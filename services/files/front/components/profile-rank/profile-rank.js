@@ -20,6 +20,16 @@ export class ProfileRank extends HTMLComponent {
     onSetupCompleted = () => {
         this.rankIcon = this.shadowRoot.getElementById("rank-icon");
         this.rankPoints = this.shadowRoot.getElementById("rank-points");
+        this.rankInfo = this.shadowRoot.getElementById("rank-info");
+        this.rankPopUp = this.shadowRoot.getElementById("rank-popup");
+        this.rankPopUp.style.display = "none";
+
+        this.rankInfo.addEventListener("click", () => {
+            this.rankPopUp.style.display = "block";
+        });
+        this.addEventListener("hide-popup", () => {
+            this.rankPopUp.style.display = "none";
+        });
     };
 
     attributeChangedCallback(name, oldValue, newValue) {

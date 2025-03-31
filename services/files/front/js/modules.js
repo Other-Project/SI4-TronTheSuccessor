@@ -35,6 +35,7 @@ import {RankListing} from "/components/rank-listing/rank-listing.js";
 import {GamePage} from "/components/game-page/game-page.js";
 import {GameResult} from "/components/game-result/game-result.js";
 import {Replay} from "/components/replay/replay.js";
+import {RankExplanation} from "/components/rank-explanation/rank-explanation.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -70,6 +71,7 @@ customElements.define("app-profile-stats", ProfileStats);
 customElements.define("app-profile-rank", ProfileRank);
 customElements.define("app-rank-repartition", RankRepartition);
 customElements.define("app-rank-listing", RankListing);
+customElements.define("app-rank-explanation", RankExplanation);
 
 // Login components
 customElements.define("app-login-container", LoginContainer);

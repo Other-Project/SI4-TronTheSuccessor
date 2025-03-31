@@ -1,5 +1,6 @@
 const http = require("http");
 const {Server} = require("socket.io");
+const jwt = require("jsonwebtoken");
 const chatDatabase = require("./js/chatDatabase.js");
 const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
 const {getFriendsList} = require("./helper/userHelper.js");
@@ -13,6 +14,7 @@ const server = http.createServer(async (request, response) => {
     if (!user) return sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
 
     const endpoint = /^\/api\/chat\/([a-zA-Z0-9]+)\/?$/;
+    const gameInvitationEndpoint = /^\/api\/chat\/game-invitation\/?$/;
     if (endpoint.test(requestUrl.pathname)) {
         const roomId = getRoomId(user.username, endpoint.exec(requestUrl.pathname)[1]);
 
@@ -51,6 +53,30 @@ const server = http.createServer(async (request, response) => {
                 };
             }));
             return sendResponse(response, HTTP_STATUS.OK, chatBox);
+        }
+    } else if (gameInvitationEndpoint.test(requestUrl.pathname)) {
+        if (request.method === "PUT") {
+            const body = JSON.parse(await getRequestBody(request));
+
+            const gameInvitationToken = body.gameInvitationToken;
+            if (!gameInvitationToken) {
+                return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Game invitation has expired or is invalid"});
+            }
+
+            if (!body.status || !["accepted", "refused"].includes(body.status)) {
+                return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid status"});
+            }
+
+            const author = jwt.decode(gameInvitationToken).author;
+
+            if (author === user.username) {
+                return sendResponse(response, HTTP_STATUS.FORBIDDEN, {error: "Cannot respond to your own invitation"});
+            }
+
+            if (await chatDatabase.updateGameInvitationStatus(gameInvitationToken, body.status))
+                return sendResponse(response, HTTP_STATUS.OK, {status: body.status});
+            else
+                return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "The game invitation has expired or is invalid, its status cannot be updated"});
         }
     } else {
         return sendResponse(response, HTTP_STATUS.NOT_FOUND);

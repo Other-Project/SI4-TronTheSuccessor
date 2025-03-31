@@ -76,18 +76,27 @@ export class ChatRoom extends HTMLComponent {
                 messageElement.setAttribute("content", message.content);
                 break;
             case "game-invitation":
-                if (sameUser)
-                    messageElement.setAttribute("content", "You sent a game invitation");
-                else {
-                    const invitationAvailable = message.expiresAt && new Date() < new Date(message.expiresAt);
-                    if (!invitationAvailable)
-                        messageElement.setAttribute("content", "Game invitation expired");
-                    else {
+                const status = message.status;
+                const isExpired = message.expiresAt && new Date() > new Date(message.expiresAt);
+                let content;
+                if (sameUser) {
+                    content = {
+                        "accepted": "Your game invitation was accepted",
+                        "refused": "Your game invitation was refused",
+                        "pending": isExpired ? "Your game invitation has expired" : "You sent a game invitation"
+                    }[status || "pending"];
+                } else {
+                    if (status === "accepted" || status === "refused") {
+                        content = `You ${status} the game invitation`;
+                    } else if (isExpired) {
+                        content = "Game invitation expired";
+                    } else {
                         messageElement.gameInvitationToken = message.gameInvitationToken;
-                        messageElement.setAttribute("content", `${message.author} wants to play with you`);
+                        content = `${message.author} wants to play with you`;
                         messageElement.setAttribute("expired", "false");
                     }
                 }
+                messageElement.setAttribute("content", content);
                 break;
             default:
                 console.warn(`Unknown message type: ${message.type}`);

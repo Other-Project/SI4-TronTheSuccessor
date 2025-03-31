@@ -7,23 +7,4 @@
         <app-chat-tab slot="template"></app-chat-tab>
     </app-tab-navigation>
 </div>
-<app-popup background="#2F1C41" id="accept-game-invitation">
-    <h2 class="accept-invitation" slot="title">Game invitation</h2>
-    <div class="accept-invitation" slot="body">
-        <img alt="Opponent avatar" id="accept-avatar" src="">
-        <h3 id="accept-name"></h3>
-        <p id="accept-content">Opponent wants to play with you</p>
-    </div>
-    <app-button class="launch-game" slot="actions">Accept</app-button>
-    <app-button id="refuse-invitation" slot="actions">Refuse</app-button>
-</app-popup>
-<app-popup background="#2F1C41" id="send-game-invitation">
-    <h2 class="send-invitation" slot="title">Game invitation</h2>
-    <div class="send-invitation" slot="body">
-        <img alt="Opponent avatar" id="send-avatar" src="">
-        <h3 id="send-name"></h3>
-        <p id="send-content">Opponent wants to play with you</p>
-    </div>
-    <app-button class="launch-game" slot="actions">Send invitation</app-button>
-    <app-button id="dont-send-invitation" slot="actions">Cancel</app-button>
-</app-popup>
+<app-game-invitation></app-game-invitation>

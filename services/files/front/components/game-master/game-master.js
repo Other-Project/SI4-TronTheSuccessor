@@ -165,7 +165,7 @@ export class GameMaster extends HTMLComponent {
         this.waitingWindow.style.display = "block";
         let msg = {against: this.against};
         if (this.against !== "local" && this.against !== "computer")
-            msg["gameInvitationToken"] = getCookie("game-invitation");
+            msg["gameInvitationToken"] = getCookie("gameInvitationToken");
         this.socket.emit("game-join", msg);
 
         this.socket.on("game-info", (msg) => {

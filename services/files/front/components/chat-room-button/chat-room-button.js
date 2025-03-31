@@ -30,7 +30,7 @@ export class ChatRoomButton extends HTMLComponent {
                 return;
             }
             storeTokens(await response.json());
-            this.dispatchEvent(new CustomEvent("show-invitation", {
+            document.dispatchEvent(new CustomEvent("show-invitation", {
                 detail: {
                     popupId: "send-game-invitation",
                     name: this.name,

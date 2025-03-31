@@ -34,6 +34,7 @@ import {GameResult} from "/components/game-result/game-result.js";
 import {Replay} from "/components/replay/replay.js";
 import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-display.js";
 import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
+import {GameInvitation} from "/components/game-invitation/game-invitation.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -41,7 +42,7 @@ customElements.define("app-tab-navigation", TabNavigation);
 customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
-customElements.define('app-notification', Notification);
+customElements.define("app-notification", Notification);
 
 // Home components
 customElements.define("app-home-page", HomePage);
@@ -86,3 +87,6 @@ customElements.define("app-chat-room-message", ChatRoomMessage);
 // History components
 customElements.define("app-game-result", GameResult);
 customElements.define("app-replay", Replay);
+
+// Invitation components
+customElements.define("app-game-invitation", GameInvitation);

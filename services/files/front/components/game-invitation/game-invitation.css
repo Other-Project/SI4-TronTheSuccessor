@@ -1,0 +1,48 @@
+app-popup {
+    display: none;
+    transition: 1s ease-in-out;
+
+    &.show {
+        display: block;
+    }
+
+    .accept-invitation[slot="body"],
+    .send-invitation[slot="body"] {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        background-color: rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+    }
+
+    img {
+        height: 70px;
+    }
+
+    h3 {
+        margin: 0.5rem 0;
+        font-size: 14pt;
+    }
+
+    p {
+        margin: 0.5rem 0 1rem;
+    }
+
+    app-button[slot="actions"] {
+        border-radius: 20px;
+    }
+
+    app-button[id="accept-invitation"]:hover,
+    app-button[id="send-invitation"]:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(106, 62, 161, 0.4);
+
+    }
+
+    app-button[id="refuse-invitation"]:hover,
+    app-button[id="dont-send-invitation"]:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.2);
+    }
+}

@@ -44,6 +44,25 @@ exports.storeMessage = async function (roomId, author, type, content) {
 };
 
 /**
+ * Modifies the status of a game invitation
+ * @param {string} gameInvitationToken The token of the game invitation
+ * @param {"accepted"|"refused"} status The status to set
+ * @returns {Promise<boolean>} True if the status was updated, false otherwise
+ */
+exports.updateGameInvitationStatus = async function (gameInvitationToken, status) {
+    try {
+        jwt.verify(gameInvitationToken, gameInvitationSecretKey);
+        const result = await chatCollection.updateOne(
+            {gameInvitationToken},
+            {$set: {status}}
+        );
+        return result.modifiedCount > 0;
+    } catch (error) {
+        return false;
+    }
+};
+
+/**
  * Verifies the validity of the message
  * @param {object} message The message to verify
  * @returns {boolean} True if the message is valid, false otherwise

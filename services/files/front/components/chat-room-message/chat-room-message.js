@@ -25,7 +25,7 @@ export class ChatRoomMessage extends HTMLComponent {
         this.dateElement = this.shadowRoot.getElementById("message-date");
         this.gameInvitationElement = this.shadowRoot.getElementById("accept-game-invitation");
         this.gameInvitationElement.addEventListener("click", () => {
-            document.cookie = `game-invitation=${this.gameInvitationToken}; path=/; max-age=${60 * 10};`;
+            document.cookie = `gameInvitationToken=${this.gameInvitationToken}; path=/; max-age=${60 * 10};`;
             this.dispatchEvent(new CustomEvent("show-invitation", {
                 detail: {
                     popupId: "accept-game-invitation",

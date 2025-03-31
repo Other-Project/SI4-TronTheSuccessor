@@ -34,14 +34,7 @@ export class GameInvitation extends HTMLComponent {
 
         this.shadowRoot.getElementById("accept-invitation").addEventListener("click", async () => {
             this.invitationPopups.forEach((popup) => popup.classList.remove("show"));
-            const response = await fetchApi("/api/chat/game-invitation", {
-                method: "PUT",
-                body: JSON.stringify({gameInvitationToken: getCookie("gameInvitationToken"), status: "accepted"})
-            });
-            if (!response.ok) {
-                alert(response.statusText);
-                return;
-            }
+            await this.#updateGameInvitationStatus("accepted");
             changePage("/game/" + btoa(this.name));
         });
 
@@ -49,9 +42,21 @@ export class GameInvitation extends HTMLComponent {
             this.invitationPopups.forEach((popup) => popup.classList.remove("show"));
         });
 
-        this.shadowRoot.getElementById("refuse-invitation").addEventListener("click", () => {
+        this.shadowRoot.getElementById("refuse-invitation").addEventListener("click", async () => {
             this.invitationPopups.forEach((popup) => popup.classList.remove("show"));
+            await this.#updateGameInvitationStatus("refused");
             document.cookie = "gameInvitation=; path=/; max-age=0;";
+            this.invitationPopups.forEach((popup) => popup.classList.remove("show"));
         });
+    };
+
+    #updateGameInvitationStatus = async (status) => {
+        const response = await fetchApi("/api/chat/game-invitation", {
+            method: "PUT",
+            body: JSON.stringify({gameInvitationToken: getCookie("gameInvitationToken"), status})
+        });
+        if (!response.ok) {
+            alert(response.statusText);
+        }
     };
 }

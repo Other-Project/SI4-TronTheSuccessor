@@ -1,14 +1,22 @@
-#rank-points {
-    margin: 0;
-    font-size: 2em;
-    text-align: center;
+#rank-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    #rank-points {
+        margin: 0;
+        font-size: 2em;
+    }
+
+    #rank-info {
+        width: 26px;
+        height: 26px;
+        filter: invert(1);
+        margin-left: 10px;
+
+        &:hover {
+            cursor: pointer;
+        }
+    }
 }
 
-#rank-info {
-    cursor: pointer;
-    font-size: 1.5em;
-    color: blue;
-    text-align: center;
-    display: inline-block;
-    margin-left: 10px;
-}

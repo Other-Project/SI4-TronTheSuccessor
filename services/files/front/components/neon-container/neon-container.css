@@ -16,12 +16,7 @@
         overflow: hidden;
 
         #content {
-            color: white;
-            padding: 20px;
             text-align: center;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 1;
         }
     }
 

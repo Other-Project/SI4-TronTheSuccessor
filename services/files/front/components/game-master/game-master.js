@@ -214,7 +214,7 @@ export class GameMaster extends HTMLComponent {
             this.socket.disconnect();
             return;
         }
-        this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed()) : msg.grid;
+        this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed().map(c => c === 1 ? 2 : (c === 2 ? 1 : c))) : msg.grid;
         this.game.setPlayerStates(msg.playerStates, reverse);
         this.gameBoard.draw(this.game);
         if (msg.ended) this.endScreen(msg);

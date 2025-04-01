@@ -120,7 +120,7 @@ exports.addWinAndLoss = async function (playerId, otherPlayerId) {
 /**
  * Get the usernames of the top players.
  * @param limit The number of players to get.
- * @returns {Promise<{playerId: string, winrate: number, rank: string}[]>} The usernames of the top players.
+ * @returns {Promise<{playerId: string, tronPoints: number, rank: string}[]>} The usernames of the top players.
  */
 getTopPlayers = async function (limit = 10) {
     const topPlayers = await statsCollection.find({}, {
@@ -134,12 +134,10 @@ getTopPlayers = async function (limit = 10) {
     }).sort({elo: -1}).limit(limit).toArray();
 
     return topPlayers.map(player => {
-        const totalGames = player.wins + player.losses;
-        const winrate = totalGames > 0 ? (player.wins / totalGames) * 100 : 0;
         const {rank} = getRank(player.elo);
         return {
             playerId: player.playerId,
-            winrate: winrate,
+            tronPoints: player.elo,
             rank: rank
         };
     });

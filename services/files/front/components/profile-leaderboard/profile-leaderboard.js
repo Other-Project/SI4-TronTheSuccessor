@@ -31,6 +31,6 @@ export class ProfileLeaderboard extends HTMLComponent {
         this.rank.setAttribute("rank", this.stats.rank);
         this.rank.setAttribute("points", this.stats.eloInRank);
         this.rank.setAttribute("baserank", this.stats.baseRank);
-        this.rank.setAttribute("height", "250");
+        this.rank.setAttribute("height", "100");
     }
 }

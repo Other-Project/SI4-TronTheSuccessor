@@ -32,6 +32,7 @@ export class RankRepartition extends HTMLComponent {
         const svgNS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
+        svg.style.maxHeight = Math.min(containerHeight * 1.4, 750) + "px";
 
         const totalPlayers = Object.values(this.rankRepartitionData).reduce((a, b) => a + b, 0);
         this.descriptionElement.textContent = `Total Players: ${totalPlayers}`;
@@ -54,7 +55,7 @@ export class RankRepartition extends HTMLComponent {
 
             const rect = document.createElementNS(svgNS, "rect");
             rect.setAttribute("x", x);
-            rect.setAttribute("y", containerHeight - barHeight - 75);
+            rect.setAttribute("y", containerHeight - barHeight - 65);
             rect.setAttribute("width", barWidth);
             rect.setAttribute("height", barHeight);
             rect.setAttribute("fill", "white");
@@ -77,8 +78,8 @@ export class RankRepartition extends HTMLComponent {
 
             const text = document.createElementNS(svgNS, "text");
             text.setAttribute("x", x + barWidth / 2);
-            text.setAttribute("y", containerHeight - 65);
-            text.setAttribute("transform", `rotate(-45 ${x + barWidth / 2} ${containerHeight - 65})`);
+            text.setAttribute("y", containerHeight - 55);
+            text.setAttribute("transform", `rotate(-45 ${x + barWidth / 2} ${containerHeight - 55})`);
             text.setAttribute("text-anchor", "end");
             text.setAttribute("font-size", "10");
             text.setAttribute("fill", "white");

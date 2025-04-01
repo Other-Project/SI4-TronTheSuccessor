@@ -41,7 +41,7 @@ export class RankListing extends HTMLComponent {
 
             const winrateCell = document.createElement("div");
             winrateCell.classList.add("grid-cell");
-            winrateCell.textContent = `${player.winrate.toFixed(2)}%`;
+            winrateCell.textContent = Math.round(player.tronPoints);
 
             playerRow.appendChild(playerIdCell);
             playerRow.appendChild(rankCell);

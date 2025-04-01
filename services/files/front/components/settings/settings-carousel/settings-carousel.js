@@ -36,6 +36,7 @@ export class SettingsCarousel extends HTMLComponent {
 
         const nodes = await Promise.all(this.#collection.map(async item => {
             const clone = this.template.content.cloneNode(true).firstElementChild;
+            clone.id = item.id;
             clone.classList.toggle("selected", item.selected);
             clone.classList.toggle("locked", !item.owned);
 
@@ -52,6 +53,11 @@ export class SettingsCarousel extends HTMLComponent {
 
     async #selectItem(item) {
         if (item.selected || !item.owned) return;
-        await fetchPostApi(`/api/inventory`, {[this.category]: item.id});
+        const response = await fetchPostApi(`/api/inventory`, {[this.category]: item.id});
+        if (response.ok) {
+            this.#collection.forEach(i => i.selected = i.id === item.id);
+            this.container.querySelectorAll(".selected").forEach(node => node.classList.remove("selected"));
+            this.shadowRoot.getElementById(item.id).classList.add("selected");
+        } else console.error("Failed to update inventory:", response.statusText);
     }
 }

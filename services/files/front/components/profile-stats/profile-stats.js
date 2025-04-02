@@ -26,9 +26,9 @@ export class ProfileStats extends HTMLComponent {
     #refresh() {
         if (!this.gamesElement) return;
         this.gamesElement.childNodes[0].textContent = this.games;
-        const {formattedTime, unit} = this.#formatTime(this.time);
+        const {formattedTime} = this.#formatTime(this.time);
         this.timeElement.childNodes[0].textContent = formattedTime;
-        this.shadowRoot.querySelector("#time .label").textContent = `Time Played (${unit})`;
+        this.shadowRoot.querySelector("#time .label").textContent = `Time Played`;
         this.streakElement.childNodes[0].textContent = this.streak;
         this.winrateElement.childNodes[0].textContent = this.winrate;
     }

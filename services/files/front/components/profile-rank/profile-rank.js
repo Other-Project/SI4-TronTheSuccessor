@@ -22,13 +22,15 @@ export class ProfileRank extends HTMLComponent {
         this.rankPoints = this.shadowRoot.getElementById("rank-points");
         this.rankInfo = this.shadowRoot.getElementById("rank-info");
         this.rankPopUp = this.shadowRoot.getElementById("rank-popup");
+        this.displayAgain = this.shadowRoot.getElementById("display-again");
         this.rankPopUp.style.display = "none";
 
-        this.rankInfo.addEventListener("click", () => {
-            this.rankPopUp.style.display = "block";
-        });
-        this.addEventListener("hide-popup", () => {
+        if (localStorage.getItem("rank-popup")) this.displayAgain.checked = true;
+        this.rankInfo.addEventListener("click", () => this.rankPopUp.style.display = "block");
+        this.shadowRoot.addEventListener("hide-popup", () => {
             this.rankPopUp.style.display = "none";
+            if (this.displayAgain.checked) localStorage.setItem("rank-popup", "false");
+            else localStorage.removeItem("rank-popup");
         });
     };
 

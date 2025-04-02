@@ -51,3 +51,7 @@ footer {
     align-self: end;
     margin: 0;
 }
+
+#rank-popup {
+    font-size: 1rem;
+}

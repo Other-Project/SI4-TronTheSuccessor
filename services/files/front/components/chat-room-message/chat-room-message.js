@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {changePage} from "/components/pages/pages.js";
+import {tryUpdatingGameInvitationStatus} from "/js/login-manager.js";
 
 export class ChatRoomMessage extends HTMLComponent {
     /** @type {string} */ author;
@@ -7,10 +8,10 @@ export class ChatRoomMessage extends HTMLComponent {
     /** @type {Date} */ date;
     /** @type {"text"|"friend-request"|"game-invitation"} */ type;
     /** @type {boolean} */ you;
-    /** @type {boolean} */ expired = true;
+    /** @type {boolean} */ expired;
 
     static get observedAttributes() {
-        return ["author", "content", "date", "type", "you", "expired"];
+        return ["author", "content", "date", "type", "you", "expired", "status"];
     }
 
     constructor() {
@@ -23,19 +24,28 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement = this.shadowRoot.getElementById("sender-name");
         this.contentElement = this.shadowRoot.getElementById("message-content");
         this.dateElement = this.shadowRoot.getElementById("message-date");
-        this.gameInvitationElement = this.shadowRoot.getElementById("accept-game-invitation");
-        this.gameInvitationElement.addEventListener("click", () => {
+        this.acceptGameInvitation = this.shadowRoot.getElementById("accept-game-invitation");
+        this.refuseGameInvitation = this.shadowRoot.getElementById("refuse-game-invitation");
+        this.gameInvitation = this.shadowRoot.getElementById("game-invitation");
+        this.acceptGameInvitation.addEventListener("click", async () => {
             document.cookie = `gameInvitationToken=${this.gameInvitationToken}; path=/; max-age=${60 * 10};`;
-            this.dispatchEvent(new CustomEvent("show-invitation", {
-                detail: {
-                    popupId: "accept-game-invitation",
-                    name: this.author,
-                    avatar: this.avatarElement.src,
-                    content: `Do you want to play a game with ${this.author}?`
-                },
-                bubbles: true,
-                composed: true
-            }));
+            if (await tryUpdatingGameInvitationStatus("accepted", this.gameInvitationToken))
+                changePage("/game/" + btoa(this.author));
+
+        });
+        this.refuseGameInvitation.addEventListener("click", async () => {
+            if (await tryUpdatingGameInvitationStatus("refused", this.gameInvitationToken)) {
+                document.dispatchEvent(new CustomEvent("hide-drawer"));
+                document.dispatchEvent(new CustomEvent("show-notification", {
+                    detail: {
+                        message: `Game invitation from ${this.author} refused.`,
+                        duration: 5000,
+                        background: "#41ff00",
+                        color: "#000000"
+                    }
+                }));
+                document.cookie = "gameInvitationToken=; path=/; max-age=0;";
+            }
         });
         this.authorElement.addEventListener("click", () => changePage(`/profile/${this.author}`));
     };
@@ -57,6 +67,8 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement.textContent = this.you ? "You" : this.author;
         this.contentElement.textContent = this.content;
         this.dateElement.textContent = this.date.toLocaleString();
-        this.gameInvitationElement.classList.toggle("show", !this.expired);
+        if (this.expired !== undefined) {
+            this.gameInvitation.classList.add("show");
+        }
     }
 }

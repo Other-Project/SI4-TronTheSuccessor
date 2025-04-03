@@ -5,7 +5,7 @@ const client = new MongoClient(process.env.MONGO_DB_URL ?? "mongodb://mongodb:27
 const database = client.db("Tron-the-successor");
 const chatCollection = database.collection("chat");
 const gameInvitationSecretKey = "4c6d80d9ca8be043da7d58c97fd9e62b24daa659c2ace0111c68bc640d3d39f1";
-const gameInvitationTokenExpiration = 60 * 10;
+const gameInvitationTokenExpiration = 20;
 
 /**
  * Gets the chat messages

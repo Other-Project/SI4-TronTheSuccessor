@@ -20,7 +20,7 @@ export class ChatDrawer extends HTMLComponent {
             this.hide();
         });
 
-        this.shadowRoot.getElementById("game-invitation").addEventListener("hide-drawer", () => {
+        document.addEventListener("hide-drawer", () => {
             this.hide();
         });
     };

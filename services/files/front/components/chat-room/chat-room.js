@@ -68,8 +68,8 @@ export class ChatRoom extends HTMLComponent {
         messageElement.setAttribute("author", message.author);
         messageElement.setAttribute("type", message.type);
         messageElement.setAttribute("date", message.date);
-        const sameUser = message.author === getUserInfo()?.username;
-        messageElement.setAttribute("you", sameUser.toString());
+        const sameAuthor = message.author === getUserInfo()?.username;
+        messageElement.setAttribute("you", sameAuthor.toString());
         switch (message.type) {
             case "friend-request" :
             case "text" || "friend-request":
@@ -79,22 +79,14 @@ export class ChatRoom extends HTMLComponent {
                 const status = message.status;
                 const isExpired = message.expiresAt && new Date() > new Date(message.expiresAt);
                 let content;
-                if (sameUser) {
-                    content = {
-                        "accepted": "Your game invitation was accepted",
-                        "refused": "Your game invitation was refused",
-                        "pending": isExpired ? "Your game invitation has expired" : "You sent a game invitation"
-                    }[status || "pending"];
+                if (status === "accepted" || status === "refused") {
+                    content = `Game invitation ${status}`;
+                } else if (isExpired) {
+                    content = "Game invitation expired";
                 } else {
-                    if (status === "accepted" || status === "refused") {
-                        content = `You ${status} the game invitation`;
-                    } else if (isExpired) {
-                        content = "Game invitation expired";
-                    } else {
-                        messageElement.gameInvitationToken = message.gameInvitationToken;
-                        content = `${message.author} wants to play with you`;
-                        messageElement.setAttribute("expired", "false");
-                    }
+                    messageElement.gameInvitationToken = message.gameInvitationToken;
+                    content = sameAuthor ? "You sent a game invitation" : `${message.author} sent you a game invitation`;
+                    if (!sameAuthor) messageElement.setAttribute("expired", isExpired.toString());
                 }
                 messageElement.setAttribute("content", content);
                 break;

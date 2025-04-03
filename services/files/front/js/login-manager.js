@@ -94,3 +94,28 @@ export function getUserInfo() {
     const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
     return JSON.parse(jsonPayload);
 }
+
+/**
+ * Update the status of a message of type "game-invitation" based on the game invitation token
+ * @param status {"accepted"|"refused"}
+ * @param gameInvitationToken The token of the game invitation
+ * @returns {Promise<boolean>} True if the status was updated, false otherwise
+ */
+export async function tryUpdatingGameInvitationStatus(status, gameInvitationToken) {
+    const response = await fetchApi("/api/chat/game-invitation", {
+        method: "PUT",
+        body: JSON.stringify({gameInvitationToken, status})
+    });
+    if (!response.ok) {
+        document.dispatchEvent(new CustomEvent("hide-drawer"));
+        document.dispatchEvent(new CustomEvent("show-notification", {
+            detail: {
+                message: "This game invitation has already expired",
+                duration: 5000,
+                background: "red",
+                color: "white"
+            }
+        }));
+    }
+    return response.ok;
+}

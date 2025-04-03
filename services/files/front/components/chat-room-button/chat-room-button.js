@@ -37,8 +37,6 @@ export class ChatRoomButton extends HTMLComponent {
                     avatar: this.icon,
                     content: `Do you want to play a game with ${this.name}?`
                 },
-                bubbles: true,
-                composed: true
             }));
         });
     };

@@ -43,12 +43,12 @@ export class HTMLComponent extends HTMLElement {
         if (this.#setupCompleted) return;
 
         if (this.fileDependencies.includes("css")) {
-            const styleUrl = `${this.path}/${this.componentName}.css`;
+            const stylesheet = await getResource(`${this.path}/${this.componentName}.css`);
             if ("adoptedStyleSheets" in this.shadowRoot) {
                 const sheet = new CSSStyleSheet();
-                sheet.replaceSync(await getResource(styleUrl));
+                sheet.replaceSync(stylesheet);
                 this.shadowRoot.adoptedStyleSheets.push(sheet);
-            } else this.shadowRoot.innerHTML += `<link rel="stylesheet" href="${styleUrl}">`; // Fallback for older browsers
+            } else this.shadowRoot.innerHTML += `<style>${stylesheet}</style>`; // Fallback for older browsers
         }
         if (this.fileDependencies.includes("html"))
             this.shadowRoot.innerHTML += await getResource(`${this.path}/${this.componentName}.html`);
@@ -64,7 +64,6 @@ export class HTMLComponent extends HTMLElement {
      * @param oldValue The old value of the attribute
      * @param newValue The new value of the attribute
      */
-    // noinspection JSUnusedGlobalSymbols
     attributeChangedCallback(name, oldValue, newValue) {
         if (this.constructor.observedAttributes?.includes(name)) this[name] = newValue;
     }
@@ -77,7 +76,7 @@ const loadingResources = new Set(); // Set of resources that are currently being
 /**
  * Fetches a resource and caches it
  * @param url The URL of the resource
- * @returns {Promise<*|string>} The resource
+ * @returns {Promise<string>} The resource
  */
 async function getResource(url) {
     if (resources[url]) return resources[url];

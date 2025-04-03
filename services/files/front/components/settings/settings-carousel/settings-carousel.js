@@ -1,6 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
 import {loadAndCustomiseSVG} from "/js/svg-utils.js";
-import {playerColors} from "/js/player.js";
 import {fetchPostApi} from "/js/login-manager.js";
 
 export class SettingsCarousel extends HTMLComponent {
@@ -41,7 +40,7 @@ export class SettingsCarousel extends HTMLComponent {
             clone.classList.toggle("locked", !item.owned);
 
             const templateImg = clone.querySelector(".image");
-            const img = await loadAndCustomiseSVG(item.asset_url, playerColors[Math.floor(Math.random() * playerColors.length)]);
+            const img = await loadAndCustomiseSVG(item.asset_url, {});
             img.classList.add("image");
             templateImg.replaceWith(img);
             clone.querySelector(".name").textContent = item.name;

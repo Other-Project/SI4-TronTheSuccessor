@@ -1,27 +1,3 @@
-export const playerImages = ["1", "2", "3"];
-export const playerColors = [
-    {
-        "cell-color": "#D732A8",
-        "primary-color": "#d99dc2",
-        "secondary-color": "#ffe5fe"
-    },
-    {
-        "cell-color": "#32BED7",
-        "primary-color": "#0088a0",
-        "secondary-color": "#bffaff"
-    },
-    {
-        "cell-color": "#F6B93B",
-        "primary-color": "#a7895a",
-        "secondary-color": "#ffedcb",
-    },
-    {
-        "cell-color": "#4CAF50",
-        "primary-color": "#4a7247",
-        "secondary-color": "#dbf9d8",
-    }
-];
-
 export const directionToAngle = {
     "up-right": 45,
     "right": 90,

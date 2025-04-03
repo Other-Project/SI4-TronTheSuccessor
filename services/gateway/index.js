@@ -41,6 +41,7 @@ if (HTTPS_CONFIG) {
         cert: fs.readFileSync(HTTPS_CONFIG.cert)
     }, requestHandler).listen(8443);
 } else server = http.createServer(requestHandler).listen(8000);
+server.keepAliveTimeout = 60000;
 
 // Register the websocket connections
 const io = new Server(server, {path: "/ws"});

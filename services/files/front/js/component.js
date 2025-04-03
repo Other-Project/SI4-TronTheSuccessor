@@ -43,14 +43,15 @@ export class HTMLComponent extends HTMLElement {
         if (this.#setupCompleted) return;
 
         if (this.fileDependencies.includes("css")) {
+            const styleUrl = `${this.path}/${this.componentName}.css`;
             if ("adoptedStyleSheets" in this.shadowRoot) {
                 const sheet = new CSSStyleSheet();
-                sheet.replaceSync(await fetch(`${this.path}/${this.componentName}.css`).then(response => response.text()));
+                sheet.replaceSync(await getResource(styleUrl));
                 this.shadowRoot.adoptedStyleSheets.push(sheet);
-            } else this.shadowRoot.innerHTML += `<link rel="stylesheet" href="${this.path}/${this.componentName}.css">`; // Fallback for older browsers
+            } else this.shadowRoot.innerHTML += `<link rel="stylesheet" href="${styleUrl}">`; // Fallback for older browsers
         }
         if (this.fileDependencies.includes("html"))
-            this.shadowRoot.innerHTML += await fetch(`${this.path}/${this.componentName}.html`).then(response => response.text());
+            this.shadowRoot.innerHTML += await getResource(`${this.path}/${this.componentName}.html`);
 
         this.#setupCompleted = true;
         await new Promise(res => setTimeout(res, 10)); // Workaround for letting the component initialize
@@ -67,4 +68,32 @@ export class HTMLComponent extends HTMLElement {
     attributeChangedCallback(name, oldValue, newValue) {
         if (this.constructor.observedAttributes?.includes(name)) this[name] = newValue;
     }
+}
+
+
+const resources = {}; // Cache for resources
+const loadingResources = new Set(); // Set of resources that are currently being loaded
+
+/**
+ * Fetches a resource and caches it
+ * @param url The URL of the resource
+ * @returns {Promise<*|string>} The resource
+ */
+async function getResource(url) {
+    if (resources[url]) return resources[url];
+    if (loadingResources.has(url)) {
+        while (loadingResources.has(url)) await new Promise(res => setTimeout(res, 10));
+        if (resources[url]) return resources[url]; // If the resource was loaded successfully while waiting, return it
+    }
+
+    loadingResources.add(url);
+    const response = await fetch(url);
+    if (!response.ok) {
+        loadingResources.delete(url);
+        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+    }
+
+    resources[url] = await response.text();
+    loadingResources.delete(url);
+    return resources[url];
 }

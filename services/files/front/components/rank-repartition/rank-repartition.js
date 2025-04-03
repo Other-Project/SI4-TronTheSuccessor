@@ -32,7 +32,6 @@ export class RankRepartition extends HTMLComponent {
         const svgNS = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
-        svg.style.maxHeight = Math.min(containerHeight * 1.4, 750) + "px";
 
         const totalPlayers = Object.values(this.rankRepartitionData).reduce((a, b) => a + b, 0);
         this.descriptionElement.textContent = `Total Players: ${totalPlayers}`;

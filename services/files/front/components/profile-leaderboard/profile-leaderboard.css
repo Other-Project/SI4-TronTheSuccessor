@@ -26,5 +26,6 @@
 
     #rank-repartition {
         grid-row: 2;
+        align-self: center;
     }
 }

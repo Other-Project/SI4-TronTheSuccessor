@@ -34,6 +34,8 @@ import {GameResult} from "/components/game-result/game-result.js";
 import {Replay} from "/components/replay/replay.js";
 import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-display.js";
 import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
+import {SettingsPage} from "/components/settings/settings-page/settings-page.js";
+import {SettingsCarousel} from "/components/settings/settings-carousel/settings-carousel.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -86,3 +88,7 @@ customElements.define("app-chat-room-message", ChatRoomMessage);
 // History components
 customElements.define("app-game-result", GameResult);
 customElements.define("app-replay", Replay);
+
+// Settings components
+customElements.define("app-settings-page", SettingsPage);
+customElements.define("app-settings-carousel", SettingsCarousel);

@@ -240,7 +240,7 @@ exports.removePendingFriendRequests = async function (username, friends) {
 };
 
 function getJwt(user) {
-    const userInfo = {username: user.username};
+    const userInfo = {username: user.username, avatar: user.avatar, colors: user.colors, spaceship: user.spaceship};
     const accessToken = jwt.sign(userInfo, secretKey, {expiresIn: accessTokenDuration});
     const refreshToken = jwt.sign(userInfo, secretKey, {expiresIn: refreshTokenDuration});
     return {accessToken, refreshToken};

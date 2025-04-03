@@ -21,12 +21,12 @@ export class HumanPlayer extends Player {
     #keypressed;
 
     /**
-     * @param {string} name The player's name
-     * @param {string} color The player's color
-     * @param {string} avatar The player's avatar
+     @param {string} name The player's name
+     @param {{"cell-color": string, "primary-color": string, "secondary-color": string}} color The player's color
+     @param {string} spaceship The player's spaceship
      */
-    constructor(name, color = undefined, avatar = undefined) {
-        super(name, color, avatar);
+    constructor(name, color, spaceship) {
+        super(name, color, spaceship);
         this.#keypressed = new Set();
     }
 

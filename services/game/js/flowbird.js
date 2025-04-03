@@ -10,8 +10,8 @@ const actionToIndexDelta = {
 }
 
 exports.FlowBird = class FlowBird extends Player {
-    constructor() {
-        super(null, "FlowBird");
+    constructor(color, spaceship) {
+        super(null, "FlowBird", color, spaceship);
     }
 
     async init(number, playerStates, game) {

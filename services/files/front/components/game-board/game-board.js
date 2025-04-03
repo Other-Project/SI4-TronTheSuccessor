@@ -1,5 +1,6 @@
 import {directionToAngle, Player} from "/js/player.js";
 import {HTMLComponent} from "/js/component.js";
+import {loadAndCustomiseSVG} from "/js/svg-utils.js";
 
 export class GameBoard extends HTMLComponent {
     cellSize = 200;
@@ -35,8 +36,14 @@ export class GameBoard extends HTMLComponent {
 
     #drawHexagons(game) {
         game.grid.forEach((row, y) => row.forEach((cell, x) => {
-            if (cell !== null) this.#drawHexagon(x, y, game.players[cell - 1]?.color || (cell === 0 ? this.unconqueredColor : this.collisionColor));
+            if (cell !== null) this.#drawHexagon(x, y, this.#getHexagonColor(game, cell));
         }));
+    }
+
+    #getHexagonColor(game, cellValue) {
+        if (cellValue === 0) return this.unconqueredColor;
+        if (cellValue < 0) return this.collisionColor;
+        return game.players[cellValue - 1].color["cell-color"] ?? game.players[cellValue - 1].color;
     }
 
     #drawHexagon(x, y, ownerColor) {
@@ -56,6 +63,7 @@ export class GameBoard extends HTMLComponent {
         this.ctx.fill();
     }
 
+
     /**
      * Draw a player on the game board
      * @param {Player} player The player to draw
@@ -63,7 +71,8 @@ export class GameBoard extends HTMLComponent {
     async #drawPlayer(player) {
         if (player.dead) return;
         let [x, y] = this.cellCoordinates(player.pos[0], player.pos[1]);
-        const playerImg = await this.#loadImage(player.avatar);
+        const playerImg = await loadAndCustomiseSVG(`/assets/spaceships/${player.avatar}.svg`, player.color);
+        if (!playerImg) return;
 
         this.ctx.setTransform(1, 0, 0, 1, x + this.cellSize / 2, y + this.cellSize / 2);
         this.ctx.rotate(directionToAngle[player.direction] / 180 * Math.PI);
@@ -72,18 +81,5 @@ export class GameBoard extends HTMLComponent {
             -this.playerSize / 2,
             this.playerSize,
             this.playerSize);
-    }
-
-    /**
-     * Load an image from a given url
-     * @param {string} src The image url
-     * @returns {Promise<HTMLImageElement>} The loaded image
-     */
-    #loadImage(src) {
-        return new Promise((resolve) => {
-            const image = new Image();
-            image.src = src ?? "";
-            image.addEventListener("load", () => resolve(image));
-        });
     }
 }

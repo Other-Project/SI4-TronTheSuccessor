@@ -8,25 +8,19 @@ export class GameChoice extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        const computerButton = this.shadowRoot.getElementById("computer");
-        const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
-
-        if (!getCookie("refreshToken")) {
-            computerButton.button.disabled = true;
-            multiplayerButton.button.disabled = true;
-        }
+        this.computerButton = this.shadowRoot.getElementById("computer");
+        this.multiplayerButton = this.shadowRoot.getElementById("multiplayer");
 
         this.shadowRoot.getElementById("local-game").addEventListener("click", () => changePage("/game/local"));
-        computerButton.addEventListener("click", () => changePage("/game/computer"));
-        multiplayerButton.addEventListener("click", () => changePage("/game/any-player"));
+        this.computerButton.addEventListener("click", () => changePage("/game/computer"));
+        this.multiplayerButton.addEventListener("click", () => changePage("/game/any-player"));
     };
 
     onVisible = () => {
-        const computerButton = this.shadowRoot.getElementById("computer");
-        const multiplayerButton = this.shadowRoot.getElementById("multiplayer");
-
         const refreshToken = getCookie("refreshToken");
-        computerButton.button.disabled = !refreshToken;
-        multiplayerButton.button.disabled = !refreshToken;
+        this.computerButton.title = !refreshToken ? "You need to be logged in to play against the computer" : "";
+        this.computerButton.button.disabled = !refreshToken;
+        this.multiplayerButton.title = !refreshToken ? "You need to be logged in to play against other players" : "";
+        this.multiplayerButton.button.disabled = !refreshToken;
     };
 }

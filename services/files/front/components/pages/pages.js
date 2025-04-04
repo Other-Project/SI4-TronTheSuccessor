@@ -14,11 +14,14 @@ export class Pages extends HTMLComponent {
     constructor() {
         super("pages", ["html"]);
         window.addEventListener("popstate", this.onVisible);
+        this.style.visibility = "hidden";
     }
 
     onSetupCompleted = () => {
+        this.style.removeProperty("visibility");
         this.pageSlot = this.shadowRoot.getElementById("pages-slot");
         this.errorPage = this.shadowRoot.getElementById("404");
+        this.#showElement(null);
     };
 
     onVisible = () => {

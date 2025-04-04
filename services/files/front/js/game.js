@@ -48,11 +48,12 @@ export class Game extends EventTarget {
     }
 
     stop() {
-        if (this.isPaused()) return;
         const details = this.#getInfo();
-        this.startTime -= new Date();
-        clearInterval(this.#gameLife);
-        this.#gameLife = null;
+        if (!this.isPaused()) {
+            this.startTime -= new Date();
+            clearInterval(this.#gameLife);
+            this.#gameLife = null;
+        }
         return details;
     }
 
@@ -80,8 +81,7 @@ export class Game extends EventTarget {
         if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) {
             player.dead = true;
             if (this.grid[player.pos[1]]) this.grid[player.pos[1]][player.pos[0]] = -1;
-        }
-        else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) {
+        } else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) {
             player.dead = true;
             this.grid[player.pos[1]][player.pos[0]] = -1;
         } else this.grid[player.pos[1]][player.pos[0]] = player.number;
@@ -116,7 +116,11 @@ export class Game extends EventTarget {
 
     setPlayerStates(playerStates, reverse = false) {
         if (reverse) playerStates = this.playerStatesTransform(playerStates, true);
-        playerStates.forEach((state, i) => this.players[i] = {...this.players[i], ...state});
+        playerStates.forEach((state, i) => {
+            this.players[i].pos = state.pos;
+            this.players[i].direction = state.direction;
+            this.players[i].dead = state.dead;
+        });
     }
 
     /**

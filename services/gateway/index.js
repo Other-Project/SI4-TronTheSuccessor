@@ -10,6 +10,7 @@ const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A
 
 const SERVICES = {
     "/api/user": {url: process.env.USER_SERVICE_URL ?? "http://127.0.0.1:8004"},
+    "/api/inventory": {url: process.env.INVENTORY_SERVICE_URL ?? "http://127.0.0.1:8002"},
     "/api/game": {url: process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003", ws: true},
     "/api/chat": {url: process.env.CHAT_SERVICE_URL ?? "http://127.0.0.1:8006", ws: true},
     "/": {url: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001"}
@@ -81,8 +82,9 @@ function requestHandler(request, response) {
         return;
     }
 
+    const ip = getIpAddress(request);
     proxy.web(request, response, {target: service}, (error) => responseError(request, response, "Proxy error", error, 502));
-    console.log(`Proxying ${request.url} to ${service}`);
+    console.log(`Proxying ${request.url} from ${ip} to ${service}`);
 }
 
 /**
@@ -146,18 +148,28 @@ function registerWebsocket(io, namespace, serviceUrl) {
         const serviceSocket = Client(serviceUrl, {
             extraHeaders: {authorization: socket.request.headers.authorization}
         });
-        console.log("Websocket connection to " + serviceUrl + " established");
+        const ip = getIpAddress(socket.request);
+        console.log(`Websocket connection from ${ip} to ${serviceUrl} established`);
 
         socket.on("disconnect", () => serviceSocket.disconnect());
         serviceSocket.on("disconnect", () => socket.disconnect());
 
         socket.onAny((event, ...args) => {
-            console.log("Transmitting " + event + " event to " + serviceUrl);
+            console.log(`Transmitting ${event} event from ${ip} (${socket.id}) to ${serviceUrl} (${serviceSocket.id})`);
             serviceSocket.emit(event, ...args);
         });
         serviceSocket.onAny((event, ...args) => {
-            console.log("Transmitting " + event + " event to the client");
+            console.log(`Transmitting ${event} event from ${serviceUrl} (${serviceSocket.id}) to ${ip} (${socket.id})`);
             socket.emit(event, ...args);
         });
     });
+}
+
+/**
+ * Returns the IP address of the request.
+ * @param request The request to process
+ * @returns {string} The IP address of the request
+ */
+function getIpAddress(request) {
+    return request.headers["x-forwarded-for"] || request.socket.remoteAddress;
 }

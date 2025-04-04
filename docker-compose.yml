@@ -17,6 +17,7 @@ services:
       GAME_SERVICE_URL: "http://game:8003"
       USER_SERVICE_URL: "http://user:8004"
       CHAT_SERVICE_URL: "http://chat:8006"
+      INVENTORY_SERVICE_URL: "http://inventory:8002"
 
       SSL_ENABLED: "true"
       SSL_KEY: "/ssl/privkey.pem"
@@ -36,6 +37,7 @@ services:
     restart: unless-stopped
     environment:
       USER_SERVICE_URL: "http://user:8004"
+      INVENTORY_SERVICE_URL: "http://inventory:8002"
   user:
     image: tron-the-successor/user
     build:
@@ -55,6 +57,13 @@ services:
       - mongodb
     environment:
       USER_SERVICE_URL: "http://user:8004"
+  inventory:
+    image: tron-the-successor/inventory
+    build:
+      context: services/inventory
+    restart: unless-stopped
+    depends_on:
+      - mongodb
 
 volumes:
   mongo-data:

@@ -22,6 +22,7 @@ export class ProfileDisplay extends HTMLComponent {
 
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
+        this.shadowRoot.getElementById("settings").addEventListener("click", () => changePage("/settings"));
         this.shadowRoot.getElementById("profile-menu").addEventListener("click", () => changePage("/profile"));
     };
 

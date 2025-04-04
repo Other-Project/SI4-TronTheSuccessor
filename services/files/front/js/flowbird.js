@@ -10,8 +10,8 @@ const actionToIndexDelta = {
 };
 
 export class FlowBird extends Player {
-    constructor() {
-        super("FlowBird");
+    constructor(color, spaceship) {
+        super("FlowBird", color, spaceship);
     }
 
     init(number, playerStates, game) {

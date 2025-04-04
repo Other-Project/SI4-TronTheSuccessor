@@ -1,6 +1,3 @@
-export const playerImages = ["/assets/player_1.png", "/assets/player_2.png"];
-export const playerColors = ["#D732A8", "#32BED7"];
-
 export const directionToAngle = {
     "up-right": 45,
     "right": 90,
@@ -14,7 +11,7 @@ export class Player extends EventTarget {
     /** @type {string} */ name;
     /** @type {number} */ number;
     /** @type {[number, number]} */ pos;
-    /** @type {string} */ color;
+    /** @type {{"cell-color": string, "primary-color": string, "secondary-color": string}} */ color;
     /** @type {string} */ avatar;
     /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ direction;
     /** @type {"right"|"left"|"up-right"|"up-left"|"down-right"|"down-left"} */ nextDirection;
@@ -24,14 +21,14 @@ export class Player extends EventTarget {
 
     /**
      * @param {string} name The player's name
-     * @param {string} color The player's color
-     * @param {string} avatar The player's avatar
+     * @param {{"cell-color": string, "primary-color": string, "secondary-color": string}} color The player's color
+     * @param {string} spaceship The player's spaceship
      */
-    constructor(name, color = undefined, avatar = undefined) {
+    constructor(name, color, spaceship) {
         super();
         this.name = name;
         this.color = color;
-        this.avatar = avatar;
+        this.avatar = spaceship;
     }
 
     /**
@@ -41,8 +38,6 @@ export class Player extends EventTarget {
      */
     init(number, playerStates) {
         this.number = number;
-        this.color ??= playerColors[number - 1];
-        this.avatar ??= playerImages[number - 1];
 
         this.pos = playerStates[number - 1].pos;
         this.direction = this.nextDirection = playerStates[number - 1].direction;

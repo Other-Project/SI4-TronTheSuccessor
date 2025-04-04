@@ -1,6 +1,6 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
-const {getRequestBody, sendResponse} = require("./js/utils.js");
+const {HTTP_STATUS, getAuthorizationToken,getRequestBody, sendResponse} = require("./js/utils.js");
 const {
     handleGetFriends,
     handleGetUser,
@@ -8,8 +8,6 @@ const {
     handleAddFriend,
     handleTestFriend
 } = require("./js/social.js");
-const {HTTP_STATUS} = require("./js/utils.js");
-const {getAuthorizationToken} = require("./js/utils.js");
 
 http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");

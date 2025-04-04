@@ -4,7 +4,7 @@ import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
 import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
-import {getAccessToken, getCookie, renewAccessToken} from "/js/login-manager.js";
+import {getAccessToken, getCookie, getUserInfo, renewAccessToken} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
 
 export class GameMaster extends HTMLComponent {
@@ -67,15 +67,27 @@ export class GameMaster extends HTMLComponent {
         this.container.style.visibility = "hidden";
         this.emoteDisplayContainer.innerHTML = "";
         this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
-        this.against === "local" ? this.newGame() : this.#gameWithServer().then();
+        this.against === "local" ? this.newGame().then() : this.#gameWithServer().then();
     }
 
-    newGame() {
+    async newGame() {
         this.pauseWindow.style.display = "none";
         this.container.style.visibility = "visible";
         this.stopGame();
-        const opponent = this.against === "computer" ? new FlowBird() : new HumanPlayer("Player 2");
-        this.game = new Game(this.gridSize[0], this.gridSize[1], new HumanPlayer("Player 1"), opponent, 500);
+
+        const username = getUserInfo()?.username;
+        let selectedInventory;
+        if (username) selectedInventory = await fetch(`/api/inventory/${username}`).then(res => res.json());
+        else {
+            const response = await fetch("/api/inventory").then(res => res.json());
+            selectedInventory = Object.fromEntries(Object.entries(response).map(([key, value]) => [key, value[0]]));
+        }
+
+        const player = new HumanPlayer("Player 1", selectedInventory.firstChoiceColors, selectedInventory.spaceships.id);
+        const opponent = this.against === "computer"
+            ? new FlowBird(selectedInventory.secondChoiceColors, selectedInventory.spaceships.id)
+            : new HumanPlayer("Player 2", selectedInventory.secondChoiceColors, selectedInventory.spaceships.id);
+        this.game = new Game(this.gridSize[0], this.gridSize[1], player, opponent, 500);
         this.game.addEventListener("game-turn", (e) => {
             this.gameBoard.draw(this.game);
             if (e.detail.ended) this.endScreen(e.detail);
@@ -220,7 +232,7 @@ export class GameMaster extends HTMLComponent {
             this.socket.disconnect();
             return;
         }
-        this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed()) : msg.grid;
+        this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed().map(c => c === 1 ? 2 : (c === 2 ? 1 : c))) : msg.grid;
         this.game.setPlayerStates(msg.playerStates, reverse);
         this.gameBoard.draw(this.game);
         if (msg.ended) this.endScreen(msg);

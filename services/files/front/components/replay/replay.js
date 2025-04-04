@@ -22,6 +22,11 @@ export class Replay extends HTMLComponent {
         this.updateDisplay();
     }
 
+    attributeChangedCallback(name, oldValue, newValue) {
+        super.attributeChangedCallback(name, oldValue, newValue);
+        this.updateDisplay();
+    }
+
     onSetupCompleted = () => {
         this.gameBoard = this.shadowRoot.getElementById("board");
         this.boardRange = this.shadowRoot.getElementById("board-range");
@@ -68,7 +73,7 @@ export class Replay extends HTMLComponent {
     updateDisplay() {
         if (!this.#gameData || !this.boardRange) return;
         this.boardRange.max = this.#gameData.gameActions.length - 1;
-        const players = this.#gameData.players.map(player => new Player(player.name, player.color, player.avatar));
+        const players = (this.flipped === "true" ? this.#gameData.players.toReversed() : this.#gameData.players).map(player => new Player(player.name, player.color, player.avatar));
         players.forEach((player, i) => player.init(i + 1, this.#gameData.gameActions[0]));
         this.game = new Game(16, 9, players[0], players[1], 500);
         this.#drawTillTurn(0);

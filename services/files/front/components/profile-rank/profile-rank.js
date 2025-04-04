@@ -22,11 +22,9 @@ export class ProfileRank extends HTMLComponent {
         this.rankPoints = this.shadowRoot.getElementById("rank-points");
         this.rankInfo = this.shadowRoot.getElementById("rank-info");
         this.rankPopUp = this.shadowRoot.getElementById("rank-popup");
-        this.displayAgain = this.shadowRoot.getElementById("display-again");
         this.close = this.shadowRoot.getElementById("close");
         this.rankPopUp.style.display = "none";
 
-        if (localStorage.getItem("rank-popup")) this.displayAgain.checked = true;
         this.rankInfo.addEventListener("click", () => this.rankPopUp.style.display = "block");
         this.shadowRoot.addEventListener("hide-popup", () => this.#close());
         this.close.addEventListener("click", () => this.#close());
@@ -86,7 +84,5 @@ export class ProfileRank extends HTMLComponent {
 
     #close() {
         this.rankPopUp.style.display = "none";
-        if (this.displayAgain.checked) localStorage.setItem("rank-popup", "false");
-        else localStorage.removeItem("rank-popup");
     }
 }

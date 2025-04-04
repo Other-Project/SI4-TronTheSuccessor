@@ -14,7 +14,7 @@ async function makeHttpRequest(method, path, data = null, authorization = null) 
             method: method,
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer " + (authorization || "")
+                "Authorization": authorization
             },
             body: data ? JSON.stringify(data) : null
         });

@@ -11,7 +11,6 @@ const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
 const {verifyFriendship} = require("./helper/userHelper.js");
 
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
-const gameInvitationSecretKey = "4c6d80d9ca8be043da7d58c97fd9e62b24daa659c2ace0111c68bc640d3d39f1";
 
 const FRIEND_GAME_TIMEOUT = 10 * 60 * 1000;
 const waitingRoomTimers = {};
@@ -105,7 +104,7 @@ async function joinFriendGame(socket, msg) {
         return;
     }
     try {
-        jwt.verify(msg.gameInvitationToken, gameInvitationSecretKey);
+        jwt.verify(msg.gameInvitationToken, process.env.GAME_INVITATION_SECRET_KEY);
     } catch (error) {
         if (error.name === "TokenExpiredError")
             socket.emit("unauthorized_room_access", {message: "Game invitation has expired. Please request a new invitation."});
@@ -118,7 +117,7 @@ async function joinFriendGame(socket, msg) {
         socket.emit("unauthorized_room_access", {message: "You cannot play against yourself"});
         return;
     }
-    const response = await verifyFriendship(opponentName, socket.request.headers.authorization?.split(" ")[1]);
+    const response = await verifyFriendship(opponentName, socket.request.headers.authorization);
     if (!response.isFriend) {
         socket.emit("unauthorized_room_access", {message: "You are not friends with this user"});
         return;
@@ -128,13 +127,10 @@ async function joinFriendGame(socket, msg) {
     const sockets = await io.in(roomName).fetchSockets();
     if (sockets.length === 1) {
         waitingRoomTimers[roomName] = setTimeout(async () => {
-            const socketsInRoom = await io.in(roomName).fetchSockets();
-            for (const s of socketsInRoom) {
-                s.emit("game_invitation_timeout", {
-                    message: "Game invitation has expired. Please send a new invitation."
-                });
-                s.leave(roomName);
-            }
+            io.to(roomName).emit("game_invitation_timeout", {
+                message: "Game invitation has expired. Please send a new invitation."
+            });
+            io.socketsLeave(roomName);
             delete waitingRoomTimers[roomName];
         }, FRIEND_GAME_TIMEOUT);
     }
@@ -149,7 +145,7 @@ io.of("/").adapter.on("join-room", async (room, id) => {
 const games = {};
 
 async function createGame(p1s, p2s = null, gameType) {
-    const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), 500, gameType);
+    const game = new Game(16, 9, createPlayer(p1s), createPlayer(p2s), gameType, 500);
     const id = randomUUID();
     games[id] = game;
 

@@ -24,19 +24,7 @@ export class GameInvitation extends HTMLComponent {
 
         this.sendButtonInvitation.addEventListener("click", async () => {
             this.sendGameInvitation.classList.remove("show");
-            const message = {
-                type: "game-invitation",
-                content: "Fight me!"
-            };
-            const response = await fetchApi(`/api/chat/${this.name}`, {
-                method: "POST",
-                body: JSON.stringify(message)
-            });
-            if (!response.ok) {
-                alert(`Failed to send game invitation: ${response.statusText}`);
-                return;
-            }
-            storeTokens(await response.json());
+            await this.#sendGameInvitation();
             changePage("/game/" + btoa(this.name));
         });
 
@@ -44,4 +32,20 @@ export class GameInvitation extends HTMLComponent {
             this.sendGameInvitation.classList.remove("show");
         });
     };
+
+    async #sendGameInvitation() {
+        const message = {
+            type: "game-invitation",
+            content: "Fight me!"
+        };
+        const response = await fetchApi(`/api/chat/${this.name}`, {
+            method: "POST",
+            body: JSON.stringify(message)
+        });
+        if (!response.ok) {
+            alert(`Failed to send game invitation: ${response.statusText}`);
+            return;
+        }
+        storeTokens(await response.json());
+    }
 }

@@ -31,7 +31,6 @@ export class ChatRoomMessage extends HTMLComponent {
             document.cookie = `gameInvitationToken=${this.gameInvitationToken}; path=/; max-age=${60 * 10};`;
             if (await tryUpdatingGameInvitationStatus("accepted", this.gameInvitationToken))
                 changePage("/game/" + btoa(this.author));
-
         });
         this.refuseGameInvitation.addEventListener("click", async () => {
             if (await tryUpdatingGameInvitationStatus("refused", this.gameInvitationToken)) {

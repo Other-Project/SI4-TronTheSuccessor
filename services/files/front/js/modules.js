@@ -83,10 +83,8 @@ customElements.define("app-chat-selection", ChatSelection);
 customElements.define("app-chat-room-button", ChatRoomButton);
 customElements.define("app-chat-room", ChatRoom);
 customElements.define("app-chat-room-message", ChatRoomMessage);
+customElements.define("app-game-invitation", GameInvitation);
 
 // History components
 customElements.define("app-game-result", GameResult);
 customElements.define("app-replay", Replay);
-
-// Invitation components
-customElements.define("app-game-invitation", GameInvitation);

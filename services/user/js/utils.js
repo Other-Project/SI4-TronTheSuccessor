@@ -21,7 +21,7 @@ exports.getRequestBody = async function (request) {
         request.on("end", () => resolve(body));
         request.on("error", reject);
     });
-}
+};
 
 exports.sendResponse = function (response, statusCode, data = null) {
     response.statusCode = statusCode;

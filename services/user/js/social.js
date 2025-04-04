@@ -73,6 +73,7 @@ exports.handleRemoveFriend = async function (request, response, friend) {
  */
 exports.handleTestFriend = async function (request, response, friend) {
     const user = getUser(request);
+    if (!user) sendResponse(response, HTTP_STATUS.NOT_FOUND, {isFriend: false});
     const friends = await userDatabase.getFriends(user.username);
     sendResponse(response, HTTP_STATUS.OK, {isFriend: friends ? friends.includes(friend) : false});
 };

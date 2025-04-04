@@ -22,10 +22,10 @@ exports.Game = class Game extends EventTarget {
      * @param {number} h Height of the game map
      * @param {Player} player1 The first player of the game
      * @param {Player} player2 The second player of the game
+     * @param {("computer"|"multiplayer"|"friend")} gameType The type of the game
      * @param {number} turnDuration The duration of a game turn
-     * @param {string} gameType The type of the game ["computer", "multiplayer", "friend"]
      */
-    constructor(w, h, player1, player2, turnDuration = 500, gameType) {
+    constructor(w, h, player1, player2, gameType, turnDuration = 500) {
         super();
         this.gridSize = [w, h];
         this.players = [player1, player2];

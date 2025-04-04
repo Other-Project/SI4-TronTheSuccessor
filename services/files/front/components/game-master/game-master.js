@@ -154,7 +154,14 @@ export class GameMaster extends HTMLComponent {
         });
 
         const handleError = (err) => {
-            alert(err.message);
+            document.dispatchEvent(new CustomEvent("show-notification", {
+                detail: {
+                    message: err.message,
+                    duration: 5000,
+                    background: "#ff0000",
+                    color: "#ffffff"
+                }
+            }));
             changePage("/", true);
         };
 

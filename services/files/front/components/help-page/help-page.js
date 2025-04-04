@@ -56,6 +56,5 @@ export class HelpPage extends HTMLComponent {
     #close() {
         this.rankPopUp.style.display = "none";
         if (this.displayAgain.checked) localStorage.setItem("rank-popup", "false");
-        else localStorage.removeItem("rank-popup");
     }
 }

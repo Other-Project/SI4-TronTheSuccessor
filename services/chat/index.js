@@ -23,10 +23,11 @@ const server = http.createServer(async (request, response) => {
             const messages = await chatDatabase.getChat(roomId, from);
             return sendResponse(response, HTTP_STATUS.OK, messages);
         } else if (request.method === "POST") {
-            let message = JSON.parse(await getRequestBody(request));
+            const message = JSON.parse(await getRequestBody(request));
             if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
-            io.to(roomId).emit("message", message = await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
-            return sendResponse(response, HTTP_STATUS.CREATED, message.type === "game-invitation" ? {gameInvitationToken: message.gameInvitationToken} : null);
+            const storedMessage = await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
+            io.to(roomId).emit("message", storedMessage);
+            return sendResponse(response, HTTP_STATUS.CREATED, message.type === "game-invitation" ? {gameInvitationToken: storedMessage.gameInvitationToken} : null);
         }
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
         if (request.method === "GET") {
@@ -59,19 +60,16 @@ const server = http.createServer(async (request, response) => {
             const body = JSON.parse(await getRequestBody(request));
 
             const gameInvitationToken = body.gameInvitationToken;
-            if (!gameInvitationToken) {
+            if (!gameInvitationToken)
                 return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Game invitation has expired or is invalid"});
-            }
 
-            if (!body.status || !["accepted", "refused"].includes(body.status)) {
+            if (!body.status || !["accepted", "refused"].includes(body.status))
                 return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid status"});
-            }
 
             const author = jwt.decode(gameInvitationToken).author;
 
-            if (author === user.username) {
+            if (author === user.username)
                 return sendResponse(response, HTTP_STATUS.FORBIDDEN, {error: "Cannot respond to your own invitation"});
-            }
 
             if (await chatDatabase.updateGameInvitationStatus(gameInvitationToken, body.status))
                 return sendResponse(response, HTTP_STATUS.OK, {status: body.status});

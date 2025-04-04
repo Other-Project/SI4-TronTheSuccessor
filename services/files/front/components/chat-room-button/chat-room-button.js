@@ -1,5 +1,4 @@
 import {HTMLComponent} from "/js/component.js";
-import {fetchApi, storeTokens} from "/js/login-manager.js";
 
 export class ChatRoomButton extends HTMLComponent {
     static get observedAttributes() {
@@ -17,19 +16,6 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomFightIcon = this.shadowRoot.getElementById("icon-fight");
         this.roomFightIcon.addEventListener("click", async e => {
             e.stopPropagation();
-            const message = {
-                type: "game-invitation",
-                content: "Fight me!"
-            };
-            const response = await fetchApi(`/api/chat/${this.name}`, {
-                method: "POST",
-                body: JSON.stringify(message)
-            });
-            if (!response.ok) {
-                alert(`Failed to send game invitation: ${response.statusText}`);
-                return;
-            }
-            storeTokens(await response.json());
             document.dispatchEvent(new CustomEvent("show-invitation", {
                 detail: {
                     popupId: "send-game-invitation",

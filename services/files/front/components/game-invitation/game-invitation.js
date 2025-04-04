@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {changePage} from "/components/pages/pages.js";
+import {fetchApi, storeTokens} from "/js/login-manager.js";
 
 export class GameInvitation extends HTMLComponent {
     constructor() {
@@ -23,6 +24,19 @@ export class GameInvitation extends HTMLComponent {
 
         this.sendButtonInvitation.addEventListener("click", async () => {
             this.sendGameInvitation.classList.remove("show");
+            const message = {
+                type: "game-invitation",
+                content: "Fight me!"
+            };
+            const response = await fetchApi(`/api/chat/${this.name}`, {
+                method: "POST",
+                body: JSON.stringify(message)
+            });
+            if (!response.ok) {
+                alert(`Failed to send game invitation: ${response.statusText}`);
+                return;
+            }
+            storeTokens(await response.json());
             changePage("/game/" + btoa(this.name));
         });
 

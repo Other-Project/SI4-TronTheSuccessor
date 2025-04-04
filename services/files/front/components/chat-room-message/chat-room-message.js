@@ -1,6 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {changePage} from "/components/pages/pages.js";
-import {tryUpdatingGameInvitationStatus} from "/js/login-manager.js";
+import {fetchApi, tryUpdatingGameInvitationStatus} from "/js/login-manager.js";
 
 export class ChatRoomMessage extends HTMLComponent {
     /** @type {string} */ author;
@@ -34,6 +34,21 @@ export class ChatRoomMessage extends HTMLComponent {
         });
         this.refuseGameInvitation.addEventListener("click", async () => {
             if (await tryUpdatingGameInvitationStatus("refused", this.gameInvitationToken)) {
+                const response = await fetchApi("/api/game/game-invitation/refuse", {
+                    method: "POST",
+                    body: this.author
+                });
+                if (!response.ok) {
+                    document.dispatchEvent(new CustomEvent("show-notification", {
+                        detail: {
+                            message: "An error happened. Failed to refuse the game invitation",
+                            duration: 5000,
+                            background: "#f11818",
+                            color: "#000000"
+                        }
+                    }));
+                    return;
+                }
                 document.dispatchEvent(new CustomEvent("hide-drawer"));
                 document.dispatchEvent(new CustomEvent("show-notification", {
                     detail: {

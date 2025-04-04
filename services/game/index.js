@@ -7,7 +7,7 @@ const {randomUUID} = require("crypto");
 const jwt = require("jsonwebtoken");
 const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
-const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
+const {HTTP_STATUS, getUser, sendResponse, getRequestBody} = require("./js/utils.js");
 const {verifyFriendship} = require("./helper/userHelper.js");
 const {getCollection, getUserInventorySelection} = require("./helper/inventoryHelper.js");
 
@@ -17,28 +17,35 @@ const FRIEND_GAME_TIMEOUT = 10 * 60 * 1000;
 const waitingRoomTimers = {};
 
 let server = http.createServer(async (request, response) => {
-    const filePath = request.url.split("/").filter(elem => elem !== "..");
+        const filePath = request.url.split("/").filter(elem => elem !== "..");
 
-    try {
-        switch (filePath[3]) {
-            case "stats":
-                if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
-                break;
-            case "emotes":
-                sendResponse(response, HTTP_STATUS.OK, {emotes});
-                break;
-            case "history":
-                if (request.method === "GET")
-                    await handleGetHistory(request, response);
-                break;
-            default:
-                sendResponse(response, HTTP_STATUS.NOT_FOUND);
+        try {
+            switch (filePath[3]) {
+                case "stats":
+                    if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
+                    break;
+                case "emotes":
+                    sendResponse(response, HTTP_STATUS.OK, {emotes});
+                    break;
+                case "history":
+                    if (request.method === "GET")
+                        await handleGetHistory(request, response);
+                    break;
+                case "game-invitation":
+                    if (request.method === "POST")
+                        if (filePath[4] === "refuse")
+                            await refuseGameInvitation(request, response);
+                    break;
+                default:
+                    sendResponse(response, HTTP_STATUS.NOT_FOUND);
+            }
+        } catch
+            (error) {
+            console.warn(error);
+            sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
         }
-    } catch (error) {
-        console.warn(error);
-        sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
     }
-}).listen(8003);
+).listen(8003);
 
 const io = new Server(server);
 io.on("connection", (socket) => {
@@ -210,4 +217,16 @@ function joinGame(socket, gameId) {
         grid: game.grid,
         playerStates: game.getPlayerStates()
     });
+}
+
+async function refuseGameInvitation(request, response) {
+    const user = getUser(request);
+    const opponentName = await getRequestBody(request);
+    const roomName = [opponentName, user.username].sort().join("-");
+    io.to(roomName).emit("friend_invitation_refused", {
+        message: `Your game invitation was refused by ${user.username}`
+    });
+    io.socketsLeave(roomName);
+    delete waitingRoomTimers[roomName];
+    sendResponse(response, HTTP_STATUS.OK);
 }

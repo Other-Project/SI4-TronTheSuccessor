@@ -179,6 +179,7 @@ export class GameMaster extends HTMLComponent {
 
         this.socket.on("unauthorized_room_access", handleError);
         this.socket.on("game_invitation_timeout", handleError);
+        this.socket.on("friend_invitation_refused", handleError);
 
         this.gameBoard.clear();
         this.waitingWindow.style.display = "block";

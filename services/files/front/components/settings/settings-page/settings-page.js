@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi} from "/js/login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class SettingsPage extends HTMLComponent {
 
@@ -12,6 +13,8 @@ export class SettingsPage extends HTMLComponent {
         this.spaceShipCarousel = this.shadowRoot.getElementById("spaceship-carousel");
         this.primaryColorCarousel = this.shadowRoot.getElementById("primary-color-carousel");
         this.secondaryColorCarousel = this.shadowRoot.getElementById("secondary-color-carousel");
+
+        this.shadowRoot.getElementById("home-page").addEventListener("click", () => changePage("/"));
     };
 
     onVisible = async () => {

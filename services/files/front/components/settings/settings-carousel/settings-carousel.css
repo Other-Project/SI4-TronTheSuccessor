@@ -1,7 +1,7 @@
 .container {
     display: grid;
     grid-auto-columns: 200px;
-    grid-template-rows: 150px;
+    grid-template-rows: 125px;
     grid-auto-flow: column;
     gap: 10px;
     overflow-y: scroll;

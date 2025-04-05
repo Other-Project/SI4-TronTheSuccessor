@@ -41,5 +41,9 @@
 
 #room-preview {
     max-width: 220px;
-    overflow: clip;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
 }

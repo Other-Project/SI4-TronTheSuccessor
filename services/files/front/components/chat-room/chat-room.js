@@ -72,18 +72,18 @@ export class ChatRoom extends HTMLComponent {
         messageElement.setAttribute("you", sameAuthor.toString());
         switch (message.type) {
             case "friend-request" :
-            case "text" || "friend-request":
+            case "text":
                 messageElement.setAttribute("content", message.content);
                 break;
             case "game-invitation":
                 const status = message.status;
                 const isExpired = message.expiresAt && new Date() > new Date(message.expiresAt);
                 let content;
-                if (status === "accepted" || status === "refused") {
+                if (status === "accepted" || status === "refused")
                     content = `Game invitation ${status}`;
-                } else if (isExpired) {
+                else if (isExpired)
                     content = "Game invitation expired";
-                } else {
+                else {
                     messageElement.gameInvitationToken = message.gameInvitationToken;
                     content = sameAuthor ? "You sent a game invitation" : `${message.author} sent you a game invitation`;
                     if (!sameAuthor) messageElement.setAttribute("expired", isExpired.toString());

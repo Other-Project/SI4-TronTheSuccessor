@@ -1,6 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {changePage} from "/components/pages/pages.js";
-import {fetchApi, tryUpdatingGameInvitationStatus} from "/js/login-manager.js";
+import {fetchApi, storeTokens, tryUpdatingGameInvitationStatus} from "/js/login-manager.js";
 
 export class ChatRoomMessage extends HTMLComponent {
     /** @type {string} */ author;
@@ -28,7 +28,7 @@ export class ChatRoomMessage extends HTMLComponent {
         this.refuseGameInvitation = this.shadowRoot.getElementById("refuse-game-invitation");
         this.gameInvitation = this.shadowRoot.getElementById("game-invitation");
         this.acceptGameInvitation.addEventListener("click", async () => {
-            document.cookie = `gameInvitationToken=${this.gameInvitationToken}; path=/; max-age=${60 * 10};`;
+            storeTokens(this);
             if (await tryUpdatingGameInvitationStatus("accepted", this.gameInvitationToken))
                 changePage("/game/" + btoa(this.author));
         });

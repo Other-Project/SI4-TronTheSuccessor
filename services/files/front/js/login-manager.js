@@ -102,10 +102,7 @@ export function getUserInfo() {
  * @returns {Promise<boolean>} True if the status was updated, false otherwise
  */
 export async function tryUpdatingGameInvitationStatus(status, gameInvitationToken) {
-    const response = await fetchApi("/api/chat/game-invitation", {
-        method: "PUT",
-        body: JSON.stringify({gameInvitationToken, status})
-    });
+    const response = await fetchPostApi("/api/chat/game-invitation", {gameInvitationToken, status}, {method: "PUT"});
     if (!response.ok) {
         document.dispatchEvent(new CustomEvent("hide-drawer"));
         document.dispatchEvent(new CustomEvent("show-notification", {

@@ -133,7 +133,7 @@ export class TabNavigation extends HTMLComponent {
         if (this.readonly) return;
         const tab = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
         const panel = tabId ? this.panels.querySelector(`#${tabId}`) : null;
-        if (tab?.classList.contains("active")) this.switchToNextTab(tab);
+        if (tab?.classList.contains("active") && !this.switchToNextTab(tab)) this.newTab();
         tab?.remove();
         panel?.remove();
     }
@@ -147,5 +147,6 @@ export class TabNavigation extends HTMLComponent {
         const nextTab = tabBtn.nextElementSibling ?? tabBtn.previousElementSibling;
         if (nextTab?.dataset.tabId) this.changeTab(nextTab.dataset.tabId);
         else this.changeTab();
+        return nextTab?.dataset.tabId;
     }
 }

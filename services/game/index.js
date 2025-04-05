@@ -69,7 +69,7 @@ io.on("connection", (socket) => {
         io.to(room).emit("emote", {emote: msg.emote, player: user.username});
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
         const gameId = Object.keys(socket.rooms).find(room => room !== socket.id);
         delete games[gameId];
 
@@ -77,6 +77,13 @@ io.on("connection", (socket) => {
             if (waitingRoomTimers[room]) {
                 clearTimeout(waitingRoomTimers[room]);
                 delete waitingRoomTimers[room];
+            }
+            if (refusedGames[room]) {
+                const sockets = await io.in(room).fetchSockets();
+                if (sockets.length === 0) {
+                    clearTimeout(refusedGames[room]);
+                    delete refusedGames[room];
+                }
             }
         }
     });

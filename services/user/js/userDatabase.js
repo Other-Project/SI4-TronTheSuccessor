@@ -1,10 +1,12 @@
 const {MongoClient} = require("mongodb");
 const jwt = require("jsonwebtoken");
 const {createHash} = require("node:crypto");
+const {sendResponse} = require("./utils.js");
 
 const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27017');
 const database = client.db("Tron-the-successor");
 const userCollection = database.collection("user");
+const inventoryCollection = database.collection("inventory");
 const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
 const secretKeyPasswordReset = "cd946159c3178defdaccef2f203a007ba0add6d02a79f8b259162924fccb7ddc";
 const accessTokenDuration = "1h";
@@ -240,7 +242,7 @@ exports.removePendingFriendRequests = async function (username, friends) {
 };
 
 function getJwt(user) {
-    const userInfo = {username: user.username, avatar: user.avatar, colors: user.colors, spaceship: user.spaceship};
+    const userInfo = {username: user.username};
     const accessToken = jwt.sign(userInfo, secretKey, {expiresIn: accessTokenDuration});
     const refreshToken = jwt.sign(userInfo, secretKey, {expiresIn: refreshTokenDuration});
     return {accessToken, refreshToken};
@@ -280,4 +282,11 @@ function hash(str) {
     const hash = createHash("sha256");
     hash.update(str);
     return hash.digest("hex");
+}
+
+exports.handleGetAvatar = async function (request, response, username) {
+    const inventory = await inventoryCollection.findOne({username: username}, {projection: {"avatars.selected": 1}});
+    const avatar = inventory?.avatars?.selected ?? "mike";
+    response.setHeader('Location', `/assets/avatars/${avatar}.svg`);
+    sendResponse(response, 302);
 }

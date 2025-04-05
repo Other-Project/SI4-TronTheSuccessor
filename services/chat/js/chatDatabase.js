@@ -39,7 +39,36 @@ exports.storeMessage = async function (roomId, author, type, content) {
         message.gameInvitationToken = jwt.sign({author}, process.env.GAME_INVITATION_SECRET_KEY, {expiresIn: gameInvitationTokenExpiration});
     }
     console.debug(message, await chatCollection.insertOne(message));
-    return message;
+    return {
+        ...message,
+        shouldEmit: true
+    };
+};
+
+exports.sendGameInvitation = async function (roomId, author, type, content, recipient) {
+    const firstPendingGameInvitation = await chatCollection.findOne({
+        author: recipient,
+        type: "game-invitation",
+        expiresAt: {$gt: new Date()},
+        $and: [
+            {status: {$ne: "accepted"}},
+            {status: {$ne: "refused"}}
+        ]
+    }, {
+        sort: {
+            timestamp: -1
+        }
+    });
+    if (firstPendingGameInvitation !== null) {
+        console.log(`Updating game invitation to ${recipient}`);
+        await chatCollection.updateOne({_id: firstPendingGameInvitation._id}, {
+            $set: {
+                status: "accepted"
+            }
+        });
+        return {gameInvitationToken: firstPendingGameInvitation.gameInvitationToken};
+    }
+    return await exports.storeMessage(roomId, author, type, content);
 };
 
 /**

@@ -40,12 +40,6 @@ export class GameMaster extends HTMLComponent {
         this.resumeButton.addEventListener("click", () => this.resume());
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", async () => {
-            if (this.against !== "local" && this.against !== "computer" && this.against !== "any-player") {
-                await fetchApi("/api/game/game-invitation/refuse", {
-                    method: "POST",
-                    body: atob(this.against)
-                });
-            }
             changePage("/");
         });
 
@@ -65,10 +59,16 @@ export class GameMaster extends HTMLComponent {
         document.addEventListener("keyup", this.#keyReleased);
         document.addEventListener("keypress", this.#keyPressed);
     };
-    onHidden = () => {
+    onHidden = async () => {
         document.removeEventListener("keypress", this.#keyPressed);
         document.removeEventListener("keyup", this.#keyReleased);
         this.stopGame();
+        if (this.against !== "local" && this.against !== "computer" && this.against !== "any-player") {
+            await fetchApi("/api/game/game-invitation/leave", {
+                method: "POST",
+                body: atob(this.against)
+            });
+        }
     };
 
     #launchGame() {

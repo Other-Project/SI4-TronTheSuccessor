@@ -16,7 +16,8 @@ const server = http.createServer(async (request, response) => {
     const endpoint = /^\/api\/chat\/([a-zA-Z0-9]+)\/?$/;
     const gameInvitationEndpoint = /^\/api\/chat\/game-invitation\/?$/;
     if (endpoint.test(requestUrl.pathname)) {
-        const roomId = getRoomId(user.username, endpoint.exec(requestUrl.pathname)[1]);
+        const recipient = endpoint.exec(requestUrl.pathname)[1];
+        const roomId = getRoomId(user.username, recipient);
 
         if (request.method === "GET") {
             const from = requestUrl.searchParams.get("from");
@@ -25,8 +26,12 @@ const server = http.createServer(async (request, response) => {
         } else if (request.method === "POST") {
             const message = JSON.parse(await getRequestBody(request));
             if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
-            const storedMessage = await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
-            io.to(roomId).emit("message", storedMessage);
+            let storedMessage;
+            if (message.type === "game-invitation") {
+                storedMessage = await chatDatabase.sendGameInvitation(roomId, user.username, message.type, message.content, recipient);
+            } else
+                storedMessage = await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
+            if (storedMessage.shouldEmit) io.to(roomId).emit("message", storedMessage);
             return sendResponse(response, HTTP_STATUS.CREATED, message.type === "game-invitation" ? {gameInvitationToken: storedMessage.gameInvitationToken} : null);
         }
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {

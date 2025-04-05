@@ -25,19 +25,17 @@ export class GamePage extends HTMLComponent {
         const helpPage = document.createElement("app-help-page");
         helpPage.setAttribute("against", this.against);
         this.shadowRoot.appendChild(helpPage);
-        window.onhashchange = async () => {
-            if (this.against !== undefined && this.against !== "computer" && this.against !== "any-player" && this.against !== "local") {
-                const response = await fetchPostApi("/api/chat/game-invitation", {
-                    "gameInvitationToken": getCookie("gameInvitationToken"),
-                    status: "cancelled"
-                }, {method: "PUT"});
-                const data = await response.json();
-                console.log(data);
-            }
-        };
     };
 
-    onHidden = () => this.inGame = false;
+    onHidden = async () => {
+        this.inGame = false;
+        if (this.against !== undefined && this.against !== "computer" && this.against !== "any-player" && this.against !== "local") {
+            await fetchPostApi("/api/chat/game-invitation", {
+                "gameInvitationToken": getCookie("gameInvitationToken"),
+                status: "cancelled"
+            }, {method: "PUT"});
+        }
+    };
 
     startGame() {
         this.inGame = true;

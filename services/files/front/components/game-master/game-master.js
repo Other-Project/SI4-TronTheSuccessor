@@ -41,6 +41,16 @@ export class GameMaster extends HTMLComponent {
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", async () => {
             changePage("/");
+            if (this.against !== "local" && this.against !== "computer" && this.against !== "any-player") {
+                await fetchApi("/api/game/game-invitation/leave", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        against: atob(this.against),
+                        gameInvitationToken: getCookie("gameInvitationToken")
+                    })
+                });
+            }
         });
 
         this.playersName = [this.shadowRoot.getElementById("p1"), this.shadowRoot.getElementById("p2")];
@@ -59,16 +69,10 @@ export class GameMaster extends HTMLComponent {
         document.addEventListener("keyup", this.#keyReleased);
         document.addEventListener("keypress", this.#keyPressed);
     };
-    onHidden = async () => {
+    onHidden = () => {
         document.removeEventListener("keypress", this.#keyPressed);
         document.removeEventListener("keyup", this.#keyReleased);
         this.stopGame();
-        if (this.against !== "local" && this.against !== "computer" && this.against !== "any-player") {
-            await fetchApi("/api/game/game-invitation/leave", {
-                method: "POST",
-                body: atob(this.against)
-            });
-        }
     };
 
     #launchGame() {

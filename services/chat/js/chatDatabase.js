@@ -60,7 +60,6 @@ exports.sendGameInvitation = async function (roomId, author, type, content, reci
         }
     });
     if (firstPendingGameInvitation !== null) {
-        console.log(`Updating game invitation to ${recipient}`);
         await chatCollection.updateOne({_id: firstPendingGameInvitation._id}, {
             $set: {
                 status: "accepted"
@@ -75,11 +74,15 @@ exports.sendGameInvitation = async function (roomId, author, type, content, reci
  * Modifies the status of a game invitation
  * @param {string} gameInvitationToken The token of the game invitation
  * @param {"accepted"|"refused"|"cancelled"} status The status to set
- * @returns {Promise<boolean>} True if the status was updated, false otherwise
+ * @returns {Promise<boolean>} True if the status was updated or already modified, false otherwise
  */
 exports.updateGameInvitationStatus = async function (gameInvitationToken, status) {
     try {
         jwt.verify(gameInvitationToken, process.env.GAME_INVITATION_SECRET_KEY);
+        const invitation = await chatCollection.findOne({gameInvitationToken});
+        if (invitation.status !== null && invitation.status !== undefined) {
+            return true;
+        }
         const result = await chatCollection.updateOne(
             {gameInvitationToken},
             {$set: {status}}

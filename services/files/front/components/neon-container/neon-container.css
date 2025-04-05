@@ -37,7 +37,6 @@
                 transparent 100%
         );
         animation: rotate 4s linear infinite;
-        z-index: -1;
     }
 
     #neon-border::after {
@@ -45,7 +44,11 @@
         position: absolute;
         inset: 4px;
         background: #111;
-        z-index: -1;
+    }
+
+    #content::slotted(*) {
+        position: relative;
+        z-index: 1;
     }
 }
 

@@ -12,6 +12,7 @@ const server = http.createServer(async (request, response) => {
 }).listen(8005);
 
 let connectedUsers = new Map();
+let numberOfConnectedUsers = 0;
 
 const io = new Server(server);
 io.on("connection", async (socket) => {
@@ -21,6 +22,9 @@ io.on("connection", async (socket) => {
         return;
     }
     connectedUsers.set(user.username, socket.id);
+    numberOfConnectedUsers++;
+
+    io.emit("userCount", numberOfConnectedUsers);
 
     const friends = await getFriendsList(socket.request.headers.authorization);
 
@@ -33,6 +37,10 @@ io.on("connection", async (socket) => {
     });
 
     socket.on("disconnect", async () => {
+        numberOfConnectedUsers--;
+
+        io.emit("userCount", numberOfConnectedUsers);
+
         connectedUsers.delete(user.username);
         const friends = await getFriendsList(socket.request.headers.authorization);
         const connectedFriends = Array.from(connectedUsers.keys()).filter(username => friends.friends.includes(username));

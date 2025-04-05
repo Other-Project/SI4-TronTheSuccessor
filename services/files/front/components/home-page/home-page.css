@@ -45,3 +45,43 @@ app-game-choice {
     width: 100%;
     max-width: 400px;
 }
+
+#online-players-counter {
+    color: #edbeff;
+
+    #counter-label {
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    #counter-display {
+        position: relative;
+        display: inline-block;
+    }
+
+    #pulse-ring {
+        position: absolute;
+        top: 50%;
+        right: -15px;
+        transform: translateY(-50%);
+        width: 10px;
+        height: 10px;
+        background-color: #edbeff;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #edbeff;
+        animation: pulse 2s infinite;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(237, 190, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(237, 190, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(237, 190, 255, 0);
+    }
+}

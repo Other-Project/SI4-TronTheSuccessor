@@ -50,5 +50,15 @@ export class Notification {
                 }
             }));
         });
+
+        this.socket.on("userCount", (notification) => {
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent("user-count-update", {
+                    detail: {
+                        nb: notification
+                    }
+                }));
+            }, 1000);
+        });
     }
 }

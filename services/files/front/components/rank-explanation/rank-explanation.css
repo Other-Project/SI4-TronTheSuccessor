@@ -1,0 +1,125 @@
+:host {
+    overflow-y: auto;
+}
+
+.container {
+    p, h3, h2 {
+        margin: 10px;
+    }
+}
+
+.ranks-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.rank-category {
+    .rank-icon {
+        height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .rank-name {
+        font-weight: bold;
+        padding: 5px;
+        text-align: center;
+        text-transform: uppercase;
+    }
+
+    .rank-tiers {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+
+        .tier {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    .line {
+        width: 80px;
+        height: 5px;
+        background-color: #6e6e6e;
+        top: 50%;
+    }
+
+    .triangle {
+        width: 0;
+        height: 0;
+        border-left: 50px solid transparent;
+        border-right: 50px solid transparent;
+        border-bottom: 90px solid #8B4513;
+    }
+
+    .square {
+        width: 80px;
+        height: 80px;
+        background-color: #C0C0C0;
+    }
+
+    .pentagon {
+        width: 80px;
+        height: 76px;
+        background-color: #FFD700;
+        clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    }
+
+    .hexagon {
+        width: 90px;
+        height: 80px;
+        background: linear-gradient(45deg, #ff33cc, #33ccff);
+        clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    }
+}
+
+.section {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 13px;
+    margin: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+
+    h2 {
+        text-transform: uppercase;
+        color: #33ccff;
+    }
+
+    .factors {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        align-items: center;
+        justify-items: center;
+
+        .factor {
+            width: 200px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            height: calc(100% - 30px);
+
+            h3 {
+                text-transform: uppercase;
+                color: #ff33cc;
+            }
+        }
+    }
+
+    .tp-info {
+        background-color: rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 2px;
+        text-align: center;
+        margin: 20px 0 10px 0;
+    }
+}

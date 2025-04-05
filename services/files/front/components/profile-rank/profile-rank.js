@@ -14,12 +14,20 @@ export class ProfileRank extends HTMLComponent {
     }
 
     static get observedAttributes() {
-        return ["rank", "points", "baserank"];
+        return ["rank", "points", "baserank", "height"];
     }
 
     onSetupCompleted = () => {
         this.rankIcon = this.shadowRoot.getElementById("rank-icon");
         this.rankPoints = this.shadowRoot.getElementById("rank-points");
+        this.rankInfo = this.shadowRoot.getElementById("rank-info");
+        this.rankPopUp = this.shadowRoot.getElementById("rank-popup");
+        this.close = this.shadowRoot.getElementById("close");
+        this.rankPopUp.style.display = "none";
+
+        this.rankInfo.addEventListener("click", () => this.rankPopUp.style.display = "block");
+        this.shadowRoot.addEventListener("hide-popup", () => this.#close());
+        this.close.addEventListener("click", () => this.#close());
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -40,6 +48,9 @@ export class ProfileRank extends HTMLComponent {
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", "0 0 100 85");
         svg.setAttribute("fill", "none");
+        svg.style.display = "block";
+        svg.style.maxHeight = this.height + "px";
+        svg.style.width = "100%";
 
         const polygon = document.createElementNS(svgNS, "polygon");
         polygon.setAttribute("points", this.#calculatePolygonPoints(vertices));
@@ -48,7 +59,7 @@ export class ProfileRank extends HTMLComponent {
         polygon.setAttribute("fill", "none");
 
         svg.appendChild(polygon);
-        this.rankIcon.innerHTML = '';
+        this.rankIcon.innerHTML = "";
         this.rankIcon.appendChild(svg);
     }
 
@@ -69,5 +80,9 @@ export class ProfileRank extends HTMLComponent {
         }
 
         return points.trim();
+    }
+
+    #close() {
+        this.rankPopUp.style.display = "none";
     }
 }

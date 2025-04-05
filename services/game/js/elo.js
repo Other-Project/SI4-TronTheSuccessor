@@ -36,8 +36,8 @@ exports.updateStats = async function (players, gameInfo) {
     await statsDatabase.addGame(players[0].name, gameInfo.elapsed / 1000);
     await statsDatabase.addGame(players[1].name, gameInfo.elapsed / 1000);
 
-    const newEloP1 = Math.max(calculateEloPoints(eloP1, 32, pointP1, diff), 0);
-    const newEloP2 = Math.max(calculateEloPoints(eloP2, 32, pointP2, -diff), 0);
+    const newEloP1 = Math.max(calculateEloPoints(eloP1, 64, pointP1, diff), 0);
+    const newEloP2 = Math.max(calculateEloPoints(eloP2, 64, pointP2, -diff), 0);
     await statsDatabase.updateElo(players[0].name, newEloP1);
     await statsDatabase.updateElo(players[1].name, newEloP2);
     console.log(`Player ${players[0].name} has now ${newEloP1} ELO points`);

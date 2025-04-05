@@ -12,5 +12,16 @@
         <p>But be careful, if you touch an already colonized area, you lose.</p>
     </main>
     <footer>Press space to start</footer>
+    <app-popup class="popup" id="rank-popup" large="true" background="#2F1C41">
+        <h2 slot="title">The Rank System</h2>
+        <app-rank-explanation class="popup-body" slot="body"></app-rank-explanation>
+        <div slot="actions" class="popup-actions">
+            <input type="checkbox" id="display-again" name="display-again"/>
+            <label for="display-again">Don't show again</label>
+        </div>
+        <div slot="actions" class="popup-body">
+            <app-button id="close">Close</app-button>
+        </div>
+    </app-popup>
     <link href="/components/help-page/help-page.css" type="text/css" rel="stylesheet">
 </div>

@@ -36,6 +36,9 @@ export class ProfilePage extends HTMLComponent {
         const stats = await response.json();
         stats.username = userName;
         stats.loggedusername = loggedUser;
-        if (stats) this.overview.setAttribute("stats", JSON.stringify(stats));
+        if (stats) {
+            this.overview.setAttribute("stats", JSON.stringify(stats));
+            this.leaderboard.setAttribute("stats", JSON.stringify(stats));
+        }
     };
 }

@@ -71,7 +71,7 @@ export class ProfileOverview extends HTMLComponent {
 
     #getFriends = async () => {
         const response = await fetchApi("/api/user/friends", {method: "GET"});
-        const friends = await response.json();
+        const friends = response.ok ? await response.json() : null;
         return {
             friends: friends?.friends ?? [],
             pending: friends?.pending ?? [],
@@ -80,7 +80,7 @@ export class ProfileOverview extends HTMLComponent {
     };
 
     #refresh() {
-        if (!this.rank || !this.stats) return;
+        if (!this.rank || !this.stats || !this.friends) return;
         if (this.stats.loggedusername && this.stats.loggedusername === this.stats.username)
             this.buttons.classList.toggle("logged-in");
 
@@ -106,6 +106,7 @@ export class ProfileOverview extends HTMLComponent {
         this.rank.setAttribute("rank", this.stats.rank);
         this.rank.setAttribute("points", this.stats.eloInRank);
         this.rank.setAttribute("baserank", this.stats.baseRank);
+        this.rank.setAttribute("height", "400");
         this.profileStats.setAttribute("games", this.stats.games);
         this.profileStats.setAttribute("time", this.stats.timePlayed);
         this.profileStats.setAttribute("streak", this.stats.winStreak);

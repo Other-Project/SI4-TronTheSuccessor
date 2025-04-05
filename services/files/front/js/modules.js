@@ -29,9 +29,13 @@ import {Notification} from "/components/notification/notification.js";
 import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
+import {NeonContainer} from "/components/neon-container/neon-container.js";
+import {RankRepartition} from "/components/rank-repartition/rank-repartition.js";
+import {RankListing} from "/components/rank-listing/rank-listing.js";
 import {GamePage} from "/components/game-page/game-page.js";
 import {GameResult} from "/components/game-result/game-result.js";
 import {Replay} from "/components/replay/replay.js";
+import {RankExplanation} from "/components/rank-explanation/rank-explanation.js";
 import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-display.js";
 import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 import {SettingsPage} from "/components/settings/settings-page/settings-page.js";
@@ -44,6 +48,7 @@ customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
 customElements.define('app-notification', Notification);
+customElements.define("app-neon-container", NeonContainer);
 
 // Home components
 customElements.define("app-home-page", HomePage);
@@ -70,6 +75,9 @@ customElements.define("app-profile-leaderboard", ProfileLeaderboard);
 customElements.define("app-profile-pfp", ProfilePfp);
 customElements.define("app-profile-stats", ProfileStats);
 customElements.define("app-profile-rank", ProfileRank);
+customElements.define("app-rank-repartition", RankRepartition);
+customElements.define("app-rank-listing", RankListing);
+customElements.define("app-rank-explanation", RankExplanation);
 
 // Login components
 customElements.define("app-login-container", LoginContainer);

@@ -118,6 +118,49 @@ exports.addWinAndLoss = async function (playerId, otherPlayerId) {
 };
 
 /**
+ * Get the usernames of the top players.
+ * @param limit The number of players to get.
+ * @returns {Promise<{playerId: string, tronPoints: number, rank: string}[]>} The usernames of the top players.
+ */
+getTopPlayers = async function (limit = 10) {
+    const topPlayers = await statsCollection.find({}, {
+        projection: {
+            playerId: 1,
+            wins: 1,
+            losses: 1,
+            elo: 1,
+            _id: 0
+        }
+    }).sort({elo: -1}).limit(limit).toArray();
+
+    return topPlayers.map(player => {
+        const {rank} = getRank(player.elo);
+        return {
+            playerId: player.playerId,
+            tronPoints: player.elo,
+            rank: rank
+        };
+    });
+};
+
+/**
+ * Get the number of players in each rank.
+ * @returns {Promise<{string : number}>}
+ */
+rankRepartition = async function () {
+    const repartition = {};
+    for (let elo in eloToRank) {
+        const {rank} = eloToRank[elo];
+        const nextElo = parseInt(elo) + 100;
+        repartition[rank] = await statsCollection.countDocuments({
+            elo: {$gte: parseInt(elo), $lt: nextElo}
+        });
+    }
+    repartition["Hexagon"] = await statsCollection.countDocuments({elo: {$gte: 1200}});
+    return repartition;
+};
+
+/**
  * Calculate the rank of a player based on their ELO.
  * @param elo The ELO of the player.
  * @returns {*&{eloInRank: number}}
@@ -153,5 +196,8 @@ exports.getAllStats = async function (playerId) {
     );
 
     const {rank, eloInRank, baseRank} = getRank(updatedStats.elo);
-    return {...updatedStats, rank, eloInRank, baseRank};
+    const topPlayers = await getTopPlayers(10);
+    const rankDistribution = await rankRepartition();
+
+    return {...updatedStats, rank, eloInRank, baseRank, topPlayers, rankDistribution};
 };

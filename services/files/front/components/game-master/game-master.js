@@ -4,7 +4,7 @@ import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
 import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
-import {getAccessToken, getCookie, getUserInfo, renewAccessToken} from "/js/login-manager.js";
+import {fetchApi, getAccessToken, getCookie, getUserInfo, renewAccessToken} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
 
 export class GameMaster extends HTMLComponent {
@@ -39,7 +39,15 @@ export class GameMaster extends HTMLComponent {
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
         this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
-        this.shadowRoot.getElementById("home").addEventListener("click", () => changePage("/"));
+        this.shadowRoot.getElementById("home").addEventListener("click", async () => {
+            if (this.against !== "local" && this.against !== "computer" && this.against !== "any-player") {
+                await fetchApi("/api/game/game-invitation/refuse", {
+                    method: "POST",
+                    body: atob(this.against)
+                });
+            }
+            changePage("/");
+        });
 
         this.playersName = [this.shadowRoot.getElementById("p1"), this.shadowRoot.getElementById("p2")];
 

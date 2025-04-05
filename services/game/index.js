@@ -15,6 +15,7 @@ const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
 const FRIEND_GAME_TIMEOUT = 10 * 60 * 1000;
 const waitingRoomTimers = {};
+const refusedGames = {};
 
 let server = http.createServer(async (request, response) => {
         const filePath = request.url.split("/").filter(elem => elem !== "..");
@@ -131,6 +132,13 @@ async function joinFriendGame(socket, msg) {
         return;
     }
     const roomName = [opponentName, user.username].sort().join("-");
+    if (roomName in refusedGames) {
+        socket.emit("friend_invitation_refused", {
+            message: `${user.username} has already left the room`
+        });
+        clearTimeout(refusedGames[roomName]);
+        delete refusedGames[roomName];
+    }
     socket.join(roomName);
     const sockets = await io.in(roomName).fetchSockets();
     if (sockets.length === 1) {
@@ -223,6 +231,14 @@ async function refuseGameInvitation(request, response) {
     const user = getUser(request);
     const opponentName = await getRequestBody(request);
     const roomName = [opponentName, user.username].sort().join("-");
+    const sockets = await io.in(roomName).fetchSockets();
+    if (sockets.length === 0) {
+        const refusedGameInvitationTimeOut = setTimeout(() => {
+            if (roomName in refusedGames)
+                delete refusedGames[roomName];
+        }, FRIEND_GAME_TIMEOUT);
+        if (!(roomName in refusedGames)) refusedGames[roomName] = refusedGameInvitationTimeOut;
+    }
     io.to(roomName).emit("friend_invitation_refused", {
         message: `Your game invitation was refused by ${user.username}`
     });

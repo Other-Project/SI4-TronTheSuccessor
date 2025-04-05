@@ -13,6 +13,7 @@ const SERVICES = {
     "/api/inventory": {url: process.env.INVENTORY_SERVICE_URL ?? "http://127.0.0.1:8002"},
     "/api/game": {url: process.env.GAME_SERVICE_URL ?? "http://127.0.0.1:8003", ws: true},
     "/api/chat": {url: process.env.CHAT_SERVICE_URL ?? "http://127.0.0.1:8006", ws: true},
+    "api/notification": {url: process.env.NOTIFICATION_SERVICE_URL ?? "http://127.0.1:8005", ws: true},
     "/": {url: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001"}
 };
 const HTTPS_CONFIG = process.env.SSL_ENABLED === "true" ? {

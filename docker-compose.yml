@@ -18,6 +18,7 @@ services:
       USER_SERVICE_URL: "http://user:8004"
       CHAT_SERVICE_URL: "http://chat:8006"
       INVENTORY_SERVICE_URL: "http://inventory:8002"
+      NOTIFICATION_SERVICE_URL: "http://notification:8005"
 
       SSL_ENABLED: "true"
       SSL_KEY: "/ssl/privkey.pem"
@@ -64,6 +65,11 @@ services:
     restart: unless-stopped
     depends_on:
       - mongodb
+  notification:
+    image: tron-the-successor/notification
+    build:
+      context: services/notification
+    restart: unless-stopped
 
 volumes:
   mongo-data:

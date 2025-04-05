@@ -1,12 +1,20 @@
 #profile-page {
     height: 100vh;
+    display: flex;
+    flex-direction: column;
+
+    #tab-navigation {
+        min-height: 0;
+    }
 
     #not-found-message {
         display: none;
     }
 
-    &.not-found {
-        #not-found-message {
+    &.not-found > * {
+        display: none;
+
+        &#not-found-message {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,10 +23,29 @@
             color: #ff00ff;
             text-shadow: 0 0 5px #ff00ff, 0 0 10px #ff00ff, 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 80px #ff00ff;
         }
+    }
+}
 
-        #tab-navigation {
-            display: none;
-        }
+#profile-header {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    padding: 20px;
+
+    h1, h3 {
+        margin: 0;
+    }
+
+    #username {
+        color: lightgray;
+    }
+
+    .filler {
+        flex-grow: 1;
+    }
+
+    #home-page img {
+        width: 35px;
     }
 }
 

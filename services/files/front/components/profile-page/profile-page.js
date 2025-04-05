@@ -13,7 +13,11 @@ export class ProfilePage extends HTMLComponent {
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
+
+        this.usernameElement = this.shadowRoot.getElementById("username");
         this.tabNavigation = this.shadowRoot.getElementById("tab-navigation");
+
+        this.shadowRoot.getElementById("home-page").addEventListener("click", () => changePage("/"));
     };
 
     onVisible = async () => {
@@ -31,6 +35,7 @@ export class ProfilePage extends HTMLComponent {
             return;
         }
 
+        this.usernameElement.textContent = userName;
         const response = await fetch(`/api/game/stats/${userName}`);
         this.profilePage.classList.toggle("not-found", !response.ok);
         this.notFoundUser.textContent = userName;

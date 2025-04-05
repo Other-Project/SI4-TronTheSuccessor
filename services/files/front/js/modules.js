@@ -36,6 +36,7 @@ import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-displa
 import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 import {SettingsPage} from "/components/settings/settings-page/settings-page.js";
 import {SettingsCarousel} from "/components/settings/settings-carousel/settings-carousel.js";
+import {Badge} from "/components/badge/badge.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -44,6 +45,7 @@ customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
 customElements.define('app-notification', Notification);
+customElements.define("app-badge", Badge);
 
 // Home components
 customElements.define("app-home-page", HomePage);

@@ -19,23 +19,8 @@
 #room-icon-container {
     position: relative;
 
-    #status-indicator:not(.hidden) {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        position: absolute;
-        bottom: 3px;
-        right: -2px;
-        border: 2px solid #36393f;
-        box-sizing: content-box;
-
-        &.connected {
-            background: #3ba55d;
-        }
-
-        &:not(.connected) {
-            background: #747f8d;
-        }
+    #status-indicator.hidden {
+        display: none;
     }
 
     #room-icon {

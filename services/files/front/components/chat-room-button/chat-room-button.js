@@ -28,7 +28,7 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomIcon.src = this.icon;
         this.roomName.textContent = this.name;
         this.roomPreview.textContent = this.preview;
-        this.status.classList.toggle("connected", this.connected === "true");
+        this.status.setAttribute("background", this.connected === "true" ? "#3ba55d" : "#747f8d");
         this.status.classList.toggle("hidden", this.id === "global");
     }
 }

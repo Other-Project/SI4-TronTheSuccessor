@@ -4,14 +4,15 @@ import {fetchApi} from "/js/login-manager.js";
 export class ChatSelection extends HTMLComponent {
     constructor() {
         super("chat-selection", ["html", "css"]);
-        this.connectedUsers = [];
+        this.connectedFriends = [];
     }
 
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
         this.shadowRoot.addEventListener("friendRequestHandled", this.#refresh);
-        document.addEventListener("user-status", this.#updateFriendStatus);
+        document.addEventListener("initialize-friend-status", this.#initializeFriendStatus);
+        document.addEventListener("friend-status-update", this.#updateFriendStatus);
     }
 
     onVisible = async () => {
@@ -43,10 +44,11 @@ export class ChatSelection extends HTMLComponent {
         for (let friend of this.friendList) {
             const friendButton = document.createElement("app-chat-room-button");
             friendButton.id = `friend-${friend.id}`;
+            friendButton.classList.add("friend-button");
             friendButton.setAttribute("icon", friend.icon ?? "/assets/profile.svg");
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
-            friendButton.setAttribute("connected", this.connectedUsers.includes(friend.name));
+            friendButton.setAttribute("connected", this.connectedFriends.includes(friend.name));
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
         }
@@ -67,14 +69,20 @@ export class ChatSelection extends HTMLComponent {
         }));
     }
 
-    #updateFriendStatus = (event) => {
-        const {connectedUsers} = event.detail;
-        this.connectedUsers = connectedUsers;
+    #initializeFriendStatus = (event) => {
+        const {connectedFriends} = event.detail;
+        this.connectedFriends = connectedFriends;
         if (!this.friendList) return;
 
-        for (const friend of this.friendList) {
-            const friendButton = this.shadowRoot.getElementById(`friend-${friend.id}`);
-            if (friendButton) friendButton.setAttribute("connected", this.connectedUsers.includes(friend.name));
+        for (let friend of this.connectedFriends) {
+            const friendButton = this.shadowRoot.getElementById(`friend-${friend}`);
+            if (friendButton) friendButton.setAttribute("connected", "true");
         }
+    };
+
+    #updateFriendStatus = (event) => {
+        const {friend, connected} = event.detail;
+        const friendButton = this.shadowRoot.getElementById(`friend-${friend}`);
+        if (friendButton) friendButton.setAttribute("connected", connected);
     };
 }

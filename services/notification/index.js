@@ -1,5 +1,6 @@
 const http = require("http");
-const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
+const {HTTP_STATUS, sendResponse, getUser} = require("./js/utils.js");
+const {getFriendsList} = require("./helper/userHelper.js");
 const {Server} = require("socket.io");
 
 const server = http.createServer(async (request, response) => {
@@ -7,25 +8,37 @@ const server = http.createServer(async (request, response) => {
     const user = getUser(request);
     if (!user) return sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
 
-
     return sendResponse(response, HTTP_STATUS.NOT_FOUND);
-
 }).listen(8005);
 
-let connectedUsers = new Set();
+let connectedUsers = new Map();
 
 const io = new Server(server);
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
     const user = getUser(socket.request);
     if (!user) {
         socket.disconnect();
         return;
     }
-    connectedUsers.add(user.username);
-    io.emit("connected", {connectedUsers: Array.from(connectedUsers)});
+    connectedUsers.set(user.username, socket.id);
 
-    socket.on("disconnect", () => {
+    const friends = await getFriendsList(socket.request.headers.authorization);
+
+    const connectedFriends = Array.from(connectedUsers.keys()).filter(username => friends.friends.includes(username));
+    socket.emit("initialize", {connectedFriends: connectedFriends});
+
+    connectedFriends.forEach(friend => {
+        const friendSocketId = connectedUsers.get(friend);
+        if (friendSocketId) io.to(friendSocketId).emit("connected", {username: user.username});
+    });
+
+    socket.on("disconnect", async () => {
         connectedUsers.delete(user.username);
-        io.emit("disconnected", {connectedUsers: Array.from(connectedUsers)});
+        const friends = await getFriendsList(socket.request.headers.authorization);
+        const connectedFriends = Array.from(connectedUsers.keys()).filter(username => friends.friends.includes(username));
+        connectedFriends.forEach(friend => {
+            const friendSocketId = connectedUsers.get(friend);
+            if (friendSocketId) io.to(friendSocketId).emit("disconnected", {username: user.username});
+        });
     });
 });

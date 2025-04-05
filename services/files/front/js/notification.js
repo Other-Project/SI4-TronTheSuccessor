@@ -23,18 +23,30 @@ export class Notification {
             } else console.error(err.message);
         });
 
+        this.socket.on("initialize", (notification) => {
+            setTimeout(() => {
+                document.dispatchEvent(new CustomEvent("initialize-friend-status", {
+                    detail: {
+                        connectedFriends: notification.connectedFriends,
+                    }
+                }));
+            }, 1000);
+        });
+
         this.socket.on("connected", (notification) => {
-            document.dispatchEvent(new CustomEvent("user-status", {
+            document.dispatchEvent(new CustomEvent("friend-status-update", {
                 detail: {
-                    connectedUsers: notification.connectedUsers,
+                    friend: notification.username,
+                    connected: true
                 }
             }));
         });
 
         this.socket.on("disconnected", (notification) => {
-            document.dispatchEvent(new CustomEvent("user-status", {
+            document.dispatchEvent(new CustomEvent("friend-status-update", {
                 detail: {
-                    connectedUsers: notification.connectedUsers,
+                    friend: notification.username,
+                    connected: false
                 }
             }));
         });

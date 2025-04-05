@@ -13,10 +13,13 @@ export class ProfilePage extends HTMLComponent {
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
+        this.tabNavigation = this.shadowRoot.getElementById("tab-navigation");
     };
 
     onVisible = async () => {
-        let userName = window.location.pathname.split("/")[2];
+        const urlPath = window.location.pathname.split("/");
+        if (urlPath[1] !== "profile") return;
+        let userName = urlPath[2];
         const loggedUser = getUserInfo()?.username ?? null;
         if (!userName && loggedUser) {
             changePage(`/profile/${loggedUser}`, true);
@@ -40,5 +43,7 @@ export class ProfilePage extends HTMLComponent {
             this.overview.setAttribute("stats", JSON.stringify(stats));
             this.leaderboard.setAttribute("stats", JSON.stringify(stats));
         }
+        this.tabNavigation.changeTab("overview");
+        this.history.dataset.tabDisabled = userName === loggedUser ? "false" : "true";
     };
 }

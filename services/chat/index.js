@@ -43,7 +43,7 @@ const server = http.createServer(async (request, response) => {
             const pendingForUser = allFriends.pendingForUser ?? [];
 
             const chatBox = await Promise.all(messages.map(async username => {
-                const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, 1);
+                const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, -1);
                 const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
 
                 let pendingStatus;

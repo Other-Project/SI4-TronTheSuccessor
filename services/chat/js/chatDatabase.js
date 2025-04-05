@@ -19,7 +19,7 @@ exports.getChat = async function (roomId, from = undefined, limit = 25, order = 
     if (Array.isArray(roomId)) query = {roomId: roomId.sort()};
     else query = {roomId};
     if (from) query.timestamp = {$gt: from};
-    const result = await chatCollection.find(query).sort({timestamp: order}).limit(limit).toArray();
+    const result = await chatCollection.find(query).sort({date: order}).limit(limit).toArray();
     console.debug(result);
     return result;
 };

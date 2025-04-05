@@ -38,3 +38,8 @@
         transform: scale(1.2);
     }
 }
+
+#room-preview {
+    max-width: 220px;
+    overflow: clip;
+}

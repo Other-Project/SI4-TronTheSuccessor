@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi} from "/js/login-manager.js";
+import notificationService from "/js/notification.js";
 
 export class ChatSelection extends HTMLComponent {
     constructor() {
@@ -11,8 +12,8 @@ export class ChatSelection extends HTMLComponent {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
         this.shadowRoot.addEventListener("friendRequestHandled", this.#refresh);
-        document.addEventListener("initialize-friend-status", this.#initializeFriendStatus);
-        document.addEventListener("friend-status-update", this.#updateFriendStatus);
+        notificationService.addEventListener("initialize-friend-status", this.#initializeFriendStatus);
+        notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
     }
 
     onVisible = async () => {

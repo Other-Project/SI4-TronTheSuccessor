@@ -1,5 +1,4 @@
-import {Notification} from "./notification.js";
+import notificationService from "./notification.js";
 
-const notification = new Notification();
-document.addEventListener("logged-in", () => notification.openWebSocket().then());
-notification.openWebSocket().then();
+document.addEventListener("logged-in", () => notificationService.openWebSocket().then());
+notificationService.openWebSocket().then();

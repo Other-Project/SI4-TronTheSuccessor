@@ -4,7 +4,13 @@ import "./socket.io.js";
 /**
  * Class to handle notifications
  */
-export class Notification {
+export class NotificationService extends EventTarget {
+
+    constructor() {
+        super();
+        if (NotificationService.instance) return NotificationService.instance;
+        NotificationService.instance = this;
+    }
 
     async openWebSocket(retry = true) {
         if (this.socket) this.socket.disconnect();
@@ -25,7 +31,7 @@ export class Notification {
 
         this.socket.on("initialize", (notification) => {
             setTimeout(() => {
-                document.dispatchEvent(new CustomEvent("initialize-friend-status", {
+                this.dispatchEvent(new CustomEvent("initialize-friend-status", {
                     detail: {
                         connectedFriends: notification.connectedFriends,
                     }
@@ -34,7 +40,7 @@ export class Notification {
         });
 
         this.socket.on("connected", (notification) => {
-            document.dispatchEvent(new CustomEvent("friend-status-update", {
+            this.dispatchEvent(new CustomEvent("friend-status-update", {
                 detail: {
                     friend: notification.username,
                     connected: true
@@ -43,7 +49,7 @@ export class Notification {
         });
 
         this.socket.on("disconnected", (notification) => {
-            document.dispatchEvent(new CustomEvent("friend-status-update", {
+            this.dispatchEvent(new CustomEvent("friend-status-update", {
                 detail: {
                     friend: notification.username,
                     connected: false
@@ -53,12 +59,17 @@ export class Notification {
 
         this.socket.on("userCount", (notification) => {
             setTimeout(() => {
-                document.dispatchEvent(new CustomEvent("user-count-update", {
+                this.dispatchEvent(new CustomEvent("user-count-update", {
                     detail: {
                         nb: notification
                     }
                 }));
             }, 1000);
         });
+
+        this.socket.on("unreadNotification", () => this.dispatchEvent(new CustomEvent("unread-notification")));
     }
 }
+
+const notificationService = new NotificationService();
+export default notificationService;

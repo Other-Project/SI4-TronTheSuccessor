@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import notificationService from "/js/notification.js";
 
 export class HomePage extends HTMLComponent {
     constructor() {
@@ -7,7 +8,7 @@ export class HomePage extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.onlinePlayers = this.shadowRoot.getElementById("player-count");
-        document.addEventListener("user-count-update", (event) => {
+        notificationService.addEventListener("user-count-update", (event) => {
             this.onlinePlayers.textContent = event.detail.nb;
         });
     };

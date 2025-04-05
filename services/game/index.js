@@ -128,11 +128,12 @@ async function joinFriendGame(socket, msg) {
     const roomName = [opponentName, user.username].sort().join("-");
     if (opponentName === leavingPlayerPerFriendRoom[roomName]) {
         socket.emit("friend_invitation_refused", {
-            message: `${user.username} has already left the room`
+            message: `${opponentName} has already left the room`
         });
         delete leavingPlayerPerFriendRoom[roomName];
         return;
-    }
+    } else
+        delete leavingPlayerPerFriendRoom[roomName];
     socket.join(roomName);
     const sockets = await io.in(roomName).fetchSockets();
     if (sockets.length === 1) {
@@ -222,12 +223,10 @@ function joinGame(socket, gameId) {
 }
 
 async function refuseGameInvitation(request, response) {
-    const user = getUser(request);
-    const opponentName = await getRequestBody(request);
-    const roomName = [opponentName, user.username].sort().join("-");
-    const sockets = await io.in(roomName).fetchSockets();
+    const username = getUser(request).username;
+    const roomName = await obtainUsernameAndRoomName(username, request);
     io.to(roomName).emit("friend_invitation_refused", {
-        message: `Your game invitation was refused by ${user.username}`
+        message: `Your game invitation was refused by ${username}`
     });
     io.socketsLeave(roomName);
     delete waitingRoomTimers[roomName];
@@ -235,15 +234,20 @@ async function refuseGameInvitation(request, response) {
 }
 
 async function leaveFriendGame(request, response) {
-    const user = getUser(request);
-    const opponentName = await getRequestBody(request);
-    const roomName = [opponentName, user.username].sort().join("-");
-    if (!(roomName in leavingPlayerPerFriendRoom)) {
-        leavingPlayerPerFriendRoom[roomName] = user.username;
-        setTimeout(() => {
-            delete leavingPlayerPerFriendRoom[roomName];
-        }, FRIEND_GAME_TIMEOUT);
-    } else
+    const username = getUser(request).username;
+    const roomName = await obtainUsernameAndRoomName(username, request);
+    if (roomName in leavingPlayerPerFriendRoom) {
         delete leavingPlayerPerFriendRoom[roomName];
+        return;
+    }
+    leavingPlayerPerFriendRoom[roomName] = username;
+    setTimeout(() => {
+        delete leavingPlayerPerFriendRoom[roomName];
+    }, FRIEND_GAME_TIMEOUT);
     sendResponse(response, HTTP_STATUS.OK);
+}
+
+async function obtainUsernameAndRoomName(username, request) {
+    const opponentName = await getRequestBody(request);
+    return [opponentName, username].sort().join("-");
 }

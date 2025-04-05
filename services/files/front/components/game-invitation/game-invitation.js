@@ -1,6 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {changePage} from "/components/pages/pages.js";
-import {fetchApi, storeTokens} from "/js/login-manager.js";
+import {fetchApi, getUserInfo, storeTokens} from "/js/login-manager.js";
 
 export class GameInvitation extends HTMLComponent {
     constructor() {
@@ -36,7 +36,7 @@ export class GameInvitation extends HTMLComponent {
     async #sendGameInvitation() {
         const message = {
             type: "game-invitation",
-            content: "Game invitation from " + this.name
+            content: "Game invitation from " + getUserInfo().username
         };
         const response = await fetchApi(`/api/chat/${this.name}`, {
             method: "POST",

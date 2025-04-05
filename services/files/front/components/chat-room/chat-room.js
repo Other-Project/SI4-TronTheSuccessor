@@ -79,7 +79,7 @@ export class ChatRoom extends HTMLComponent {
                 const status = message.status;
                 const isExpired = message.expiresAt && new Date() > new Date(message.expiresAt);
                 let content;
-                if (status === "accepted" || status === "refused")
+                if (status === "accepted" || status === "refused" || status === "cancelled")
                     content = `Game invitation ${status}`;
                 else if (isExpired)
                     content = "Game invitation expired";

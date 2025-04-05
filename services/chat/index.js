@@ -68,12 +68,12 @@ const server = http.createServer(async (request, response) => {
             if (!gameInvitationToken)
                 return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Game invitation has expired or is invalid"});
 
-            if (!body.status || !["accepted", "refused"].includes(body.status))
+            if (!body.status || !["accepted", "refused", "cancelled"].includes(body.status))
                 return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid status"});
 
             const author = jwt.decode(gameInvitationToken).author;
 
-            if (author === user.username)
+            if (author === user.username && body.status !== "cancelled")
                 return sendResponse(response, HTTP_STATUS.FORBIDDEN, {error: "Cannot respond to your own invitation"});
 
             if (await chatDatabase.updateGameInvitationStatus(gameInvitationToken, body.status))

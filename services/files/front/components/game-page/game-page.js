@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {changePage} from "/components/pages/pages.js";
+import {fetchPostApi, getCookie} from "/js/login-manager.js";
 
 export class GamePage extends HTMLComponent {
     level = 2;
@@ -24,6 +25,16 @@ export class GamePage extends HTMLComponent {
         const helpPage = document.createElement("app-help-page");
         helpPage.setAttribute("against", this.against);
         this.shadowRoot.appendChild(helpPage);
+        window.onhashchange = async () => {
+            if (this.against !== undefined && this.against !== "computer" && this.against !== "any-player" && this.against !== "local") {
+                const response = await fetchPostApi("/api/chat/game-invitation", {
+                    "gameInvitationToken": getCookie("gameInvitationToken"),
+                    status: "cancelled"
+                }, {method: "PUT"});
+                const data = await response.json();
+                console.log(data);
+            }
+        };
     };
 
     onHidden = () => this.inGame = false;

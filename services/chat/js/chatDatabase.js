@@ -74,7 +74,7 @@ exports.sendGameInvitation = async function (roomId, author, type, content, reci
 /**
  * Modifies the status of a game invitation
  * @param {string} gameInvitationToken The token of the game invitation
- * @param {"accepted"|"refused"} status The status to set
+ * @param {"accepted"|"refused"|"cancelled"} status The status to set
  * @returns {Promise<boolean>} True if the status was updated, false otherwise
  */
 exports.updateGameInvitationStatus = async function (gameInvitationToken, status) {

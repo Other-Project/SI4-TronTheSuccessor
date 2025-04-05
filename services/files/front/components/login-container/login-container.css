@@ -1,6 +1,7 @@
 #disconnect {
     text-align: center;
     margin: 0;
+    display: none;
 }
 
 h2, p {

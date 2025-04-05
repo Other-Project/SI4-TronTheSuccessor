@@ -36,7 +36,7 @@ export class GameInvitation extends HTMLComponent {
     async #sendGameInvitation() {
         const message = {
             type: "game-invitation",
-            content: "Fight me!"
+            content: "Game invitation from " + this.name
         };
         const response = await fetchApi(`/api/chat/${this.name}`, {
             method: "POST",

@@ -5,8 +5,6 @@ import notificationService from "/js/notification.js";
 export class ChatSelection extends HTMLComponent {
     constructor() {
         super("chat-selection", ["html", "css"]);
-        this.connectedFriends = notificationService.getConnectedFriends();
-        this.unreadNotifications = notificationService.getUnreadNotifications();
     }
 
     onSetupCompleted = () => {
@@ -15,7 +13,6 @@ export class ChatSelection extends HTMLComponent {
         document.addEventListener("friendRequestHandled", this.#refresh);
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
         notificationService.addEventListener("unread-notification", this.#updateMessageNotification);
-        notificationService.addEventListener("initialize", this.onVisible);
         notificationService.addEventListener("refresh-friend-list", this.onVisible);
     }
 
@@ -54,8 +51,8 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("roomId", friend.id);
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
-            friendButton.setAttribute("connected", this.connectedFriends.includes(friend.name));
-            friendButton.setAttribute("unread", this.unreadNotifications.includes(friend.name));
+            friendButton.setAttribute("connected", notificationService.getConnectedFriends().includes(friend.name));
+            friendButton.setAttribute("unread", notificationService.getUnreadNotifications().includes(friend.name));
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
             if (this.currentRoom?.id === friend.id) this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend);

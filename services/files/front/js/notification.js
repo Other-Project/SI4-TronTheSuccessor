@@ -7,6 +7,7 @@ import "./socket.io.js";
 export class NotificationService extends EventTarget {
     connectedFriends = [];
     unreadNotifications = [];
+    numberOfConnectedUsers = 0;
 
     constructor() {
         super();
@@ -32,17 +33,8 @@ export class NotificationService extends EventTarget {
         });
 
         this.socket.on("initialize", (notification) => {
-            console.log("initialize", notification);
             this.connectedFriends = notification.connectedFriends;
             this.unreadNotifications = notification.unreadNotifications;
-            setTimeout(() => {
-                this.dispatchEvent(new CustomEvent("initialize", {
-                    detail: {
-                        connectedFriends: notification.connectedFriends,
-                        unreadNotifications: notification.unreadNotifications
-                    }
-                }));
-            }, 1000);
         });
 
         this.socket.on("connected", (notification) => {
@@ -66,13 +58,8 @@ export class NotificationService extends EventTarget {
         });
 
         this.socket.on("userCount", (notification) => {
-            setTimeout(() => {
-                this.dispatchEvent(new CustomEvent("user-count-update", {
-                    detail: {
-                        nb: notification
-                    }
-                }));
-            }, 1000);
+            this.numberOfConnectedUsers = notification;
+            this.dispatchEvent(new CustomEvent("user-count-update"));
         });
 
         this.socket.on("unreadNotification", (notification) => {
@@ -97,6 +84,10 @@ export class NotificationService extends EventTarget {
         return this.connectedFriends;
     }
 
+    getNumberOfConnectedUsers() {
+        return this.numberOfConnectedUsers;
+    }
+
     readNotification(friend) {
         this.unreadNotifications.splice(this.unreadNotifications.indexOf(friend), 1);
         this.socket.emit("readNotification", friend);
@@ -105,11 +96,7 @@ export class NotificationService extends EventTarget {
     disconnect() {
         if (this.socket) this.socket.disconnect();
         this.socket = null;
-        this.dispatchEvent(new CustomEvent("user-count-update", {
-            detail: {
-                nb: 0
-            }
-        }));
+        this.dispatchEvent(new CustomEvent("user-count-update"));
     }
 }
 

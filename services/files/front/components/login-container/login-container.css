@@ -6,3 +6,26 @@
 h2, p {
     margin: 0;
 }
+
+#cancel-button {
+    animation: pulse 4s infinite;
+
+    &:hover {
+        animation: paused;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes pulse {
+    25% {
+        transform: scale(1.15);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}

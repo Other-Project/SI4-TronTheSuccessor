@@ -1,6 +1,6 @@
 #room-button {
     display: grid;
-    grid-template: 60px / 40px 1fr auto;
+    grid-template: 60px / 40px 1fr;
     gap: 10px;
     align-items: center;
 

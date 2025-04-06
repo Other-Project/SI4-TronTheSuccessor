@@ -16,7 +16,7 @@ RUN npm install --omit=dev
 COPY --chown=node:node . .
 
 # exposes the port the service is listening to
-EXPOSE 8006
+EXPOSE 8005
 
 # start the service
 CMD ["npm", "start"]

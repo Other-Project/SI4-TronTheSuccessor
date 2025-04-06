@@ -15,10 +15,12 @@ export class ProfileDisplay extends HTMLComponent {
         this.container = this.shadowRoot.getElementById("container");
         this.username = this.shadowRoot.getElementById("username");
 
-
-        this.shadowRoot.getElementById("profile").addEventListener("click", () => {
+        this.shadowRoot.getElementById("profile").addEventListener("click", (e) => {
+            e.stopPropagation();
             this.toggleDropdown();
         });
+
+        document.addEventListener("click", () => this.toggleDropdown(false));
 
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
@@ -36,5 +38,9 @@ export class ProfileDisplay extends HTMLComponent {
     toggleDropdown(show = undefined) {
         show ??= this.dropDownMenu.style.display === "none";
         this.dropDownMenu.style.display = show ? "block" : "none";
+    }
+
+    disconnectedCallback() {
+        document.removeEventListener("click", () => this.toggleDropdown(false));
     }
 }

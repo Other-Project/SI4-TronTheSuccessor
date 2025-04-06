@@ -18,7 +18,7 @@ const server = http.createServer(async (request, response) => {
 
         if (request.method === "GET") {
             const before = requestUrl.searchParams.get("before");
-            const messages = await chatDatabase.getChat(roomId, before, 25, (before ? -1 : 1));
+            const messages = await chatDatabase.getChat(roomId, before, 25, -1);
             return sendResponse(response, HTTP_STATUS.OK, messages);
         } else if (request.method === "POST") {
             const message = JSON.parse(await getRequestBody(request));
@@ -35,7 +35,7 @@ const server = http.createServer(async (request, response) => {
             const pendingForUser = allFriends.pendingForUser ?? [];
 
             const chatBox = await Promise.all(messages.map(async username => {
-                const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, 1);
+                const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1, -1);
                 const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
 
                 let pendingStatus;

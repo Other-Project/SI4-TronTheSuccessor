@@ -22,7 +22,7 @@ exports.getChat = async function (roomId, pivot = undefined, limit = 25, order =
     }
     const result = await chatCollection
         .find(query)
-        .sort({date: order})
+        .sort({date: order === 1 ? "asc" : "desc"})
         .limit(limit)
         .toArray();
     console.debug(result);

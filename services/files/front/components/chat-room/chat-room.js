@@ -124,7 +124,7 @@ export class ChatRoom extends HTMLComponent {
     async #fetchMessages() {
         const response = await fetchApi(`/api/chat/${this.room}`);
         if (response.ok)
-            this.messages = await response.json();
+            this.messages = (await response.json()).reverse();
         else {
             this.#showNotification("Error fetching messages", 2000, "red", "white");
             this.messages = [];

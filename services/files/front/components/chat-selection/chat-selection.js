@@ -26,6 +26,7 @@ export class ChatSelection extends HTMLComponent {
 
     openChatRoom(roomId, roomName, pending, friend) {
         notificationService.readNotification(roomId);
+        this.currentRoom = {id: roomId};
         this.dispatchEvent(new CustomEvent("room-selected", {
             detail: {
                 id: roomId,
@@ -57,6 +58,7 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("unread", this.unreadNotifications.includes(friend.name));
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
+            if (this.currentRoom?.id === friend.id) this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend);
         }
     }
 

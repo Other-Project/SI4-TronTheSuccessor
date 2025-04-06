@@ -48,8 +48,10 @@ exports.handleAddFriend = async function (request, response, friend) {
         sendResponse(response, HTTP_STATUS.OK, result);
         return;
     }
-    if (await userDatabase.addFriend(user.username, friend))
+    if (await userDatabase.addFriend(user.username, friend)) {
         sendResponse(response, HTTP_STATUS.OK, friend);
+        await sendNotification(friend, request.headers.authorization);
+    }
     else
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Friend request already sent"});
 };

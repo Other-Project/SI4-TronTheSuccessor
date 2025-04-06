@@ -50,7 +50,8 @@ export class ChatSelection extends HTMLComponent {
         for (let friend of this.friendList) {
             const friendButton = document.createElement("app-chat-room-button");
             friendButton.id = `friend-${friend.id}`;
-            friendButton.setAttribute("icon", friend.icon ?? "/assets/profile.svg");
+            friendButton.setAttribute("icon", friend.icon);
+            friendButton.setAttribute("roomId", friend.id);
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
             friendButton.setAttribute("connected", this.connectedFriends.includes(friend.name));

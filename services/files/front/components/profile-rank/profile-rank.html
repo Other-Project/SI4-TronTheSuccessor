@@ -1,2 +1,13 @@
 <div id="rank-icon"></div>
-<p id="rank-points"></p>
+<div id="rank-container">
+    <p id="rank-points"></p>
+    <img id="rank-info" src="/assets/help.svg" alt="Rank info">
+</div>
+
+<app-popup class="popup" id="rank-popup" large="true" background="#2F1C41">
+    <h2 slot="title">The Rank System</h2>
+    <app-rank-explanation class="popup-body" slot="body"></app-rank-explanation>
+    <div slot="actions" class="popup-body">
+        <app-button id="close">Close</app-button>
+    </div>
+</app-popup>

@@ -13,10 +13,17 @@ export class ProfilePage extends HTMLComponent {
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
+
+        this.usernameElement = this.shadowRoot.getElementById("username");
+        this.tabNavigation = this.shadowRoot.getElementById("tab-navigation");
+
+        this.shadowRoot.getElementById("home-page").addEventListener("click", () => changePage("/"));
     };
 
     onVisible = async () => {
-        let userName = window.location.pathname.split("/")[2];
+        const urlPath = window.location.pathname.split("/");
+        if (urlPath[1] !== "profile") return;
+        let userName = urlPath[2];
         const loggedUser = getUserInfo()?.username ?? null;
         if (!userName && loggedUser) {
             changePage(`/profile/${loggedUser}`, true);
@@ -28,6 +35,7 @@ export class ProfilePage extends HTMLComponent {
             return;
         }
 
+        this.usernameElement.textContent = userName;
         const response = await fetch(`/api/game/stats/${userName}`);
         this.profilePage.classList.toggle("not-found", !response.ok);
         this.notFoundUser.textContent = userName;
@@ -36,6 +44,11 @@ export class ProfilePage extends HTMLComponent {
         const stats = await response.json();
         stats.username = userName;
         stats.loggedusername = loggedUser;
-        if (stats) this.overview.setAttribute("stats", JSON.stringify(stats));
+        if (stats) {
+            this.overview.setAttribute("stats", JSON.stringify(stats));
+            this.leaderboard.setAttribute("stats", JSON.stringify(stats));
+        }
+        this.history.dataset.tabDisabled = userName === loggedUser ? "false" : "true";
+        this.tabNavigation.changeTab("overview");
     };
 }

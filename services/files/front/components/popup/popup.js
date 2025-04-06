@@ -6,7 +6,7 @@ export class Popup extends HTMLComponent {
 
     // noinspection JSUnusedGlobalSymbols
     static get observedAttributes() {
-        return ["background"];
+        return ["background", "large"];
     }
 
     constructor() {
@@ -36,5 +36,6 @@ export class Popup extends HTMLComponent {
     #refresh() {
         if (!this.popupPanel) return;
         if (this.background) this.popupPanel.style.background = this.background;
+        if (this.large === "true") this.popupPanel.classList.add("large");
     }
 }

@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {loadAndCustomiseSVG} from "/js/svg-utils.js";
+import {loadSVG} from "/js/svg-utils.js";
 import {fetchPostApi} from "/js/login-manager.js";
 
 export class SettingsCarousel extends HTMLComponent {
@@ -40,7 +40,8 @@ export class SettingsCarousel extends HTMLComponent {
             clone.classList.toggle("locked", !item.owned);
 
             const templateImg = clone.querySelector(".image");
-            const img = await loadAndCustomiseSVG(item.asset_url, {});
+            const img = item.asset ? await loadSVG(item.asset) : new Image();
+            if (item.asset_url) img.src = item.asset_url;
             img.classList.add("image");
             templateImg.replaceWith(img);
             clone.querySelector(".name").textContent = item.name;

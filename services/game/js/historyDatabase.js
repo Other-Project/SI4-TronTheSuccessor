@@ -26,13 +26,14 @@ exports.addGame = async function (players, grid, gameActions, winner, timeElapse
 /**
  * Get the player's history.
  * @param playerName The player's name
- * @param {string} from The timestamp from which to get the messages (optional)
+ * @param offset The number of games to skip (Default: 0)
  * @param limit The maximum number of games to return (Default: 10)
+ * @param {string} from The timestamp from which to get the messages (optional)
  */
-exports.getHistory = async function (playerName, from = undefined, limit = 10) {
+exports.getHistory = async function (playerName, offset = 0, limit = 10, from = undefined) {
     let query = {
         players: {$elemMatch: {name: playerName}}
     };
     if (from) query.date = {$gt: from};
-    return await historyCollection.find(query).sort({date: -1}).limit(limit).toArray();
+    return await historyCollection.find(query).sort({date: -1}).skip(offset).limit(limit).toArray();
 };

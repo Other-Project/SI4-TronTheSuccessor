@@ -1,5 +1,5 @@
 const historyDatabase = require("./historyDatabase.js");
-const {getUser, sendResponse, HTTP_STATUS} = require("./utils.js");
+const {getUser, sendResponse, HTTP_STATUS, getRequestBody} = require("./utils.js");
 
 /**
  * Get the history of a user
@@ -13,7 +13,9 @@ exports.handleGetHistory = async function (request, response) {
         await sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
         return;
     }
-    const histories = await historyDatabase.getHistory(user.username);
+    const body = await getRequestBody(request);
+    const parsedBody = JSON.parse(body);
+    const histories = await historyDatabase.getHistory(user.username, parsedBody.offset, parsedBody.limit);
     if (!histories) {
         await sendResponse(response, HTTP_STATUS.NOT_FOUND);
         return;

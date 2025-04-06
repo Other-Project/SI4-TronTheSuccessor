@@ -3,7 +3,7 @@ const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
-const {randomUUID} = require('crypto');
+const {randomUUID} = require("crypto");
 const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
@@ -23,8 +23,7 @@ let server = http.createServer(async (request, response) => {
                 sendResponse(response, HTTP_STATUS.OK, {emotes});
                 break;
             case "history":
-                if (request.method === "GET")
-                    await handleGetHistory(request, response);
+                await handleGetHistory(request, response);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

@@ -21,7 +21,7 @@ export class GameEmoteDisplay extends HTMLComponent {
     onVisible = () => {
         this.container.classList.add("visible");
         this.emoteImg.title = this.emoteSender.alt = this.player;
-        this.emoteSender.src = `/api/user/${this.player}/avatar`;
+        this.emoteSender.setAttribute("username", this.player);
         this.emoteImg.title = this.emoteImg.alt = this.emote;
         this.emoteImg.src = `/assets/emotes/${this.emote}.png`;
         setTimeout(() => this.remove(), 5000);

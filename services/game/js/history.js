@@ -15,7 +15,7 @@ exports.handleGetHistory = async function (request, response) {
     }
     const body = await getRequestBody(request);
     const parsedBody = JSON.parse(body);
-    const histories = await historyDatabase.getHistory(user.username, parsedBody.offset, parsedBody.limit);
+    const histories = await historyDatabase.getHistory(user.username, parsedBody.from, parsedBody.limit);
     if (!histories) {
         await sendResponse(response, HTTP_STATUS.NOT_FOUND);
         return;

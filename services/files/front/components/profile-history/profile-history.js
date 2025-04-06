@@ -4,8 +4,8 @@ import {fetchApi, getUserInfo} from "/js/login-manager.js";
 export class ProfileHistory extends HTMLComponent {
     /** @type {Array} */
     gamesCache = [];
-    offset = 0;
     limit = 10;
+    oldestGameDate = null;
     isLoading = false;
     hasMore = true;
 
@@ -21,7 +21,6 @@ export class ProfileHistory extends HTMLComponent {
 
     onVisible = async () => {
         this.gamesCache = [];
-        this.offset = 0;
         this.hasMore = true;
         this.gameResultsContainer.innerHTML = "";
         await this.loadNextPage();
@@ -48,7 +47,7 @@ export class ProfileHistory extends HTMLComponent {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    offset: this.offset,
+                    from: this.oldestGameDate,
                     limit: this.limit
                 })
             });
@@ -59,8 +58,6 @@ export class ProfileHistory extends HTMLComponent {
 
             if (data.length < this.limit)
                 this.hasMore = false;
-            else
-                this.offset += this.limit;
         } catch (error) {
             document.dispatchEvent(new CustomEvent("show-notification", {
                 detail: {
@@ -83,8 +80,10 @@ export class ProfileHistory extends HTMLComponent {
             this.gameResultsContainer.style.fontSize = "1.5em";
             return;
         }
-
         for (const game of data) {
+            if (this.oldestGameDate === null || new Date(game.date) < new Date(this.oldestGameDate)) {
+                this.oldestGameDate = game.date;
+            }
             const gameResult = document.createElement("app-game-result");
             gameResult.gameData = game;
             this.gameResultsContainer.appendChild(gameResult);

@@ -2,6 +2,7 @@ const userDatabase = require("./userDatabase.js");
 const {sendResponse, getUser} = require('./utils.js');
 const {HTTP_STATUS} = require('./utils.js');
 const {sendFriendRequest} = require('../helper/chatHelper.js');
+const {sendNotification} = require('../helper/notificationHelper.js');
 
 /**
  * Handles checking if the user exists
@@ -42,7 +43,8 @@ exports.handleAddFriend = async function (request, response, friend) {
     const user = getUser(request);
     if (!await checkValidity(response, user, friend)) return;
     if (await userDatabase.addToPendingFriendRequests(user.username, friend)) {
-        const result = await sendFriendRequest(user.username, friend, request.headers.authorization);
+        const result = await sendFriendRequest(friend, request.headers.authorization);
+        await sendNotification(friend, request.headers.authorization);
         sendResponse(response, HTTP_STATUS.OK, result);
         return;
     }

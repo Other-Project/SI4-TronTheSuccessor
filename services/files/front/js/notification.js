@@ -35,9 +35,18 @@ export class NotificationService extends EventTarget {
             console.log("initialize", notification);
             this.connectedFriends = notification.connectedFriends;
             this.unreadNotifications = notification.unreadNotifications;
+            setTimeout(() => {
+                this.dispatchEvent(new CustomEvent("initialize", {
+                    detail: {
+                        connectedFriends: notification.connectedFriends,
+                        unreadNotifications: notification.unreadNotifications
+                    }
+                }));
+            }, 1000);
         });
 
         this.socket.on("connected", (notification) => {
+            this.connectedFriends.push(notification.username);
             this.dispatchEvent(new CustomEvent("friend-status-update", {
                 detail: {
                     friend: notification.username,
@@ -47,6 +56,7 @@ export class NotificationService extends EventTarget {
         });
 
         this.socket.on("disconnected", (notification) => {
+            this.connectedFriends.splice(this.connectedFriends.indexOf(notification.username), 1);
             this.dispatchEvent(new CustomEvent("friend-status-update", {
                 detail: {
                     friend: notification.username,
@@ -66,11 +76,16 @@ export class NotificationService extends EventTarget {
         });
 
         this.socket.on("unreadNotification", (notification) => {
+            this.unreadNotifications.push(notification.username);
             this.dispatchEvent(new CustomEvent("unread-notification", {
                 detail: {
                     friend: notification.username
                 }
             }));
+        });
+
+        this.socket.on("refreshFriendList", () => {
+            this.dispatchEvent(new CustomEvent("refresh-friend-list"));
         });
     }
 

@@ -15,6 +15,8 @@ export class ChatSelection extends HTMLComponent {
         this.shadowRoot.addEventListener("friendRequestHandled", this.#refresh);
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
         notificationService.addEventListener("unread-notification", this.#updateMessageNotification);
+        notificationService.addEventListener("initialize", this.onVisible);
+        notificationService.addEventListener("refresh-friend-list", this.onVisible);
     }
 
     onVisible = async () => {

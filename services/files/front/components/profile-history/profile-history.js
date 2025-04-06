@@ -15,6 +15,7 @@ export class ProfileHistory extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
+        this.loadingSpinner = this.shadowRoot.querySelector(".loading-spinner");
         this.addEventListener("scroll", this.handleScroll);
     };
 
@@ -28,7 +29,7 @@ export class ProfileHistory extends HTMLComponent {
 
     handleScroll = async () => {
         const {scrollTop, scrollHeight, clientHeight} = this;
-        if (scrollTop + clientHeight >= scrollHeight - 100 && this.hasMore && !this.isLoading) {
+        if (scrollTop + clientHeight >= scrollHeight && this.hasMore && !this.isLoading) {
             await this.loadNextPage();
         }
     };
@@ -36,28 +37,43 @@ export class ProfileHistory extends HTMLComponent {
     async loadNextPage() {
         const user = getUserInfo();
         if (!user) return;
+
         this.isLoading = true;
+        this.loadingSpinner.style.display = "flex";
 
-        const response = await fetchApi(`/api/game/history`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                offset: this.offset,
-                limit: this.limit
-            })
-        });
-        const data = await response.json();
+        try {
+            const response = await fetchApi(`/api/game/history`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    offset: this.offset,
+                    limit: this.limit
+                })
+            });
 
-        this.gamesCache = this.gamesCache.concat(data);
-        this.renderGamesAppend(data);
+            const data = await response.json();
+            this.gamesCache = this.gamesCache.concat(data);
+            this.renderGamesAppend(data);
 
-        if (data.length < this.limit)
-            this.hasMore = false;
-        else
-            this.offset += this.limit;
-        this.isLoading = false;
+            if (data.length < this.limit)
+                this.hasMore = false;
+            else
+                this.offset += this.limit;
+        } catch (error) {
+            document.dispatchEvent(new CustomEvent("show-notification", {
+                detail: {
+                    message: "Error loading game history",
+                    duration: 2000,
+                    background: "red",
+                    color: "white"
+                }
+            }));
+        } finally {
+            this.isLoading = false;
+            this.loadingSpinner.style.display = "none";
+        }
     }
 
     renderGamesAppend(data) {
@@ -67,6 +83,7 @@ export class ProfileHistory extends HTMLComponent {
             this.gameResultsContainer.style.fontSize = "1.5em";
             return;
         }
+
         for (const game of data) {
             const gameResult = document.createElement("app-game-result");
             gameResult.gameData = game;

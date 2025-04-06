@@ -12,7 +12,7 @@ export class ChatSelection extends HTMLComponent {
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
-        this.shadowRoot.addEventListener("friendRequestHandled", this.#refresh);
+        document.addEventListener("friendRequestHandled", this.#refresh);
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
         notificationService.addEventListener("unread-notification", this.#updateMessageNotification);
         notificationService.addEventListener("initialize", this.onVisible);

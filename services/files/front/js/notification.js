@@ -101,6 +101,16 @@ export class NotificationService extends EventTarget {
         this.unreadNotifications.splice(this.unreadNotifications.indexOf(friend), 1);
         this.socket.emit("readNotification", friend);
     }
+
+    disconnect() {
+        if (this.socket) this.socket.disconnect();
+        this.socket = null;
+        this.dispatchEvent(new CustomEvent("user-count-update", {
+            detail: {
+                nb: 0
+            }
+        }));
+    }
 }
 
 const notificationService = new NotificationService();

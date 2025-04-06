@@ -7,20 +7,28 @@ const chatCollection = database.collection("chat");
 /**
  * Gets the chat messages
  * @param {string | string[] } roomId The id of the chat room
- * @param {string} from The timestamp from which to get the messages (optional)
+ * @param {string} pivot The timestamp to start from (optional)
  * @param {number} limit The number of messages to get (optional)
  * @param {number} order The order of the messages (optional)
  * @returns {Promise<{date: Date, author: string, type: string, content: string}[]>}
  */
-exports.getChat = async function (roomId, from = undefined, limit = 25, order = 1) {
+exports.getChat = async function (roomId, pivot = undefined, limit = 25, order = 1) {
     let query;
     if (Array.isArray(roomId)) query = {roomId: roomId.sort()};
     else query = {roomId};
-    if (from) query.timestamp = {$gt: from};
-    const result = await chatCollection.find(query).sort({timestamp: order}).limit(limit).toArray();
+    if (pivot) {
+        const pivotDate = new Date(pivot);
+        query.date = order === 1 ? {$gt: pivotDate} : {$lt: pivotDate};
+    }
+    const result = await chatCollection
+        .find(query)
+        .sort({date: order})
+        .limit(limit)
+        .toArray();
     console.debug(result);
     return result;
 };
+
 
 /**
  * Stores a message sent in a chat room

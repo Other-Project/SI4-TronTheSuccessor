@@ -17,8 +17,8 @@ const server = http.createServer(async (request, response) => {
         const roomId = getRoomId(user.username, endpoint.exec(requestUrl.pathname)[1]);
 
         if (request.method === "GET") {
-            const from = requestUrl.searchParams.get("from");
-            const messages = await chatDatabase.getChat(roomId, from);
+            const before = requestUrl.searchParams.get("before");
+            const messages = await chatDatabase.getChat(roomId, before, 25, (before ? -1 : 1));
             return sendResponse(response, HTTP_STATUS.OK, messages);
         } else if (request.method === "POST") {
             const message = JSON.parse(await getRequestBody(request));

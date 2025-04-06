@@ -3,6 +3,7 @@ import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
+    /** @type {Array} */ messages = [];
 
     constructor() {
         super("chat-room", ["html", "css"]);
@@ -14,6 +15,7 @@ export class ChatRoom extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.messagePanel = this.shadowRoot.getElementById("messages");
+        this.messagesWrap = this.shadowRoot.getElementById("messages-wrap");
         this.messageInput = this.shadowRoot.getElementById("message-input");
         this.sendButton = this.shadowRoot.getElementById("send");
         this.notificationBanner = this.shadowRoot.getElementById("notification-banner");
@@ -24,6 +26,7 @@ export class ChatRoom extends HTMLComponent {
         this.sendButton.onclick = () => this.sendMessage();
         this.acceptRequestButton.onclick = () => this.handleFriendRequest("POST");
         this.refuseRequestButton.onclick = () => this.handleFriendRequest("DELETE");
+        this.messagesWrap.addEventListener("scroll", this.handleScroll);
     };
 
     onVisible = () => {
@@ -40,9 +43,20 @@ export class ChatRoom extends HTMLComponent {
         this.#refresh();
     }
 
+    handleScroll = async () => {
+        if (-this.messagesWrap.scrollTop + this.messagesWrap.clientHeight + 50 >= this.messagesWrap.scrollHeight) {
+            this.messagesWrap.onscroll = null;
+            await this.loadMoreMessages();
+            this.messagesWrap.onscroll = this.handleScroll;
+        }
+    };
+
     #refresh() {
         if (!this.messagePanel) return;
-        this.getMessages().then(messages => this.#displayMessages(messages));
+        if (this.messages.length === 0)
+            this.#fetchMessages().then(() => this.#displayMessages());
+        else
+            this.#displayMessages();
         this.messageInput.disabled = this.sendButton.button.disabled = this.friend === "false";
         const showNotification = this.pending !== "undefined" || this.friend === "false";
         this.messageInput.title = this.sendButton.title = showNotification ? "You need to be friends to send messages" : "";
@@ -58,9 +72,24 @@ export class ChatRoom extends HTMLComponent {
         else this.#openWebSocket().then();
     }
 
-    #displayMessages(messages) {
+    #displayMessages() {
         this.messagePanel.innerHTML = "";
-        for (const message of messages) this.#displayMessage(message);
+        for (const message of this.messages) this.#displayMessage(message);
+    }
+
+    async loadMoreMessages() {
+        if (this.messages.length === 0) return;
+        const oldestMessage = this.messages[0];
+        const before = oldestMessage.date;
+        const response = await fetchApi(`/api/chat/${this.room}?before=${encodeURIComponent(before)}`);
+        if (!response.ok) {
+            this.#showNotification("Error fetching older messages", 2000, "red", "white");
+            return;
+        }
+        const olderMessages = await response.json();
+        this.messages = [...olderMessages, ...this.messages];
+        this.#displayMessages();
+        this.messagesWrap.scrollTop += 100;
     }
 
     #displayMessage(message) {
@@ -85,13 +114,21 @@ export class ChatRoom extends HTMLComponent {
                 this.#openWebSocket(false).then();
             } else console.error(err.message);
         });
-        this.socket.on("message", (message) => this.#displayMessage(message));
+        this.socket.on("message", (message) => {
+            this.messages.push(message);
+            this.#displayMessage(message);
+        });
         this.socket.emit("join", this.room);
     }
 
-    async getMessages() {
+    async #fetchMessages() {
         const response = await fetchApi(`/api/chat/${this.room}`);
-        return await response.json();
+        if (response.ok)
+            this.messages = await response.json();
+        else {
+            this.#showNotification("Error fetching messages", 2000, "red", "white");
+            this.messages = [];
+        }
     }
 
     async sendMessage() {
@@ -132,7 +169,7 @@ export class ChatRoom extends HTMLComponent {
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
 
-        this.dispatchEvent(new CustomEvent('friendRequestHandled', {
+        this.dispatchEvent(new CustomEvent("friendRequestHandled", {
             bubbles: true,
             composed: true,
             detail: {friend: this.pending, method: method}

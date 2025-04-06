@@ -10,9 +10,14 @@
 
     .column-1 {
         grid-column: 1;
+        max-height: 100%;
         display: flex;
         flex-direction: column;
         gap: 10px;
+
+        #profile-pfp {
+            display: contents;
+        }
 
         .profile-buttons:not(.logged-in) #modify-password,
         .profile-buttons:not(.logged-in) #share,

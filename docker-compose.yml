@@ -58,6 +58,7 @@ services:
       - mongodb
     environment:
       USER_SERVICE_URL: "http://user:8004"
+      NOTIFICATION_SERVICE_URL: "http://notification:8005"
   inventory:
     image: tron-the-successor/inventory
     build:

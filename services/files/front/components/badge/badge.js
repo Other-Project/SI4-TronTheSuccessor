@@ -6,7 +6,7 @@ export class Badge extends HTMLComponent {
     }
 
     constructor() {
-        super("badge", ["html", "css"]);
+        super("badge", ["css"]);
     }
 
     attributeChangedCallback(name, oldValue, newValue) {

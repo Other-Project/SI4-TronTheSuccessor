@@ -5,6 +5,8 @@ import "./socket.io.js";
  * Class to handle notifications
  */
 export class NotificationService extends EventTarget {
+    connectedFriends = [];
+    unreadNotifications = [];
 
     constructor() {
         super();
@@ -30,13 +32,9 @@ export class NotificationService extends EventTarget {
         });
 
         this.socket.on("initialize", (notification) => {
-            setTimeout(() => {
-                this.dispatchEvent(new CustomEvent("initialize-friend-status", {
-                    detail: {
-                        connectedFriends: notification.connectedFriends,
-                    }
-                }));
-            }, 1000);
+            console.log("initialize", notification);
+            this.connectedFriends = notification.connectedFriends;
+            this.unreadNotifications = notification.unreadNotifications;
         });
 
         this.socket.on("connected", (notification) => {
@@ -67,7 +65,26 @@ export class NotificationService extends EventTarget {
             }, 1000);
         });
 
-        this.socket.on("unreadNotification", () => this.dispatchEvent(new CustomEvent("unread-notification")));
+        this.socket.on("unreadNotification", (notification) => {
+            this.dispatchEvent(new CustomEvent("unread-notification", {
+                detail: {
+                    friend: notification.username
+                }
+            }));
+        });
+    }
+
+    getUnreadNotifications() {
+        return this.unreadNotifications;
+    }
+
+    getConnectedFriends() {
+        return this.connectedFriends;
+    }
+
+    readNotification(friend) {
+        this.unreadNotifications.splice(this.unreadNotifications.indexOf(friend), 1);
+        this.socket.emit("readNotification", friend);
     }
 }
 

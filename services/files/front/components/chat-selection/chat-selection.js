@@ -5,15 +5,16 @@ import notificationService from "/js/notification.js";
 export class ChatSelection extends HTMLComponent {
     constructor() {
         super("chat-selection", ["html", "css"]);
-        this.connectedFriends = [];
+        this.connectedFriends = notificationService.getConnectedFriends();
+        this.unreadNotifications = notificationService.getUnreadNotifications();
     }
 
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
         this.shadowRoot.addEventListener("friendRequestHandled", this.#refresh);
-        notificationService.addEventListener("initialize-friend-status", this.#initializeFriendStatus);
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
+        notificationService.addEventListener("unread-notification", this.#updateMessageNotification);
     }
 
     onVisible = async () => {
@@ -22,6 +23,7 @@ export class ChatSelection extends HTMLComponent {
     };
 
     openChatRoom(roomId, roomName, pending, friend) {
+        notificationService.readNotification(roomId);
         this.dispatchEvent(new CustomEvent("room-selected", {
             detail: {
                 id: roomId,
@@ -50,6 +52,7 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("name", friend.name);
             friendButton.setAttribute("preview", friend.preview);
             friendButton.setAttribute("connected", this.connectedFriends.includes(friend.name));
+            friendButton.setAttribute("unread", this.unreadNotifications.includes(friend.name));
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
         }
@@ -70,20 +73,15 @@ export class ChatSelection extends HTMLComponent {
         }));
     }
 
-    #initializeFriendStatus = (event) => {
-        const {connectedFriends} = event.detail;
-        this.connectedFriends = connectedFriends;
-        if (!this.friendList) return;
-
-        for (let friend of this.connectedFriends) {
-            const friendButton = this.shadowRoot.getElementById(`friend-${friend}`);
-            if (friendButton) friendButton.setAttribute("connected", "true");
-        }
-    };
-
     #updateFriendStatus = (event) => {
         const {friend, connected} = event.detail;
         const friendButton = this.shadowRoot.getElementById(`friend-${friend}`);
         if (friendButton) friendButton.setAttribute("connected", connected);
+    };
+
+    #updateMessageNotification = (event) => {
+        const {friend} = event.detail;
+        const friendButton = this.shadowRoot.getElementById(`friend-${friend}`);
+        if (friendButton) friendButton.setAttribute("unread", "true");
     };
 }

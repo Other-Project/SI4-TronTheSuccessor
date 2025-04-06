@@ -1,6 +1,6 @@
 #room-button {
     display: grid;
-    grid-template: 60px / 40px 1fr;
+    grid-template: 60px / 40px 1fr auto;
     gap: 10px;
     align-items: center;
 
@@ -14,13 +14,22 @@
     &:hover {
         background: #5a3863;
     }
+
+    &.unread {
+        border-left: 4px solid #ff5252;
+    }
 }
 
 #room-icon-container {
     position: relative;
 
-    #status-indicator.hidden {
-        display: none;
+    #status-indicator {
+        width: 10px;
+        height: 10px;
+
+        &.hidden {
+            display: none;
+        }
     }
 
     #room-icon {

@@ -3,6 +3,7 @@ const {Server} = require("socket.io");
 const chatDatabase = require("./js/chatDatabase.js");
 const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
 const {getFriendsList} = require("./helper/userHelper.js");
+const {notifyMessageSent} = require("./helper/notificationHelper.js");
 const {getRoomId} = require("./js/chatDatabase.js");
 
 
@@ -24,6 +25,7 @@ const server = http.createServer(async (request, response) => {
             const message = JSON.parse(await getRequestBody(request));
             if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
             io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
+            await notifyMessageSent(request.headers.authorization, endpoint.exec(requestUrl.pathname)[1]);
             return sendResponse(response, HTTP_STATUS.CREATED);
         }
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
@@ -86,6 +88,7 @@ io.on("connection", (socket) => {
         }
 
         io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
+        await notifyMessageSent(socket.request.headers.authorization, roomId.filter(elem => elem !== user.username)[0]);
         callback?.(true);
     });
 });

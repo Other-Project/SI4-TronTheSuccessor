@@ -6,7 +6,8 @@ const fs = require("fs");
 const {Server} = require("socket.io");
 const {io: Client} = require("socket.io-client");
 const jwt = require("jsonwebtoken");
-const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
+const secretKey = process.env.JWT_SECRET;
+if (!secretKey) throw new Error("JWT_SECRET is not set");
 
 const SERVICES = {
     "/api/user": {url: process.env.USER_SERVICE_URL ?? "http://127.0.0.1:8004"},
@@ -16,9 +17,9 @@ const SERVICES = {
     "api/notification": {url: process.env.NOTIFICATION_SERVICE_URL ?? "http://127.0.1:8005", ws: true},
     "/": {url: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001"}
 };
-const HTTPS_CONFIG = process.env.SSL_ENABLED === "true" ? {
-    key: process.env.SSL_KEY ?? "/ssl/key.pem",
-    cert: process.env.SSL_CERT ?? "/ssl/cert.pem"
+const HTTPS_CONFIG = process.env.HTTPS_ENABLED === "true" ? {
+    key: process.env.HTTPS_KEY ?? "/ssl/key.pem",
+    cert: process.env.HTTPS_CERT ?? "/ssl/cert.pem"
 } : null;
 
 const proxy = httpProxy.createProxyServer();
@@ -106,9 +107,9 @@ function responseError(request, response, message, error, code) {
 /**
  * Verifies the token of the request.
  * @param request The request to verify
- * @return {Promise<boolean>} True if the token is valid, false otherwise
+ * @return {boolean} True if the token is valid, false otherwise
  */
-async function verifyToken(request) {
+function verifyToken(request) {
     const authorization = request.headers.authorization?.split(" ");
     if (!authorization) {
         console.warn("No authorization header");
@@ -126,10 +127,13 @@ async function verifyToken(request) {
         return false;
     }
 
-    return await new Promise((resolve) => jwt.verify(accessToken, secretKey, (error) => {
-        if (error) console.warn(error);
-        resolve(!error);
-    }));
+    try {
+        jwt.verify(accessToken, secretKey);
+        return true;
+    } catch (error) {
+        console.warn("Invalid access token", error);
+        return false;
+    }
 }
 
 /**
@@ -142,7 +146,7 @@ function registerWebsocket(io, namespace, serviceUrl) {
     const nmp = io.of(namespace);
 
     nmp.use(async (socket, next) => {
-        if (await verifyToken(socket.request)) next();
+        if (verifyToken(socket.request)) next();
         else next(new Error("Authentication needed"));
     });
 

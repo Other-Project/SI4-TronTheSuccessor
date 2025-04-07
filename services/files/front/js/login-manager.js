@@ -14,6 +14,19 @@ export async function renewAccessToken() {
             "Authorization": `Bearer ${getCookie("refreshToken")}`
         }
     });
+    if (!response.ok) {
+        document.dispatchEvent(new CustomEvent("show-notification", {
+            detail: {
+                message: "Failed to extend session",
+                duration: 2000,
+                background: "red",
+                color: "white"
+            }
+        }));
+        console.error("Failed to extend session", response.statusText);
+        if (response.status === 401) disconnect(); // Logout if refresh token is invalid
+        return;
+    }
     const data = await response.json();
     storeTokens(data);
 }

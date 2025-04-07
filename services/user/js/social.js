@@ -44,13 +44,13 @@ exports.handleAddFriend = async function (request, response, friend) {
     if (!await checkValidity(response, user, friend)) return;
     if (await userDatabase.addToPendingFriendRequests(user.username, friend)) {
         const result = await sendFriendRequest(friend, request.headers.authorization);
-        await sendNotification(friend, request.headers.authorization);
+        await sendNotification(friend, request.headers.authorization, "POST");
         sendResponse(response, HTTP_STATUS.OK, result);
         return;
     }
     if (await userDatabase.addFriend(user.username, friend)) {
         sendResponse(response, HTTP_STATUS.OK, friend);
-        await sendNotification(friend, request.headers.authorization);
+        await sendNotification(friend, request.headers.authorization, "POST");
     }
     else
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Friend request already sent"});
@@ -61,10 +61,13 @@ exports.handleRemoveFriend = async function (request, response, friend) {
     if (!await checkValidity(response, user, friend)) return;
     if (await userDatabase.removePendingFriendRequests(friend, user.username)) {
         sendResponse(response, HTTP_STATUS.OK, friend);
+        await sendNotification(friend, request.headers.authorization, "DELETE");
         return;
     }
-    if (await userDatabase.removeFriend(user.username, friend))
+    if (await userDatabase.removeFriend(user.username, friend)) {
         sendResponse(response, HTTP_STATUS.OK, friend);
+        await sendNotification(friend, request.headers.authorization, "DELETE");
+    }
     else
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request or you are not friends"});
 };

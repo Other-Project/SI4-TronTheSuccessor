@@ -12,13 +12,9 @@ const server = http.createServer(async (request, response) => {
     const user = getUser(request);
     if (!user) return sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
 
-    if (filePath.length === 3 && filePath[2] === "chat" && request.method === "POST") await handleUnreadNotification(request, user);
-
-    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") {
-        const username = await handleUnreadNotification(request, user);
-        const userSocketId = connectedUsers.get(username);
-        if (userSocketId) io.to(userSocketId).emit("refreshFriendList");
-    }
+    if (filePath.length === 3 && filePath[2] === "chat" && request.method === "POST") await handleUnreadNotification(request, user.username);
+    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") await handleFriendListModification(request, user.username, "POST");
+    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "DELETE") await handleFriendListModification(request, user.username, "DELETE");
 
     return sendResponse(response, HTTP_STATUS.NOT_FOUND);
 }).listen(8005);
@@ -67,18 +63,32 @@ io.on("connection", async (socket) => {
     });
 });
 
+/**
+ * Handle the friend list modification event.
+ * @param {module:http.IncomingMessage} request the request object
+ * @param {string} username the username of the user who sent the message
+ * @param {"POST" | "DELETE" } method the HTTP method used
+ */
+async function handleFriendListModification(request, username, method) {
+    const friend = await handleUnreadNotification(request, username);
+    const userSocketId = connectedUsers.get(friend);
+    if (!userSocketId) return;
+    io.to(userSocketId).emit("refreshFriendList");
+    if (connectedUsers.has(username)) io.to(userSocketId).emit(method === "POST" ? "connected" : "disconnected", {username: username});
+}
+
 
 /**
  * Handle the unread notification event.
- * @param request the request object
- * @param user the user who sent the message
+ * @param {module:http.IncomingMessage} request the request object
+ * @param {string} username the username of the user who sent the message
  * @returns {Promise<string>} the username of the user that need to be notified
  */
-async function handleUnreadNotification(request, user) {
+async function handleUnreadNotification(request, username) {
     const body = await getRequestBody(request);
     const friend = JSON.parse(body);
     const friendSocketId = connectedUsers.get(friend.username);
-    await notificationDatabase.addNotification(friend.username, user.username);
-    if (friendSocketId) io.to(friendSocketId).emit("unreadNotification", {username: user.username});
+    await notificationDatabase.addNotification(friend.username, username);
+    if (friendSocketId) io.to(friendSocketId).emit("unreadNotification", {username: username});
     return friend.username;
 }

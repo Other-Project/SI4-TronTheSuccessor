@@ -81,6 +81,8 @@ p {
 #replay {
     display: none;
     animation: slideDown 0.7s ease-out forwards;
+    overflow: hidden;
+    max-height: 0;
 }
 
 .show {
@@ -93,13 +95,38 @@ p {
     }
 }
 
+.hide-replay {
+    #replay {
+        animation: slideUp 0.5s ease-out forwards;
+    }
+
+    #chevron {
+        transform: rotate(0deg);
+    }
+}
+
 @keyframes slideDown {
     from {
         opacity: 0;
         transform: translateY(-20px);
+        max-height: 0;
     }
     to {
         opacity: 1;
         transform: translateY(0);
+        max-height: 1000px;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1000px;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
     }
 }

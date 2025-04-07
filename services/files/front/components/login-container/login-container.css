@@ -7,13 +7,8 @@ h2, p {
     margin: 0;
 }
 
-#cancel-button {
-    animation: pulse 4s infinite;
-
-    &:hover {
-        animation: paused;
-        transform: scale(1.2);
-    }
+#cancel-button:hover {
+    transform: scale(1.1);
 }
 
 @keyframes pulse {

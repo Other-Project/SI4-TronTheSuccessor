@@ -28,12 +28,6 @@ p {
     margin: 0.5em;
 }
 
-#multiplayer {
-    &.logged-in {
-        animation: pulse 4s infinite;
-    }
-}
-
 
 @keyframes flicker {
     0%, 18%, 22%, 25%, 53%, 57%, 100% {
@@ -43,19 +37,5 @@ p {
     20%, 24%, 55% {
         border: 5px solid #505050;
         box-shadow: none;
-    }
-}
-
-@keyframes pulse {
-    25% {
-        transform: scale(1.08);
-    }
-
-    50% {
-        transform: scale(1);
-    }
-
-    100% {
-        transform: scale(1);
     }
 }

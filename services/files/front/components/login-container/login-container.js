@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {disconnect} from "/js/login-manager.js";
+import {disconnect, getCookie} from "/js/login-manager.js";
 
 export class LoginContainer extends HTMLComponent {
     popupContainer;
@@ -15,7 +15,11 @@ export class LoginContainer extends HTMLComponent {
         this.addEventListener("hide-popup", () => this.show());
 
         this.shadowRoot.getElementById("disconnect-button").addEventListener("click", () => disconnect());
-        this.shadowRoot.getElementById("cancel-button").addEventListener("click", () => this.show());
+        this.cancelButton = this.shadowRoot.getElementById("cancel-button");
+        this.cancelButton.addEventListener("click", () => this.show());
+        const refreshToken = getCookie("refreshToken");
+        this.cancelButton.button.classList.toggle("animated", !!refreshToken);
+        this.cancelButton.button.classList.toggle("cancel_background", !!refreshToken);
     };
 
     onVisible = () => this.show();

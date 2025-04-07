@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login-manager.js";
+import notificationService from "/js/notification.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -33,6 +34,7 @@ export class ChatRoom extends HTMLComponent {
     onHidden = () => {
         if (this.socket) this.socket.disconnect();
         this.socket = null;
+        notificationService.readNotification(this.room);
     };
 
     attributeChangedCallback(name, oldValue, newValue) {

@@ -129,7 +129,7 @@ export class GameMaster extends HTMLComponent {
         const details = this.game.stop();
         if (!details) return;
         this.restartButton.setAttribute("pulse", "false");
-        this.restartButton.setAttribute("background", "");
+        this.restartButton.removeAttribute("background");
         this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = this.against === "local" ? "block" : "none";
         this.pauseTitle.innerText = "Pause";

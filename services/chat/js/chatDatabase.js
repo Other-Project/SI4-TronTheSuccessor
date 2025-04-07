@@ -31,7 +31,7 @@ exports.getChat = async function (roomId, from = undefined, limit = 25, order = 
  * @returns {Promise<{date: Date, author: string, type: string, content: string}>} The stored message
  */
 exports.storeMessage = async function (roomId, author, type, content) {
-    const message = {roomId, author, type, content, date: new Date()};
+    const message = {roomId, author, type, content: content.trim(), date: new Date()};
     console.debug(message, await chatCollection.insertOne(message));
     return message;
 };
@@ -43,6 +43,9 @@ exports.storeMessage = async function (roomId, author, type, content) {
  */
 exports.verifyMessage = function (message) {
     if (!message.type || !message.content) return false;
+    if (typeof message.type !== "string" || typeof message.content !== "string") return false;
+    message.content = message.content.trim();
+    if (message.content.length < 2 || message.content.length > 128 || message.content.split("\n").length > 5) return false;
     return ["text", "friend-request", "game-invitation"].includes(message.type);
 };
 

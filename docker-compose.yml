@@ -26,6 +26,8 @@ services:
       context: services/game
     restart: unless-stopped
     env_file: .env
+    depends_on:
+      - mongodb
   user:
     image: tron-the-successor/user
     build:

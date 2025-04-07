@@ -1,7 +1,7 @@
 const {MongoClient} = require("mongodb");
 const jwt = require("jsonwebtoken");
 const {createHash} = require("node:crypto");
-const {sendResponse} = require("./utils.js");
+const {sendResponse, getUser} = require("./utils.js");
 
 // MongoDB
 const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27017');
@@ -188,9 +188,8 @@ exports.removeFriend = async function (playerId, otherId) {
 exports.renewToken = async function (refreshToken) {
     if (!refreshToken)
         return {error: "Refresh token is missing"};
-    if (!jwt.verify(refreshToken, secretKey))
-        return {error: "Refresh token is invalid : " + refreshToken};
-    const username = jwt.decode(refreshToken).username;
+    const username = getUser(refreshToken)?.username;
+    if (!username) return {error: "Refresh token is invalid : " + refreshToken};
     const user = await userCollection.findOne({username});
     if (!user)
         return {error: "Could not find user with this refresh token : " + refreshToken};
@@ -228,13 +227,9 @@ exports.resetPassword = async function (newPassword, resetPasswordToken) {
         return {error: `New password must be at least ${passwordMinLength} and at most ${maxLength} characters long`};
     if (!authorizedRegex.test(newPassword))
         return {error: "New password must contain only letters, numbers or one of the following characters : #?!@$%^&*"};
-    try {
-        jwt.verify(resetPasswordToken, secretKey);
-    } catch (error) {
-        return {error: "It took too long to reset your password, please try again"};
-    }
 
-    const username = jwt.decode(resetPasswordToken).username;
+    const username = getUser(resetPasswordToken)?.username;
+    if (!username) return {error: "It took too long to reset your password, please try again"};
     const user = await userCollection.findOne({username});
     if (!user)
         return {error: "Could not find user with this reset password token : " + resetPasswordToken};

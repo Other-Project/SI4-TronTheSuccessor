@@ -59,7 +59,7 @@ exports.getAuthorizationToken = function (request) {
  * @returns {{username: string}|null}
  */
 exports.getUser = function (request) {
-    const token = exports.getAuthorizationToken(request);
+    const token = typeof request === "string" ? request : exports.getAuthorizationToken(request);
     if (!token) return null;
     try {
         return jwt.verify(token, jwtSecret);

@@ -41,9 +41,9 @@ export class SignInPopup extends HTMLComponent {
             storeTokens(data);
             fakePageReload();
             this.#clearInputs();
-        } else {
+            this.dispatchEvent(new CustomEvent("logged-in", {bubbles: true, composed: true}));
+        } else
             alert(data?.error ?? response.statusText);
-        }
     }
 
     correctInputs() {

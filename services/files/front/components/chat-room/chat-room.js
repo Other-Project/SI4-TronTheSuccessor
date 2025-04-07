@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login-manager.js";
+import notificationService from "/js/notification.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -25,10 +26,25 @@ export class ChatRoom extends HTMLComponent {
         this.acceptRequestButton = this.shadowRoot.getElementById("accept-request");
         this.refuseRequestButton = this.shadowRoot.getElementById("refuse-request");
         this.notificationActionButton = this.shadowRoot.getElementById("notification-actions");
+
+        this.messageInput.onkeydown = (event) => {
+            if (event.key === "Enter") {
+                if (event.shiftKey && this.messageInput.value.split("\n").length < 5) return;
+                if (!event.shiftKey) this.sendMessage().then();
+                event.preventDefault();
+            }
+        }
+        this.messageInput.oninput = () => {
+            const rows = this.messageInput.value.split("\n");
+            if (rows.length > 5) this.messageInput.value = rows.slice(0, 5).join("\n");
+            this.messageInput.style.height = '';
+            this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
+        };
         this.sendButton.onclick = () => this.sendMessage();
         this.acceptRequestButton.onclick = () => this.handleFriendRequest("POST");
         this.refuseRequestButton.onclick = () => this.handleFriendRequest("DELETE");
         this.messagesWrap.addEventListener("scroll", this.handleScroll);
+        notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
     };
 
     onVisible = () => {
@@ -38,6 +54,7 @@ export class ChatRoom extends HTMLComponent {
     onHidden = () => {
         if (this.socket) this.socket.disconnect();
         this.socket = null;
+        notificationService.readNotification(this.room);
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -102,6 +119,7 @@ export class ChatRoom extends HTMLComponent {
         messageElement.setAttribute("date", message.date);
         messageElement.setAttribute("type", message.type);
         messageElement.setAttribute("you", (message.author === getUserInfo()?.username).toString());
+        messageElement.setAttribute("connected", notificationService.getConnectedFriends().includes(message.author));
         this.messagePanel.appendChild(messageElement);
     }
 
@@ -135,8 +153,11 @@ export class ChatRoom extends HTMLComponent {
     }
 
     async sendMessage() {
-        const messageContent = this.messageInput.value;
-        if (!messageContent) return;
+        const messageContent = this.messageInput.value.trim();
+        if (!messageContent || messageContent.length < 2 || messageContent.length > 128 || messageContent.split("\n").length > 5)
+            this.messageInput.setCustomValidity("Message must be between 2 and 128 characters and must not exceed 5 lines");
+        else this.messageInput.setCustomValidity("");
+        if (!this.messageInput.reportValidity()) return;
 
         const message = {
             type: "text",
@@ -144,8 +165,10 @@ export class ChatRoom extends HTMLComponent {
         };
 
         const ok = await new Promise(resolve => this.socket.timeout(5000).emit("message", message, (err, ack) => resolve(!err && ack)));
-        if (ok) this.messageInput.value = "";
-        else alert("Failed to send message");
+        if (ok) {
+            this.messageInput.value = "";
+            this.messageInput.style.height = '';
+        } else this.#showNotification("Failed to send message", 2000, "red", "white");
     }
 
     #showNotification(message, duration, background, color) {
@@ -171,11 +194,11 @@ export class ChatRoom extends HTMLComponent {
             const error = await response.json();
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
-
-        this.dispatchEvent(new CustomEvent("friendRequestHandled", {
-            bubbles: true,
-            composed: true,
-            detail: {friend: this.pending, method: method}
-        }));
     }
+
+    #updateFriendStatus = (event) => {
+        const {friend, connected} = event.detail;
+        const messageElements = this.shadowRoot.querySelectorAll(`app-chat-room-message[author="${friend}"]`);
+        for (const message of messageElements) message.setAttribute("connected", connected);
+    };
 }

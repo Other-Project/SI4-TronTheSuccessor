@@ -40,6 +40,7 @@ import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-displa
 import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 import {SettingsPage} from "/components/settings/settings-page/settings-page.js";
 import {SettingsCarousel} from "/components/settings/settings-carousel/settings-carousel.js";
+import {Badge} from "/components/badge/badge.js";
 import {Avatar} from "/components/avatar/avatar.js";
 import {LoadingSpinner} from "/components/loading-spinner/loading-spinner.js";
 
@@ -52,6 +53,7 @@ customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
 customElements.define("app-notification", Notification);
 customElements.define("app-neon-container", NeonContainer);
+customElements.define("app-badge", Badge);
 
 // Home components
 customElements.define("app-home-page", HomePage);

@@ -1,5 +1,10 @@
 const jwt = require("jsonwebtoken");
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) throw new Error("JWT_SECRET is not set");
 
+/**
+ * HTTP status codes
+ */
 exports.HTTP_STATUS = {
     OK: 200,
     CREATED: 201,
@@ -10,8 +15,8 @@ exports.HTTP_STATUS = {
 };
 
 /**
- *
- * @param {IncomingMessage} request
+ * Read the request body and return it as a string
+ * @param {module:http.IncomingMessage} request The request object
  * @returns {Promise<string>}
  */
 exports.getRequestBody = async function (request) {
@@ -21,8 +26,14 @@ exports.getRequestBody = async function (request) {
         request.on("end", () => resolve(body));
         request.on("error", reject);
     });
-}
+};
 
+/**
+ * Send a response with the given status code and data
+ * @param {ServerResponse} response The response object
+ * @param {number} statusCode The status code to send
+ * @param {*} data The data to send
+ */
 exports.sendResponse = function (response, statusCode, data = null) {
     response.statusCode = statusCode;
     if (data) {
@@ -42,8 +53,46 @@ exports.getAuthorizationToken = function (request) {
     return authHeader[1];
 };
 
+/**
+ * Get the user from the request
+ * @param request The request object
+ * @returns {{username: string}|null}
+ */
 exports.getUser = function (request) {
-    const token = exports.getAuthorizationToken(request);
+    const token = typeof request === "string" ? request : exports.getAuthorizationToken(request);
     if (!token) return null;
-    return jwt.decode(token);
+    try {
+        return jwt.verify(token, jwtSecret);
+    } catch (e) {
+        return null;
+    }
+};
+
+/**
+ * Make an HTTP request.
+ * @param {URL} url The base URL of the service.
+ * @param {string} method The HTTP method (e.g., 'GET', 'POST').
+ * @param {string} path The request path.
+ * @param {string} authorization The authorization
+ * @param {Object} [data] The request payload (for 'POST' or 'PUT' methods).
+ * @returns {Promise<unknown>}
+ */
+exports.makeHttpRequest = async function (url, method, path, authorization, data = null) {
+    url = new URL(path, url);
+    const response = await fetch(url,
+        {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authorization
+            },
+            body: data ? JSON.stringify(data) : null,
+        });
+    if (!response.ok) {
+        console.warn(`HTTP request failed with status ${response.status}`);
+        return null;
+    }
+    const text = await response.text();
+    if (!text) return null;
+    return JSON.parse(text);
 };

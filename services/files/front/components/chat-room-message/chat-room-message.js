@@ -9,7 +9,7 @@ export class ChatRoomMessage extends HTMLComponent {
     /** @type {boolean} */ you;
 
     static get observedAttributes() {
-        return ["author", "content", "date", "type", "you"];
+        return ["author", "content", "date", "type", "you", "connected"];
     }
 
     constructor() {
@@ -22,6 +22,7 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement = this.shadowRoot.getElementById("sender-name");
         this.contentElement = this.shadowRoot.getElementById("message-content");
         this.dateElement = this.shadowRoot.getElementById("message-date");
+        this.status = this.shadowRoot.getElementById("status-indicator");
         this.authorElement.addEventListener("click", () => changePage(`/profile/${this.author}`));
     };
 
@@ -37,6 +38,8 @@ export class ChatRoomMessage extends HTMLComponent {
     #refresh() {
         if (!this.containerElement) return;
         this.containerElement.classList.toggle("you", this.you);
+        this.status.classList.toggle("connected", this.connected === "true");
+        this.status.classList.toggle("hidden", this.you);
         this.avatarElement.setAttribute("username", this.author);
         this.authorElement.textContent = this.you ? "You" : this.author;
         this.contentElement.textContent = this.content;

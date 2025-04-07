@@ -19,6 +19,10 @@ button {
         &.cancel_background {
             background-color: #da4343;
         }
+
+        &.join_background {
+            background-color: #118512;
+        }
     }
 
     &:disabled {
@@ -40,6 +44,10 @@ button {
 
     &.cancel_background {
         background-color: #cd2c2c;
+    }
+
+    &.join_background {
+        background-color: #09730a;
     }
 }
 

@@ -23,7 +23,7 @@ export class ChatRoomButton extends HTMLComponent {
                     name: this.name,
                     avatar: this.icon,
                     content: `Do you want to play a game with ${this.name}?`
-                },
+                }
             }));
         });
     };
@@ -38,7 +38,7 @@ export class ChatRoomButton extends HTMLComponent {
 
     #refresh() {
         if (!this.roomName) return;
-        if (!this.icon) this.roomAvatar.setAttribute("username", this.roomId);
+        if (!this.icon) this.roomAvatar.setAttribute("username", this.name);
         else this.roomIcon.src = this.icon;
         this.roomIcon.style.display = this.icon ? "block" : "none";
         this.roomAvatar.style.display = this.icon ? "none" : "block";

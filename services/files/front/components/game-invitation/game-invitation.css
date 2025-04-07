@@ -16,8 +16,9 @@ app-popup {
         border-radius: 8px;
     }
 
-    img {
-        height: 70px;
+    app-avatar {
+        width: 80px;
+        height: 80px;
     }
 
     h3 {

@@ -16,7 +16,7 @@ export class GameInvitation extends HTMLComponent {
         });
 
         document.addEventListener("show-invitation", (event) => {
-            this.shadowRoot.getElementById(`send-avatar`).src = event.detail.avatar;
+            this.shadowRoot.getElementById(`send-avatar`).setAttribute("username", event.detail.name);
             this.shadowRoot.getElementById(`send-name`).textContent = this.name = event.detail.name;
             this.shadowRoot.getElementById(`send-content`).textContent = event.detail.content;
             this.sendGameInvitation.classList.add("show");

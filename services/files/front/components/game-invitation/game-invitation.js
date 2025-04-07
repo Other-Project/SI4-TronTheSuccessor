@@ -43,7 +43,14 @@ export class GameInvitation extends HTMLComponent {
             body: JSON.stringify(message)
         });
         if (!response.ok) {
-            alert(`Failed to send game invitation: ${response.statusText}`);
+            document.dispatchEvent(new CustomEvent("show-notification", {
+                detail: {
+                    message: "An error happened. Failed to send game invitation",
+                    duration: 5000,
+                    background: "#f11818",
+                    color: "#000000"
+                }
+            }));
             return;
         }
         storeTokens(await response.json());

@@ -34,15 +34,15 @@ app-popup {
         border-radius: 20px;
     }
 
-    app-button[id="accept-invitation"]:hover,
-    app-button[id="send-invitation"]:hover {
+    #accept-invitation:hover,
+    #send-invitation:hover {
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(106, 62, 161, 0.4);
 
     }
 
-    app-button[id="refuse-invitation"]:hover,
-    app-button[id="dont-send-invitation"]:hover {
+    #refuse-invitation:hover,
+    #dont-send-invitation:hover {
         transform: translateY(-2px);
         background: rgba(255, 255, 255, 0.2);
     }

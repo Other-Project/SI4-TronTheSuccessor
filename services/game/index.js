@@ -30,8 +30,7 @@ let server = http.createServer(async (request, response) => {
                     sendResponse(response, HTTP_STATUS.OK, {emotes});
                     break;
                 case "history":
-
-                        await handleGetHistory(request, response);
+                    await handleGetHistory(request, response);
                     break;
                 case "game-invitation":
                     if (request.method === "POST")
@@ -43,8 +42,7 @@ let server = http.createServer(async (request, response) => {
                 default:
                     sendResponse(response, HTTP_STATUS.NOT_FOUND);
             }
-        } catch
-            (error) {
+        } catch (error) {
             console.warn(error);
             sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
         }

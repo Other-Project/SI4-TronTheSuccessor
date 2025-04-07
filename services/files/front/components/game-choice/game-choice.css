@@ -29,7 +29,9 @@ p {
 }
 
 #multiplayer {
-    animation: pulse 4s infinite;
+    &.logged-in {
+        animation: pulse 4s infinite;
+    }
 }
 
 

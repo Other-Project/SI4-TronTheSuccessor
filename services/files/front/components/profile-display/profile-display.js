@@ -20,6 +20,11 @@ export class ProfileDisplay extends HTMLComponent {
             this.toggleDropdown();
         });
 
+        this.shadowRoot.getElementById("username").addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.toggleDropdown();
+        });
+
         document.addEventListener("click", () => this.toggleDropdown(false));
 
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));

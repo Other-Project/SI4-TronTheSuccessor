@@ -25,6 +25,7 @@ export class ChatRoom extends HTMLComponent {
         this.sendButton.onclick = () => this.sendMessage();
         this.acceptRequestButton.onclick = () => this.handleFriendRequest("POST");
         this.refuseRequestButton.onclick = () => this.handleFriendRequest("DELETE");
+        notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
     };
 
     onVisible = () => {
@@ -72,6 +73,7 @@ export class ChatRoom extends HTMLComponent {
         messageElement.setAttribute("date", message.date);
         messageElement.setAttribute("type", message.type);
         messageElement.setAttribute("you", (message.author === getUserInfo()?.username).toString());
+        messageElement.setAttribute("connected", notificationService.getConnectedFriends().includes(message.author));
         this.messagePanel.appendChild(messageElement);
     }
 
@@ -134,4 +136,10 @@ export class ChatRoom extends HTMLComponent {
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
     }
+
+    #updateFriendStatus = (event) => {
+        const {friend, connected} = event.detail;
+        const messageElements = this.shadowRoot.querySelectorAll(`app-chat-room-message[author="${friend}"]`);
+        for (const message of messageElements) message.setAttribute("connected", connected);
+    };
 }

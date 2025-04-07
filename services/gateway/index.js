@@ -18,7 +18,7 @@ const SERVICES = {
 };
 const HTTPS_CONFIG = process.env.HTTPS_ENABLED === "true" ? {
     key: process.env.HTTPS_KEY ?? "/ssl/key.pem",
-    cert: process.env.HTTPS_CERT_CERT ?? "/ssl/cert.pem"
+    cert: process.env.HTTPS_CERT ?? "/ssl/cert.pem"
 } : null;
 
 const proxy = httpProxy.createProxyServer();

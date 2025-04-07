@@ -5,6 +5,7 @@ export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
     /** @type {Array} */ messages = [];
     /** @type {boolean} */ hasMore = true;
+    /** @type {boolean} */ isLoading = false;
 
     constructor() {
         super("chat-room", ["html", "css"]);
@@ -45,9 +46,9 @@ export class ChatRoom extends HTMLComponent {
     }
 
     handleScroll = async () => {
-        if (-this.messagesWrap.scrollTop + this.messagesWrap.clientHeight >= this.messagesWrap.scrollHeight && this.hasMore) {
+        if (-this.messagesWrap.scrollTop + this.messagesWrap.clientHeight >= this.messagesWrap.scrollHeight && this.hasMore && !this.isLoading) {
             this.messagesWrap.scrollTop = 0;
-            await this.loadMoreMessages();
+            await this.loadOlderMessages();
         }
     };
 
@@ -77,8 +78,9 @@ export class ChatRoom extends HTMLComponent {
         for (const message of this.messages) this.#displayMessage(message);
     }
 
-    async loadMoreMessages() {
+    async loadOlderMessages() {
         if (this.messages.length === 0) return;
+        this.isLoading = true;
         const oldestMessage = this.messages[0];
         const before = oldestMessage.date;
         const response = await fetchApi(`/api/chat/${this.room}?before=${before}`);
@@ -90,6 +92,7 @@ export class ChatRoom extends HTMLComponent {
         if (olderMessages.length < 25) this.hasMore = false;
         this.messages = [...olderMessages, ...this.messages];
         this.#displayMessages();
+        this.isLoading = false;
     }
 
     #displayMessage(message) {

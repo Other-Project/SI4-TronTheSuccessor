@@ -38,6 +38,7 @@ label {
 
 #play-pause img, #next-btn img, #previous-btn img {
     height: 25px;
+    filter: invert(0.75);
 }
 
 #board-range {

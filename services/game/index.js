@@ -12,8 +12,8 @@ const {getCollection, getUserInventorySelection} = require("./helper/inventoryHe
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
 let server = http.createServer(async (request, response) => {
-    const urlPath = request.url.split("?")[0];
-    const filePath = urlPath.split("/").filter(elem => elem !== "..");
+    const requestUrl = new URL(request.url, `http://${request.headers.host}`);
+    const filePath = requestUrl.pathname.split("/").filter(elem => elem !== "..");
     try {
         switch (filePath[3]) {
             case "stats":

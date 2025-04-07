@@ -42,16 +42,6 @@ export class ProfileHistory extends HTMLComponent {
         this.loadingSpinner.classList.add("show");
 
         try {
-            /*const response = await fetchApi(`/api/game/history?`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    from: this.oldestGameDate,
-                    limit: this.limit
-                })
-            });*/
             const response = await fetchApi(`/api/game/history?limit=${this.limit}&from=${this.oldestGameDate}`);
 
             const data = await response.json();

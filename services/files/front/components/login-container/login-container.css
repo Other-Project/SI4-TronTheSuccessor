@@ -7,6 +7,6 @@ h2, p {
     margin: 0;
 }
 
-#cancel-button:hover {
+#disconnect-button:hover {
     transform: scale(1.1);
 }

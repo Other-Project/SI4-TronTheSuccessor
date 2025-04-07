@@ -24,7 +24,7 @@ export class GameChoice extends HTMLComponent {
         this.multiplayerButton.button.disabled = !refreshToken;
         if (refreshToken) {
             this.multiplayerButton.setAttribute("pulse", "true");
-            this.multiplayerButton.setAttribute("background", "#430e57");
+            this.multiplayerButton.setAttribute("background", "action_background");
         }
     };
 }

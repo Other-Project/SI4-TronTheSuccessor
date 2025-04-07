@@ -13,7 +13,7 @@ button {
         background-color: #3c3c3c;
 
         &.action_background {
-            background-color: #5a1571;
+            background-color: #75208f;
         }
 
         &.cancel_background {
@@ -32,6 +32,14 @@ button {
 
     &.pulse {
         animation: pulse 4s infinite;
+    }
+
+    &.action_background {
+        background-color: #5a1571;
+    }
+
+    &.cancel_background {
+        background-color: #cd2c2c;
     }
 }
 

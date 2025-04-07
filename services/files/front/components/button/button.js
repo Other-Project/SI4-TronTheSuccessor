@@ -22,7 +22,7 @@ export class Button extends HTMLComponent {
 
     #refresh() {
         if (!this.background) return;
-        this.button.style.background = this.background;
+        this.button.classList.add(this.background);
         this.button.classList.toggle("pulse", this.pulse === "true");
     }
 }

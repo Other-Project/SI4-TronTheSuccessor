@@ -69,7 +69,7 @@ export class ProfileOverview extends HTMLComponent {
             });
         });
         this.share.setAttribute("pulse", "true");
-        this.share.setAttribute("background", "#8E24AA");
+        this.share.setAttribute("background", "action_background");
     };
 
     #getFriends = async () => {

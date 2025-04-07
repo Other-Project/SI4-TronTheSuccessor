@@ -39,7 +39,7 @@ export class GameMaster extends HTMLComponent {
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
         this.resumeButton.setAttribute("pulse", "true");
-        this.resumeButton.setAttribute("background", "#430e57");
+        this.resumeButton.setAttribute("background", "action_background");
         this.restartButton = this.shadowRoot.getElementById("restart");
         this.restartButton.addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => changePage("/"));
@@ -123,7 +123,7 @@ export class GameMaster extends HTMLComponent {
         this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = "none";
         this.restartButton.setAttribute("pulse", "true");
-        this.restartButton.setAttribute("background", "#53126c");
+        this.restartButton.setAttribute("background", "action_background");
         this.pauseTitle.innerText = details.draw ? "Draw" : details.winner + " won";
         this.pauseTime.innerText = this.#timeToString(details.elapsed);
         this.pauseDescription.innerText = "";

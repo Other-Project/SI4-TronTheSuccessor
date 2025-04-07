@@ -12,6 +12,13 @@ button {
     &:hover:not(:disabled) {
         background-color: #3c3c3c;
 
+        &.action_background {
+            background-color: #75208f;
+        }
+
+        &.cancel_background {
+            background-color: #da4343;
+        }
     }
 
     &:disabled {
@@ -21,5 +28,28 @@ button {
 
     & :disabled {
         pointer-events: none;
+    }
+
+    &.pulse {
+        animation: pulse 4s infinite;
+    }
+
+    &.action_background {
+        background-color: #5a1571;
+    }
+
+    &.cancel_background {
+        background-color: #cd2c2c;
+    }
+}
+
+
+@keyframes pulse {
+    25% {
+        transform: scale(1.08);
+    }
+
+    50%, 100% {
+        transform: scale(1);
     }
 }

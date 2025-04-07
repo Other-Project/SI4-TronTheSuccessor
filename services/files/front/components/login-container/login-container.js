@@ -14,7 +14,8 @@ export class LoginContainer extends HTMLComponent {
         this.addEventListener("change-popup", (event) => this.show(event.detail));
         this.addEventListener("hide-popup", () => this.show());
 
-        this.shadowRoot.getElementById("disconnect-button").addEventListener("click", () => disconnect());
+        this.disconnectButton = this.shadowRoot.getElementById("disconnect-button");
+        this.disconnectButton.addEventListener("click", () => disconnect());
         this.shadowRoot.getElementById("cancel-button").addEventListener("click", () => this.show());
     };
 

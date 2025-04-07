@@ -18,7 +18,8 @@ const waitingRoomTimers = {};
 const declinedGameInvitations = {};
 
 let server = http.createServer(async (request, response) => {
-        const filePath = request.url.split("/").filter(elem => elem !== "..");
+        const requestUrl = new URL(request.url, `http://${request.headers.host}`);
+    const filePath = requestUrl.pathname.split("/").filter(elem => elem !== "..");
 
         try {
             switch (filePath[3]) {
@@ -29,7 +30,7 @@ let server = http.createServer(async (request, response) => {
                     sendResponse(response, HTTP_STATUS.OK, {emotes});
                     break;
                 case "history":
-                    if (request.method === "GET")
+
                         await handleGetHistory(request, response);
                     break;
                 case "game-invitation":

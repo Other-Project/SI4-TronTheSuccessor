@@ -9,11 +9,16 @@
     align-items: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease;
+    animation: slideDown 0.6s ease-out forwards;
 
     &:hover {
         transform: translateY(-5px);
         cursor: pointer;
     }
+}
+
+#container {
+    transition: all 0.3s ease-out;
 }
 
 .status {
@@ -70,11 +75,14 @@ p {
     height: 45px;
     cursor: pointer;
     justify-self: center;
-    transition: transform 0.2s ease;
+    transition: transform 0.4s ease;
 }
 
 #replay {
     display: none;
+    animation: slideDown 0.7s ease-out forwards;
+    overflow: hidden;
+    max-height: 0;
 }
 
 .show {
@@ -84,5 +92,41 @@ p {
 
     #replay {
         display: block;
+    }
+}
+
+.hide-replay {
+    #replay {
+        animation: slideUp 0.5s ease-out forwards;
+    }
+
+    #chevron {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1000px;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 1000px;
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+        max-height: 0;
     }
 }

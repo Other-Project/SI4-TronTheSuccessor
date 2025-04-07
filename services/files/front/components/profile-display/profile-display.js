@@ -14,9 +14,20 @@ export class ProfileDisplay extends HTMLComponent {
         this.loginContainer = this.shadowRoot.getElementById("login-container");
         this.container = this.shadowRoot.getElementById("container");
         this.username = this.shadowRoot.getElementById("username");
+
+        this.shadowRoot.getElementById("username").addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.toggleDropdown();
+        });
+
+        document.addEventListener("click", this.hideDropdown);
+
         this.pfp = this.shadowRoot.getElementById("profile");
 
-        this.pfp.addEventListener("click", () => this.toggleDropdown());
+        this.pfp.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.toggleDropdown();
+        });
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
         this.shadowRoot.getElementById("settings").addEventListener("click", () => changePage("/settings"));
@@ -31,8 +42,14 @@ export class ProfileDisplay extends HTMLComponent {
         this.toggleDropdown(false);
     };
 
+    hideDropdown = () => this.toggleDropdown(false);
+
     toggleDropdown(show = undefined) {
         show ??= this.dropDownMenu.style.display === "none";
         this.dropDownMenu.style.display = show ? "block" : "none";
+    }
+
+    disconnectedCallback() {
+        document.removeEventListener("click", this.hideDropdown);
     }
 }

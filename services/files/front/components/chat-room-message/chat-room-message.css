@@ -20,10 +20,10 @@
 #sender-avatar-container {
     position: relative;
     max-width: 100%;
-    grid-row: 1 / span 3;
+    height: fit-content;
 
     #status-indicator {
-        bottom: 5px;
+        bottom: 2px;
         width: 12px;
         height: 12px;
         right: 1px;

@@ -4,6 +4,7 @@ import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
     /** @type {Array} */ messages = [];
+    /** @type {boolean} */ hasMore = true;
 
     constructor() {
         super("chat-room", ["html", "css"]);
@@ -44,10 +45,9 @@ export class ChatRoom extends HTMLComponent {
     }
 
     handleScroll = async () => {
-        if (-this.messagesWrap.scrollTop + this.messagesWrap.clientHeight + 50 >= this.messagesWrap.scrollHeight) {
-            this.messagesWrap.onscroll = null;
+        if (-this.messagesWrap.scrollTop + this.messagesWrap.clientHeight >= this.messagesWrap.scrollHeight && this.hasMore) {
+            this.messagesWrap.scrollTop = 0;
             await this.loadMoreMessages();
-            this.messagesWrap.onscroll = this.handleScroll;
         }
     };
 
@@ -81,15 +81,15 @@ export class ChatRoom extends HTMLComponent {
         if (this.messages.length === 0) return;
         const oldestMessage = this.messages[0];
         const before = oldestMessage.date;
-        const response = await fetchApi(`/api/chat/${this.room}?before=${encodeURIComponent(before)}`);
+        const response = await fetchApi(`/api/chat/${this.room}?before=${before}`);
         if (!response.ok) {
             this.#showNotification("Error fetching older messages", 2000, "red", "white");
             return;
         }
-        const olderMessages = await response.json();
+        const olderMessages = (await response.json()).reverse();
+        if (olderMessages.length < 25) this.hasMore = false;
         this.messages = [...olderMessages, ...this.messages];
         this.#displayMessages();
-        this.messagesWrap.scrollTop += 100;
     }
 
     #displayMessage(message) {

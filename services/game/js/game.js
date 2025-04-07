@@ -14,6 +14,7 @@ exports.Game = class Game extends EventTarget {
     startTime;
     #turnDuration;
     #gameLife;
+    gameType;
     gameActions = [];
 
     /**
@@ -21,14 +22,16 @@ exports.Game = class Game extends EventTarget {
      * @param {number} h Height of the game map
      * @param {Player} player1 The first player of the game
      * @param {Player} player2 The second player of the game
+     * @param {("computer"|"multiplayer"|"friend")} gameType The type of the game
      * @param {number} turnDuration The duration of a game turn
      */
-    constructor(w, h, player1, player2, turnDuration = 500) {
+    constructor(w, h, player1, player2, gameType, turnDuration = 500) {
         super();
         this.gridSize = [w, h];
         this.players = [player1, player2];
         this.grid = Array.from(Array(h), (_, i) => Array(i % 2 === 0 ? w : w - 1).fill(0));
         this.#turnDuration = turnDuration;
+        this.gameType = gameType;
     }
 
     init() {
@@ -92,10 +95,11 @@ exports.Game = class Game extends EventTarget {
     #updateGrid(player) {
         if (!this.grid[player.pos[1]] || this.grid[player.pos[1]][player.pos[0]] !== 0) {
             player.dead = true;
-            if (this.grid[player.pos[1]]) this.grid[player.pos[1]][player.pos[0]] = -1;
+            if (this.grid[player.pos[1]] && this.grid[player.pos[1]][player.pos[0]] != null)
+                this.grid[player.pos[1]][player.pos[0]] = -1;
         } else if (this.players.some(p => p !== player && p.pos && p.pos[0] === player.pos[0] && p.pos[1] === player.pos[1])) {
             player.dead = true;
-            this.grid[player.pos[1]][player.pos[0]] = -1;
+            if (this.grid[player.pos[1]][player.pos[0]] != null) this.grid[player.pos[1]][player.pos[0]] = -1;
         } else this.grid[player.pos[1]][player.pos[0]] = player.number;
     }
 

@@ -1,8 +1,10 @@
 const {MongoClient} = require("mongodb");
+const jwt = require("jsonwebtoken");
 
 const client = new MongoClient(process.env.MONGO_DB_URL ?? "mongodb://mongodb:27017");
 const database = client.db("Tron-the-successor");
 const chatCollection = database.collection("chat");
+const gameInvitationTokenExpiration = 10 * 60;
 
 /**
  * Gets the chat messages
@@ -40,8 +42,63 @@ exports.getChat = async function (roomId, pivot = undefined, limit = 25, order =
  */
 exports.storeMessage = async function (roomId, author, type, content) {
     const message = {roomId, author, type, content: content.trim(), date: new Date()};
+    if (type === "game-invitation") {
+        message.expiresAt = new Date(Date.now() + gameInvitationTokenExpiration * 1000);
+        message.gameInvitationToken = jwt.sign({author}, process.env.GAME_INVITATION_SECRET_KEY, {expiresIn: gameInvitationTokenExpiration});
+    }
     console.debug(message, await chatCollection.insertOne(message));
-    return message;
+    return {
+        ...message,
+        shouldEmit: true
+    };
+};
+
+exports.sendGameInvitation = async function (roomId, author, type, content, recipient) {
+    const firstPendingGameInvitation = await chatCollection.findOne({
+        author: recipient,
+        type: "game-invitation",
+        expiresAt: {$gt: new Date()},
+        $and: [
+            {status: {$ne: "accepted"}},
+            {status: {$ne: "refused"}}
+        ]
+    }, {
+        sort: {
+            timestamp: -1
+        }
+    });
+    if (firstPendingGameInvitation !== null) {
+        await chatCollection.updateOne({_id: firstPendingGameInvitation._id}, {
+            $set: {
+                status: "accepted"
+            }
+        });
+        return {gameInvitationToken: firstPendingGameInvitation.gameInvitationToken};
+    }
+    return await exports.storeMessage(roomId, author, type, content);
+};
+
+/**
+ * Modifies the status of a game invitation
+ * @param {string} gameInvitationToken The token of the game invitation
+ * @param {"accepted"|"refused"|"cancelled"} status The status to set
+ * @returns {Promise<boolean>} True if the status was updated or already modified, false otherwise
+ */
+exports.updateGameInvitationStatus = async function (gameInvitationToken, status) {
+    try {
+        jwt.verify(gameInvitationToken, process.env.GAME_INVITATION_SECRET_KEY);
+        const invitation = await chatCollection.findOne({gameInvitationToken});
+        if (invitation.status !== null && invitation.status !== undefined) {
+            return true;
+        }
+        const result = await chatCollection.updateOne(
+            {gameInvitationToken},
+            {$set: {status}}
+        );
+        return result.modifiedCount > 0;
+    } catch (error) {
+        return false;
+    }
 };
 
 /**

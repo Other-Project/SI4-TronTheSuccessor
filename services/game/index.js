@@ -4,35 +4,50 @@ const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
 const {randomUUID} = require("crypto");
+const jwt = require("jsonwebtoken");
 const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
-const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
+const {HTTP_STATUS, getUser, sendResponse, getRequestBody} = require("./js/utils.js");
+const {verifyFriendship} = require("./helper/userHelper.js");
 const {getCollection, getUserInventorySelection} = require("./helper/inventoryHelper.js");
 
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
+const FRIEND_GAME_TIMEOUT = 10 * 60 * 1000;
+const waitingRoomTimers = {};
+const declinedGameInvitations = {};
+
 let server = http.createServer(async (request, response) => {
-    const requestUrl = new URL(request.url, `http://${request.headers.host}`);
+        const requestUrl = new URL(request.url, `http://${request.headers.host}`);
     const filePath = requestUrl.pathname.split("/").filter(elem => elem !== "..");
-    try {
-        switch (filePath[3]) {
-            case "stats":
-                if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
-                break;
-            case "emotes":
-                sendResponse(response, HTTP_STATUS.OK, {emotes});
-                break;
-            case "history":
-                await handleGetHistory(request, response);
-                break;
-            default:
-                sendResponse(response, HTTP_STATUS.NOT_FOUND);
+
+        try {
+            switch (filePath[3]) {
+                case "stats":
+                    if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
+                    break;
+                case "emotes":
+                    sendResponse(response, HTTP_STATUS.OK, {emotes});
+                    break;
+                case "history":
+                    await handleGetHistory(request, response);
+                    break;
+                case "game-invitation":
+                    if (request.method === "POST")
+                        if (filePath[4] === "refuse")
+                            await refuseGameInvitation(request, response);
+                    if (filePath[4] === "leave")
+                        await leaveFriendGame(request, response);
+                    break;
+                default:
+                    sendResponse(response, HTTP_STATUS.NOT_FOUND);
+            }
+        } catch (error) {
+            console.warn(error);
+            sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
         }
-    } catch (error) {
-        console.warn(error);
-        sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
     }
-}).listen(8003);
+).listen(8003);
 
 const io = new Server(server);
 io.on("connection", (socket) => {
@@ -55,39 +70,99 @@ io.on("connection", (socket) => {
         io.to(room).emit("emote", {emote: msg.emote, player: user.username});
     });
 
-    socket.on("disconnect", () => {
-        const gameId = Object.keys(socket.rooms).find(room => room !== socket.id);
+    socket.on("disconnecting", async () => {
+        const rooms = Array.from(socket.rooms);
+        const gameId = rooms[1];
         delete games[gameId];
+        if (rooms.some(room => room in waitingRoomTimers)) {
+            const roomName = rooms.find(room => room in waitingRoomTimers);
+            delete waitingRoomTimers[roomName];
+        }
     });
 });
 
 async function findGame(socket, msg) {
     if (msg.against === "computer")
-        joinGame(socket, await createGame(socket));
-    else socket.join("waiting-anyone");
+        joinGame(socket, await createGame(socket, null, "computer"));
+    else if (msg.against === "any-player")
+        socket.join("waiting-anyone");
+    else
+        await joinFriendGame(socket, msg);
 }
 
-async function transfertRoom(waitingRoom) {
+async function transferRoom(waitingRoom, gameType) {
     const sockets = await io.in(waitingRoom).fetchSockets();
     if (sockets.length < 2) return;
-    const gameId = await createGame(sockets[0], sockets[1]);
+    if (waitingRoomTimers[waitingRoom]) {
+        clearTimeout(waitingRoomTimers[waitingRoom]);
+        delete waitingRoomTimers[waitingRoom];
+    }
+    const gameId = await createGame(sockets[0], sockets[1], gameType);
     for (let socket of sockets) {
         socket.leave(waitingRoom);
         joinGame(socket, gameId);
     }
 }
 
+async function joinFriendGame(socket, msg) {
+    const user = getUser(socket.request);
+    if (!user) {
+        socket.emit("connect_error", {message: "Authentication needed"});
+        return;
+    }
+    try {
+        jwt.verify(msg.gameInvitationToken, process.env.GAME_INVITATION_SECRET_KEY);
+    } catch (error) {
+        if (error.name === "TokenExpiredError")
+            socket.emit("unauthorized_room_access", {message: "Game invitation has expired. Please request a new invitation."});
+        else
+            socket.emit("unauthorized_room_access", {message: "You are not allowed to access this room"});
+        return;
+    }
+    const opponentName = atob(msg.against);
+    if (user.username === opponentName) {
+        socket.emit("unauthorized_room_access", {message: "You cannot play against yourself"});
+        return;
+    }
+    const response = await verifyFriendship(opponentName, socket.request.headers.authorization);
+    if (!response.isFriend) {
+        socket.emit("unauthorized_room_access", {message: "You are not friends with this user"});
+        return;
+    }
+    const roomName = [opponentName, user.username].sort().join("-");
+    const declinedRoomName = [opponentName, user.username, msg.gameInvitationToken].sort().join("-");
+    if (msg.gameInvitationToken === declinedGameInvitations[declinedRoomName]) {
+        socket.emit("friend_invitation_refused", {
+            message: `${opponentName} has already left the room`
+        });
+        delete declinedGameInvitations[declinedRoomName];
+        return;
+    }
+    socket.join(roomName);
+    const sockets = await io.in(roomName).fetchSockets();
+    if (sockets.length === 1) {
+        waitingRoomTimers[roomName] = setTimeout(async () => {
+            io.to(roomName).emit("game_invitation_timeout", {
+                message: "Game invitation has expired. Please send a new invitation."
+            });
+            io.socketsLeave(roomName);
+            delete waitingRoomTimers[roomName];
+        }, FRIEND_GAME_TIMEOUT);
+    }
+    await transferRoom(roomName, "friend");
+}
+
 io.of("/").adapter.on("join-room", async (room, id) => {
     console.log(`socket ${id} has joined room ${room}`);
-    if (room === "waiting-anyone") await transfertRoom(room);
+    if (room === "waiting-anyone") await transferRoom(room, "multiplayer");
 });
 
 const games = {};
 
-async function createGame(p1s, p2s = null) {
+async function createGame(p1s, p2s = null, gameType) {
     const p1 = await createPlayer(p1s);
     const p2 = await createPlayer(p2s, p1.color);
-    const game = new Game(16, 9, p1, p2, 500);
+    const game = new Game(16, 9, p1, p2, gameType, 500);
     const id = randomUUID();
     games[id] = game;
 
@@ -95,7 +170,7 @@ async function createGame(p1s, p2s = null) {
         io.to(id).emit("game-turn", event.detail);
         if (event.detail.ended) {
             io.in(id).disconnectSockets();
-            if (p2s)
+            if (p2s && game.gameType === "multiplayer")
                 updateStats(game.players, event.detail);
             updateHistory(gameInfo.players, gameInfo.grid, game.gameActions, event.detail.winner, event.detail.elapsed);
         }
@@ -149,4 +224,47 @@ function joinGame(socket, gameId) {
         grid: game.grid,
         playerStates: game.getPlayerStates()
     });
+}
+
+async function refuseGameInvitation(request, response) {
+    const user = getUser(request);
+    if (!user) {
+        sendResponse(response, HTTP_STATUS.UNAUTHORIZED, {message: "Authentication needed"});
+        return;
+    }
+    const username = user.username;
+    const opponentName = await getRequestBody(request);
+    const roomName = [opponentName, username].sort().join("-");
+    io.to(roomName).emit("friend_invitation_refused", {
+        message: `Your game invitation was refused by ${username}`
+    });
+    io.socketsLeave(roomName);
+    delete waitingRoomTimers[roomName];
+    sendResponse(response, HTTP_STATUS.OK);
+}
+
+async function leaveFriendGame(request, response) {
+    const user = getUser(request);
+    if (!user) {
+        sendResponse(response, HTTP_STATUS.UNAUTHORIZED, {message: "Authentication needed"});
+        return;
+    }
+    const username = user.username;
+    const rawBody = await getRequestBody(request);
+    const body = JSON.parse(rawBody);
+    const roomName = [body.against, username].sort().join("-");
+    const declinedRoomName = [body.against, username, body.gameInvitationToken].sort().join("-");
+    if (declinedRoomName in declinedGameInvitations) {
+        delete declinedGameInvitations[declinedRoomName];
+        return;
+    }
+    io.to(roomName).emit("friend_invitation_refused", {
+        message: `Your game invitation was refused by ${username}`
+    });
+    io.socketsLeave(roomName);
+    declinedGameInvitations[declinedRoomName] = body.gameInvitationToken;
+    setTimeout(() => {
+        delete declinedGameInvitations [roomName];
+    }, FRIEND_GAME_TIMEOUT);
+    sendResponse(response, HTTP_STATUS.OK);
 }

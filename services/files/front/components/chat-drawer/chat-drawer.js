@@ -19,6 +19,10 @@ export class ChatDrawer extends HTMLComponent {
         this.shadowRoot.getElementById("overlay").addEventListener("click", () => {
             this.hide();
         });
+
+        document.addEventListener("hide-drawer", () => {
+            this.hide();
+        });
     };
 
     onVisible = () => {

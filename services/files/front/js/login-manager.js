@@ -34,6 +34,7 @@ export async function renewAccessToken() {
 export function disconnect() {
     document.cookie = "accessToken=; path=/; max-age=0;";
     document.cookie = "refreshToken=; path=/; max-age=0;";
+    document.cookie = "gameInvitationToken=; path=/; max-age=0;";
     notificationService.disconnect();
     fakePageReload();
 }
@@ -45,6 +46,7 @@ export function fakePageReload() {
 export function storeTokens(data) {
     if (data.refreshToken) document.cookie = `refreshToken=${data.refreshToken}; path=/; max-age=${60 * 60 * 24 * 7};`;
     if (data.accessToken) document.cookie = `accessToken=${data.accessToken}; path=/; max-age=${60 * 60};`;
+    if (data.gameInvitationToken) document.cookie = `gameInvitationToken=${data.gameInvitationToken}; path=/; max-age=${60 * 10};`;
 }
 
 /**
@@ -106,4 +108,26 @@ export function getUserInfo() {
     const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload = decodeURIComponent(window.atob(base64).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
     return JSON.parse(jsonPayload);
+}
+
+/**
+ * Update the status of a message of type "game-invitation" based on the game invitation token
+ * @param status {"accepted"|"refused"}
+ * @param gameInvitationToken The token of the game invitation
+ * @returns {Promise<boolean>} True if the status was updated, false otherwise
+ */
+export async function tryUpdatingGameInvitationStatus(status, gameInvitationToken) {
+    const response = await fetchPostApi("/api/chat/game-invitation", {gameInvitationToken, status}, {method: "PUT"});
+    if (!response.ok) {
+        document.dispatchEvent(new CustomEvent("hide-drawer"));
+        document.dispatchEvent(new CustomEvent("show-notification", {
+            detail: {
+                message: "This game invitation has already expired",
+                duration: 5000,
+                background: "red",
+                color: "white"
+            }
+        }));
+    }
+    return response.ok;
 }

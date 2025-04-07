@@ -1,7 +1,7 @@
 const userDatabase = require("./userDatabase.js");
-const {sendResponse, getUser} = require('./utils.js');
-const {HTTP_STATUS} = require('./utils.js');
-const {sendFriendRequest} = require('../helper/chatHelper.js');
+const {sendResponse, getUser} = require("./utils.js");
+const {HTTP_STATUS} = require("./utils.js");
+const {sendFriendRequest} = require("../helper/chatHelper.js");
 const {sendNotification} = require('../helper/notificationHelper.js');
 
 /**
@@ -70,6 +70,19 @@ exports.handleRemoveFriend = async function (request, response, friend) {
     }
     else
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request or you are not friends"});
+};
+
+/**
+ * @param request The request
+ * @param response The response
+ * @param friend The username of the friend to check
+ * @returns {Promise<Boolean>} Whether the user and friend are friends
+ */
+exports.handleTestFriend = async function (request, response, friend) {
+    const user = getUser(request);
+    if (!user) sendResponse(response, HTTP_STATUS.NOT_FOUND, {isFriend: false});
+    const friends = await userDatabase.getFriends(user.username);
+    sendResponse(response, HTTP_STATUS.OK, {isFriend: friends ? friends.includes(friend) : false});
 };
 
 /**

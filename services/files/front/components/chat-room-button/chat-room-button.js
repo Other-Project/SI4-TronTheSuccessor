@@ -2,7 +2,7 @@ import {HTMLComponent} from "/js/component.js";
 
 export class ChatRoomButton extends HTMLComponent {
     static get observedAttributes() {
-        return ["icon", "roomId", "name", "preview", "connected", "unread"];
+        return ["icon", "roomId", "name", "preview", "friend", "connected", "unread"];
     }
 
     constructor() {
@@ -16,7 +16,19 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomPreview = this.shadowRoot.getElementById("room-preview");
         this.status = this.shadowRoot.getElementById("status-indicator");
         this.roomButton = this.shadowRoot.getElementById("room-button");
-    }
+        this.roomFightIcon = this.shadowRoot.getElementById("icon-fight");
+        this.roomFightIcon.addEventListener("click", async e => {
+            e.stopPropagation();
+            document.dispatchEvent(new CustomEvent("show-invitation", {
+                detail: {
+                    popupId: "send-game-invitation",
+                    name: this.name,
+                    avatar: this.icon,
+                    content: `Do you want to play a game with ${this.name}?`
+                }
+            }));
+        });
+    };
 
     onVisible = () => this.#refresh();
 
@@ -28,7 +40,7 @@ export class ChatRoomButton extends HTMLComponent {
 
     #refresh() {
         if (!this.roomName) return;
-        if (!this.icon) this.roomAvatar.setAttribute("username", this.roomId);
+        if (!this.icon) this.roomAvatar.setAttribute("username", this.name);
         else this.roomIcon.src = this.icon;
         this.roomIcon.style.display = this.icon ? "block" : "none";
         this.roomAvatar.style.display = this.icon ? "none" : "block";
@@ -37,5 +49,6 @@ export class ChatRoomButton extends HTMLComponent {
         this.status.classList.toggle("connected", this.connected === "true");
         this.status.classList.toggle("hidden", this.id === "global");
         this.roomButton.classList.toggle("unread", this.unread === "true");
+        this.roomFightIcon.style.display = this.friend === "true" ? "block" : "none";
     }
 }

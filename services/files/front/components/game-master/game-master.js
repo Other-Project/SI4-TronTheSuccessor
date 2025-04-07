@@ -4,7 +4,7 @@ import {HTMLComponent} from "/js/component.js";
 import {FlowBird} from "/js/flowbird.js";
 import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
-import {getAccessToken, getCookie, getUserInfo, renewAccessToken} from "/js/login-manager.js";
+import {fetchApi, getAccessToken, getCookie, getUserInfo, renewAccessToken} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
 
 export class GameMaster extends HTMLComponent {
@@ -40,7 +40,19 @@ export class GameMaster extends HTMLComponent {
         this.resumeButton.addEventListener("click", () => this.resume());
         this.restartButton = this.shadowRoot.getElementById("restart");
         this.restartButton.addEventListener("click", () => this.#launchGame());
-        this.shadowRoot.getElementById("home").addEventListener("click", () => changePage("/"));
+        this.shadowRoot.getElementById("home").addEventListener("click", async () => {
+            changePage("/");
+            if (this.against !== "local" && this.against !== "computer" && this.against !== "any-player") {
+                await fetchApi("/api/game/game-invitation/leave", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        against: atob(this.against),
+                        gameInvitationToken: getCookie("gameInvitationToken")
+                    })
+                });
+            }
+        });
 
         this.playersName = [this.shadowRoot.getElementById("p1"), this.shadowRoot.getElementById("p2")];
 
@@ -170,9 +182,28 @@ export class GameMaster extends HTMLComponent {
             } else console.error(err.message);
         });
 
+        const handleError = (err) => {
+            document.dispatchEvent(new CustomEvent("show-notification", {
+                detail: {
+                    message: err.message,
+                    duration: 5000,
+                    background: "#ff0000",
+                    color: "#ffffff"
+                }
+            }));
+            changePage("/", true);
+        };
+
+        this.socket.on("unauthorized_room_access", handleError);
+        this.socket.on("game_invitation_timeout", handleError);
+        this.socket.on("friend_invitation_refused", handleError);
+
         this.gameBoard.clear();
         this.waitingWindow.style.display = "block";
-        this.socket.emit("game-join", {against: this.against});
+        let msg = {against: this.against};
+        if (this.against !== "local" && this.against !== "computer")
+            msg["gameInvitationToken"] = getCookie("gameInvitationToken");
+        this.socket.emit("game-join", msg);
 
         this.socket.on("game-info", (msg) => {
             const reverse = msg.yourNumber === 2;

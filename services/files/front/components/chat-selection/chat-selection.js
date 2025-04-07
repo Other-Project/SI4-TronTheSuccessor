@@ -45,6 +45,7 @@ export class ChatSelection extends HTMLComponent {
             friendButton.setAttribute("preview", friend.preview);
             friendButton.setAttribute("connected", notificationService.getConnectedFriends().includes(friend.name));
             friendButton.setAttribute("unread", notificationService.getUnreadNotifications().includes(friend.name));
+            friendButton.setAttribute("friend", friend.friend);
             friendButton.addEventListener("click", () => this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend));
             this.friendListPanel.appendChild(friendButton);
             if (this.currentRoom?.id === friend.id) this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend);

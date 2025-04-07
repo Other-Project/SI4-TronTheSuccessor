@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {changePage} from "/components/pages/pages.js";
+import {fetchPostApi, getCookie} from "/js/login-manager.js";
 
 export class GamePage extends HTMLComponent {
     level = 2;
@@ -26,7 +27,15 @@ export class GamePage extends HTMLComponent {
         this.shadowRoot.appendChild(helpPage);
     };
 
-    onHidden = () => this.inGame = false;
+    onHidden = async () => {
+        this.inGame = false;
+        if (this.against !== undefined && this.against !== "computer" && this.against !== "any-player" && this.against !== "local") {
+            await fetchPostApi("/api/chat/game-invitation", {
+                "gameInvitationToken": getCookie("gameInvitationToken"),
+                status: "cancelled"
+            }, {method: "PUT"});
+        }
+    };
 
     startGame() {
         this.inGame = true;

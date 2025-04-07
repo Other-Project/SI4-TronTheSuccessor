@@ -15,8 +15,7 @@ export class Button extends HTMLComponent {
 
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);
-        if (name === "background")
-            if (oldValue)
+        if (name === "background" && oldValue)
                 this.button.classList.remove(oldValue);
         this.#refresh();
     }

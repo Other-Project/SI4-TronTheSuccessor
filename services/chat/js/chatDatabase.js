@@ -12,7 +12,7 @@ const chatCollection = database.collection("chat");
  * @param {number} order The order of the messages (optional)
  * @returns {Promise<{date: Date, author: string, type: string, content: string}[]>}
  */
-exports.getChat = async function (roomId, pivot = undefined, limit = 25, order = 1) {
+exports.getChat = async function (roomId, pivot = undefined, limit = 25, order = -1) {
     let query;
     if (Array.isArray(roomId)) query = {roomId: roomId.sort()};
     else query = {roomId};

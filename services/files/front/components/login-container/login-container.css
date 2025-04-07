@@ -10,17 +10,3 @@ h2, p {
 #cancel-button:hover {
     transform: scale(1.1);
 }
-
-@keyframes pulse {
-    25% {
-        transform: scale(1.15);
-    }
-
-    50% {
-        transform: scale(1);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}

@@ -15,7 +15,7 @@ export class ProfileHistory extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
-        this.loadingSpinner = this.shadowRoot.querySelector(".loading-spinner");
+        this.loadingSpinner = this.shadowRoot.getElementById("loading-spinner");
         this.addEventListener("scroll", this.handleScroll);
     };
 
@@ -39,10 +39,10 @@ export class ProfileHistory extends HTMLComponent {
         if (!user) return;
 
         this.isLoading = true;
-        this.loadingSpinner.style.display = "flex";
+        this.loadingSpinner.classList.add("show");
 
         try {
-            const response = await fetchApi(`/api/game/history`, {
+            /*const response = await fetchApi(`/api/game/history?`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -51,7 +51,8 @@ export class ProfileHistory extends HTMLComponent {
                     from: this.oldestGameDate,
                     limit: this.limit
                 })
-            });
+            });*/
+            const response = await fetchApi(`/api/game/history?limit=${this.limit}&from=${this.oldestGameDate}`);
 
             const data = await response.json();
             this.gamesCache = this.gamesCache.concat(data);
@@ -70,7 +71,7 @@ export class ProfileHistory extends HTMLComponent {
             }));
         } finally {
             this.isLoading = false;
-            this.loadingSpinner.style.display = "none";
+            this.loadingSpinner.classList.remove("show");
         }
     }
 

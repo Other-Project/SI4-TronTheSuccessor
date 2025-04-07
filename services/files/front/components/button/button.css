@@ -49,11 +49,7 @@ button {
         transform: scale(1.08);
     }
 
-    50% {
-        transform: scale(1);
-    }
-
-    100% {
+    50%, 100% {
         transform: scale(1);
     }
 }

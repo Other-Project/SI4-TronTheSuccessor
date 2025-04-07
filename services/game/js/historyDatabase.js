@@ -33,7 +33,7 @@ exports.getHistory = async function (playerName, from = undefined, limit = 10) {
     let query = {
         players: {$elemMatch: {name: playerName}}
     };
-    if (from)
+    if (from && from !== "null")
         query.date = {$lt: typeof from === "string" ? new Date(from) : from};
     return await historyCollection.find(query).sort({date: -1}).limit(limit).toArray();
 };

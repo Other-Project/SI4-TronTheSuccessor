@@ -41,6 +41,7 @@ import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 import {SettingsPage} from "/components/settings/settings-page/settings-page.js";
 import {SettingsCarousel} from "/components/settings/settings-carousel/settings-carousel.js";
 import {Avatar} from "/components/avatar/avatar.js";
+import {LoadingSpinner} from "/components/loading-spinner/loading-spinner.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -49,7 +50,7 @@ customElements.define("app-tab-navigation", TabNavigation);
 customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
-customElements.define('app-notification', Notification);
+customElements.define("app-notification", Notification);
 customElements.define("app-neon-container", NeonContainer);
 
 // Home components
@@ -102,3 +103,6 @@ customElements.define("app-replay", Replay);
 // Settings components
 customElements.define("app-settings-page", SettingsPage);
 customElements.define("app-settings-carousel", SettingsCarousel);
+
+// Loading components
+customElements.define("app-loading-spinner", LoadingSpinner);

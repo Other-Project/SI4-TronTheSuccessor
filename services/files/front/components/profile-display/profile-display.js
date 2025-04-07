@@ -20,13 +20,13 @@ export class ProfileDisplay extends HTMLComponent {
             this.toggleDropdown();
         });
 
-        document.addEventListener("click", () => this.toggleDropdown(false));
+        document.addEventListener("click", this.hideDropdown);
 
         this.pfp = this.shadowRoot.getElementById("profile");
 
         this.pfp.addEventListener("click", (e) => {
             e.stopPropagation();
-            this.toggleDropdown()
+            this.toggleDropdown();
         });
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
@@ -42,12 +42,14 @@ export class ProfileDisplay extends HTMLComponent {
         this.toggleDropdown(false);
     };
 
+    hideDropdown = () => this.toggleDropdown(false);
+
     toggleDropdown(show = undefined) {
         show ??= this.dropDownMenu.style.display === "none";
         this.dropDownMenu.style.display = show ? "block" : "none";
     }
 
     disconnectedCallback() {
-        document.removeEventListener("click", () => this.toggleDropdown(false));
+        document.removeEventListener("click", this.hideDropdown);
     }
 }

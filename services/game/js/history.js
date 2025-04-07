@@ -13,9 +13,10 @@ exports.handleGetHistory = async function (request, response) {
         await sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
         return;
     }
-    const body = await getRequestBody(request);
-    const parsedBody = JSON.parse(body);
-    const histories = await historyDatabase.getHistory(user.username, parsedBody.from, parsedBody.limit);
+    const url = new URL(request.url, `http://${request.headers.host}`);
+    const from = url.searchParams.get("from") || null;
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+    const histories = await historyDatabase.getHistory(user.username, from, limit);
     if (!histories) {
         await sendResponse(response, HTTP_STATUS.NOT_FOUND);
         return;

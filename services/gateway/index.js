@@ -15,9 +15,9 @@ const SERVICES = {
     "/api/chat": {url: process.env.CHAT_SERVICE_URL ?? "http://127.0.0.1:8006", ws: true},
     "/": {url: process.env.FILES_SERVICE_URL ?? "http://127.0.0.1:8001"}
 };
-const HTTPS_CONFIG = process.env.SSL_ENABLED === "true" ? {
-    key: process.env.SSL_KEY ?? "/ssl/key.pem",
-    cert: process.env.SSL_CERT ?? "/ssl/cert.pem"
+const HTTPS_CONFIG = process.env.HTTPS_ENABLED === "true" ? {
+    key: process.env.HTTPS_KEY ?? "/ssl/key.pem",
+    cert: process.env.HTTPS_CERT_CERT ?? "/ssl/cert.pem"
 } : null;
 
 const proxy = httpProxy.createProxyServer();

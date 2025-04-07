@@ -15,8 +15,8 @@ const server = http.createServer(async (request, response) => {
 
     const endpoint = /^\/api\/chat\/([a-zA-Z0-9]+)\/?$/;
     if (endpoint.test(requestUrl.pathname)) {
-        const roomId = getRoomId(user.username, endpoint.exec(requestUrl.pathname)[1]);
-
+        const room = endpoint.exec(requestUrl.pathname)[1];
+        const roomId = getRoomId(user.username, room);
         if (request.method === "GET") {
             const from = requestUrl.searchParams.get("from");
             const messages = await chatDatabase.getChat(roomId, from);
@@ -25,7 +25,7 @@ const server = http.createServer(async (request, response) => {
             const message = JSON.parse(await getRequestBody(request));
             if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
             io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
-            await notifyMessageSent(request.headers.authorization, endpoint.exec(requestUrl.pathname)[1]);
+            await notifyMessageSent(request.headers.authorization, room);
             return sendResponse(response, HTTP_STATUS.CREATED);
         }
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {

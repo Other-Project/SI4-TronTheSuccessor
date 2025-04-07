@@ -15,11 +15,6 @@ export class ProfileDisplay extends HTMLComponent {
         this.container = this.shadowRoot.getElementById("container");
         this.username = this.shadowRoot.getElementById("username");
 
-        this.shadowRoot.getElementById("profile").addEventListener("click", (e) => {
-            e.stopPropagation();
-            this.toggleDropdown();
-        });
-
         this.shadowRoot.getElementById("username").addEventListener("click", (e) => {
             e.stopPropagation();
             this.toggleDropdown();
@@ -27,6 +22,12 @@ export class ProfileDisplay extends HTMLComponent {
 
         document.addEventListener("click", () => this.toggleDropdown(false));
 
+        this.pfp = this.shadowRoot.getElementById("profile");
+
+        this.pfp.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.toggleDropdown()
+        });
         this.shadowRoot.getElementById("connect").addEventListener("click", () => this.loginContainer.show("sign-in"));
         this.shadowRoot.getElementById("logout").addEventListener("click", () => this.loginContainer.show("disconnect"));
         this.shadowRoot.getElementById("settings").addEventListener("click", () => changePage("/settings"));
@@ -37,6 +38,7 @@ export class ProfileDisplay extends HTMLComponent {
         const user = getUserInfo();
         this.container.classList.toggle("connected", !!user);
         this.username.textContent = user?.username;
+        this.pfp.setAttribute("username", user?.username);
         this.toggleDropdown(false);
     };
 

@@ -48,7 +48,7 @@ export class ProfilePage extends HTMLComponent {
             this.overview.setAttribute("stats", JSON.stringify(stats));
             this.leaderboard.setAttribute("stats", JSON.stringify(stats));
         }
-        this.tabNavigation.changeTab("overview");
         this.history.dataset.tabDisabled = userName === loggedUser ? "false" : "true";
+        this.tabNavigation.changeTab("overview");
     };
 }

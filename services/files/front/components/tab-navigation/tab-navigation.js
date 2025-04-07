@@ -62,6 +62,7 @@ export class TabNavigation extends HTMLComponent {
      * @param {string} tabId The tab id to display
      */
     changeTab(tabId = undefined) {
+        if (!this.tabs) return;
         const tabToActivate = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
         if (!tabToActivate) return;
         for (let tab of this.tabs.querySelectorAll("[data-tab-id]")) tab.classList.toggle("active", tab.dataset.tabId === tabId);

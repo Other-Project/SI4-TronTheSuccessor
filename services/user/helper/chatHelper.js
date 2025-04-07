@@ -6,7 +6,7 @@
  * @param {Object} [data] The request payload (for 'POST' or 'PUT' methods).
  * @returns {Promise<unknown>}
  */
-async function makeHttpRequest(method, path, authorization, data = null,) {
+async function makeHttpRequest(method, path, authorization, data = null) {
     let url = new URL(process.env.CHAT_SERVICE_URL || "http://localhost:8006");
     url += path;
     const response = await fetch(url,

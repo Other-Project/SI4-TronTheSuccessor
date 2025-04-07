@@ -17,6 +17,7 @@
 
     .image {
         height: 100%;
+        margin: auto;
 
         .custom-primary-color {
             fill: lightblue;

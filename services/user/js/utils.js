@@ -1,5 +1,10 @@
 const jwt = require("jsonwebtoken");
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret) throw new Error("JWT_SECRET is not set");
 
+/**
+ * HTTP status codes
+ */
 exports.HTTP_STATUS = {
     OK: 200,
     CREATED: 201,
@@ -10,8 +15,8 @@ exports.HTTP_STATUS = {
 };
 
 /**
- *
- * @param {IncomingMessage} request
+ * Read the request body and return it as a string
+ * @param {module:http.IncomingMessage} request The request object
  * @returns {Promise<string>}
  */
 exports.getRequestBody = async function (request) {
@@ -23,6 +28,12 @@ exports.getRequestBody = async function (request) {
     });
 };
 
+/**
+ * Send a response with the given status code and data
+ * @param {ServerResponse} response The response object
+ * @param {number} statusCode The status code to send
+ * @param {*} data The data to send
+ */
 exports.sendResponse = function (response, statusCode, data = null) {
     response.statusCode = statusCode;
     if (data) {
@@ -42,8 +53,17 @@ exports.getAuthorizationToken = function (request) {
     return authHeader[1];
 };
 
+/**
+ * Get the user from the request
+ * @param request The request object
+ * @returns {{username: string}|null}
+ */
 exports.getUser = function (request) {
-    const token = exports.getAuthorizationToken(request);
+    const token = typeof request === "string" ? request : exports.getAuthorizationToken(request);
     if (!token) return null;
-    return jwt.decode(token);
+    try {
+        return jwt.verify(token, jwtSecret);
+    } catch (e) {
+        return null;
+    }
 };

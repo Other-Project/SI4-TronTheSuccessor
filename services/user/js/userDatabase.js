@@ -1,23 +1,28 @@
 const {MongoClient} = require("mongodb");
 const jwt = require("jsonwebtoken");
 const {createHash} = require("node:crypto");
-const {sendResponse} = require("./utils.js");
+const {sendResponse, getUser} = require("./utils.js");
 
+// MongoDB
 const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27017');
 const database = client.db("Tron-the-successor");
 const userCollection = database.collection("user");
 const inventoryCollection = database.collection("inventory");
-const secretKey = "FC61BBB751F52278B9C49AD4294E9668E22B3B363BA18AE5DB1170216343A357";
-const secretKeyPasswordReset = "cd946159c3178defdaccef2f203a007ba0add6d02a79f8b259162924fccb7ddc";
-const accessTokenDuration = "1h";
-const refreshTokenDuration = "7d";
-const resetPasswordTokenDuration = "10min";
+
+// JWT
+const secretKey = process.env.JWT_SECRET;
+if (!secretKey) throw new Error("JWT_SECRET is not set");
+const accessTokenDuration = process.env.JWT_ACCESS_TOKEN_EXPIRES_IN ?? "1h";
+const refreshTokenDuration = process.env.JWT_REFRESH_TOKEN_EXPIRES_IN ?? "7d";
+const resetPasswordTokenDuration = process.env.JWT_RESET_PASSWORD_TOKEN_EXPIRES_IN ?? "10min";
+
+// Constants
 const usernameMinLength = 3;
 const passwordMinLength = 6;
 const maxLength = 20;
 const authorizedRegex = /^[A-Za-z0-9#?!@$%^&*]+$/;
-
-const securityQuestionsArray = ["What was the name of your favorite teacher in elementary school ?",
+const securityQuestionsArray = [
+    "What was the name of your favorite teacher in elementary school ?",
     "What was your dream job as a child ?",
     "In what city or town did you meet your spouse/partner ?",
     "What was your favorite vacation spot as a child ?",
@@ -33,8 +38,16 @@ const securityQuestionsArray = ["What was the name of your favorite teacher in e
     "What is the name of the first beach you visited ?",
     "What was the first movie you saw in a theater ?",
     "What is the name of the first foreign country you visited ?",
-    "What was the name of your favorite childhood cartoon character ?"];
+    "What was the name of your favorite childhood cartoon character ?"
+];
 
+/**
+ * Register a new user
+ * @param {string} username The username
+ * @param {string} password The password
+ * @param {{question: string, answer: string}[2]} securityQuestions The security questions
+ * @returns {Promise<{error: string}|{username: string, accessToken: string, refreshToken: string}>}
+ */
 exports.addUser = async function (username, password, securityQuestions) {
     const error = checkValue(username, password, securityQuestions);
     if (error) return error;
@@ -175,9 +188,8 @@ exports.removeFriend = async function (playerId, otherId) {
 exports.renewToken = async function (refreshToken) {
     if (!refreshToken)
         return {error: "Refresh token is missing"};
-    if (!jwt.verify(refreshToken, secretKey))
-        return {error: "Refresh token is invalid : " + refreshToken};
-    const username = jwt.decode(refreshToken).username;
+    const username = getUser(refreshToken)?.username;
+    if (!username) return {error: "Refresh token is invalid : " + refreshToken};
     const user = await userCollection.findOne({username});
     if (!user)
         return {error: "Could not find user with this refresh token : " + refreshToken};
@@ -204,7 +216,7 @@ exports.verifyAnswers = async function (username, answers) {
     if (!user.securityQuestions.every((question, i) => question.answer === hashedAnswers[i]))
         return {error: "Wrong answers"};
     const userInfo = {username: user.username};
-    const resetPasswordToken = jwt.sign(userInfo, secretKeyPasswordReset, {expiresIn: resetPasswordTokenDuration});
+    const resetPasswordToken = jwt.sign(userInfo, secretKey, {expiresIn: resetPasswordTokenDuration});
     return {resetPasswordToken};
 };
 
@@ -215,13 +227,9 @@ exports.resetPassword = async function (newPassword, resetPasswordToken) {
         return {error: `New password must be at least ${passwordMinLength} and at most ${maxLength} characters long`};
     if (!authorizedRegex.test(newPassword))
         return {error: "New password must contain only letters, numbers or one of the following characters : #?!@$%^&*"};
-    try {
-        jwt.verify(resetPasswordToken, secretKeyPasswordReset);
-    } catch (error) {
-        return {error: "It took too long to reset your password, please try again"};
-    }
 
-    const username = jwt.decode(resetPasswordToken).username;
+    const username = getUser(resetPasswordToken)?.username;
+    if (!username) return {error: "It took too long to reset your password, please try again"};
     const user = await userCollection.findOne({username});
     if (!user)
         return {error: "Could not find user with this reset password token : " + resetPasswordToken};
@@ -252,6 +260,13 @@ function getSecurityQuestionsFromArray() {
     return securityQuestionsArray.slice();
 }
 
+/**
+ * Check if the given values are valid
+ * @param {string} username The username
+ * @param {string} password The password
+ * @param {{question: string, answer: string}[2]} securityQuestions The security questions
+ * @returns {{error: string}|null} The error message if the values are invalid, null otherwise
+ */
 function checkValue(username, password, securityQuestions) {
     if (!username || !password)
         return {error: "Username or password is missing"};

@@ -133,11 +133,5 @@ export class ChatRoom extends HTMLComponent {
             const error = await response.json();
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
         }
-
-        this.dispatchEvent(new CustomEvent('friendRequestHandled', {
-            bubbles: true,
-            composed: true,
-            detail: {friend: this.pending, method: method}
-        }));
     }
 }

@@ -10,7 +10,6 @@ export class ChatSelection extends HTMLComponent {
     onSetupCompleted = () => {
         this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
-        document.addEventListener("friendRequestHandled", this.#refresh);
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
         notificationService.addEventListener("unread-notification", this.#updateMessageNotification);
         notificationService.addEventListener("refresh-friend-list", this.onVisible);
@@ -33,14 +32,6 @@ export class ChatSelection extends HTMLComponent {
             }
         }));
     }
-
-    #refresh = async (event) => {
-        const friend = event?.detail?.friend;
-        const method = event?.detail?.method;
-        this.friendList = await this.#getFriendList();
-        this.#updateFriendListPanel();
-        this.openChatRoom(friend, friend, "undefined", method === "POST" ? "true" : "false");
-    };
 
     #updateFriendListPanel() {
         this.friendListPanel.innerHTML = "";

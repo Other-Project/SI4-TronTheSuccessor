@@ -71,11 +71,19 @@ io.on("connection", async (socket) => {
  */
 async function handleFriendListModification(request, username, add) {
     const data = await handleUnreadNotification(request, username);
-    const userSocketId = connectedUsers.get(data.username);
-    if (!userSocketId) return;
-    io.to(userSocketId).emit("refreshFriendList");
-    if (connectedUsers.has(username) && !data.pending) io.to(userSocketId).emit(add ? "connected" : "disconnected", {username: username});
-    if (connectedUsers.has(data.username) && !data.pending) io.to(connectedUsers.get(username)).emit(add ? "connected" : "disconnected", {username: data.username});
+    const friendSocketId = connectedUsers.get(data.username);
+    const userSocketId = connectedUsers.get(username);
+
+    if (userSocketId) {
+        io.to(userSocketId).emit("refreshFriendList");
+        if (connectedUsers.has(data.username) && !data.pending) io.to(userSocketId).emit(add ? "connected" : "disconnected", {username: data.username});
+    }
+
+    if (!friendSocketId) return;
+
+    io.to(friendSocketId).emit("refreshFriendList");
+    if (connectedUsers.has(username) && !data.pending) io.to(friendSocketId).emit(add ? "connected" : "disconnected", {username: username});
+
 }
 
 

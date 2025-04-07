@@ -61,7 +61,8 @@ export class TabNavigation extends HTMLComponent {
      * Navigate to a specific page
      * @param {string} tabId The tab id to display
      */
-    changeTab(tabId) {
+    changeTab(tabId = undefined) {
+        if (!this.tabs) return;
         const tabToActivate = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
         if (!tabToActivate) return;
         for (let tab of this.tabs.querySelectorAll("[data-tab-id]")) tab.classList.toggle("active", tab.dataset.tabId === tabId);
@@ -98,6 +99,7 @@ export class TabNavigation extends HTMLComponent {
         tabBtn.addEventListener("mousedown", (e) => {
             if (e.button === 1) this.closeTab(tabId);
         });
+        tabBtn.style.display = tabPanel.dataset.tabDisabled === "true" ? "none" : "";
         this.tabs.appendChild(tabBtn);
 
         const tabCloseBtn = document.createElement("button");
@@ -109,13 +111,18 @@ export class TabNavigation extends HTMLComponent {
         });
         tabBtn.appendChild(tabCloseBtn);
 
-        this.#setupTabTitleObserver(tabPanel, tabBtnText);
+        this.#setupTabTitleObserver(tabPanel, tabBtn, tabBtnText);
     }
 
-    #setupTabTitleObserver(tabPanel, tabBtnText) {
-        new MutationObserver(() => tabBtnText.textContent = tabPanel.dataset.tabTitle ?? "New Tab").observe(tabPanel, {
+    #setupTabTitleObserver(tabPanel, tabBtn, tabBtnText) {
+        new MutationObserver(() => {
+            tabBtnText.textContent = tabPanel.dataset.tabTitle ?? "New Tab";
+            const isDisabled = tabPanel.dataset.tabDisabled === "true";
+            tabBtn.style.display = isDisabled ? "none" : "";
+            if (isDisabled && tabBtn.classList.contains("active")) this.switchToNextTab(tabBtn);
+        }).observe(tabPanel, {
             attributes: true,
-            attributeFilter: ["data-tab-title"]
+            attributeFilter: ["data-tab-title", "data-tab-disabled"]
         });
     }
 
@@ -127,14 +134,20 @@ export class TabNavigation extends HTMLComponent {
         if (this.readonly) return;
         const tab = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
         const panel = tabId ? this.panels.querySelector(`#${tabId}`) : null;
-
-        if (tab?.classList.contains("active")) {
-            const nextTab = tab.nextElementSibling ?? tab.previousElementSibling;
-            if (nextTab?.dataset.tabId) this.changeTab(nextTab.dataset.tabId);
-            else this.newTab();
-        }
-
+        if (tab?.classList.contains("active") && !this.switchToNextTab(tab)) this.newTab();
         tab?.remove();
         panel?.remove();
+    }
+
+    /**
+     * Switch to the next tab
+     * @param {HTMLElement} tabBtn The tab button to switch from
+     */
+    switchToNextTab(tabBtn) {
+        tabBtn ??= this.tabs.querySelector("[data-tab-id].active");
+        const nextTab = tabBtn.nextElementSibling ?? tabBtn.previousElementSibling;
+        if (nextTab?.dataset.tabId) this.changeTab(nextTab.dataset.tabId);
+        else this.changeTab();
+        return nextTab?.dataset.tabId;
     }
 }

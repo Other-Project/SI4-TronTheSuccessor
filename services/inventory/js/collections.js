@@ -8,16 +8,16 @@ exports.avatars = Object.fromEntries([
         "id": "luna"
     },
     {
+        "name": "Kai",
+        "id": "kai"
+    },
+    {
         "name": "Zara",
         "id": "zara"
     },
     {
         "name": "Ravi",
         "id": "ravi"
-    },
-    {
-        "name": "Kai",
-        "id": "kai"
     }
 ].map(item => [item.id, item]));
 

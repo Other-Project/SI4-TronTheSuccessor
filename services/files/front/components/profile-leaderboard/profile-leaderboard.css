@@ -1,7 +1,7 @@
 #profile-leaderboard {
     display: grid;
     grid-template-columns: 4fr 6fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 150px minmax(300px, calc(100% - 200px));
     gap: 50px;
     padding: 20px;
     height: calc(100% - 40px);
@@ -27,5 +27,6 @@
     #rank-repartition {
         grid-row: 2;
         align-self: center;
+        height: 100%;
     }
 }

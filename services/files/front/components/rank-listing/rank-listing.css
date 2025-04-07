@@ -19,3 +19,7 @@
         font-size: 1.2em;
     }
 }
+
+.player-id {
+    cursor: pointer;
+}

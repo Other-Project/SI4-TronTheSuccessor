@@ -51,6 +51,8 @@ http.createServer(async (request, response) => {
                     await handleRemoveFriend(request, response, filePath[4]);
                 break;
             default:
+                if (request.method === "GET" && filePath[4] === "avatar")
+                    await userDatabase.handleGetAvatar(request, response, filePath[3]);
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);
         }
     } catch (error) {

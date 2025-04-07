@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import {changePage} from "/components/pages/pages.js";
 
 export class RankListing extends HTMLComponent {
     constructor() {
@@ -33,7 +34,9 @@ export class RankListing extends HTMLComponent {
 
             const playerIdCell = document.createElement("div");
             playerIdCell.classList.add("grid-cell");
+            playerIdCell.classList.add("player-id");
             playerIdCell.textContent = player.playerId;
+            playerIdCell.addEventListener("click", () => changePage(`/profile/${player.playerId}`));
 
             const rankCell = document.createElement("div");
             rankCell.classList.add("grid-cell");
@@ -41,7 +44,7 @@ export class RankListing extends HTMLComponent {
 
             const winrateCell = document.createElement("div");
             winrateCell.classList.add("grid-cell");
-            winrateCell.textContent = Math.round(player.tronPoints);
+            winrateCell.textContent = Math.round(player.tronPoints).toString();
 
             playerRow.appendChild(playerIdCell);
             playerRow.appendChild(rankCell);

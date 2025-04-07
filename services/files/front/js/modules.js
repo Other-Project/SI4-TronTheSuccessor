@@ -41,9 +41,11 @@ import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 import {GameInvitation} from "/components/game-invitation/game-invitation.js";
 import {SettingsPage} from "/components/settings/settings-page/settings-page.js";
 import {SettingsCarousel} from "/components/settings/settings-carousel/settings-carousel.js";
+import {Avatar} from "/components/avatar/avatar.js";
 
 // General components
 customElements.define("app-button", Button);
+customElements.define("app-avatar", Avatar);
 customElements.define("app-tab-navigation", TabNavigation);
 customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);

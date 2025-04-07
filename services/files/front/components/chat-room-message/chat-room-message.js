@@ -77,7 +77,7 @@ export class ChatRoomMessage extends HTMLComponent {
     #refresh() {
         if (!this.containerElement) return;
         this.containerElement.classList.toggle("you", this.you);
-        this.avatarElement.src = `/api/user/${this.author}/avatar`;
+        this.avatarElement.setAttribute("username", this.author);
         this.authorElement.textContent = this.you ? "You" : this.author;
         this.contentElement.textContent = this.content;
         this.dateElement.textContent = this.date.toLocaleString();

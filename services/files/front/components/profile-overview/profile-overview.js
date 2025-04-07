@@ -101,7 +101,7 @@ export class ProfileOverview extends HTMLComponent {
             await this.#manageFriend(this.stats.username, "remove");
         });
 
-        this.profilePfp.setAttribute("src", "/assets/profile.svg");
+        this.profilePfp.setAttribute("src", `/api/user/${this.stats.username}/avatar`);
         this.profilePfp.setAttribute("username", this.stats.username);
         this.rank.setAttribute("rank", this.stats.rank);
         this.rank.setAttribute("points", this.stats.eloInRank);

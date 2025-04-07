@@ -23,6 +23,7 @@ export class ProfileHistory extends HTMLComponent {
         this.gamesCache = [];
         this.hasMore = true;
         this.gameResultsContainer.innerHTML = "";
+        this.oldestGameDate = null;
         await this.loadNextPage();
     };
 

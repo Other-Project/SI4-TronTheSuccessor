@@ -59,16 +59,9 @@ app-game-choice {
         letter-spacing: 1px;
     }
 
-    #counter-display {
-        position: relative;
-        display: inline-block;
-    }
-
     #pulse-ring {
-        position: absolute;
-        top: 50%;
-        right: -15px;
-        transform: translateY(-50%);
+        display: inline-block;
+        margin-left: 2px;
         width: 10px;
         height: 10px;
         background-color: #edbeff;

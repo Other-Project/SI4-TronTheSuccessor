@@ -34,7 +34,8 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomAvatar.style.display = this.icon ? "none" : "block";
         this.roomName.textContent = this.name;
         this.roomPreview.textContent = this.preview;
-        this.status.setAttribute("background", this.connected === "true" ? "#3ba55d" : "#747f8d");
+        this.status.classList.toggle("connected", this.connected === "true");
+        this.status.classList.toggle("disconnected", this.connected === "false");
         this.status.classList.toggle("hidden", this.id === "global");
         this.roomButton.classList.toggle("unread", this.unread === "true");
     }

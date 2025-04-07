@@ -35,7 +35,6 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomName.textContent = this.name;
         this.roomPreview.textContent = this.preview;
         this.status.classList.toggle("connected", this.connected === "true");
-        this.status.classList.toggle("disconnected", this.connected === "false");
         this.status.classList.toggle("hidden", this.id === "global");
         this.roomButton.classList.toggle("unread", this.unread === "true");
     }

@@ -2,7 +2,7 @@ import {HTMLComponent} from "/js/component.js";
 
 export class ChatRoomButton extends HTMLComponent {
     static get observedAttributes() {
-        return ["icon", "roomId", "name", "preview"];
+        return ["icon", "roomId", "name", "preview", "connected", "unread"];
     }
 
     constructor() {
@@ -14,6 +14,8 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomAvatar = this.shadowRoot.getElementById("room-avatar");
         this.roomName = this.shadowRoot.getElementById("room-name");
         this.roomPreview = this.shadowRoot.getElementById("room-preview");
+        this.status = this.shadowRoot.getElementById("status-indicator");
+        this.roomButton = this.shadowRoot.getElementById("room-button");
     }
 
     onVisible = () => this.#refresh();
@@ -32,5 +34,8 @@ export class ChatRoomButton extends HTMLComponent {
         this.roomAvatar.style.display = this.icon ? "none" : "block";
         this.roomName.textContent = this.name;
         this.roomPreview.textContent = this.preview;
+        this.status.classList.toggle("connected", this.connected === "true");
+        this.status.classList.toggle("hidden", this.id === "global");
+        this.roomButton.classList.toggle("unread", this.unread === "true");
     }
 }

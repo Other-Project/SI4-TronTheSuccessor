@@ -26,6 +26,8 @@ services:
       context: services/game
     restart: unless-stopped
     env_file: .env
+    depends_on:
+      - mongodb
   user:
     image: tron-the-successor/user
     build:
@@ -46,6 +48,14 @@ services:
     image: tron-the-successor/inventory
     build:
       context: services/inventory
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      - mongodb
+  notification:
+    image: tron-the-successor/notification
+    build:
+      context: services/notification
     restart: unless-stopped
     env_file: .env
     depends_on:

@@ -13,6 +13,10 @@ export class NotificationService extends EventTarget {
         super();
         if (NotificationService.instance) return NotificationService.instance;
         NotificationService.instance = this;
+
+        window.addEventListener('pageshow', async (event) => {
+            if (event.persisted) await this.openWebSocket();
+        });
     }
 
     async openWebSocket(retry = true) {

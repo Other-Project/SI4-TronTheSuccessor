@@ -21,6 +21,14 @@
     }
 }
 
+p {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: bold;
+    margin: 0.5em;
+}
+
+
 @keyframes flicker {
     0%, 18%, 22%, 25%, 53%, 57%, 100% {
         border: 5px solid #edbeff;

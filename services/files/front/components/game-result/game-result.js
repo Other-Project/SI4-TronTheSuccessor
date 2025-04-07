@@ -16,8 +16,17 @@ export class GameResult extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.replay = this.shadowRoot.getElementById("replay");
+        this.container = this.shadowRoot.getElementById("container");
         this.shadowRoot.getElementById("game-result").addEventListener("click", () => {
-            this.shadowRoot.getElementById("container").classList.toggle("show");
+            if (this.container.classList.contains("show")) {
+                this.container.classList.add("hide-replay");
+
+                setTimeout(() => {
+                    this.container.classList.remove("show");
+                    this.container.classList.remove("hide-replay");
+                }, 500);
+            } else
+                this.container.classList.add("show");
         });
 
         this.statusElement = this.shadowRoot.querySelector(".status");

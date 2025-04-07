@@ -6,3 +6,7 @@
 h2, p {
     margin: 0;
 }
+
+#disconnect-button:hover {
+    transform: scale(1.1);
+}

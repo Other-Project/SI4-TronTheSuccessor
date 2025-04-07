@@ -66,4 +66,22 @@ ul {
 
 p {
     font-size: 15pt;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+#connect {
+    animation: pulse 6s infinite;
+}
+
+@keyframes pulse {
+    16.5% {
+        transform: scale(1.3);
+    }
+
+    33%, 100% {
+        transform: scale(1);
+    }
 }

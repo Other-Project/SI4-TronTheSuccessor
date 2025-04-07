@@ -38,7 +38,8 @@ export class GameMaster extends HTMLComponent {
 
         this.resumeButton = this.shadowRoot.getElementById("resume");
         this.resumeButton.addEventListener("click", () => this.resume());
-        this.shadowRoot.getElementById("restart").addEventListener("click", () => this.#launchGame());
+        this.restartButton = this.shadowRoot.getElementById("restart");
+        this.restartButton.addEventListener("click", () => this.#launchGame());
         this.shadowRoot.getElementById("home").addEventListener("click", () => changePage("/"));
 
         this.playersName = [this.shadowRoot.getElementById("p1"), this.shadowRoot.getElementById("p2")];
@@ -56,12 +57,12 @@ export class GameMaster extends HTMLComponent {
         this.#launchGame();
         document.addEventListener("keyup", this.#keyReleased);
         document.addEventListener("keypress", this.#keyPressed);
-    }
+    };
     onHidden = () => {
         document.removeEventListener("keypress", this.#keyPressed);
         document.removeEventListener("keyup", this.#keyReleased);
         this.stopGame();
-    }
+    };
 
     #launchGame() {
         this.container.style.visibility = "hidden";
@@ -127,6 +128,8 @@ export class GameMaster extends HTMLComponent {
     pause() {
         const details = this.game.stop();
         if (!details) return;
+        this.restartButton.setAttribute("pulse", "false");
+        this.restartButton.removeAttribute("background");
         this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = this.against === "local" ? "block" : "none";
         this.pauseTitle.innerText = "Pause";
@@ -141,6 +144,8 @@ export class GameMaster extends HTMLComponent {
 
     resume() {
         this.pauseWindow.style.display = "none";
+        this.restartButton.setAttribute("pulse", "true");
+        this.restartButton.setAttribute("background", "action_background");
         this.#startTimer();
         this.game.resume();
     }
@@ -241,7 +246,7 @@ export class GameMaster extends HTMLComponent {
             if (this.game.isPaused()) this.resume();
             else this.pause();
         }
-    }
+    };
 
     #keyPressed = (e) => {
         let emote = /^Digit(\d)$/.exec(e.code)?.[1];

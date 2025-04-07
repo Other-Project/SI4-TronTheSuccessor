@@ -3,7 +3,7 @@ const {Server} = require("socket.io");
 const {Game} = require("./js/game.js");
 const {FlowBird} = require("./js/flowbird.js");
 const {Player} = require("./js/player.js");
-const {randomUUID} = require('crypto');
+const {randomUUID} = require("crypto");
 const {updateStats, handleGetAllStats} = require("./js/elo.js");
 const {updateHistory, handleGetHistory} = require("./js/history.js");
 const {HTTP_STATUS, getUser, sendResponse} = require("./js/utils.js");
@@ -12,8 +12,8 @@ const {getCollection, getUserInventorySelection} = require("./helper/inventoryHe
 const emotes = ["animethink", "hmph", "huh", "ohgeez", "yawn"];
 
 let server = http.createServer(async (request, response) => {
-    const filePath = request.url.split("/").filter(elem => elem !== "..");
-
+    const requestUrl = new URL(request.url, `http://${request.headers.host}`);
+    const filePath = requestUrl.pathname.split("/").filter(elem => elem !== "..");
     try {
         switch (filePath[3]) {
             case "stats":
@@ -23,8 +23,7 @@ let server = http.createServer(async (request, response) => {
                 sendResponse(response, HTTP_STATUS.OK, {emotes});
                 break;
             case "history":
-                if (request.method === "GET")
-                    await handleGetHistory(request, response);
+                await handleGetHistory(request, response);
                 break;
             default:
                 sendResponse(response, HTTP_STATUS.NOT_FOUND);

@@ -68,8 +68,6 @@ export class ProfileOverview extends HTMLComponent {
                 this.#showNotification("Profile URL copied to clipboard!", 2000, "#8E24AA", "white");
             });
         });
-        this.share.setAttribute("pulse", "true");
-        this.share.setAttribute("background", "action_background");
     };
 
     #getFriends = async () => {

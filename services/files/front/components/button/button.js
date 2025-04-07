@@ -15,13 +15,15 @@ export class Button extends HTMLComponent {
 
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);
+        if (name === "background")
+            if (oldValue)
+                this.button.classList.remove(oldValue);
         this.#refresh();
     }
 
     onSetupCompleted = () => this.#refresh();
 
     #refresh() {
-        if (!this.background) return;
         this.button.classList.add(this.background);
         this.button.classList.toggle("pulse", this.pulse === "true");
     }

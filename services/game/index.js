@@ -228,7 +228,12 @@ function joinGame(socket, gameId) {
 }
 
 async function refuseGameInvitation(request, response) {
-    const username = getUser(request).username;
+    const user = getUser(request);
+    if (!user) {
+        sendResponse(response, HTTP_STATUS.UNAUTHORIZED, {message: "Authentication needed"});
+        return;
+    }
+    const username = user.username;
     const opponentName = await getRequestBody(request);
     const roomName = [opponentName, username].sort().join("-");
     io.to(roomName).emit("friend_invitation_refused", {
@@ -240,7 +245,12 @@ async function refuseGameInvitation(request, response) {
 }
 
 async function leaveFriendGame(request, response) {
-    const username = getUser(request).username;
+    const user = getUser(request);
+    if (!user) {
+        sendResponse(response, HTTP_STATUS.UNAUTHORIZED, {message: "Authentication needed"});
+        return;
+    }
+    const username = user.username;
     const rawBody = await getRequestBody(request);
     const body = JSON.parse(rawBody);
     const roomName = [body.against, username].sort().join("-");

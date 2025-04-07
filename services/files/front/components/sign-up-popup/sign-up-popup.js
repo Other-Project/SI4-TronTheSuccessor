@@ -74,6 +74,7 @@ export class SignUpPopup extends HTMLComponent {
         storeTokens(data);
         fakePageReload();
         this.#clearInputs();
+        this.dispatchEvent(new CustomEvent("logged-in", {bubbles: true, composed: true}));
     }
 
     #checkFirstPageInputs() {

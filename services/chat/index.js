@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const chatDatabase = require("./js/chatDatabase.js");
 const {HTTP_STATUS, sendResponse, getRequestBody, getUser} = require("./js/utils.js");
 const {getFriendsList} = require("./helper/userHelper.js");
+const {notifyMessageSent} = require("./helper/notificationHelper.js");
 const {getRoomId} = require("./js/chatDatabase.js");
 
 
@@ -16,9 +17,8 @@ const server = http.createServer(async (request, response) => {
     const endpoint = /^\/api\/chat\/([a-zA-Z0-9]+)\/?$/;
     const gameInvitationEndpoint = /^\/api\/chat\/game-invitation\/?$/;
     if (endpoint.test(requestUrl.pathname)) {
-        const recipient = endpoint.exec(requestUrl.pathname)[1];
-        const roomId = getRoomId(user.username, recipient);
-
+        const room = endpoint.exec(requestUrl.pathname)[1];
+        const roomId = getRoomId(user.username, room);
         if (request.method === "GET") {
             const from = requestUrl.searchParams.get("from");
             const messages = await chatDatabase.getChat(roomId, from);
@@ -28,10 +28,11 @@ const server = http.createServer(async (request, response) => {
             if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
             let storedMessage;
             if (message.type === "game-invitation") {
-                storedMessage = await chatDatabase.sendGameInvitation(roomId, user.username, message.type, message.content, recipient);
+                storedMessage = await chatDatabase.sendGameInvitation(roomId, user.username, message.type, message.content, room);
             } else
                 storedMessage = await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
             if (storedMessage.shouldEmit) io.to(roomId).emit("message", storedMessage);
+            await notifyMessageSent(request.headers.authorization, room);
             return sendResponse(response, HTTP_STATUS.CREATED, message.type === "game-invitation" ? {gameInvitationToken: storedMessage.gameInvitationToken} : null);
         }
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
@@ -115,6 +116,7 @@ io.on("connection", (socket) => {
         }
 
         io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
+        if (roomId !== "global") await notifyMessageSent(socket.request.headers.authorization, roomId.filter(elem => elem !== user.username)[0]);
         callback?.(true);
     });
 });

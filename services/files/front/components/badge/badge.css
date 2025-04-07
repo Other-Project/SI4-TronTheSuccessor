@@ -1,0 +1,20 @@
+:host {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: -1px;
+    right: -2px;
+    box-sizing: content-box;
+    border: 2px solid #36393f;
+    background-color: #747f8d;
+}
+
+:host(.hidden) {
+    display: none;
+}
+
+:host(.connected) {
+    border: 2px solid #36393f;
+    background-color: #3ba55d;
+}

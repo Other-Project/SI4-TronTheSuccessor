@@ -1,5 +1,6 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi} from "/js/login-manager.js";
+import notificationService from "/js/notification.js";
 
 export class ProfileOverview extends HTMLComponent {
     constructor() {
@@ -37,14 +38,8 @@ export class ProfileOverview extends HTMLComponent {
             method: action === "add" ? "POST" : "DELETE",
         });
         if (response.ok) {
-            if (action === "add") {
-                this.addFriend.button.disabled = true;
-                this.addFriend.title = "Friend request already sent";
-                this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
-            } else {
-                this.buttons.classList.toggle("add");
-                this.#showNotification("Friend removed", 2000, "#8E24AA", "white");
-            }
+            if (action === "add") this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
+            else this.#showNotification("Friend removed", 2000, "#8E24AA", "white");
         } else {
             const error = await response.json();
             this.#showNotification(`Error: ${error.error}`, 2000, "red", "white");
@@ -67,6 +62,9 @@ export class ProfileOverview extends HTMLComponent {
                 this.#showNotification("Profile URL copied to clipboard!", 2000, "#8E24AA", "white");
             });
         });
+        this.addFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, "add"));
+        this.removeFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, "remove"));
+        notificationService.addEventListener("refresh-friend-list", this.onVisible);
     };
 
     #getFriends = async () => {
@@ -84,22 +82,12 @@ export class ProfileOverview extends HTMLComponent {
         if (this.stats.loggedusername && this.stats.loggedusername === this.stats.username)
             this.buttons.classList.toggle("logged-in");
 
-        if (!this.friends.friends.includes(this.stats.username))
-            this.buttons.classList.toggle("add");
+        this.buttons.classList.toggle("add", !this.friends.friends.includes(this.stats.username));
 
         if (this.friends.pending.includes(this.stats.username)) {
             this.addFriend.button.disabled = true;
             this.addFriend.title = "Friend request already sent";
-        }
-
-        this.addFriend.addEventListener("click", async () => {
-            if (!this.stats.loggedusername) {
-                // TODO: open login modal
-            } else await this.#manageFriend(this.stats.username, "add");
-        });
-        this.removeFriend.addEventListener("click", async () => {
-            await this.#manageFriend(this.stats.username, "remove");
-        });
+        } else this.addFriend.button.disabled = false;
 
         this.profilePfp.setAttribute("src", `/api/user/${this.stats.username}/avatar`);
         this.profilePfp.setAttribute("username", this.stats.username);

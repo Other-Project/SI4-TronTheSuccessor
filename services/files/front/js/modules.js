@@ -41,6 +41,7 @@ import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 import {GameInvitation} from "/components/game-invitation/game-invitation.js";
 import {SettingsPage} from "/components/settings/settings-page/settings-page.js";
 import {SettingsCarousel} from "/components/settings/settings-carousel/settings-carousel.js";
+import {Badge} from "/components/badge/badge.js";
 import {Avatar} from "/components/avatar/avatar.js";
 
 // General components
@@ -52,6 +53,7 @@ customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
 customElements.define("app-notification", Notification);
 customElements.define("app-neon-container", NeonContainer);
+customElements.define("app-badge", Badge);
 
 // Home components
 customElements.define("app-home-page", HomePage);

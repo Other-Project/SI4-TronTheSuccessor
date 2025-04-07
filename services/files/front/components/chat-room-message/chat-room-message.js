@@ -11,7 +11,7 @@ export class ChatRoomMessage extends HTMLComponent {
     /** @type {boolean} */ expired;
 
     static get observedAttributes() {
-        return ["author", "content", "date", "type", "you", "expired", "status"];
+        return ["author", "content", "date", "type", "you", "expired", "status", "connected"];
     }
 
     constructor() {
@@ -24,6 +24,7 @@ export class ChatRoomMessage extends HTMLComponent {
         this.authorElement = this.shadowRoot.getElementById("sender-name");
         this.contentElement = this.shadowRoot.getElementById("message-content");
         this.dateElement = this.shadowRoot.getElementById("message-date");
+        this.status = this.shadowRoot.getElementById("status-indicator");
         this.acceptGameInvitation = this.shadowRoot.getElementById("accept-game-invitation");
         this.refuseGameInvitation = this.shadowRoot.getElementById("refuse-game-invitation");
         this.gameInvitation = this.shadowRoot.getElementById("game-invitation");
@@ -77,6 +78,8 @@ export class ChatRoomMessage extends HTMLComponent {
     #refresh() {
         if (!this.containerElement) return;
         this.containerElement.classList.toggle("you", this.you);
+        this.status.classList.toggle("connected", this.connected === "true");
+        this.status.classList.toggle("hidden", this.you);
         this.avatarElement.setAttribute("username", this.author);
         this.authorElement.textContent = this.you ? "You" : this.author;
         this.contentElement.textContent = this.content;

@@ -62,8 +62,7 @@ export class ProfileOverview extends HTMLComponent {
         this.shadowRoot.getElementById("modify-password").addEventListener("click", () => {
             // TODO: implement password change
         });
-        this.share = this.shadowRoot.getElementById("share");
-        this.share.addEventListener("click", () => {
+        this.shadowRoot.getElementById("share").addEventListener("click", () => {
             navigator.clipboard.writeText(location.href).then(() => {
                 this.#showNotification("Profile URL copied to clipboard!", 2000, "#8E24AA", "white");
             });

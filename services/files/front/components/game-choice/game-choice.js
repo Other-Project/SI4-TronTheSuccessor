@@ -23,6 +23,6 @@ export class GameChoice extends HTMLComponent {
         this.multiplayerButton.title = !refreshToken ? "You need to be logged in to play against other players" : "";
         this.multiplayerButton.button.disabled = !refreshToken;
         this.multiplayerButton.setAttribute("pulse", refreshToken ? "true" : "false");
-        this.multiplayerButton.setAttribute("background", refreshToken ? "action_background" : "null");
+        this.multiplayerButton.setAttribute("background", refreshToken ? "action_background" : "");
     };
 }

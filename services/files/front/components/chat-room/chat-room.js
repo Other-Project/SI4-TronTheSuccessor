@@ -26,6 +26,7 @@ export class ChatRoom extends HTMLComponent {
         this.acceptRequestButton = this.shadowRoot.getElementById("accept-request");
         this.refuseRequestButton = this.shadowRoot.getElementById("refuse-request");
         this.notificationActionButton = this.shadowRoot.getElementById("notification-actions");
+        this.spinner = this.shadowRoot.querySelector("app-loading-spinner");
 
         this.messageInput.onkeydown = (event) => {
             if (event.key === "Enter") {
@@ -33,7 +34,7 @@ export class ChatRoom extends HTMLComponent {
                 if (!event.shiftKey) this.sendMessage().then();
                 event.preventDefault();
             }
-        }
+        };
         this.messageInput.oninput = () => {
             const rows = this.messageInput.value.split("\n");
             if (rows.length > 5) this.messageInput.value = rows.slice(0, 5).join("\n");
@@ -64,7 +65,6 @@ export class ChatRoom extends HTMLComponent {
 
     handleScroll = async () => {
         if (-this.messagesWrap.scrollTop + this.messagesWrap.clientHeight >= this.messagesWrap.scrollHeight && this.hasMore && !this.isLoading) {
-            this.messagesWrap.scrollTop = 0;
             await this.loadOlderMessages();
         }
     };
@@ -98,6 +98,7 @@ export class ChatRoom extends HTMLComponent {
     async loadOlderMessages() {
         if (this.messages.length === 0) return;
         this.isLoading = true;
+        this.spinner.setAttribute("show", "true");
         const oldestMessage = this.messages[0];
         const before = oldestMessage.date;
         const response = await fetchApi(`/api/chat/${this.room}?before=${before}`);
@@ -105,14 +106,16 @@ export class ChatRoom extends HTMLComponent {
             this.#showNotification("Error fetching older messages", 2000, "red", "white");
             return;
         }
-        const olderMessages = (await response.json()).reverse();
+        const olderMessages = (await response.json());
         if (olderMessages.length < 25) this.hasMore = false;
-        this.messages = [...olderMessages, ...this.messages];
-        this.#displayMessages();
+        for (let message of olderMessages)
+            this.#displayMessage(message, false)
+        this.messages = [...olderMessages.reverse(), ...this.messages];
         this.isLoading = false;
+        this.spinner.removeAttribute("show");
     }
 
-    #displayMessage(message) {
+    #displayMessage(message, first = true) {
         const messageElement = document.createElement("app-chat-room-message");
         messageElement.setAttribute("author", message.author);
         messageElement.setAttribute("content", message.content);
@@ -145,7 +148,8 @@ export class ChatRoom extends HTMLComponent {
             default:
                 console.warn(`Unknown message type: ${message.type}`);
         }
-        this.messagePanel.appendChild(messageElement);
+        if (first) this.messagePanel.appendChild(messageElement);
+        else this.messagePanel.prepend(messageElement);
     }
 
     async #openWebSocket(retry = true) {

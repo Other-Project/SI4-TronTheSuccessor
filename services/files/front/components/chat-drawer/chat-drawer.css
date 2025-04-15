@@ -14,7 +14,7 @@
     position: absolute;
     inset: 0;
 
-    &:has(~ :not(.show)) {
+    &:has(> :not(.show)) {
         display: none;
     }
 }

@@ -157,7 +157,7 @@ export class GameMaster extends HTMLComponent {
     resume() {
         this.pauseWindow.style.display = "none";
         this.restartButton.setAttribute("pulse", "true");
-        this.restartButton.setAttribute("background", "action_background");
+        this.restartButton.setAttribute("background", "purple");
         this.#startTimer();
         this.game.resume();
     }

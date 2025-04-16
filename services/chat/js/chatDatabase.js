@@ -88,12 +88,15 @@ exports.updateGameInvitationStatus = async function (gameInvitationToken, status
     try {
         jwt.verify(gameInvitationToken, process.env.GAME_INVITATION_SECRET_KEY);
         const invitation = await chatCollection.findOne({gameInvitationToken});
-        if (invitation.status !== null && invitation.status !== undefined) {
+        if (invitation && invitation.status !== null && invitation.status !== undefined) {
             return true;
         }
+        let set = {status};
+        if (status === "cancelled")
+            set["gameInvitationToken"] = null;
         const result = await chatCollection.updateOne(
             {gameInvitationToken},
-            {$set: {status}}
+            {$set: set}
         );
         return result.modifiedCount > 0;
     } catch (error) {

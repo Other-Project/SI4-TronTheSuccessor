@@ -46,6 +46,10 @@ export class ChatRoom extends HTMLComponent {
         this.refuseRequestButton.onclick = () => this.handleFriendRequest("DELETE");
         this.messagesWrap.addEventListener("scroll", this.handleScroll);
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
+        this.addEventListener("refresh-chat-room", () => {
+            this.messages = [];
+            this.#refresh();
+        });
     };
 
     onVisible = () => {
@@ -109,7 +113,7 @@ export class ChatRoom extends HTMLComponent {
         const olderMessages = (await response.json());
         if (olderMessages.length < 25) this.hasMore = false;
         for (let message of olderMessages)
-            this.#displayMessage(message, false)
+            this.#displayMessage(message, false);
         this.messages = [...olderMessages.reverse(), ...this.messages];
         this.isLoading = false;
         this.spinner.removeAttribute("show");

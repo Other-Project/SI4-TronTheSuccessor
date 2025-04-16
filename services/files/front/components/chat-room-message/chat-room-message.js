@@ -30,8 +30,13 @@ export class ChatRoomMessage extends HTMLComponent {
         this.gameInvitation = this.shadowRoot.getElementById("game-invitation");
         this.acceptGameInvitation.addEventListener("click", async () => {
             storeTokens(this);
-            if (await tryUpdatingGameInvitationStatus("accepted", this.gameInvitationToken))
+            if (await tryUpdatingGameInvitationStatus("accepted", this.gameInvitationToken)) {
                 changePage("/game/" + btoa(this.author));
+                this.dispatchEvent(new CustomEvent("refresh-chat-room", {
+                    bubbles: true,
+                    composed: true
+                }));
+            }
         });
         this.refuseGameInvitation.addEventListener("click", async () => {
             if (await tryUpdatingGameInvitationStatus("refused", this.gameInvitationToken)) {

@@ -24,6 +24,8 @@ Once logged in, additional features become available:
 * A small arrow on the right allows you to access various chat rooms.
 * Your avatar and username will be displayed. Clicking on them will take you to your settings, profile, or allow you to log out.
 
+![home](../../.github/assets/home.webp)
+
 #### Login/Logout and Registration (pop-up)
 
 By clicking the login icon in the top-right corner, users access a sign-in pop-up where they can enter their username and password to log in.
@@ -48,6 +50,10 @@ Clicking "Disconnect" logs the user out of the website.
 
 Additionally, clicking outside any pop-up will close it, enhancing user navigation and experience.
 
+![login](../../.github/assets/login.webp)
+![sign-up](../../.github/assets/sign-up.webp)
+![reset-password](../../.github/assets/reset-password.webp)
+
 #### Game
 
 Before starting a game, a help page is shown that provides essential information such as game rules and controls.  
@@ -69,6 +75,8 @@ In local game, the player can pause the game using `Escape`.
 
 After the game ends, a pop-up appears offering players the option to either queue for another game or return to the home page.
 
+![AI](../../.github/assets/AI.webp)
+
 #### Settings
 
 The settings are accessible by clicking on the avatar or username located at the top-right of the screen and then selecting "Settings" in the dropdown.
@@ -79,6 +87,8 @@ On the settings page, users have the ability to:
 * Choose a primary and a secondary color scheme for their tiles and spaceship.  
   The secondary color scheme is used in case of matching primary colors with an opponent.
 
+![settings](../../.github/assets/settings.webp)
+
 #### Profile
 
 This page is divided into three distinct tabs:
@@ -87,13 +97,13 @@ This page is divided into three distinct tabs:
 
 * History: Allows exploration of the match history in detail. This tab presents a chronological list of past games, offering insights into gameplay patterns, results, and
   performance.
-*
-
-It provides an easy way to visualize past games, including the opponents faced, match outcomes, and other relevant stats for each match.
+  It provides an easy way to visualize past games, including the opponents faced, match outcomes, and other relevant stats for each match.
 
 * Ranking: Showcases the top players worldwide, displaying the global leaderboard.  
   In addition, it features a rank distribution histogram, providing a visual breakdown of how players are distributed across different ranks.  
   This tab offers an overview of the player's position relative to the best players in the world and helps track progress.
+
+![profile](../../.github/assets/profile.webp)
 
 #### Chat drawer
 
@@ -102,6 +112,8 @@ By default, the drawer displays a room selection tab, listing ongoing conversati
 Each friend’s activity status is indicated by a colored circle, providing a quick overview of who is currently online.  
 From this tab, it’s possible to open an individual chat conversation or a global chat.
 It is possible to open new tabs within the drawer, so that the user can keep multiple conversations opened and easily accessible.
+
+![chat](../../.github/assets/chat.webp)
 
 #### Ranking Explanation
 

@@ -6,7 +6,7 @@
     <br/>as part of the <b>PS8: Full Stack Developer</b> course.</span>
 </p>
 
-## Installation 
+## Installation
 
 ### Using Docker
 
@@ -61,7 +61,7 @@ Hexagon is the highest rank, with no upper limit, reserved for the most elite pl
 
 ### Social
 
-#### Friends 
+#### Friends
 
 You can add other players as friends to stay connected.
 Once added, you’ll be able to see their online status, and quickly invite them to matches or chat privately.
@@ -71,6 +71,7 @@ Chats with unread messages are subtly highlighted and moved to the top, so you�
 #### Chats
 
 The game includes three types of chat interactions to keep communication dynamic and engaging:
+
 * a global chat for connecting with the wider community ;
 * private chats with friends for direct conversations ;
 * and in-game emotes to quickly express yourself during matches.
@@ -79,14 +80,15 @@ The game includes three types of chat interactions to keep communication dynamic
 
 Some statistics are publicly visible, such as the win rate, the number of hours and games played, the current win streak and your rank.
 
-In addition, a detailed match history — covering games played against online opponents, friends, and bots — exclusively reserved for you is available, so that you can replay each match step by step to review moves, learn from mistakes, and refine your strategy.
+In addition, a detailed match history — covering games played against online opponents, friends, and bots — exclusively reserved for you is available, so that you can
+replay each match step by step to review moves, learn from mistakes, and refine your strategy.
 
 A leaderboard showcases the top 10 players, highlighting the highest-performing users in the game.
 
 You can also view a rank distribution histogram, offering insights about how players are spread across the different ranks.
 It's helpful for understanding your position in the global competitive landscape.
 
-### Customization 
+### Customization
 
 Personalize your experience by choosing from a selection of preset avatars and spaceships, along with your first and second choice colors.
 Whether you want to stand out or match your style, customization options let you make the game feel more like your own.
@@ -107,7 +109,8 @@ All other micro-services are deployed within a private network and are not expos
 #### Files
 
 The file service serves the front-end.  
-Since our website is a SPA (Single Page Application), it will redirect each request (other that the ones asking for assets) to the `index.html` page.
+Since our website is a SPA (Single Page Application), it will redirect each request (other that the ones asking for assets) to the `index.html` page.  
+The front-end is described in it's dedicated [read-me](https://github.com/PolytechNS/ps8-25-tronthesuccessor/blob/main/services/files/README.md).
 
 #### Game
 
@@ -186,9 +189,9 @@ In our architecture, service communication is split between HTTP and WebSocket b
   micro-service (e.g., user service, inventory service, file service). This approach is optimal for transactional operations where immediate and bidirectional
   communication is not required.
 
-* WebSocket is used for real-time, event-driven communication where low latency is crucial. The client establishes a WebSocket connection to the Gateway at /ws,
-  specifying a namespace corresponding to the target service (e.g., /api/game, /api/chat, /api/notification). This allows the system to push instant updates such as game
-  status changes, chat messages, and notifications directly to clients without needing to refresh or poll for updates.
+* WebSocket is used for real-time, event-driven communication where low latency is crucial. The client establishes a WebSocket connection to the Gateway at `/ws`,
+  specifying a namespace corresponding to the target service (e.g., `/api/game`, `/api/chat`, `/api/notification`). This allows the system to push instant updates such as
+  game status changes, chat messages, and notifications directly to clients without needing to refresh or poll for updates.
 
 There is also communication between services via HTTP requests to synchronize actions across the system. For instance:
 
@@ -198,4 +201,4 @@ There is also communication between services via HTTP requests to synchronize ac
 * The notification service receives HTTP requests from other services to trigger and send notifications to the client via the WebSocket connection.
 
 By combining HTTP for transactional operations and WebSocket for real-time communication, we ensure that each type of data exchange uses the most efficient and
-appropriate protocol.
+appropriate protocol.  

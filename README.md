@@ -110,7 +110,7 @@ All other micro-services are deployed within a private network and are not expos
 
 The file service serves the front-end.  
 Since our website is a SPA (Single Page Application), it will redirect each request (other that the ones asking for assets) to the `index.html` page.  
-The front-end is described in it's dedicated [read-me](https://github.com/PolytechNS/ps8-25-tronthesuccessor/blob/main/services/files/README.md).
+The front-end is described in it's dedicated [read-me](services/files/README.md).
 
 #### Game
 

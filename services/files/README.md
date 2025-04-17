@@ -176,5 +176,4 @@ Here's some of the most notable and most important ones:
 * Rank repartition: Shows total player count and calculate the rank distribution, so users can see how many players hold each rank.
 * Settings page: Displays the different avatar, spaceships and color the player can choose to personalize it's game experience.
 
-If you want to see all of them, you can find them all in [
-`services/files/front/components`](https://github.com/PolytechNS/ps8-25-tronthesuccessor/tree/main/services/files/front/components)
+If you want to see all of them, you can find them all in [`services/files/front/components`](front/components)

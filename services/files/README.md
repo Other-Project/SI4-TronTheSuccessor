@@ -98,6 +98,7 @@ This page is divided into three distinct tabs:
 * History: Allows exploration of the match history in detail. This tab presents a chronological list of past games, offering insights into gameplay patterns, results, and
   performance.
   It provides an easy way to visualize past games, including the opponents faced, match outcomes, and other relevant stats for each match.
+  You can only see your own game history.
 
 * Ranking: Showcases the top players worldwide, displaying the global leaderboard.  
   In addition, it features a rank distribution histogram, providing a visual breakdown of how players are distributed across different ranks.  

@@ -121,7 +121,8 @@ For games against the computer, the service manages the AI logic, ensuring that 
 In ranked games, the service handles matchmaking.  
 Additionally, it tracks player rankings and updates them in real-time based on game outcomes.  
 It also keeps track of player statistics such as win rate, win streaks, total number of games played, and maintains a detailed history of past matches.  
-For friend challenges, the service facilitates invitations and accepts requests, allowing players to compete directly against their friends.
+For friend challenges, the service verifies whether the invitation is still active (not expired or already accepted/rejected) and ensures that the recipient is the
+intended user.
 
 #### Chat
 
@@ -165,7 +166,7 @@ poll for updates.
 
 By isolating these responsibilities into a dedicated service, we ensured that real-time features remain performant and scalable without overloading other services like
 the User Service or Game Service.  
-It also allowed us to tailor event broadcasting specifically to notification use cases, making the system easier to maintain and extend.
+It has also enabled us to adapt the distribution of events specifically to the notification use cases, which has made it easier to maintain and extend the system.
 
 #### Inventory
 
@@ -184,21 +185,35 @@ By isolating personalisation-related functionalities, we can more easily update 
 
 In our architecture, service communication is split between HTTP and WebSocket based on the nature and timing of the data being exchanged.
 
-* HTTP is employed for stateless, request/response-based operations. This includes tasks such as user registration, login, password reset, retrieving inventory, and
-  accessing static game resources. In these cases, the client initiates a connection to the Gateway via HTTP, which then proxies the request to the appropriate
-  micro-service (e.g., user service, inventory service, file service). This approach is optimal for transactional operations where immediate and bidirectional
-  communication is not required.
+HTTP is employed for stateless, request/response-based operations. This includes tasks such as user registration, login, password reset, retrieving inventory, and
+accessing static game resources. In these cases, the client initiates a connection to the Gateway via HTTP, which then proxies the request to the appropriate
+micro-service (e.g., user service, inventory service, file service). This approach is optimal for transactional operations where immediate and bidirectional
+communication is not required.
 
-* WebSocket is used for real-time, event-driven communication where low latency is crucial. The client establishes a WebSocket connection to the Gateway at `/ws`,
-  specifying a namespace corresponding to the target service (e.g., `/api/game`, `/api/chat`, `/api/notification`). This allows the system to push instant updates such as
-  game status changes, chat messages, and notifications directly to clients without needing to refresh or poll for updates.
+Examples of HTTP-based exchanges:
+
+* User registration, login, password reset: Client → Gateway → User Service
+
+* Retrieve inventory: Client → Gateway → Inventory Service
+
+WebSocket is used for real-time, event-driven communication where low latency is crucial. The client establishes a WebSocket connection to the Gateway at `/ws`,
+specifying a namespace corresponding to the target service (e.g., `/api/game`, `/api/chat`, `/api/notification`) to which the gateway will open a new connection. This
+allows the system to push instant updates such as
+game status changes, chat messages, and notifications directly to clients without needing to refresh or poll for updates.
+
+Examples of WebSocket-based exchanges:
+
+* Game status updates: Server ↔ Client (e.g., new turn, player moves)
+
+* Live chat messages: Client ↔ Server
 
 There is also communication between services via HTTP requests to synchronize actions across the system. For instance:
 
 * The user service communicates with the chat service to send friend requests and the chat service communicates with the user service to manage user-specific chat rooms
-  and ensure that the players are friends.
+  and ensure that the players are friends : Client → Gateway -> User Service -> Chat Service
 
-* The notification service receives HTTP requests from other services to trigger and send notifications to the client via the WebSocket connection.
+* The notification service receives HTTP requests from other services to trigger and send notifications to the client via the WebSocket connection : Client → Gateway ->
+  User Service -> Notification Service -> Client (via websocket).
 
 By combining HTTP for transactional operations and WebSocket for real-time communication, we ensure that each type of data exchange uses the most efficient and
 appropriate protocol.  

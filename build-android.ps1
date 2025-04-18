@@ -13,6 +13,7 @@ cd android
 
 echo "Launching Android emulator"
 & "$SDK/platform-tools/adb" start-server
+& "$SDK/platform-tools/adb" logcat -c
 & "$SDK/platform-tools/adb" shell am force-stop academy.pns.ps8.tronsuccessor
 ./gradlew installDebug
 & "$SDK/platform-tools/adb" shell monkey -p academy.pns.ps8.tronsuccessor 1

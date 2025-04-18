@@ -1,6 +1,6 @@
 const http = require("http");
 const userDatabase = require("./js/userDatabase.js");
-const {HTTP_STATUS, getAuthorizationToken,getRequestBody, sendResponse} = require("./js/utils.js");
+const {HTTP_STATUS, getAuthorizationToken, getRequestBody, sendResponse} = require("./js/utils.js");
 const {
     handleGetFriends,
     handleGetUser,
@@ -13,51 +13,26 @@ http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== "..");
 
     try {
-        if (filePath.length < 4) {
-            sendResponse(response, HTTP_STATUS.NOT_FOUND);
-        }
-        switch (filePath[3]) {
-            case "sign-up":
-                await handleSignUp(request, response);
-                break;
-            case "sign-in":
-                await handleSignIn(request, response);
-                break;
-            case "renew-access-token":
-                await handleRenewToken(request, response);
-                break;
-            case "security-questions":
-                await handleSecurityQuestions(request, response);
-                break;
-            case "verify-answers":
-                await handleVerifyAnswers(request, response);
-                break;
-            case "reset-password":
-                await handleResetPassword(request, response);
-                break;
-            case "check":
-                if (request.method === "GET")
-                    await handleGetUser(request, response, filePath[4]);
-                break;
-            case "friends":
-                if (request.method === "GET") {
-                    if (filePath[5] === "status")
-                        await handleTestFriend(request, response, filePath[4]);
-                    else
-                        await handleGetFriends(request, response);
-                } else if (request.method === "POST")
-                    await handleAddFriend(request, response, filePath[4]);
-                else if (request.method === "DELETE")
-                    await handleRemoveFriend(request, response, filePath[4]);
-                break;
-            default:
-                if (request.method === "GET" && filePath[4] === "avatar")
-                    await userDatabase.handleGetAvatar(request, response, filePath[3]);
-                sendResponse(response, HTTP_STATUS.NOT_FOUND);
-        }
+        if (filePath.length < 4) return sendResponse(response, HTTP_STATUS.NOT_FOUND);
+        if (filePath[3] === "sign-up" && request.method === "POST") return await handleSignUp(request, response);
+        else if (filePath[3] === "sign-in" && request.method === "POST") return await handleSignIn(request, response);
+        else if (filePath[3] === "renew-access-token" && request.method === "GET") return await handleRenewToken(request, response);
+        else if (filePath[3] === "security-questions" && request.method === "GET") return await handleSecurityQuestions(request, response);
+        else if (filePath[3] === "verify-answers" && request.method === "POST") return await handleVerifyAnswers(request, response);
+        else if (filePath[3] === "reset-password" && request.method === "POST") return await handleResetPassword(request, response);
+        else if (filePath[3] === "check" && request.method === "GET") return await handleGetUser(request, response, filePath[4]);
+        else if (filePath[3] === "friends") {
+            if (request.method === "GET") {
+                if (filePath[5] === "status") return await handleTestFriend(request, response, filePath[4]);
+                else return await handleGetFriends(request, response);
+            } else if (request.method === "POST") return await handleAddFriend(request, response, filePath[4]);
+            else if (request.method === "DELETE") return await handleRemoveFriend(request, response, filePath[4]);
+        } else if (request.method === "GET" && filePath[4] === "avatar") return await userDatabase.handleGetAvatar(request, response, filePath[3]);
+
+        return sendResponse(response, HTTP_STATUS.NOT_FOUND);
     } catch (error) {
         console.warn(error);
-        sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
+        return sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
     }
 }).listen(8004);
 

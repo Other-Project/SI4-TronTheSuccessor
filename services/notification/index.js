@@ -15,8 +15,7 @@ const server = http.createServer(async (request, response) => {
     if (filePath.length === 3 && filePath[2] === "chat" && request.method === "POST") await handleUnreadNotification(request, user.username);
     else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") await handleFriendListModification(request, user.username, true);
     else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "DELETE") await handleFriendListModification(request, user.username, false);
-
-    return sendResponse(response, HTTP_STATUS.NOT_FOUND);
+    else return sendResponse(response, HTTP_STATUS.NOT_FOUND);
 }).listen(8005);
 
 const io = new Server(server);
@@ -33,7 +32,7 @@ io.on("connection", async (socket) => {
 
     const friends = await getFriendsList(socket.request.headers.authorization);
     const connectedFriends = Array.from(connectedUsers.keys()).filter(username => friends?.friends?.includes(username));
-    
+
     socket.emit("initialize", {
         connectedFriends: connectedFriends,
         unreadNotifications: await notificationDatabase.getUniqueNotificationSenders(user.username)

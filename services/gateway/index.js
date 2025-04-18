@@ -89,6 +89,12 @@ function requestHandler(request, response) {
         return;
     }
 
+    if (request.method === "OPTIONS") {
+        addCors(response);
+        response.end();
+        return;
+    }
+
     const ip = getIpAddress(request);
     proxy.web(request, response, {target: service}, (error) => responseError(request, response, "Proxy error", error, 502));
     console.log(`Proxying ${request.url} from ${ip} to ${service}`);

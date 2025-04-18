@@ -55,7 +55,7 @@ export class ChatSelection extends HTMLComponent {
     }
 
     async #updateGlobalChat() {
-        const globalChatRoom = await fetchApi("/api/chat/global?last=true").then(response => response.json());
+        const globalChatRoom = await fetchApi("/api/chat/global?limit=1").then(response => response.json());
         this.globalChat.setAttribute("preview", globalChatRoom[0].content);
     }
 

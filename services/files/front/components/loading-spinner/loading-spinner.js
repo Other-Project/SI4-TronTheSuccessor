@@ -13,7 +13,7 @@ export class LoadingSpinner extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.spinner = this.shadowRoot.getElementById("loading-spinner");
-    }
+    };
 
     attributeChangedCallback(name, oldValue, newValue) {
         super.attributeChangedCallback(name, oldValue, newValue);

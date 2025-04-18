@@ -7,6 +7,7 @@ export class ChatRoom extends HTMLComponent {
     /** @type {Array} */ messages = [];
     /** @type {boolean} */ hasMore = true;
     /** @type {boolean} */ isLoading = false;
+    oldestGameDate = null;
 
     constructor() {
         super("chat-room", ["html", "css"]);
@@ -69,16 +70,13 @@ export class ChatRoom extends HTMLComponent {
 
     handleScroll = async () => {
         if (-this.messagesWrap.scrollTop + this.messagesWrap.clientHeight >= this.messagesWrap.scrollHeight && this.hasMore && !this.isLoading) {
-            await this.loadOlderMessages();
+            await this.#fetchMessages();
         }
     };
 
     #refresh() {
         if (!this.messagePanel) return;
-        if (this.messages.length === 0)
-            this.#fetchMessages().then(() => this.#displayMessages());
-        else
-            this.#displayMessages();
+        this.#fetchMessages().then(() => this.#displayMessages());
         this.messageInput.disabled = this.sendButton.button.disabled = this.friend === "false";
         const showNotification = this.pending !== "undefined" || this.friend === "false";
         this.messageInput.title = this.sendButton.title = showNotification ? "You need to be friends to send messages" : "";
@@ -97,26 +95,6 @@ export class ChatRoom extends HTMLComponent {
     #displayMessages() {
         this.messagePanel.innerHTML = "";
         for (const message of this.messages) this.#displayMessage(message);
-    }
-
-    async loadOlderMessages() {
-        if (this.messages.length === 0) return;
-        this.isLoading = true;
-        this.spinner.setAttribute("show", "true");
-        const oldestMessage = this.messages[0];
-        const before = oldestMessage.date;
-        const response = await fetchApi(`/api/chat/${this.room}?before=${before}`);
-        if (!response.ok) {
-            this.#showNotification("Error fetching older messages", 2000, "red", "white");
-            return;
-        }
-        const olderMessages = (await response.json());
-        if (olderMessages.length < 25) this.hasMore = false;
-        for (let message of olderMessages)
-            this.#displayMessage(message, false);
-        this.messages = [...olderMessages.reverse(), ...this.messages];
-        this.isLoading = false;
-        this.spinner.removeAttribute("show");
     }
 
     #displayMessage(message, first = true) {
@@ -176,13 +154,24 @@ export class ChatRoom extends HTMLComponent {
     }
 
     async #fetchMessages() {
-        const response = await fetchApi(`/api/chat/${this.room}`);
-        if (response.ok)
-            this.messages = (await response.json()).reverse();
-        else {
+        this.isLoading = true;
+        this.spinner.setAttribute("show", "true");
+        const response = await fetchApi(`/api/chat/${this.room}?before=${this.oldestGameDate}`);
+        if (!response.ok) {
             this.#showNotification("Error fetching messages", 2000, "red", "white");
-            this.messages = [];
+            return;
         }
+        const newMessages = (await response.json());
+        if (newMessages.length < 25) this.hasMore = false;
+        for (let message of newMessages) {
+            if (this.oldestGameDate === null || new Date(message.date) < new Date(this.oldestGameDate)) {
+                this.oldestGameDate = message.date;
+            }
+            this.#displayMessage(message, false);
+        }
+        this.messages = [...newMessages.reverse(), ...this.messages];
+        this.spinner.removeAttribute("show");
+        this.isLoading = false;
     }
 
     async sendMessage() {

@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {getUserInfo} from "/js/login-manager.js";
+import {fetchApi, getUserInfo} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
 
 export class ProfilePage extends HTMLComponent {
@@ -36,7 +36,7 @@ export class ProfilePage extends HTMLComponent {
         }
 
         this.usernameElement.textContent = userName;
-        const response = await fetch(`/api/game/stats/${userName}`);
+        const response = await fetchApi(`/api/game/stats/${userName}`, undefined, false);
         this.profilePage.classList.toggle("not-found", !response.ok);
         this.notFoundUser.textContent = userName;
         if (!response.ok) return;

@@ -1,5 +1,6 @@
 import {changePage} from "../components/pages/pages.js";
 import notificationService from "./notification.js";
+import "/js/capacitor.min.js";
 
 export function getCookie(name) {
     return document.cookie.split("; ").reduce((r, v) => {
@@ -9,11 +10,11 @@ export function getCookie(name) {
 }
 
 export async function renewAccessToken() {
-    const response = await fetch("/api/user/renew-access-token", {
+    const response = await fetchApi("/api/user/renew-access-token", {
         headers: {
             "Authorization": `Bearer ${getCookie("refreshToken")}`
         }
-    });
+    }, false);
     if (!response.ok) {
         document.dispatchEvent(new CustomEvent("show-notification", {
             detail: {
@@ -72,8 +73,13 @@ export async function getAccessToken() {
 export async function fetchApi(url, options = undefined, retry = true) {
     options ??= {};
     options.headers ??= {};
-    options.headers["Authorization"] ??= `Bearer ${await getAccessToken()}`;
-    const response = await fetch(url, options);
+    if (!options.headers["Authorization"]) {
+        const accessToken = await getAccessToken();
+        if (accessToken) options.headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+
+    // noinspection JSUnresolvedReference
+    const response = await fetch(Capacitor.isNativePlatform() ? new URL(url, "https://tronsuccessor.ps8.pns.academy").toString() : url, options);
     if (retry && response.status === 401) {
         await renewAccessToken();
         return await fetchApi(url, options, false);

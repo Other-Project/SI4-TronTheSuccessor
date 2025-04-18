@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {fakePageReload, fetchPostApi, storeTokens} from "/js/login-manager.js";
+import {fakePageReload, fetchApi, fetchPostApi, storeTokens} from "/js/login-manager.js";
 
 export class ResetPassword extends HTMLComponent {
     resetPasswordToken;
@@ -117,14 +117,14 @@ export class ResetPassword extends HTMLComponent {
     async #resetPassword() {
         const password = this.passwordInput.value;
         const body = JSON.stringify({newPassword: password});
-        const response = await fetch("/api/user/reset-password", {
+        const response = await fetchApi("/api/user/reset-password", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": "Bearer " + this.resetPasswordToken
             },
             body: body
-        });
+        }, false);
         const data = await response.json();
         if (response.ok) {
             storeTokens(data);

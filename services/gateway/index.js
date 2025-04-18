@@ -6,6 +6,7 @@ const fs = require("fs");
 const {Server} = require("socket.io");
 const {io: Client} = require("socket.io-client");
 const jwt = require("jsonwebtoken");
+const {addCors} = require("./cors.js");
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) throw new Error("JWT_SECRET is not set");
 
@@ -23,6 +24,9 @@ const HTTPS_CONFIG = process.env.HTTPS_ENABLED === "true" ? {
 } : null;
 
 const proxy = httpProxy.createProxyServer();
+proxy.on('proxyReq', function (proxyReq, req, res, options) {
+    addCors(res);
+});
 
 // Check if the SSL key and certificate files are accessible
 if (HTTPS_CONFIG && !fs.existsSync(HTTPS_CONFIG.key, fs.constants.R_OK)) {

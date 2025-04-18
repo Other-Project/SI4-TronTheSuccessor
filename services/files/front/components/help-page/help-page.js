@@ -1,5 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
-import {getUserInfo} from "/js/login-manager.js";
+import {fetchApi, getUserInfo} from "/js/login-manager.js";
 
 export class HelpPage extends HTMLComponent {
     against = "local";
@@ -39,9 +39,9 @@ export class HelpPage extends HTMLComponent {
         if (!this.controls) return;
         const username = getUserInfo()?.username;
         let selectedInventory;
-        if (username) selectedInventory = await fetch(`/api/inventory/${username}`).then(res => res.json());
+        if (username) selectedInventory = await fetchApi(`/api/inventory/${username}`, undefined, false).then(res => res.json());
         else {
-            const response = await fetch("/api/inventory").then(res => res.json());
+            const response = await fetchApi("/api/inventory", undefined, false).then(res => res.json());
             selectedInventory = Object.fromEntries(Object.entries(response).map(([key, value]) => [key, value[0]]));
         }
 

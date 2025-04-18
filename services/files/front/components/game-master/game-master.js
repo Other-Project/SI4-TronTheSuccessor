@@ -90,9 +90,9 @@ export class GameMaster extends HTMLComponent {
 
         const username = getUserInfo()?.username;
         let selectedInventory;
-        if (username) selectedInventory = await fetch(`/api/inventory/${username}`).then(res => res.json());
+        if (username) selectedInventory = await fetchApi(`/api/inventory/${username}`, undefined, false).then(res => res.json());
         else {
-            const response = await fetch("/api/inventory").then(res => res.json());
+            const response = await fetchApi("/api/inventory", undefined, false).then(res => res.json());
             selectedInventory = Object.fromEntries(Object.entries(response).map(([key, value]) => [key, value[0]]));
         }
 

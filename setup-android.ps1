@@ -4,7 +4,9 @@ $SDK=$env:ANDROID_HOME
 
 echo "Installing dependencies"
 # Make sure you have Node.js and npm installed (https://nodejs.org/en/download/)
+cd services/files
 npm install
+cd ../..
 
 echo "Installing Android SDK"
 # Make sure you have the Android SDK installed (https://developer.android.com/studio?hl=en#command-line-tools-only) and set up in your environment (ANDROID_HOME)

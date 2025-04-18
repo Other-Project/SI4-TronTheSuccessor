@@ -25,10 +25,6 @@ header {
     font-size: 4rem;
     font-weight: bolder;
     text-align: center;
-
-    @media screen and (max-width: 600px) {
-        font-size: 2rem;
-    }
 }
 
 #profile-display {
@@ -80,5 +76,11 @@ app-game-choice {
     }
     100% {
         box-shadow: 0 0 0 0 rgba(237, 190, 255, 0);
+    }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+    #title {
+        font-size: 2rem;
     }
 }

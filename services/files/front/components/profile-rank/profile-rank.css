@@ -19,3 +19,16 @@
         }
     }
 }
+
+@media (max-height: 480px) and (orientation: landscape) {
+    #rank-container {
+        #rank-points {
+            font-size: 1.7em;
+        }
+
+        #rank-info {
+            width: 20px;
+            height: 20px;
+        }
+    }
+}

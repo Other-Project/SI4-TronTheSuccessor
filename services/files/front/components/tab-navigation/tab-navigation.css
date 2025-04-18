@@ -73,3 +73,9 @@ button {
 .active, ::slotted(.active) {
     background: #1F1F1F;
 }
+
+@media (max-height: 480px) and (orientation: landscape) {
+    #tabs {
+        height: auto;
+    }
+}

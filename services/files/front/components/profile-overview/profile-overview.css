@@ -46,6 +46,12 @@
     }
 }
 
+@media (max-height: 480px) and (orientation: landscape) {
+    #profile-overview {
+        grid-template-rows: auto;
+    }
+}
+
 @media (max-width: 600px) {
     #profile-overview {
         grid-template-rows: auto auto auto;

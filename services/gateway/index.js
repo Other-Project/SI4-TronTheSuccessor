@@ -24,7 +24,7 @@ const HTTPS_CONFIG = process.env.HTTPS_ENABLED === "true" ? {
 } : null;
 
 const proxy = httpProxy.createProxyServer();
-proxy.on('proxyReq', function (proxyReq, req, res, options) {
+proxy.on('proxyRes', function (proxyRes, req, res) {
     addCors(res);
 });
 

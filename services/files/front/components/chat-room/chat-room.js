@@ -1,6 +1,7 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "/js/login-manager.js";
 import notificationService from "/js/notification.js";
+import "/js/capacitor.min.js";
 
 export class ChatRoom extends HTMLComponent {
     /** @type {string} */ room;
@@ -150,7 +151,8 @@ export class ChatRoom extends HTMLComponent {
 
     async #openWebSocket(retry = true) {
         if (this.socket) this.socket.disconnect();
-        this.socket = io("/api/chat", {
+        const namespace = "/api/chat";
+        this.socket = io(Capacitor.isNativePlatform() ? new URL(namespace, "https://tronsuccessor.ps8.pns.academy").toString() : namespace, {
             extraHeaders: {authorization: "Bearer " + await getAccessToken()},
             path: "/ws"
         });

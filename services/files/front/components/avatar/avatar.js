@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import "/js/capacitor.min.js";
 
 export class Avatar extends HTMLComponent {
     avatar;
@@ -22,7 +23,8 @@ export class Avatar extends HTMLComponent {
     #refresh() {
         if (!this.avatar) this.shadowRoot.replaceChildren();
         const image = document.createElement("div");
-        image.style.backgroundImage = `url("${this.avatar}")`;
+        const url = Capacitor.isNativePlatform() ? new URL(this.avatar, "https://tronsuccessor.ps8.pns.academy").toString() : this.avatar;
+        image.style.backgroundImage = `url("${url}")`;
         this.shadowRoot.replaceChildren(image);
     }
 }

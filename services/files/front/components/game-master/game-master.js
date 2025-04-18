@@ -6,6 +6,7 @@ import {directionToAngle, Player} from "/js/player.js";
 import "/js/socket.io.js";
 import {fetchApi, getAccessToken, getCookie, getUserInfo, renewAccessToken} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
+import "/js/capacitor.min.js";
 
 export class GameMaster extends HTMLComponent {
     gridSize = [16, 9];
@@ -171,7 +172,8 @@ export class GameMaster extends HTMLComponent {
         this.pauseWindow.style.display = "none";
         this.stopGame();
 
-        this.socket = io("/api/game", {
+        const namespace = "/api/game";
+        this.socket = io(Capacitor.isNativePlatform() ? new URL(namespace, "https://tronsuccessor.ps8.pns.academy").toString() : namespace, {
             extraHeaders: {authorization: "Bearer " + await getAccessToken()},
             path: "/ws"
         });

@@ -1,6 +1,6 @@
 import {directionToAngle, Player} from "/js/player.js";
 
-export const emotes = await fetch("/api/game/emotes").then(res => res.ok ? res.json() : null).then(data => data?.emotes);
+export const emotes = await fetch("/api/game/emotes").then(res => res.ok ? res.json() : null).then(data => data?.emotes).catch(() => null);
 
 export class Game extends EventTarget {
     gridSize;

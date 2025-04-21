@@ -22,29 +22,18 @@ let server = http.createServer(async (request, response) => {
     const filePath = requestUrl.pathname.split("/").filter(elem => elem !== "..");
 
         try {
-            switch (filePath[3]) {
-                case "stats":
-                    if (request.method === "GET") await handleGetAllStats(request, response, filePath[4]);
-                    break;
-                case "emotes":
-                    sendResponse(response, HTTP_STATUS.OK, {emotes});
-                    break;
-                case "history":
-                    await handleGetHistory(request, response);
-                    break;
-                case "game-invitation":
-                    if (request.method === "POST")
-                        if (filePath[4] === "refuse")
-                            await refuseGameInvitation(request, response);
-                    if (filePath[4] === "leave")
-                        await leaveFriendGame(request, response);
-                    break;
-                default:
-                    sendResponse(response, HTTP_STATUS.NOT_FOUND);
+            if (filePath[3] === "stats" && request.method === "GET") return await handleGetAllStats(request, response, filePath[4]);
+            else if (filePath[3] === "emotes" && request.method === "GET") return sendResponse(response, HTTP_STATUS.OK, {emotes});
+            else if (filePath[3] === "history" && request.method === "GET") return await handleGetHistory(request, response);
+            else if (filePath[3] === "game-invitation" && request.method === "POST") {
+                if (filePath[4] === "refuse") return await refuseGameInvitation(request, response);
+                else if (filePath[4] === "leave") return await leaveFriendGame(request, response);
             }
+
+            return sendResponse(response, HTTP_STATUS.NOT_FOUND);
         } catch (error) {
             console.warn(error);
-            sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
+            return sendResponse(response, HTTP_STATUS.INTERNAL_SERVER_ERROR, {error: "Invalid request"});
         }
     }
 ).listen(8003);

@@ -26,65 +26,58 @@ const server = http.createServer(async (request, response) => {
         } else if (request.method === "POST") {
             const message = JSON.parse(await getRequestBody(request));
             if (!chatDatabase.verifyMessage(message)) return sendResponse(response, HTTP_STATUS.BAD_REQUEST);
-            let storedMessage;
-            if (message.type === "game-invitation") {
-                storedMessage = await chatDatabase.sendGameInvitation(roomId, user.username, message.type, message.content, room);
-            } else
-                storedMessage = await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
+            const storedMessage = message.type === "game-invitation"
+                ? await chatDatabase.sendGameInvitation(roomId, user.username, message.type, message.content, room)
+                : await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
             if (storedMessage.shouldEmit) io.to(roomId).emit("message", storedMessage);
             await notifyMessageSent(request.headers.authorization, room);
             return sendResponse(response, HTTP_STATUS.CREATED, message.type === "game-invitation" ? {gameInvitationToken: storedMessage.gameInvitationToken} : null);
         }
-    } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname)) {
-        if (request.method === "GET") {
-            const messages = await chatDatabase.getAllRoom(user.username);
-            const allFriends = await getFriendsList(request.headers.authorization);
-            const friends = allFriends.friends ?? [];
-            const pendingFromUser = allFriends.pending ?? [];
-            const pendingForUser = allFriends.pendingForUser ?? [];
+    } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname) && request.method === "GET") {
+        const messages = await chatDatabase.getAllRoom(user.username);
+        const allFriends = await getFriendsList(request.headers.authorization);
+        const friends = allFriends.friends ?? [];
+        const pendingFromUser = allFriends.pending ?? [];
+        const pendingForUser = allFriends.pendingForUser ?? [];
 
-            const chatBox = await Promise.all(messages.map(async username => {
-                const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1);
-                const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
+        const chatBox = await Promise.all(messages.map(async username => {
+            const chatMessages = await chatDatabase.getChat([user.username, username], undefined, 1);
+            const lastMessage = chatMessages.length > 0 ? chatMessages[0] : null;
 
-                let pendingStatus;
-                if (friends.includes(username)) pendingStatus = undefined;
-                else if (pendingFromUser.includes(username)) pendingStatus = user.username;
-                else pendingStatus = pendingForUser.includes(username) ? username : undefined;
+            let pendingStatus;
+            if (friends.includes(username)) pendingStatus = undefined;
+            else if (pendingFromUser.includes(username)) pendingStatus = user.username;
+            else pendingStatus = pendingForUser.includes(username) ? username : undefined;
 
-                return {
-                    username: username,
-                    friend: friends.includes(username),
-                    pending: pendingStatus,
-                    last: lastMessage.content
-                };
-            }));
-            return sendResponse(response, HTTP_STATUS.OK, chatBox);
-        }
-    } else if (gameInvitationEndpoint.test(requestUrl.pathname)) {
-        if (request.method === "PUT") {
-            const body = JSON.parse(await getRequestBody(request));
+            return {
+                username: username,
+                friend: friends.includes(username),
+                pending: pendingStatus,
+                last: lastMessage.content
+            };
+        }));
+        return sendResponse(response, HTTP_STATUS.OK, chatBox);
+    } else if (gameInvitationEndpoint.test(requestUrl.pathname) && request.method === "PUT") {
+        const body = JSON.parse(await getRequestBody(request));
 
-            const gameInvitationToken = body.gameInvitationToken;
-            if (!gameInvitationToken)
-                return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Game invitation has expired or is invalid"});
+        const gameInvitationToken = body.gameInvitationToken;
+        if (!gameInvitationToken)
+            return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Game invitation has expired or is invalid"});
 
-            if (!body.status || !["accepted", "refused", "cancelled"].includes(body.status))
-                return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid status"});
+        if (!body.status || !["accepted", "refused", "cancelled"].includes(body.status))
+            return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "Invalid status"});
 
-            const author = jwt.decode(gameInvitationToken).author;
+        const author = jwt.decode(gameInvitationToken).author;
 
-            if (author === user.username && body.status !== "cancelled")
-                return sendResponse(response, HTTP_STATUS.FORBIDDEN, {error: "Cannot respond to your own invitation"});
+        if (author === user.username && body.status !== "cancelled")
+            return sendResponse(response, HTTP_STATUS.FORBIDDEN, {error: "Cannot respond to your own invitation"});
 
-            if (await chatDatabase.updateGameInvitationStatus(gameInvitationToken, body.status))
-                return sendResponse(response, HTTP_STATUS.OK, {status: body.status});
-            else
-                return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "The game invitation has expired or is invalid, its status cannot be updated"});
-        }
-    } else {
-        return sendResponse(response, HTTP_STATUS.NOT_FOUND);
+        if (await chatDatabase.updateGameInvitationStatus(gameInvitationToken, body.status))
+            return sendResponse(response, HTTP_STATUS.OK, {status: body.status});
+        else
+            return sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "The game invitation has expired or is invalid, its status cannot be updated"});
     }
+    return sendResponse(response, HTTP_STATUS.NOT_FOUND);
 }).listen(8006);
 
 

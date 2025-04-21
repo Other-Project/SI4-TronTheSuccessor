@@ -1,4 +1,5 @@
 import {HTMLComponent} from "/js/component.js";
+import "/js/capacitor.min.js";
 
 export class ProfilePfp extends HTMLComponent {
     static get observedAttributes() {
@@ -23,7 +24,7 @@ export class ProfilePfp extends HTMLComponent {
 
     #refresh() {
         if (!this.pfpElement) return;
-        this.pfpElement.src = this.src;
+        this.pfpElement.src = Capacitor.isNativePlatform() ? new URL(this.src, "https://tronsuccessor.ps8.pns.academy").toString() : this.src;
         this.usernameElement.textContent = this.username;
     }
 }

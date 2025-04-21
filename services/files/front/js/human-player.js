@@ -41,12 +41,14 @@ export class HumanPlayer extends Player {
         this.#keypressed.clear();
         document.addEventListener("keydown", this.#onKeyPressed);
         document.addEventListener("keyup", this.#onKeyReleased);
+        document.addEventListener("joystick-direction", this.#onJoystickMove);
     }
 
     unsubscribe() {
         super.unsubscribe();
         document.removeEventListener("keydown", this.#onKeyPressed);
         document.removeEventListener("keyup", this.#onKeyReleased);
+        document.removeEventListener("joystick-direction", this.#onJoystickMove);
     }
 
     #onKeyPressed = e => {
@@ -64,6 +66,17 @@ export class HumanPlayer extends Player {
             }));
         }
     }
+
+    #onJoystickMove = e => {
+        const direction = e.detail.direction;
+        super.setNextDirection(direction);
+        this.dispatchEvent(new CustomEvent("player-direction", {
+            detail: {
+                direction: direction,
+                number: this.number
+            }
+        }));
+    };
 
     #onKeyReleased = e => this.#keypressed.delete(e.key.toUpperCase());
 }

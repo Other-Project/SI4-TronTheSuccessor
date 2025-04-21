@@ -118,3 +118,14 @@
     max-width: 20px;
     vertical-align: middle;
 }
+
+@media (max-height: 480px) and (orientation: landscape) {
+    #notification-banner {
+        padding: 0.5em 1em;
+    }
+
+    #input-panel {
+        grid-template: 34px / 1fr 34px;
+        gap: 5px;
+    }
+}

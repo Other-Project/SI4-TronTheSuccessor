@@ -1,3 +1,5 @@
+import {fetchApi} from "/js/login-manager.js";
+
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 export async function loadAndCustomiseSVG(url, colors) {
@@ -24,7 +26,7 @@ export async function loadSVG(url) {
 
     const svgString = url.startsWith("data:image/svg+xml;base64,")
         ? atob(url.substring(26))
-        : await fetch(url)
+        : await fetchApi(url, undefined, false)
             .then(response => response.ok && response.headers.get("Content-Type") === "image/svg+xml" ? response.text() : null)
             .catch(() => null);
     if (!svgString) return null;

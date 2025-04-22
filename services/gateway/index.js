@@ -6,6 +6,7 @@ const fs = require("fs");
 const {Server} = require("socket.io");
 const {io: Client} = require("socket.io-client");
 const jwt = require("jsonwebtoken");
+const {addCors} = require("./cors.js");
 const secretKey = process.env.JWT_SECRET;
 if (!secretKey) throw new Error("JWT_SECRET is not set");
 
@@ -23,6 +24,9 @@ const HTTPS_CONFIG = process.env.HTTPS_ENABLED === "true" ? {
 } : null;
 
 const proxy = httpProxy.createProxyServer();
+proxy.on('proxyRes', function (proxyRes, req, res) {
+    addCors(res);
+});
 
 // Check if the SSL key and certificate files are accessible
 if (HTTPS_CONFIG && !fs.existsSync(HTTPS_CONFIG.key, fs.constants.R_OK)) {
@@ -46,7 +50,7 @@ if (HTTPS_CONFIG) {
 server.keepAliveTimeout = 60000;
 
 // Register the websocket connections
-const io = new Server(server, {path: "/ws"});
+const io = new Server(server, {path: "/ws", cors: {origin: '*'}});
 for (let servicePath in SERVICES) {
     const service = SERVICES[servicePath];
     if (service.ws) registerWebsocket(io, servicePath, service.url);
@@ -79,6 +83,12 @@ function redirectToHttps(request, response) {
  * Handles the request by proxying it to the appropriate service.
  */
 function requestHandler(request, response) {
+    if (request.method === "OPTIONS") {
+        addCors(response);
+        response.end();
+        return;
+    }
+
     const service = getService(request);
     if (!service) {
         responseError(request, response, "Service not found", null, 404);
@@ -146,6 +156,7 @@ function registerWebsocket(io, namespace, serviceUrl) {
     const nmp = io.of(namespace);
 
     nmp.use(async (socket, next) => {
+        if (socket.handshake.method === "OPTIONS") next();
         if (verifyToken(socket.request)) next();
         else next(new Error("Authentication needed"));
     });

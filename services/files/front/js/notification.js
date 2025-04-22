@@ -1,5 +1,6 @@
 import {getAccessToken, renewAccessToken} from "./login-manager.js";
 import "./socket.io.js";
+import "/js/capacitor.min.js";
 
 /**
  * Class to handle notifications
@@ -24,7 +25,8 @@ export class NotificationService extends EventTarget {
         const token = await getAccessToken();
         if (!token) return;
 
-        this.socket = io("/api/notification", {
+        const namespace = "/api/notification";
+        this.socket = io(Capacitor.isNativePlatform() ? new URL(namespace, "https://tronsuccessor.ps8.pns.academy").toString() : namespace, {
             extraHeaders: {authorization: "Bearer " + token},
             path: "/ws"
         });

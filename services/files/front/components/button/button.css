@@ -12,15 +12,15 @@ button {
     &:hover:not(:disabled) {
         background-color: #3c3c3c;
 
-        &.action_background {
+        &.purple {
             background-color: #75208f;
         }
 
-        &.cancel_background {
+        &.red {
             background-color: #da4343;
         }
 
-        &.join_background {
+        &.green {
             background-color: #118512;
         }
     }
@@ -38,15 +38,15 @@ button {
         animation: pulse 4s infinite;
     }
 
-    &.action_background {
+    &.purple {
         background-color: #5a1571;
     }
 
-    &.cancel_background {
+    &.red {
         background-color: #cd2c2c;
     }
 
-    &.join_background {
+    &.green {
         background-color: #09730a;
     }
 }

@@ -2,11 +2,3 @@
     max-width: 800px;
     margin: auto auto 150px auto;
 }
-
-app-loading-spinner {
-    display: none;
-
-    &.show {
-        display: block;
-    }
-}

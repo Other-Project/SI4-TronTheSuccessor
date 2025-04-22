@@ -5,3 +5,4 @@ README.md
 ios/
 android/
 capacitor.config.json
+dist/

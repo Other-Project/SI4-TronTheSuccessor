@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./index.js"
+    "start": "node ./index.js",
+    "capacitor:copy:before": "gulp"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,11 @@
     "postcss-nesting": "^13.0.1"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.2.0"
+    "@capacitor/cli": "^7.2.0",
+    "del": "^8.0.0",
+    "gulp": "^5.0.0",
+    "gulp-cli": "^3.0.0",
+    "gulp-postcss": "^10.0.0",
+    "gulp-sourcemaps": "^3.0.0"
   }
 }

@@ -10,22 +10,20 @@ export class GameJoystick extends HTMLComponent {
         this.base = this.shadowRoot.getElementById("joystick-base");
         this.knob = this.shadowRoot.getElementById("joystick-knob");
         this.center = {x: 0, y: 0};
-        this.active = false;
+        this.direction = null;
         this.base.addEventListener("touchstart", this.onTouchStart.bind(this));
         this.base.addEventListener("touchmove", this.onTouchMove.bind(this));
         this.base.addEventListener("touchend", this.onTouchEnd.bind(this));
     };
 
-    onTouchStart(e) {
+    onTouchStart = (e) => {
         e.preventDefault();
-        this.active = true;
         const rect = this.base.getBoundingClientRect();
         this.center = {x: rect.left + rect.width / 2, y: rect.top + rect.height / 2};
     }
 
-    onTouchMove(e) {
+    onTouchMove = (e) => {
         e.preventDefault();
-        if (!this.active) return;
 
         const touch = e.touches[0];
         const dx = touch.clientX - this.center.x;
@@ -46,7 +44,8 @@ export class GameJoystick extends HTMLComponent {
         else if (dx < -30) direction = "left";
         else if (dx > 30) direction = "right";
 
-        if (direction) {
+        if (direction && direction !== this.direction) {
+            this.direction = direction;
             this.dispatchEvent(new CustomEvent("joystick-direction", {
                 detail: {direction},
                 bubbles: true,
@@ -55,8 +54,7 @@ export class GameJoystick extends HTMLComponent {
         }
     }
 
-    onTouchEnd(e) {
-        this.active = false;
+    onTouchEnd = () => {
         this.knob.style.left = `50%`;
         this.knob.style.top = `50%`;
     }

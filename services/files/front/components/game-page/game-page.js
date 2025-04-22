@@ -10,7 +10,7 @@ export class GamePage extends HTMLComponent {
         document.addEventListener("keyup", async (event) => {
             if (event.code === "Space" && !this.inGame) this.startGame();
         });
-        document.addEventListener("touchend", () => {
+        this.shadowRoot.addEventListener("touchend", () => {
             if (!this.inGame) this.startGame();
         });
     }
@@ -37,6 +37,8 @@ export class GamePage extends HTMLComponent {
                 status: "cancelled"
             }, {method: "PUT"});
         }
+        this.shadowRoot.removeEventListener("touchend", this.startGame);
+        document.removeEventListener("keyup", this.startGame);
     };
 
     startGame() {

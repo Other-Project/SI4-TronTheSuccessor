@@ -20,6 +20,12 @@
     }
 }
 
+svg {
+    display: block;
+    width: 100%;
+    margin: auto;
+}
+
 @media (max-height: 480px) and (orientation: landscape) {
     #rank-container {
         #rank-points {
@@ -31,4 +37,17 @@
             height: 20px;
         }
     }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+    svg {
+        width: 50%;
+    }
+
+    #rank-container {
+        #rank-points {
+            font-size: 1em;
+        }
+    }
+
 }

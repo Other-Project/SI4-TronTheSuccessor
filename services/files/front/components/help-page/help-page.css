@@ -55,7 +55,7 @@ footer {
     font-size: 1rem;
 }
 
-@media (max-height: 480px) and (orientation: landscape) {
+@media (max-height: 480px) or (max-width: 480px) {
     .grid {
         font-size: small;
     }

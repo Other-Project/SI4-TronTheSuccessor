@@ -30,17 +30,3 @@
         height: 100%;
     }
 }
-
-@media (max-height: 480px) and (orientation: landscape) {
-    #profile-overview {
-        grid-template-rows: 1fr;
-
-        #neon-container {
-            grid-row: 1;
-        }
-
-        #rank-repartition {
-            display: none;
-        }
-    }
-}

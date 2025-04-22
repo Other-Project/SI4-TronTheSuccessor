@@ -33,3 +33,13 @@ p {
         width: 80%;
     }
 }
+
+@media (max-width: 480px) and (orientation: portrait) {
+    #stats {
+        font-size: 1.5em;
+    }
+
+    svg {
+        width: 70%;
+    }
+}

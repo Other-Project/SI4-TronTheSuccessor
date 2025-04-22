@@ -103,7 +103,7 @@ h2, p {
     }
 }
 
-@media (max-height: 480px) and (orientation: landscape) {
+@media (max-height: 480px) or (max-width: 480px) {
     .container {
         #mobile-container {
             grid-row: 3;

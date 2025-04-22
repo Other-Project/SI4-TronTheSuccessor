@@ -11,7 +11,7 @@ body {
     font-family: "Tomorrow", serif;
 }
 
-@media (max-height: 480px) {
+@media (max-height: 480px) and (resolution >= 240dpi) {
     body {
         font-size: 0.65em;
     }

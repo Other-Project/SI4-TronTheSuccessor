@@ -22,7 +22,7 @@ header {
 #title {
     grid-column: 2;
     margin: 0;
-    font-size: 4rem;
+    font-size: 4em;
     font-weight: bolder;
     text-align: center;
 }
@@ -76,11 +76,5 @@ app-game-choice {
     }
     100% {
         box-shadow: 0 0 0 0 rgba(237, 190, 255, 0);
-    }
-}
-
-@media (max-height: 480px) and (orientation: landscape) {
-    #title {
-        font-size: 2rem;
     }
 }

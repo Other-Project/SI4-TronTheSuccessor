@@ -31,8 +31,8 @@ export class GameJoystick extends HTMLComponent {
         const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 60);
         const angle = Math.atan2(dy, dx);
 
-        this.knob.style.left = `calc(50% + ${Math.cos(angle) * distance}px)`;
-        this.knob.style.top = `calc(50% + ${Math.sin(angle) * distance}px)`;
+        this.knob.style.left = `calc(40% + ${Math.cos(angle) * distance}px)`;
+        this.knob.style.top = `calc(40% + ${Math.sin(angle) * distance}px)`;
 
         let direction = null;
         if (Math.abs(dx) < 15 && Math.abs(dy) < 15) return;

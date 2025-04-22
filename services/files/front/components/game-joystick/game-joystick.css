@@ -1,9 +1,6 @@
 #joystick-container {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    width: 150px;
-    height: 150px;
+    height: 100%;
+    width: 100%;
     touch-action: none;
     z-index: 10;
 

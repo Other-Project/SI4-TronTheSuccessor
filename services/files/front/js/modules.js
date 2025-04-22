@@ -44,6 +44,7 @@ import {SettingsCarousel} from "/components/settings/settings-carousel/settings-
 import {Badge} from "/components/badge/badge.js";
 import {Avatar} from "/components/avatar/avatar.js";
 import {LoadingSpinner} from "/components/loading-spinner/loading-spinner.js";
+import {GameJoystick} from "/components/game-joystick/game-joystick.js";
 
 // General components
 customElements.define("app-button", Button);
@@ -72,6 +73,7 @@ customElements.define("app-game-master", GameMaster);
 customElements.define("app-game-emotes", GameEmotes);
 customElements.define("app-game-emote-display", GameEmoteDisplay);
 customElements.define("app-game-match-intro", GameMatchIntro);
+customElements.define("app-game-joystick", GameJoystick);
 
 // Profile components
 customElements.define("app-profile-page", ProfilePage);

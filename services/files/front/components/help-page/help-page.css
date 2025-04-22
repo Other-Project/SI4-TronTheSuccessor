@@ -7,10 +7,6 @@
     height: calc(100vh - 30px);
 
     font-size: xx-large;
-
-    @media screen and (max-width: 600px) {
-        font-size: x-large;
-    }
 }
 
 main {
@@ -57,4 +53,10 @@ footer {
 
 #rank-popup {
     font-size: 1rem;
+}
+
+@media (max-height: 480px) or (max-width: 480px) {
+    .grid {
+        font-size: small;
+    }
 }

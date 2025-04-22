@@ -1,12 +1,12 @@
 #room-button {
     display: grid;
-    grid-template: 60px / 40px 1fr auto;
+    grid-template: auto / 40px 1fr auto;
     gap: 10px;
     align-items: center;
 
     background: #4a2853;
     border-radius: 10px;
-    padding: 5px 15px;
+    padding: 0.4em 1em;
 
     cursor: pointer;
     user-select: none;

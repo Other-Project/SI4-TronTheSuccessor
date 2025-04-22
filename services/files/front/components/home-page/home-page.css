@@ -22,13 +22,9 @@ header {
 #title {
     grid-column: 2;
     margin: 0;
-    font-size: 4rem;
+    font-size: 4em;
     font-weight: bolder;
     text-align: center;
-
-    @media screen and (max-width: 600px) {
-        font-size: 2rem;
-    }
 }
 
 #profile-display {

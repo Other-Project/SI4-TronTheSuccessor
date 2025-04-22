@@ -9,6 +9,7 @@ brew install xcbeautify
 
 echo "Generating iOS project files"
 cd services/files
+npx gulp
 npx cap sync ios
 cd ../..
 

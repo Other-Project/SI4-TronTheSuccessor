@@ -35,7 +35,7 @@ export class ProfileOverview extends HTMLComponent {
 
     async #manageFriend(friend, action) {
         const response = await fetchApi(`/api/user/friends/${friend}`, {
-            method: action === "add" ? "POST" : "DELETE",
+            method: action === "add" ? "POST" : "DELETE"
         });
         if (response.ok) {
             if (action === "add") this.#showNotification("Friend request sent!", 2000, "#8E24AA", "white");
@@ -79,8 +79,7 @@ export class ProfileOverview extends HTMLComponent {
 
     #refresh() {
         if (!this.rank || !this.stats || !this.friends) return;
-        if (this.stats.loggedusername && this.stats.loggedusername === this.stats.username)
-            this.buttons.classList.toggle("logged-in");
+        this.buttons.classList.toggle("logged-in", this.stats.loggedusername && this.stats.loggedusername === this.stats.username);
 
         this.buttons.classList.toggle("add", !this.friends.friends.includes(this.stats.username));
 

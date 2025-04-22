@@ -5,7 +5,7 @@
     align-items: center;
     background-color: #1C1A1AFF;
     padding: 10px;
-    margin-bottom: 20px;
+    margin: auto auto 20px auto;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -84,4 +84,19 @@ label {
     background: #000002;
     border-radius: 50%;
     border: 2px solid rgb(102, 26, 113);
+}
+
+@media (max-height: 425px) {
+    #board-container {
+        max-width: 70%;
+    }
+
+    #play-pause, #next-btn, #previous-btn {
+        width: 25px;
+        height: 25px;
+    }
+
+    #play-pause img, #next-btn img, #previous-btn img {
+        height: 17px;
+    }
 }

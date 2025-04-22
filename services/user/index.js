@@ -17,7 +17,7 @@ http.createServer(async (request, response) => {
         if (filePath[3] === "sign-up" && request.method === "POST") return await handleSignUp(request, response);
         else if (filePath[3] === "sign-in" && request.method === "POST") return await handleSignIn(request, response);
         else if (filePath[3] === "renew-access-token" && request.method === "GET") return await handleRenewToken(request, response);
-        else if (filePath[3] === "security-questions" && request.method === "GET") return await handleSecurityQuestions(request, response);
+        else if (filePath[3] === "security-questions" && request.method === "POST") return await handleSecurityQuestions(request, response);
         else if (filePath[3] === "verify-answers" && request.method === "POST") return await handleVerifyAnswers(request, response);
         else if (filePath[3] === "reset-password" && request.method === "POST") return await handleResetPassword(request, response);
         else if (filePath[3] === "check" && request.method === "GET") return await handleGetUser(request, response, filePath[4]);

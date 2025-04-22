@@ -9,4 +9,6 @@ body {
     margin: 0;
 
     font-family: "Tomorrow", serif;
+
+    touch-action: pan-x pan-y;
 }

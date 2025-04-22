@@ -1,6 +1,8 @@
 <div class="container">
-    <app-chat-room-button id="global" icon="/assets/chat.svg" name="Global Chat"></app-chat-room-button>
+    <app-chat-room-button icon="/assets/chat.svg" id="global" name="Global Chat"></app-chat-room-button>
 
     <h2>Friends</h2>
-    <div id="friend-list"></div>
+    <div id="friend-list">
+        <app-loading-spinner>Loading friends list</app-loading-spinner>
+    </div>
 </div>

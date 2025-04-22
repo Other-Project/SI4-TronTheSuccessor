@@ -11,14 +11,17 @@ export class ChatSelection extends HTMLComponent {
         this.globalChat = this.shadowRoot.getElementById("global");
         this.globalChat.addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
+        this.spinner = this.shadowRoot.querySelector("app-loading-spinner");
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
         notificationService.addEventListener("unread-notification", this.#updateMessageNotification);
         notificationService.addEventListener("refresh-friend-list", this.onVisible);
     };
 
     onVisible = async () => {
+        this.spinner.setAttribute("show", "true");
         this.friendList = await this.#getFriendList();
         this.#updateFriendListPanel();
+        this.spinner.removeAttribute("show");
         await this.#updateGlobalChat();
     };
 
@@ -56,7 +59,8 @@ export class ChatSelection extends HTMLComponent {
 
     async #updateGlobalChat() {
         const globalChatRoom = await fetchApi("/api/chat/global?limit=1").then(response => response.json());
-        this.globalChat.setAttribute("preview", globalChatRoom[0].content);
+        if (globalChatRoom.length >= 1)
+            this.globalChat.setAttribute("preview", globalChatRoom[0].content);
     }
 
     /**

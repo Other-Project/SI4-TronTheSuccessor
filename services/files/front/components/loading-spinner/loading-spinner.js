@@ -23,6 +23,6 @@ export class LoadingSpinner extends HTMLComponent {
     }
 
     #refresh() {
-        this.spinner.classList.toggle("show", this.show === "true");
+        if (this.spinner) this.spinner.classList.toggle("show", this.show === "true");
     }
 }

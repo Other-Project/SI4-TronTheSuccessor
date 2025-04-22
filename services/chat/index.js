@@ -21,7 +21,7 @@ const server = http.createServer(async (request, response) => {
         const roomId = getRoomId(user.username, room);
         if (request.method === "GET") {
             const before = requestUrl.searchParams.get("before");
-            const messages = await chatDatabase.getChat(roomId, before, parseInt(requestUrl.searchParams.get("limit")) || 25);
+            const messages = await chatDatabase.getChat(roomId, before, Math.max(1, Math.min(25, parseInt(requestUrl.searchParams.get("limit")))) || 25);
             return sendResponse(response, HTTP_STATUS.OK, messages);
         } else if (request.method === "POST") {
             const message = JSON.parse(await getRequestBody(request));

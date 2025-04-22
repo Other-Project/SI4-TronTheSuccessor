@@ -2,3 +2,6 @@ node_modules
 Dockerfile
 .dockerignore
 README.md
+ios/
+android/
+capacitor.config.json

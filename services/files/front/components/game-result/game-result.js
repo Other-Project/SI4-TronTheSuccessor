@@ -46,9 +46,8 @@ export class GameResult extends HTMLComponent {
             return;
         }
 
-        const result = !this.#gameData.winner ? "Draw" : this.#gameData.winner === username ? "Victory" : "Defeat";
-        this.statusElement.textContent = result;
-        this.statusElement.className = "status " + result.toLowerCase();
+        const result = !this.#gameData.winner ? "draw" : this.#gameData.winner === username ? "victory" : "defeat";
+        this.statusElement.className = "status " + result;
 
         this.opponentElement.innerHTML = "";
         let first = true;

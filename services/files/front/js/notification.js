@@ -134,10 +134,10 @@ export class NotificationService extends EventTarget {
             this.notificationSetUp = true;
             await this.createNotificationChannel();
             await this.setupNotificationActions();
-            await PushNotifications.register();
 
             this.setupLocalNotificationListeners();
             this.setupPushListeners();
+            PushNotifications.register();
         }
     }
 
@@ -227,7 +227,6 @@ export class NotificationService extends EventTarget {
     setupLocalNotificationListeners() {
         LocalNotifications.addListener("localNotificationActionPerformed", async (notification) => {
             const actionId = notification.actionId;
-            console.log(notification);
             if (notification.notification.extra.redirect) changePage(notification.notification.extra.redirect);
             if (!actionId) return;
             const friend = notification.notification.extra.friend;

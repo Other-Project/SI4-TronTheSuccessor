@@ -37,3 +37,29 @@ exports.removeNotification = async function (playerId, otherPlayerId) {
         fromPlayer: otherPlayerId
     });
 };
+
+/**
+ * Register a notification token for a player.
+ * @param playerId The username of the player.
+ * @param token The notification token.
+ * @param device The device of the player.
+ * @returns {Promise<void>} Promise resolving when the token is registered.
+ */
+exports.registerNotificationToken = async function (playerId, token, device) {
+    await notificationCollection.updateOne(
+        {playerId: playerId},
+        {$set: {token: token, device: device}},
+        {upsert: true}
+    );
+};
+
+/**
+ * Get the notification token for a player.
+ * @param playerId The username of the player.
+ * @returns {Promise<string>} The notification token.
+ */
+exports.getNotificationToken = async function (playerId) {
+    console.log(await notificationCollection.findOne({playerId: playerId}));
+    const data = await notificationCollection.findOne({playerId: playerId});
+    return data?.token || null;
+};

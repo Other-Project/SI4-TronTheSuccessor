@@ -3,9 +3,14 @@ const {HTTP_STATUS, sendResponse, getUser, getRequestBody} = require("./js/utils
 const {getFriendsList} = require("./helper/userHelper.js");
 const {Server} = require("socket.io");
 const notificationDatabase = require("./js/notification-database.js");
+const admin = require("firebase-admin");
+const serviceAccount = require("./tronthesuccessor-firebase-adminsdk-fbsvc-f8e620f65d.json");
 
 let connectedUsers = new Map();
 let numberOfConnectedUsers = 0;
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 
 const server = http.createServer(async (request, response) => {
     const filePath = request.url.split("/").filter(elem => elem !== ".." && elem !== "");
@@ -15,6 +20,7 @@ const server = http.createServer(async (request, response) => {
     if (filePath.length === 3 && filePath[2] === "chat" && request.method === "POST") await handleUnreadNotification(request, user.username);
     else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") await handleFriendListModification(request, user.username, true);
     else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "DELETE") await handleFriendListModification(request, user.username, false);
+    else if (filePath.length === 3 && filePath[2] === "register" && request.method === "POST") await handleRegisterNotificationToken(request, response, user.username);
     else return sendResponse(response, HTTP_STATUS.NOT_FOUND);
 }).listen(8005);
 
@@ -79,12 +85,28 @@ async function handleFriendListModification(request, username, add) {
     }
 
     if (!friendSocketId) return;
+    else if (data.pending) {
+        const token = await notificationDatabase.getNotificationToken(data.username);
+        if (!token) return data;
+        await sendPushNotification(
+            token,
+            `${username} sent you a friend request`,
+            "Do you wish to accept it?",
+            {
+                channelId: "important-notifications",
+                actionTypeId: "response-action",
+                extra: {
+                    friend: username,
+                    redirect: `/#${username}`
+                }
+            }
+        );
+    }
 
     io.to(friendSocketId).emit("refreshFriendList", {username: username, pending: data.pending});
     if (connectedUsers.has(username) && !data.pending) io.to(friendSocketId).emit(add ? "connected" : "disconnected", {username: username});
 
 }
-
 
 /**
  * Handle the unread notification event.
@@ -98,5 +120,82 @@ async function handleUnreadNotification(request, username) {
     const friendSocketId = connectedUsers.get(data.username);
     await notificationDatabase.addNotification(data.username, username);
     if (friendSocketId) io.to(friendSocketId).emit("unreadNotification", {username: username});
+    else {
+        const token = await notificationDatabase.getNotificationToken(data.username);
+        if (!token) return data;
+        await sendPushNotification(
+            token,
+            `${username} sent you a message`,
+            "I would love to display the message but, the Giga Chad backend only send the username 🗿",
+            {
+                channelId: "default-notifications",
+                extra: {
+                    friend: username,
+                    redirect: `/#${username}`
+                }
+            }
+        );
+    }
     return data;
+}
+
+/**
+ * Handle the register notification token event.
+ * @param {module:http.IncomingMessage} request the request object
+ * @param {module:http.ServerResponse} response the response object
+ * @param {string} username the username of the user who sent the message
+ */
+async function handleRegisterNotificationToken(request, response, username) {
+    const body = await getRequestBody(request);
+    const data = JSON.parse(body);
+    await notificationDatabase.registerNotificationToken(username, data.token, data.device);
+    return sendResponse(response, HTTP_STATUS.OK, {message: "Notification token registered"});
+}
+
+/**
+ * Send a push notification to a user.
+ * @param {string} userToken The user's notification token.
+ * @param {string} title The notification title.
+ * @param {string} body The notification body.
+ * @param options
+ */
+async function sendPushNotification(userToken, title, body, options = {}) {
+    try {
+        const message = {
+            token: userToken,
+            notification: {
+                title: title,
+                body: body
+            },
+            data: {
+                ...(options.extra || {}),
+                redirect: options.redirect || "",
+                channelId: options.channelId || "default-notifications",
+                actionTypeId: options.actionTypeId || ""
+            },
+            android: {
+                notification: {
+                    channelId: options.channelId || "default-notifications",
+                    clickAction: options.actionTypeId || ""
+                }
+            },
+            // iOS specific settings
+            apns: {
+                payload: {
+                    aps: {
+                        category: options.actionTypeId || "",
+                        contentAvailable: true
+                    }
+                },
+                fcmOptions: {}
+            }
+        };
+
+        const response = await admin.messaging().send(message);
+        console.log("Successfully sent message: ", response);
+        return response;
+    } catch (error) {
+        console.error("Error sending message: ", error);
+        throw error;
+    }
 }

@@ -102,9 +102,9 @@ export class GameMaster extends HTMLComponent {
             ? new FlowBird(selectedInventory.secondChoiceColors, selectedInventory.spaceships.id)
             : new HumanPlayer("Player 2", selectedInventory.secondChoiceColors, selectedInventory.spaceships.id);
         this.game = new Game(this.gridSize[0], this.gridSize[1], player, opponent, 500);
-        this.game.addEventListener("game-turn", (e) => {
+        this.game.addEventListener("game-turn", async (e) => {
             this.gameBoard.draw(this.game);
-            if (e.detail.ended) this.endScreen(e.detail);
+            if (e.detail.ended) await this.endScreen(e.detail);
         });
         this.game.init();
         this.matchIntro.removeAttribute("opponent");
@@ -128,9 +128,11 @@ export class GameMaster extends HTMLComponent {
         clearInterval(this.timer);
     }
 
-    endScreen(details) {
+    async endScreen(details) {
         this.stopGame();
 
+        if (Capacitor.isNativePlatform() && (getUserInfo()?.username !== details.winner || details.draw || this.against === "local"))
+            await Capacitor.Plugins.Haptics.vibrate();
         this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = "none";
         this.pauseTitle.innerText = details.draw ? "Draw" : details.winner + " won";
@@ -207,7 +209,7 @@ export class GameMaster extends HTMLComponent {
             msg["gameInvitationToken"] = getCookie("gameInvitationToken");
         this.socket.emit("game-join", msg);
 
-        this.socket.on("game-info", (msg) => {
+        this.socket.on("game-info", async (msg) => {
             const reverse = msg.yourNumber === 2;
 
             const msgPlayers = reverse ? msg.players.toReversed() : msg.players;
@@ -220,7 +222,7 @@ export class GameMaster extends HTMLComponent {
                 this.playersName[i].innerText = player.name;
                 player.init(i + 1, this.game.playerStatesTransform(msg.playerStates, this.game.reversed));
             });
-            this.#applyMessage(msg, this.game.reversed);
+            await this.#applyMessage(msg, this.game.reversed);
 
             this.waitingWindow.style.display = "none";
             this.container.style.visibility = "visible";
@@ -234,9 +236,9 @@ export class GameMaster extends HTMLComponent {
             this.game.startTime = msg.startTime;
         });
 
-        this.socket.on("game-turn", (msg) => this.#applyMessage(msg, this.game.reversed));
+        this.socket.on("game-turn", async (msg) => await this.#applyMessage(msg, this.game.reversed));
 
-        this.socket.on("game-end", (msg) => this.endScreen(msg));
+        this.socket.on("game-end", async (msg) => await this.endScreen(msg));
 
         this.socket.on("emote", (msg) => {
             const emoteDisplay = document.createElement("app-game-emote-display");
@@ -246,7 +248,7 @@ export class GameMaster extends HTMLComponent {
         });
     }
 
-    #applyMessage(msg, reverse = false) {
+    async #applyMessage(msg, reverse = false) {
         if (!this.game) {
             console.warn("Game not initialized");
             this.socket.disconnect();
@@ -255,7 +257,7 @@ export class GameMaster extends HTMLComponent {
         this.game.grid = reverse ? msg.grid.toReversed().map(r => r.toReversed().map(c => c === 1 ? 2 : (c === 2 ? 1 : c))) : msg.grid;
         this.game.setPlayerStates(msg.playerStates, reverse);
         this.gameBoard.draw(this.game);
-        if (msg.ended) this.endScreen(msg);
+        if (msg.ended) await this.endScreen(msg);
     }
 
     #sendEmote(emote) {

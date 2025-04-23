@@ -21,13 +21,14 @@ export class ProfilePage extends HTMLComponent {
 
         this.shadowRoot.getElementById("home-page").addEventListener("click", () => changePage("/"));
 
+        this.actionButtons = this.shadowRoot.getElementById("action-buttons");
         this.share = this.shadowRoot.getElementById("share");
         this.share.addEventListener("click", () => {
             if (Capacitor.isNativePlatform())
                 Capacitor.Plugins.Share.share({
                     title: "Tron: The Successor",
-                    text: "I want to share this Tron: The Successor profile with you",
-                    url: new URL("https://tronsuccessor.ps8.pns.academy", location.pathname).toString(),
+                    text: "I want to share this Tron: The Successor profile with you.",
+                    url: new URL(location.pathname, "https://tronsuccessor.ps8.pns.academy").toString(),
                     dialogTitle: "Share this profile"
                 });
             else navigator.clipboard.writeText(location.href)
@@ -44,7 +45,7 @@ export class ProfilePage extends HTMLComponent {
     onVisible = () => this.#refresh().then();
 
     async #getStatus(username) {
-        if (this.stats.username === this.stats.loggedusername) return {isYou: true, isFriend: false, isPending: false};
+        if (username === this.stats.loggedusername) return {isYou: true, isFriend: false, isPending: false};
         const response = await fetchApi("/api/user/friends", {method: "GET"});
         const friends = response.ok ? await response.json() : null;
         return {
@@ -69,9 +70,7 @@ export class ProfilePage extends HTMLComponent {
             return;
         }
 
-        this.share.classList.toggle("hidden", true);
-        this.addFriend.classList.toggle("hidden", true);
-        this.removeFriend.classList.toggle("hidden", true);
+        this.actionButtons.classList.toggle("hidden", true);
 
         this.usernameElement.textContent = userName;
         const response = await fetchApi(`/api/game/stats/${userName}`, undefined, false);
@@ -84,15 +83,17 @@ export class ProfilePage extends HTMLComponent {
         this.stats.loggedusername = loggedUser;
         this.overview.setAttribute("stats", JSON.stringify(this.stats));
         this.leaderboard.setAttribute("stats", JSON.stringify(this.stats));
-        this.history.dataset.tabDisabled = userName === loggedUser ? "false" : "true";
-        this.tabNavigation.changeTab("overview");
-        this.share.classList.toggle("hidden", false);
 
         const {isYou, isFriend, isPending} = await this.#getStatus(this.stats.username);
+        this.history.dataset.tabDisabled = (!isYou).toString();
+        this.share.classList.toggle("hidden", false);
         this.addFriend.classList.toggle("hidden", isYou || isFriend);
         this.removeFriend.classList.toggle("hidden", isYou || isPending || !isFriend);
         this.addFriend.button.disabled = isPending;
         this.addFriend.title = isPending ? "Friend request already sent" : "";
+
+        this.tabNavigation.changeTab("overview");
+        this.actionButtons.classList.toggle("hidden", false);
     }
 
     async #manageFriend(friend, add) {

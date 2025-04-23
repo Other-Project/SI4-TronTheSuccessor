@@ -5,7 +5,7 @@ $SDK=$env:ANDROID_HOME
 cd services/files
 
 echo "Generating Android build files"
-npx cap sync
+npx cap sync android
 
 echo "Building Android app"
 cd android

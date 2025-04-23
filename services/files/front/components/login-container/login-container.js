@@ -17,6 +17,7 @@ export class LoginContainer extends HTMLComponent {
         this.disconnectButton = this.shadowRoot.getElementById("disconnect-button");
         this.disconnectButton.addEventListener("click", () => disconnect());
         this.shadowRoot.getElementById("cancel-button").addEventListener("click", () => this.show());
+        this.show();
     };
 
     onVisible = () => this.show();

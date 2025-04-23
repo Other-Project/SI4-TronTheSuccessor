@@ -16,12 +16,12 @@ export class SignUpPopup extends HTMLComponent {
 
     onSetupCompleted = async () => {
         this.firstQuestion = this.shadowRoot.getElementById("first-security-question");
-        this.firstAnswer = this.shadowRoot.getElementById("first-answer-input").input_answer;
+        this.firstAnswer = this.shadowRoot.getElementById("first-answer-input");
         this.secondQuestion = this.shadowRoot.getElementById("second-security-question");
-        this.secondAnswer = this.shadowRoot.getElementById("second-answer-input").input_answer;
-        this.username = this.shadowRoot.getElementById("username-input").input_answer;
-        this.password = this.shadowRoot.getElementById("password-input").input_answer;
-        this.confirmPassword = this.shadowRoot.getElementById("confirm-password-input").input_answer;
+        this.secondAnswer = this.shadowRoot.getElementById("second-answer-input");
+        this.username = this.shadowRoot.getElementById("username-input");
+        this.password = this.shadowRoot.getElementById("password-input");
+        this.confirmPassword = this.shadowRoot.getElementById("confirm-password-input");
 
         await this.#injectSecurityQuestions();
 
@@ -52,16 +52,16 @@ export class SignUpPopup extends HTMLComponent {
         const firstQuestionText = this.firstQuestion.options[this.firstQuestion.selectedIndex].text;
         const secondQuestionText = this.secondQuestion.options[this.secondQuestion.selectedIndex].text;
         const body = {
-            username: this.username.value,
-            password: this.password.value,
+            username: this.username.input.value,
+            password: this.password.input.value,
             securityQuestions: [
                 {
                     question: firstQuestionText,
-                    answer: this.firstAnswer.value
+                    answer: this.firstAnswer.input.value
                 },
                 {
                     question: secondQuestionText,
-                    answer: this.secondAnswer.value
+                    answer: this.secondAnswer.input.value
                 }
             ]
         };
@@ -78,32 +78,32 @@ export class SignUpPopup extends HTMLComponent {
     }
 
     #checkFirstPageInputs() {
-        this.username.setCustomValidity("");
-        this.password.setCustomValidity("");
-        this.confirmPassword.setCustomValidity("");
+        this.username.input.setCustomValidity("");
+        this.password.input.setCustomValidity("");
+        this.confirmPassword.input.setCustomValidity("");
 
-        if (!this.username.validity.valid)
-            this.username.setCustomValidity("this.username must be at least 3 characters long and less than 20.");
+        if (!this.username.input.validity.valid)
+            this.username.input.setCustomValidity("this.username must be at least 3 characters long and less than 20.");
 
-        if (!this.password.validity.valid)
-            this.password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        if (!this.password.input.validity.valid)
+            this.password.input.setCustomValidity("Password must be at least 6 characters long and less than 20.");
 
-        if (!this.confirmPassword.validity.valid)
-            this.confirmPassword.setCustomValidity("Please confirm your password.");
+        if (!this.confirmPassword.input.validity.valid)
+            this.confirmPassword.input.setCustomValidity("Please confirm your password.");
 
-        if (this.password.value !== this.confirmPassword.value)
-            this.confirmPassword.setCustomValidity("Passwords do not match.");
+        if (this.password.input.value !== this.confirmPassword.input.value)
+            this.confirmPassword.input.setCustomValidity("Passwords do not match.");
 
-        if (!this.username.checkValidity() || !this.password.checkValidity() || !this.confirmPassword.checkValidity())
+        if (!this.username.input.checkValidity() || !this.password.input.checkValidity() || !this.confirmPassword.input.checkValidity())
             this.#showPage("first-page");
 
-        this.confirmPassword.reportValidity();
-        this.password.reportValidity();
-        this.username.reportValidity();
+        this.confirmPassword.input.reportValidity();
+        this.password.input.reportValidity();
+        this.username.input.reportValidity();
 
-        return this.username.validity.valid
-            && this.password.validity.valid
-            && this.confirmPassword.validity.valid;
+        return this.username.input.validity.valid
+            && this.password.input.validity.valid
+            && this.confirmPassword.input.validity.valid;
     }
 
     #checkSecondPageInputs() {
@@ -112,28 +112,28 @@ export class SignUpPopup extends HTMLComponent {
             return;
         }
 
-        this.firstAnswer.setCustomValidity("");
-        this.secondAnswer.setCustomValidity("");
+        this.firstAnswer.input.setCustomValidity("");
+        this.secondAnswer.input.setCustomValidity("");
         this.firstQuestion.setCustomValidity("");
 
-        if (!this.firstAnswer.validity.valid)
-            this.firstAnswer.setCustomValidity("Please provide an answer to the first security question.");
+        if (!this.firstAnswer.input.validity.valid)
+            this.firstAnswer.input.setCustomValidity("Please provide an answer to the first security question.");
 
-        if (!this.secondAnswer.validity.valid)
-            this.secondAnswer.setCustomValidity("Please provide an answer to the second security question.");
+        if (!this.secondAnswer.input.validity.valid)
+            this.secondAnswer.input.setCustomValidity("Please provide an answer to the second security question.");
 
-        if (!this.firstAnswer.checkValidity() || !this.secondAnswer.checkValidity())
+        if (!this.firstAnswer.input.checkValidity() || !this.secondAnswer.input.checkValidity())
             this.#showPage("second-page");
 
         if (this.shadowRoot.getElementById("first-security-question").value === this.shadowRoot.getElementById("second-security-question").value)
             this.firstQuestion.setCustomValidity("Please choose two different questions");
 
         this.firstQuestion.reportValidity();
-        this.secondAnswer.reportValidity();
-        this.firstAnswer.reportValidity();
+        this.secondAnswer.input.reportValidity();
+        this.firstAnswer.input.reportValidity();
 
-        return this.firstAnswer.validity.valid
-            && this.secondAnswer.validity.valid
+        return this.firstAnswer.input.validity.valid
+            && this.secondAnswer.input.validity.valid
             && this.firstQuestion.validity.valid;
     }
 
@@ -175,10 +175,10 @@ export class SignUpPopup extends HTMLComponent {
     }
 
     #clearInputs() {
-        this.username.value = "";
-        this.password.value = "";
-        this.confirmPassword.value = "";
-        this.firstAnswer.value = "";
-        this.secondAnswer.value = "";
+        this.username.input.value = "";
+        this.password.input.value = "";
+        this.confirmPassword.input.value = "";
+        this.firstAnswer.input.value = "";
+        this.secondAnswer.input.value = "";
     }
 }

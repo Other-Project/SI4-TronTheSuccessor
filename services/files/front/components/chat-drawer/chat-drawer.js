@@ -23,6 +23,7 @@ export class ChatDrawer extends HTMLComponent {
         document.addEventListener("hide-drawer", () => {
             this.hide();
         });
+        this.onVisible();
     };
 
     onVisible = () => {

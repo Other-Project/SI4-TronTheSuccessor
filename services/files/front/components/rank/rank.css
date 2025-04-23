@@ -1,6 +1,7 @@
 :host {
-    display: inline-flex;
     height: 1em;
+    aspect-ratio: 1/1;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }

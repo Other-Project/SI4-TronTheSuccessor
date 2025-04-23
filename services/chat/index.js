@@ -109,7 +109,7 @@ io.on("connection", (socket) => {
         }
 
         io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
-        if (roomId !== "global") await notifyMessageSent(socket.request.headers.authorization, roomId.filter(elem => elem !== user.username)[0]);
         callback?.(true);
+        if (roomId !== "global") await notifyMessageSent(socket.request.headers.authorization, roomId.filter(elem => elem !== user.username)[0]);
     });
 });

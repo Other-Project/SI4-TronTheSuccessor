@@ -14,6 +14,7 @@ export class ProfilePage extends HTMLComponent {
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
         this.ranking = this.shadowRoot.getElementById("ranking");
+        this.rankingContainer = this.shadowRoot.getElementById("ranking-container");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
 
         this.usernameElement = this.shadowRoot.getElementById("username");
@@ -53,7 +54,7 @@ export class ProfilePage extends HTMLComponent {
         }
         this.history.dataset.tabDisabled = userName === loggedUser ? "false" : "true";
         if (!Capacitor.isNativePlatform())
-            this.ranking.dataset.tabDisabled = "true";
+            this.rankingContainer.dataset.tabDisabled = "true";
         this.tabNavigation.changeTab("overview");
     };
 }

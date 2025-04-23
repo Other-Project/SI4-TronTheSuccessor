@@ -1,7 +1,6 @@
 #rank-distribution-container {
     display: flex;
     flex-direction: column;
-    height: 340%;
     text-align: center;
     color: white;
 
@@ -26,5 +25,11 @@
 
     #hover-info:not(.active) {
         visibility: hidden;
+    }
+}
+
+@media (max-width: 900px) and (max-height: 480px) {
+    #rank-distribution-container {
+        flex-direction: row;
     }
 }

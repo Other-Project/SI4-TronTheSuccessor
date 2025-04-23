@@ -1,22 +1,22 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, getUserInfo} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
-import notificationService from "../../js/notification.js";
+import notificationService from "/js/notification.js";
 import "/js/capacitor.min.js";
 
 export class ProfilePage extends HTMLComponent {
     constructor() {
-        super("profile-page", ["html", "css"]);
+        super("profile-page", ["html", "css"], "profile");
     }
 
     onSetupCompleted = () => {
         this.profilePage = this.shadowRoot.getElementById("profile-page");
-        this.overview = this.shadowRoot.getElementById("overview");
+        this.profileStats = this.shadowRoot.getElementById("overview");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
 
-        this.usernameElement = this.shadowRoot.getElementById("username");
+        this.userInfo = this.shadowRoot.getElementById("userinfo");
         this.tabNavigation = this.shadowRoot.getElementById("tab-navigation");
 
         this.shadowRoot.getElementById("home-page").addEventListener("click", () => changePage("/"));
@@ -64,15 +64,14 @@ export class ProfilePage extends HTMLComponent {
             changePage(`/profile/${loggedUser}`, true);
             userName = loggedUser;
         }
-
         if (!userName) {
             changePage("/", true);
             return;
         }
 
+
         this.actionButtons.classList.toggle("hidden", true);
 
-        this.usernameElement.textContent = userName;
         const response = await fetchApi(`/api/game/stats/${userName}`, undefined, false);
         this.profilePage.classList.toggle("not-found", !response.ok);
         this.notFoundUser.textContent = userName;
@@ -81,8 +80,16 @@ export class ProfilePage extends HTMLComponent {
         this.stats = await response.json();
         this.stats.username = userName;
         this.stats.loggedusername = loggedUser;
-        this.overview.setAttribute("stats", JSON.stringify(this.stats));
+        this.userInfo.setAttribute("stats", JSON.stringify(this.stats));
         this.leaderboard.setAttribute("stats", JSON.stringify(this.stats));
+
+        this.profileStats.setAttribute("games", this.stats.games);
+        this.profileStats.setAttribute("time", this.stats.timePlayed);
+        this.profileStats.setAttribute("streak", this.stats.winStreak);
+        const totalGames = this.stats.games - this.stats.draws;
+        if (totalGames === 0) this.profileStats.setAttribute("winrate", "-");
+        else this.profileStats.setAttribute("winrate", Math.round((this.stats.wins * 100 / totalGames)));
+
 
         const {isYou, isFriend, isPending} = await this.#getStatus(this.stats.username);
         this.history.dataset.tabDisabled = (!isYou).toString();

@@ -78,3 +78,9 @@ app-game-choice {
         box-shadow: 0 0 0 0 rgba(237, 190, 255, 0);
     }
 }
+
+@media (max-width: 480px) or (max-height: 480px) {
+    app-game-choice {
+        max-width: 250px;
+    }
+}

@@ -62,12 +62,11 @@
             grid-row: 1;
 
             #profile-buttons-container {
-                gap: 0;
+                gap: 16px;
             }
 
             #profile-buttons-container > * {
                 font-size: 0.6em;
-                padding: 8px;
             }
         }
 

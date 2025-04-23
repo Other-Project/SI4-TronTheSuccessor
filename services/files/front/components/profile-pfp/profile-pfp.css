@@ -7,8 +7,6 @@
 }
 
 #pfp {
-    width: 75%;
-    height: 75%;
     border-radius: 50%;
     display: block;
     margin: 0 auto;
@@ -17,7 +15,9 @@
 
 @media (max-height: 480px) and (orientation: landscape) {
     #pfp {
-        width: 40%;
+        width: auto;
+        max-width: 100%;
+        max-height: 20vh;
     }
 }
 
@@ -27,6 +27,8 @@
     }
 
     #pfp {
-        width: 25%;
+        width: auto;
+        max-width: 100%;
+        max-height: 30vh;
     }
 }

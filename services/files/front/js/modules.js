@@ -44,10 +44,12 @@ import {SettingsCarousel} from "/components/settings/settings-carousel/settings-
 import {Badge} from "/components/badge/badge.js";
 import {Avatar} from "/components/avatar/avatar.js";
 import {LoadingSpinner} from "/components/loading-spinner/loading-spinner.js";
+import {Rank} from "/components/rank/rank.js";
 
 // General components
 customElements.define("app-button", Button);
 customElements.define("app-avatar", Avatar);
+customElements.define("app-rank", Rank);
 customElements.define("app-tab-navigation", TabNavigation);
 customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);

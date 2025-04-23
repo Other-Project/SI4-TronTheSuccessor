@@ -56,19 +56,16 @@ export class HumanPlayer extends Player {
         this.#keypressed.add(e.key.toUpperCase());
         let direction = Object.entries(this.keys)
             .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-        if (direction) {
-            super.setNextDirection(direction[0]);
-            this.dispatchEvent(new CustomEvent("player-direction", {
-                detail: {
-                    direction: direction[0],
-                    number: this.number
-                }
-            }));
-        }
+        if (direction) this.#changeDirection(direction[0]);
     }
 
     #onJoystickMove = e => {
         const direction = e.detail.direction;
+        console.log(direction);
+        this.#changeDirection(direction);
+    };
+
+    #changeDirection(direction) {
         super.setNextDirection(direction);
         this.dispatchEvent(new CustomEvent("player-direction", {
             detail: {
@@ -76,7 +73,7 @@ export class HumanPlayer extends Player {
                 number: this.number
             }
         }));
-    };
+    }
 
     #onKeyReleased = e => this.#keypressed.delete(e.key.toUpperCase());
 }

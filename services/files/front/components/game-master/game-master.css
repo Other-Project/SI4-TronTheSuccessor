@@ -71,10 +71,8 @@ h2, p {
 
     #joystick {
         justify-self: start;
-        min-height: 100px;
         display: none;
-        height: 100%;
-        aspect-ratio: 1/1;
+        margin: 0 0 15px 15px;
     }
 
     #timer {
@@ -103,7 +101,7 @@ h2, p {
     }
 }
 
-@media (max-height: 480px) or (max-width: 480px) {
+@media (hover: none) or (max-height: 800px) {
     .container {
         #mobile-container {
             grid-row: 3;

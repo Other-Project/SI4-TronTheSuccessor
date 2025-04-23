@@ -30,6 +30,18 @@ export class TabNavigation extends HTMLComponent {
         this.panelSlot.addEventListener("slotchange", () => this.#recreateTabs());
         this.#refresh();
         this.#recreateTabs();
+
+        this.touchStartX = 0;
+        this.touchEndX = 0;
+
+        this.panels.addEventListener("touchstart", (e) => {
+            this.touchStartX = e.changedTouches[0].screenX;
+        });
+
+        this.panels.addEventListener("touchend", (e) => {
+            this.touchEndX = e.changedTouches[0].screenX;
+            this.#handleSwipe();
+        });
     };
 
     onVisible = () => {
@@ -55,6 +67,29 @@ export class TabNavigation extends HTMLComponent {
     #recreateTabs() {
         this.tabs.innerHTML = "";
         this.#getTabs().forEach(tabPanel => this.#createTabBtn(tabPanel));
+    }
+
+    /**
+     * Handle swipe navigation
+     */
+    #handleSwipe() {
+        const diffX = this.touchEndX - this.touchStartX;
+        if (Math.abs(diffX) < window.screen.width / 3) {
+            return;
+        }
+
+        const activeTab = this.tabs.querySelector("[data-tab-id].active");
+        if (!activeTab) return;
+
+        if (diffX > 0) {
+            const prevTab = activeTab.previousElementSibling;
+            if (prevTab?.dataset?.tabId && prevTab !== this.newtabBtn)
+                this.changeTab(prevTab.dataset.tabId);
+        } else {
+            const nextTab = activeTab.nextElementSibling;
+            if (nextTab?.dataset?.tabId)
+                this.changeTab(nextTab.dataset.tabId);
+        }
     }
 
     /**

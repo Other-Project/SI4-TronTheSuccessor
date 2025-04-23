@@ -1,8 +1,7 @@
 #rank-distribution-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
-
+    height: 340%;
     text-align: center;
     color: white;
 

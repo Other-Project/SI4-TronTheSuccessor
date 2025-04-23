@@ -55,6 +55,11 @@
     padding-top: 20px;
 }
 
+#ranking-container {
+    display: grid;
+    grid-template-rows: 140px minmax(300px, calc(100% - 200px));
+}
+
 @media (max-width: 900px) {
     #profile-header {
         padding: 5px 20px 5px 20px;

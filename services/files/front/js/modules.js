@@ -25,7 +25,6 @@ import {ProfileLeaderboard} from "/components/profile-leaderboard/profile-leader
 import {ProfilePfp} from "/components/profile-pfp/profile-pfp.js";
 import {ProfileStats} from "/components/profile-stats/profile-stats.js";
 import {ProfileRank} from "/components/profile-rank/profile-rank.js";
-import {ProfileRanking} from "/components/profile-ranking/profile-ranking.js";
 import {Notification} from "/components/notification/notification.js";
 import {ChatRoom} from "/components/chat-room/chat-room.js";
 import {ChatRoomMessage} from "/components/chat-room-message/chat-room-message.js";
@@ -87,7 +86,6 @@ customElements.define("app-profile-rank", ProfileRank);
 customElements.define("app-rank-repartition", RankRepartition);
 customElements.define("app-rank-listing", RankListing);
 customElements.define("app-rank-explanation", RankExplanation);
-customElements.define("app-profile-ranking", ProfileRanking);
 
 // Login components
 customElements.define("app-login-container", LoginContainer);

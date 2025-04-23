@@ -21,6 +21,10 @@ export class RankRepartition extends HTMLComponent {
         this.#refresh();
     }
 
+    onVisible = () => {
+        this.#refresh();
+    };
+
     #refresh() {
         if (!this.rankRepartition || !this.stats) return;
         this.playerRank = this.stats.rank;

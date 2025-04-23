@@ -1,4 +1,5 @@
 import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "./login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 import "./socket.io.js";
 import "/js/capacitor.min.js";
 
@@ -11,6 +12,8 @@ export class NotificationService extends EventTarget {
     connectedFriends = [];
     unreadNotifications = [];
     numberOfConnectedUsers = 0;
+    notificationSetUp = false;
+    id = 0;
 
     constructor() {
         super();
@@ -86,10 +89,11 @@ export class NotificationService extends EventTarget {
                         {
                             title: `${notification.username} sent you a message`,
                             body: "I would love to display the message but, the Giga Chad backend only send the username 🗿",
-                            id: Date.now(),
+                            id: this.id++,
                             channelId: "default-notifications",
                             extra: {
-                                friend: notification.username
+                                friend: notification.username,
+                                redirect: `/#${notification.username}`
                             }
                         }
                     ]
@@ -99,19 +103,18 @@ export class NotificationService extends EventTarget {
 
         this.socket.on("refreshFriendList", async (friend) => {
             this.dispatchEvent(new CustomEvent("refresh-friend-list"));
-            if (!friend) return;
+            if (!friend || !friend.pending) return;
             await LocalNotifications.schedule({
                 notifications: [
                     {
                         title: `${friend.username} as sent you a friend request`,
                         body: "Do you wish to accept it?",
-                        id: Date.now(),
+                        id: this.id++,
                         channelId: "important-notifications",
                         actionTypeId: "response-action",
-                        smallIcon: "ic_notification",
-                        sound: "default",
                         extra: {
-                            friend: friend.username
+                            friend: friend.username,
+                            redirect: `/#${friend.username}`
                         }
                     }
                 ]
@@ -124,44 +127,17 @@ export class NotificationService extends EventTarget {
      * @returns {Promise<void>}
      */
     async initializeNotifications() {
-        if (!Capacitor.isNativePlatform()) return;
+        if (!Capacitor.isNativePlatform() || this.notificationSetUp) return;
         const permStatus = await this.requestPermission();
 
-        alert("Notification permission status: " + permStatus);
-
         if (permStatus) {
+            this.notificationSetUp = true;
             await this.createNotificationChannel();
             await this.setupNotificationActions();
             await PushNotifications.register();
 
             this.setupLocalNotificationListeners();
             this.setupPushListeners();
-
-            await this.testNotification();
-        }
-    }
-
-    async testNotification() {
-        const hasPermission = await this.requestPermission();
-
-        if (hasPermission) {
-            await LocalNotifications.schedule({
-                notifications: [
-                    {
-                        id: 123,
-                        title: "Test Notification",
-                        body: "This is a test local notification from Capacitor",
-                        schedule: {at: new Date(Date.now() + 5000)},
-                        channelId: "important-notifications",
-                        autoCancel: true
-                    }
-                ]
-            });
-            console.log("Notification scheduled!");
-            alert("Notification scheduled!");
-        } else {
-            console.log("Notification permission was denied");
-            alert("Notification permission was denied");
         }
     }
 
@@ -193,7 +169,7 @@ export class NotificationService extends EventTarget {
     async requestPermission() {
         const permResultLocal = await LocalNotifications.requestPermissions();
         const permResultPush = await PushNotifications.requestPermissions();
-        return permResultLocal.receive === "granted" && permResultPush.receive === "granted";
+        return permResultLocal.display === "granted" && permResultPush.receive === "granted";
     }
 
     /**
@@ -251,6 +227,9 @@ export class NotificationService extends EventTarget {
     setupLocalNotificationListeners() {
         LocalNotifications.addListener("localNotificationActionPerformed", async (notification) => {
             const actionId = notification.actionId;
+            console.log(notification);
+            if (notification.notification.extra.redirect) changePage(notification.notification.extra.redirect);
+            if (!actionId) return;
             const friend = notification.notification.extra.friend;
 
             await fetchApi(`/api/user/friends/${friend}`, {

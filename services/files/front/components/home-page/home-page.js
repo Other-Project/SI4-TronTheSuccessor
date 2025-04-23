@@ -11,7 +11,7 @@ export class HomePage extends HTMLComponent {
         this.onlinePlayersCount = this.shadowRoot.getElementById("player-count");
         this.onlinePlayers = this.shadowRoot.getElementById("online-players-counter");
         notificationService.addEventListener("user-count-update", this.#updateOnlinePlayersCount);
-        this.#updateOnlinePlayersCount();
+        document.addEventListener("hashchange", () => document.dispatchEvent(new CustomEvent("show-drawer")));
     };
 
     #updateOnlinePlayersCount = () => {

@@ -80,7 +80,7 @@ async function handleFriendListModification(request, username, add) {
 
     if (!friendSocketId) return;
 
-    io.to(friendSocketId).emit("refreshFriendList", {username: username});
+    io.to(friendSocketId).emit("refreshFriendList", {username: username, pending: data.pending});
     if (connectedUsers.has(username) && !data.pending) io.to(friendSocketId).emit(add ? "connected" : "disconnected", {username: username});
 
 }

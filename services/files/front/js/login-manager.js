@@ -10,9 +10,11 @@ export function getCookie(name) {
 }
 
 export async function renewAccessToken() {
+    const refreshToken = getCookie("refreshToken");
+    if(!refreshToken) return;
     const response = await fetchApi("/api/user/renew-access-token", {
         headers: {
-            "Authorization": `Bearer ${getCookie("refreshToken")}`
+            "Authorization": `Bearer ${refreshToken}`
         }
     }, false);
     if (!response.ok) {

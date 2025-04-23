@@ -14,11 +14,11 @@ export class ResetPassword extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.firstAnswerInput = this.shadowRoot.getElementById("first-answer-input").input_answer;
-        this.secondAnswerInput = this.shadowRoot.getElementById("second-answer-input").input_answer;
-        this.usernameInput = this.shadowRoot.getElementById("username-input").input_answer;
-        this.passwordInput = this.shadowRoot.getElementById("new-password-input").input_answer;
-        this.confirmPasswordInput = this.shadowRoot.getElementById("confirm-password-input").input_answer;
+        this.firstAnswerInput = this.shadowRoot.getElementById("first-answer-input");
+        this.secondAnswerInput = this.shadowRoot.getElementById("second-answer-input");
+        this.usernameInput = this.shadowRoot.getElementById("username-input");
+        this.passwordInput = this.shadowRoot.getElementById("new-password-input");
+        this.confirmPasswordInput = this.shadowRoot.getElementById("confirm-password-input");
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             this.dispatchEvent(new CustomEvent("change-popup", {detail: "sign-in", bubbles: true, composed: true}));
@@ -51,43 +51,43 @@ export class ResetPassword extends HTMLComponent {
     };
 
     #usernameCheck() {
-        this.usernameInput.setCustomValidity("");
-        if (!this.usernameInput.validity.valid)
-            this.usernameInput.setCustomValidity("Username must be at least 3 characters long and less than 20.");
-        this.usernameInput.reportValidity();
-        return this.usernameInput.validity.valid;
+        this.usernameInput.input.setCustomValidity("");
+        if (!this.usernameInput.input.validity.valid)
+            this.usernameInput.input.setCustomValidity("Username must be at least 3 characters long and less than 20.");
+        this.usernameInput.input.reportValidity();
+        return this.usernameInput.input.validity.valid;
     }
 
     #answersCheck() {
-        this.firstAnswerInput.setCustomValidity("");
-        this.secondAnswerInput.setCustomValidity("");
+        this.firstAnswerInput.input.setCustomValidity("");
+        this.secondAnswerInput.input.setCustomValidity("");
 
-        if (!this.firstAnswerInput.validity.valid)
-            this.firstAnswerInput.setCustomValidity("Answer cannot be empty");
+        if (!this.firstAnswerInput.input.validity.valid)
+            this.firstAnswerInput.input.setCustomValidity("Answer cannot be empty");
 
-        if (!this.secondAnswerInput.validity.valid)
-            this.secondAnswerInput.setCustomValidity("Answer cannot be empty");
+        if (!this.secondAnswerInput.input.validity.valid)
+            this.secondAnswerInput.input.setCustomValidity("Answer cannot be empty");
 
-        this.secondAnswerInput.reportValidity();
-        this.firstAnswerInput.reportValidity();
+        this.secondAnswerInput.input.reportValidity();
+        this.firstAnswerInput.input.reportValidity();
 
-        return this.firstAnswerInput.validity.valid && this.secondAnswerInput.validity.valid;
+        return this.firstAnswerInput.input.validity.valid && this.secondAnswerInput.input.validity.valid;
     }
 
     #passwordsCheck() {
-        this.passwordInput.setCustomValidity("");
-        this.confirmPasswordInput.setCustomValidity("");
-        if (!this.passwordInput.validity.valid)
-            this.passwordInput.setCustomValidity("Password must be at least 6 characters long and less than 20.");
-        if (this.passwordInput.value !== this.confirmPasswordInput.value)
-            this.confirmPasswordInput.setCustomValidity("Passwords do not match.");
-        this.confirmPasswordInput.reportValidity();
-        this.passwordInput.reportValidity();
-        return this.passwordInput.validity.valid && this.confirmPasswordInput.validity.valid;
+        this.passwordInput.input.setCustomValidity("");
+        this.confirmPasswordInput.input.setCustomValidity("");
+        if (!this.passwordInput.input.validity.valid)
+            this.passwordInput.input.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        if (this.passwordInput.input.value !== this.confirmPasswordInput.input.value)
+            this.confirmPasswordInput.input.setCustomValidity("Passwords do not match.");
+        this.confirmPasswordInput.input.reportValidity();
+        this.passwordInput.input.reportValidity();
+        return this.passwordInput.input.validity.valid && this.confirmPasswordInput.input.validity.valid;
     }
 
     async #fetchSecurityQuestionsForUser() {
-        const username = this.usernameInput.value;
+        const username = this.usernameInput.input.value;
         const response = await fetchPostApi("/api/user/security-questions", {username});
         const data = await response.json();
         if (response.ok) {
@@ -100,9 +100,9 @@ export class ResetPassword extends HTMLComponent {
     }
 
     async #verifyAnswers() {
-        const username = this.usernameInput.value;
-        const firstAnswer = this.firstAnswerInput.value;
-        const secondAnswer = this.secondAnswerInput.value;
+        const username = this.usernameInput.input.value;
+        const firstAnswer = this.firstAnswerInput.input.value;
+        const secondAnswer = this.secondAnswerInput.input.value;
         const body = {username, answers: [firstAnswer, secondAnswer]};
         const response = await fetchPostApi("/api/user/verify-answers", body);
         const data = await response.json();
@@ -115,7 +115,7 @@ export class ResetPassword extends HTMLComponent {
     }
 
     async #resetPassword() {
-        const password = this.passwordInput.value;
+        const password = this.passwordInput.input.value;
         const body = JSON.stringify({newPassword: password});
         const response = await fetchApi("/api/user/reset-password", {
             method: "POST",
@@ -145,7 +145,7 @@ export class ResetPassword extends HTMLComponent {
 
     clearInputs() {
         this.shadowRoot.querySelectorAll("app-input").forEach(element => {
-            if (element.input_answer) element.input_answer.value = "";
+            if (element.input) element.input.value = "";
         });
     }
 }

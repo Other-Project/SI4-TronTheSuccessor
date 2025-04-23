@@ -32,6 +32,12 @@ export class ChatRoomMessage extends HTMLComponent {
             storeTokens(this);
             if (await tryUpdatingGameInvitationStatus("accepted", this.gameInvitationToken))
                 changePage("/game/" + btoa(this.author));
+            else
+                this.#show_notification("Game invitation was already cancelled", 5000, "#f11818", "#000000");
+            this.dispatchEvent(new CustomEvent("refresh-chat-room", {
+                bubbles: true,
+                composed: true
+            }));
         });
         this.refuseGameInvitation.addEventListener("click", async () => {
             if (await tryUpdatingGameInvitationStatus("refused", this.gameInvitationToken)) {
@@ -40,25 +46,15 @@ export class ChatRoomMessage extends HTMLComponent {
                     body: this.author
                 });
                 if (!response.ok) {
-                    document.dispatchEvent(new CustomEvent("show-notification", {
-                        detail: {
-                            message: "An error happened. Failed to refuse the game invitation",
-                            duration: 5000,
-                            background: "#f11818",
-                            color: "#000000"
-                        }
-                    }));
+                    this.#show_notification("An error happened. Failed to refuse the game invitation", 5000, "#f11818", "#000000");
                     return;
                 }
                 document.dispatchEvent(new CustomEvent("hide-drawer"));
-                document.dispatchEvent(new CustomEvent("show-notification", {
-                    detail: {
-                        message: `Game invitation from ${this.author} refused.`,
-                        duration: 5000,
-                        background: "#41ff00",
-                        color: "#000000"
-                    }
+                this.dispatchEvent(new CustomEvent("refresh-chat-room", {
+                    bubbles: true,
+                    composed: true
                 }));
+                this.#show_notification(`Game invitation from ${this.author} refused.`, 5000, "#41ff00", "#000000");
                 document.cookie = "gameInvitationToken=; path=/; max-age=0;";
             }
         });
@@ -87,5 +83,13 @@ export class ChatRoomMessage extends HTMLComponent {
         if (this.expired !== undefined) {
             this.gameInvitation.classList.add("show");
         }
+    }
+
+    #show_notification(message, duration, background, color) {
+        document.dispatchEvent(new CustomEvent("show-notification", {
+            detail: {
+                message, duration, background, color
+            }
+        }));
     }
 }

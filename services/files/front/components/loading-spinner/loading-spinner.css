@@ -1,10 +1,13 @@
-.loading-spinner {
-    display: flex;
+#loading-spinner {
+    display: none;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 20px 0;
     width: 100%;
+    &.show {
+        display: flex;
+    }
 }
 
 .spinner {

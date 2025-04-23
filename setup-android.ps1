@@ -6,6 +6,7 @@ echo "Installing dependencies"
 # Make sure you have Node.js and npm installed (https://nodejs.org/en/download/)
 cd services/files
 npm install
+npx gulp
 cd ../..
 
 echo "Installing Android SDK"

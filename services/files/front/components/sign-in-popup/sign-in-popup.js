@@ -10,8 +10,8 @@ export class SignInPopup extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.username = this.shadowRoot.getElementById("username-input").input_answer;
-        this.password = this.shadowRoot.getElementById("password-input").input_answer;
+        this.username = this.shadowRoot.getElementById("username-input");
+        this.password = this.shadowRoot.getElementById("password-input");
 
         this.shadowRoot.getElementById("link").addEventListener("click", () => {
             this.dispatchEvent(new CustomEvent("change-popup", {detail: "sign-up", bubbles: true, composed: true}));
@@ -32,8 +32,8 @@ export class SignInPopup extends HTMLComponent {
     };
 
     async #loginFetch() {
-        const username_value = this.username.value;
-        const password_value = this.password.value;
+        const username_value = this.username.input.value;
+        const password_value = this.password.input.value;
         const body = {username: username_value, password: password_value};
         const response = await fetchPostApi("/api/user/sign-in", body);
         const data = await response.json();
@@ -47,24 +47,23 @@ export class SignInPopup extends HTMLComponent {
     }
 
     correctInputs() {
-        this.username.setCustomValidity("");
-        this.password.setCustomValidity("");
+        this.username.input.setCustomValidity("");
+        this.password.input.setCustomValidity("");
 
-        if (!this.username.validity.valid)
-            this.username.setCustomValidity("Username must be at least 3 characters long and less than 20.");
+        if (!this.username.input.validity.valid)
+            this.username.input.setCustomValidity("Username must be at least 3 characters long and less than 20.");
 
-        if (!this.password.validity.valid)
-            this.password.setCustomValidity("Password must be at least 6 characters long and less than 20.");
+        if (!this.password.input.validity.valid)
+            this.password.input.setCustomValidity("Password must be at least 6 characters long and less than 20.");
 
-        this.password.reportValidity();
-        this.username.reportValidity();
+        this.password.input.reportValidity();
+        this.username.input.reportValidity();
 
-        return this.username.validity.valid &&
-            this.password.validity.valid;
+        return this.username.input.validity.valid && this.password.input.validity.valid;
     }
 
     #clearInputs() {
-        this.username.value = "";
-        this.password.value = "";
+        this.username.input.value = "";
+        this.password.input.value = "";
     }
 }

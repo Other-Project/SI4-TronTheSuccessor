@@ -14,7 +14,7 @@ export async function renewAccessToken() {
     if(!refreshToken) return;
     const response = await fetchApi("/api/user/renew-access-token", {
         headers: {
-            "Authorization": `Bearer $refreshToken}`
+            "Authorization": `Bearer ${refreshToken}`
         }
     }, false);
     if (!response.ok) {

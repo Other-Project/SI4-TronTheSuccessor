@@ -11,7 +11,7 @@ export class ProfilePage extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.profilePage = this.shadowRoot.getElementById("profile-page");
-        this.profileStats = this.shadowRoot.getElementById("overview");
+        this.profileStats = this.shadowRoot.getElementById("stats");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
@@ -99,7 +99,7 @@ export class ProfilePage extends HTMLComponent {
         this.addFriend.button.disabled = isPending;
         this.addFriend.title = isPending ? "Friend request already sent" : "";
 
-        this.tabNavigation.changeTab("overview");
+        this.tabNavigation.changeTab("leaderboard");
         this.actionButtons.classList.toggle("hidden", false);
     }
 

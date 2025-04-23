@@ -12,14 +12,12 @@
     </header>
 
     <main>
-        <div id="userinfo-panel">
-            <app-profile-userinfo id="userinfo" class="panel"></app-profile-userinfo>
-        </div>
+        <app-profile-userinfo id="userinfo" class="panel"></app-profile-userinfo>
+        <app-profile-stats id="stats" class="panel"></app-profile-stats>
 
         <app-tab-navigation id="tab-navigation" readonly="true">
-            <app-profile-stats id="overview" data-tab-title="Overview"></app-profile-stats>
-            <app-profile-history id="history" data-tab-title="History"></app-profile-history>
             <app-profile-leaderboard id="leaderboard" data-tab-title="Ranking"></app-profile-leaderboard>
+            <app-profile-history id="history" data-tab-title="History"></app-profile-history>
         </app-tab-navigation>
     </main>
 

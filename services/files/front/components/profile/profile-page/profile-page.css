@@ -59,6 +59,7 @@
 main {
     display: grid;
     grid-template-columns: 25% 1fr;
+    grid-template-rows: auto auto 1fr;
     gap: 1em;
     padding: 0 1em;
     height: calc(100vh - 6.5em);
@@ -70,6 +71,10 @@ main {
     border-radius: .75em;
 }
 
+#tab-navigation {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+}
 
 #action-buttons {
     position: fixed;

@@ -6,3 +6,4 @@ ios/
 android/
 capacitor.config.json
 dist/
+assets/

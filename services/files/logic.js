@@ -7,7 +7,7 @@ const postcss = require("./postcss.js");
 
 // We will limit the search of files in the front folder (../../front from here).
 // Note that fs methods consider the current folder to be the one where the app is run, that's why we don't need the "../.." before front.
-const baseFrontPath = '/dist';
+const baseFrontPath = '/front';
 // If the user requests a directory, a file can be returned by default.
 const defaultFileIfFolder = "index.html";
 

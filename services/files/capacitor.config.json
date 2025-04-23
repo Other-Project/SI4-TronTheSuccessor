@@ -1,5 +1,10 @@
 {
   "appId": "academy.pns.ps8.tronsuccessor",
   "appName": "Tron: The Successor",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "CapacitorCookies": {
+      "enabled": true
+    }
+  }
 }

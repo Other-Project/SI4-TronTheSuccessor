@@ -23,7 +23,7 @@ export class Input extends HTMLComponent {
         this.revealButton.addEventListener("click", () => {
             const should_show_password = this.input.type === "password";
             this.input.type = should_show_password ? "text" : "password";
-            this.querySelector("img").src = should_show_password ? "/assets/password_show.svg" : "/assets/password_hide.svg";
+            this.shadowRoot.querySelector("img").src = should_show_password ? "/assets/password_show.svg" : "/assets/password_hide.svg";
         });
     }
 

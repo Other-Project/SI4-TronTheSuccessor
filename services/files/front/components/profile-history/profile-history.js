@@ -39,7 +39,7 @@ export class ProfileHistory extends HTMLComponent {
         if (!user) return;
 
         this.isLoading = true;
-        this.loadingSpinner.classList.add("show");
+        this.loadingSpinner.setAttribute("show", "true");
 
         try {
             const response = await fetchApi(`/api/game/history?limit=${this.limit}&from=${this.oldestGameDate}`);
@@ -61,7 +61,7 @@ export class ProfileHistory extends HTMLComponent {
             }));
         } finally {
             this.isLoading = false;
-            this.loadingSpinner.classList.remove("show");
+            this.loadingSpinner.removeAttribute("show");
         }
     }
 

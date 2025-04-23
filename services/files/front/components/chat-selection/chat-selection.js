@@ -8,16 +8,21 @@ export class ChatSelection extends HTMLComponent {
     }
 
     onSetupCompleted = () => {
-        this.shadowRoot.getElementById("global").addEventListener("click", () => this.openChatRoom("global", "Global"));
+        this.globalChat = this.shadowRoot.getElementById("global");
+        this.globalChat.addEventListener("click", () => this.openChatRoom("global", "Global"));
         this.friendListPanel = this.shadowRoot.getElementById("friend-list");
+        this.spinner = this.shadowRoot.querySelector("app-loading-spinner");
         notificationService.addEventListener("friend-status-update", this.#updateFriendStatus);
         notificationService.addEventListener("unread-notification", this.#updateMessageNotification);
         notificationService.addEventListener("refresh-friend-list", this.onVisible);
-    }
+    };
 
     onVisible = async () => {
+        this.spinner.setAttribute("show", "true");
         this.friendList = await this.#getFriendList();
         this.#updateFriendListPanel();
+        this.spinner.removeAttribute("show");
+        await this.#updateGlobalChat();
     };
 
     openChatRoom(roomId, roomName, pending, friend) {
@@ -50,6 +55,12 @@ export class ChatSelection extends HTMLComponent {
             this.friendListPanel.appendChild(friendButton);
             if (this.currentRoom?.id === friend.id) this.openChatRoom(friend.id, friend.name, friend.pending, friend.friend);
         }
+    }
+
+    async #updateGlobalChat() {
+        const globalChatRoom = await fetchApi("/api/chat/global?limit=1").then(response => response.json());
+        if (globalChatRoom.length >= 1)
+            this.globalChat.setAttribute("preview", globalChatRoom[0].content);
     }
 
     /**

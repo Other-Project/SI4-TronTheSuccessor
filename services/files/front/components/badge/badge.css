@@ -1,10 +1,10 @@
 :host {
-    width: 10px;
-    height: 10px;
+    width: 25%;
+    height: 25%;
     border-radius: 50%;
     position: absolute;
-    bottom: -1px;
-    right: -2px;
+    bottom: -2.5%;
+    right: -2.5%;
     box-sizing: content-box;
     border: 2px solid #36393f;
     background-color: #747f8d;

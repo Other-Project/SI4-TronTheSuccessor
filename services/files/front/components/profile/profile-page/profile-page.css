@@ -4,10 +4,6 @@
     flex-direction: column;
     background: #191919;
 
-    #tab-navigation {
-        min-height: 0;
-    }
-
     #not-found-message {
         display: none;
     }
@@ -58,7 +54,7 @@
 
 main {
     display: grid;
-    grid-template-columns: 25% 1fr;
+    grid-template-columns: minmax(350px, 25%) 1fr;
     grid-template-rows: auto auto 1fr;
     gap: 1em;
     padding: 0 1em;
@@ -74,6 +70,18 @@ main {
 #tab-navigation {
     grid-column: 2;
     grid-row: 1 / span 3;
+}
+
+
+@media screen and (max-width: 960px) {
+    main {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(auto-fill, auto);
+    }
+
+    #tab-navigation {
+        grid-area: unset;
+    }
 }
 
 #action-buttons {

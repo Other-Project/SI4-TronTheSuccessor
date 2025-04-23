@@ -54,3 +54,50 @@
     overflow: auto;
     padding-top: 20px;
 }
+
+
+.action-buttons {
+    position: fixed;
+    right: 25px;
+    bottom: 25px;
+    z-index: 3;
+
+    display: flex;
+    gap: .5em;
+
+    height: 75px;
+    flex-direction: row-reverse;
+
+    .icon {
+        height: 2em;
+        vertical-align: middle;
+    }
+
+    @media screen and (hover: none) {
+        flex-direction: column-reverse;
+        width: 75px;
+        height: auto;
+
+        app-button {
+            display: block;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .icon {
+            width: calc(100% - 1em);
+            height: calc(100% - 1em);
+            object-fit: contain;
+            margin: .5em .6em .5em .4em;
+        }
+
+        .action-label {
+            display: none;
+        }
+    }
+}
+
+.hidden {
+    display: none !important;
+}

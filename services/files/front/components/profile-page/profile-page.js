@@ -1,6 +1,7 @@
 import {HTMLComponent} from "/js/component.js";
 import {fetchApi, getUserInfo} from "/js/login-manager.js";
 import {changePage} from "/components/pages/pages.js";
+import "/js/capacitor.min.js";
 
 export class ProfilePage extends HTMLComponent {
     constructor() {
@@ -12,6 +13,7 @@ export class ProfilePage extends HTMLComponent {
         this.overview = this.shadowRoot.getElementById("overview");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
+        this.ranking = this.shadowRoot.getElementById("ranking");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
 
         this.usernameElement = this.shadowRoot.getElementById("username");
@@ -47,8 +49,11 @@ export class ProfilePage extends HTMLComponent {
         if (stats) {
             this.overview.setAttribute("stats", JSON.stringify(stats));
             this.leaderboard.setAttribute("stats", JSON.stringify(stats));
+            this.ranking.setAttribute("stats", JSON.stringify(stats));
         }
         this.history.dataset.tabDisabled = userName === loggedUser ? "false" : "true";
+        if (!Capacitor.isNativePlatform())
+            this.ranking.dataset.tabDisabled = "true";
         this.tabNavigation.changeTab("overview");
     };
 }

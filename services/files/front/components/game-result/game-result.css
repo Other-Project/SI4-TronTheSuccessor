@@ -131,7 +131,7 @@ p {
     }
 }
 
-@media (max-height: 400px) {
+@media (max-height: 480px) {
     #game-result {
         height: 50px;
         align-content: center;

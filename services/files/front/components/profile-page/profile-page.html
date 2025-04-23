@@ -1,17 +1,19 @@
 <div id="profile-page">
-    <div id="not-found-message">The user&nbsp;<span id="not-found-user"></span>&nbsp;does not exist or has deleted their account.
+    <div id="not-found-message">The user&nbsp;<span id="not-found-user"></span>&nbsp;does not exist or has deleted their
+        account.
     </div>
     <div id="profile-header">
         <h1>Profile</h1>
         <h3 id="username">Username</h3>
         <div class="filler"></div>
         <app-button id="home-page">
-            <img src="/assets/home.svg" alt="Home" title="Home"/>
+            <img alt="Home" src="/assets/home.svg" title="Home"/>
         </app-button>
     </div>
     <app-tab-navigation id="tab-navigation" readonly="true">
-        <app-profile-overview id="overview" data-tab-title="Overview"></app-profile-overview>
-        <app-profile-history id="history" data-tab-title="History"></app-profile-history>
-        <app-profile-leaderboard id="leaderboard" data-tab-title="Ranking"></app-profile-leaderboard>
+        <app-profile-overview data-tab-title="Overview" id="overview"></app-profile-overview>
+        <app-profile-history data-tab-title="History" id="history"></app-profile-history>
+        <app-profile-leaderboard data-tab-title="Leaderboard" id="leaderboard"></app-profile-leaderboard>
+        <app-profile-ranking data-tab-title="Ranking" id="ranking"></app-profile-ranking>
     </app-tab-navigation>
 </div>

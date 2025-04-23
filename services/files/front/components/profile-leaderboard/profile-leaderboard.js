@@ -11,9 +11,8 @@ export class ProfileLeaderboard extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.leaderboard = this.shadowRoot.getElementById("profile-leaderboard");
-        this.rankRepartition = this.shadowRoot.getElementById("rank-repartition");
-        this.rank = this.shadowRoot.getElementById("rank");
         this.rankListing = this.shadowRoot.getElementById("rank-listing");
+        this.profileRanking = this.shadowRoot.getElementById("profile-ranking");
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -26,11 +25,7 @@ export class ProfileLeaderboard extends HTMLComponent {
 
     #refresh() {
         if (!this.leaderboard || !this.stats) return;
-        this.rankRepartition.setAttribute("stats", JSON.stringify(this.stats));
         this.rankListing.setAttribute("rank-listing", JSON.stringify(this.stats.topPlayers));
-        this.rank.setAttribute("rank", this.stats.rank);
-        this.rank.setAttribute("points", this.stats.eloInRank);
-        this.rank.setAttribute("baserank", this.stats.baseRank);
-        this.rank.setAttribute("height", "100");
+        this.profileRanking.setAttribute("stats", JSON.stringify(this.stats));
     }
 }

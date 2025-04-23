@@ -1,32 +1,23 @@
 #profile-leaderboard {
     display: grid;
     grid-template-columns: 4fr 6fr;
-    grid-template-rows: 150px minmax(300px, calc(100% - 200px));
     gap: 50px;
     padding: 20px;
     height: calc(100% - 40px);
     overflow-y: auto;
+}
 
-    #neon-container {
-        grid-column: 1;
-        grid-row: 1 / 3;
-        height: 100%;
-        width: 100%;
+@media (max-height: 480px) and (max-width: 1025px), (max-height: 1025px) and (max-width: 480px) {
+    #profile-leaderboard {
         display: flex;
     }
 
-    #rank, #rank-repartition {
-        grid-column: 2;
+    #neon-container {
+        margin: auto;
+        width: 90%;
     }
 
-    #rank {
-        grid-row: 1;
-        max-height: 250px;
-    }
-
-    #rank-repartition {
-        grid-row: 2;
-        align-self: center;
-        height: 100%;
+    #profile-ranking {
+        display: none;
     }
 }

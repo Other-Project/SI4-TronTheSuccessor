@@ -86,7 +86,7 @@ label {
     border: 2px solid rgb(102, 26, 113);
 }
 
-@media (max-height: 425px) {
+@media (max-height: 480px) {
     #board-container {
         max-width: 70%;
     }

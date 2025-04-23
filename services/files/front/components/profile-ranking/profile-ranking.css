@@ -1,0 +1,12 @@
+#profile-ranking {
+    display: grid;
+    grid-template-rows: 150px 1fr;
+}
+
+#rank {
+    max-height: 250px;
+}
+
+#rank-repartition {
+    height: 100%;
+}

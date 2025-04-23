@@ -60,12 +60,12 @@ export class HumanPlayer extends Player {
     }
 
     #onJoystickMove = e => {
-        const direction = e.detail.direction;
-        console.log(direction);
+        const direction = e.detail;
         this.#changeDirection(direction);
     };
 
     #changeDirection(direction) {
+        if (!direction) return;
         super.setNextDirection(direction);
         this.dispatchEvent(new CustomEvent("player-direction", {
             detail: {

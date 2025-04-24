@@ -9,8 +9,16 @@ button {
     width: 100%;
     height: 100%;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled), &:active:not(:disabled) {
         background-color: #3c3c3c;
+
+        &:active {
+            box-shadow: inset #0003 0 0 5px 5px;
+
+            &.none {
+                box-shadow: none;
+            }
+        }
 
         &.purple {
             background-color: #75208f;
@@ -22,6 +30,10 @@ button {
 
         &.green {
             background-color: #118512;
+        }
+
+        &.none {
+            background: none;
         }
     }
 
@@ -48,6 +60,11 @@ button {
 
     &.green {
         background-color: #09730a;
+    }
+
+    &.none {
+        background: none;
+        padding: 0;
     }
 }
 

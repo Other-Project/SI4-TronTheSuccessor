@@ -1,0 +1,41 @@
+<div id="profile-page">
+    <div id="not-found-message">
+        The user&nbsp;<span id="not-found-user"></span>&nbsp;does not exist or has deleted their account.
+    </div>
+
+    <header id="profile-header">
+        <app-button id="home-page">
+            <img src="/assets/back.svg" alt="Home" title="Home"/>
+        </app-button>
+        <h1>Profile</h1>
+        <div class="filler"></div>
+    </header>
+
+    <main>
+        <app-profile-userinfo id="userinfo" class="panel"></app-profile-userinfo>
+        <app-profile-stats id="stats" class="panel desktop"></app-profile-stats>
+
+        <div id="action-buttons" class="panel">
+            <app-button id="share" background="purple">
+                <img src="/assets/share.svg" alt="Share Profile" class="icon"/>
+                <span class="action-label">Share Profile</span>
+            </app-button>
+
+            <app-button id="add-friend" background="green">
+                <img src="/assets/add-friend.svg" alt="Add to friends" class="icon"/>
+                <span class="action-label">Add to friends</span>
+            </app-button>
+
+            <app-button id="remove-friend" background="red">
+                <img src="/assets/remove-friend.svg" alt="Remove from friends" class="icon"/>
+                <span class="action-label">Remove from friends</span>
+            </app-button>
+        </div>
+
+        <app-tab-navigation id="tab-navigation" readonly="true">
+            <app-profile-stats id="stats-tab" class="mobile" data-tab-title="Stats"></app-profile-stats>
+            <app-profile-leaderboard id="leaderboard" data-tab-title="Ranking"></app-profile-leaderboard>
+            <app-profile-history id="history" data-tab-title="History"></app-profile-history>
+        </app-tab-navigation>
+    </main>
+</div>

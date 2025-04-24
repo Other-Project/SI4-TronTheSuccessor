@@ -32,7 +32,6 @@ import {GameJoystick} from "/components/game-joystick/game-joystick.js";
 import {ProfilePage} from "/components/profile/profile-page/profile-page.js";
 import {ProfileUserInfo} from "/components/profile/profile-userinfo/profile-userinfo.js";
 import {ProfileStats} from "/components/profile/profile-stats/profile-stats.js";
-
 import {ProfileHistory} from "/components/profile-history/profile-history.js";
 import {ProfileLeaderboard} from "/components/profile-leaderboard/profile-leaderboard.js";
 import {RankRepartition} from "/components/rank-repartition/rank-repartition.js";
@@ -97,7 +96,6 @@ customElements.define("app-game-joystick", GameJoystick);
 customElements.define("app-profile-page", ProfilePage);
 customElements.define("app-profile-userinfo", ProfileUserInfo);
 customElements.define("app-profile-stats", ProfileStats);
-
 customElements.define("app-profile-history", ProfileHistory);
 customElements.define("app-profile-leaderboard", ProfileLeaderboard);
 customElements.define("app-rank-repartition", RankRepartition);

@@ -12,10 +12,10 @@
     </header>
 
     <main>
-        <app-profile-userinfo id="userinfo" class="panel"></app-profile-userinfo>
-        <app-profile-stats id="stats" class="panel desktop"></app-profile-stats>
+        <app-profile-userinfo class="panel" id="userinfo"></app-profile-userinfo>
+        <app-profile-stats class="panel desktop" id="stats"></app-profile-stats>
 
-        <div id="action-buttons" class="panel">
+        <div class="panel" id="action-buttons">
             <app-button background="purple" id="share">
                 <img alt="Share Profile" class="icon" src="/assets/share.svg"/>
                 <span class="action-label">Share Profile</span>
@@ -33,9 +33,9 @@
         </div>
 
         <app-tab-navigation id="tab-navigation" readonly="true">
-            <app-profile-stats id="stats-tab" class="mobile" data-tab-title="Stats"></app-profile-stats>
-            <app-profile-leaderboard id="leaderboard" data-tab-title="Ranking"></app-profile-leaderboard>
-            <app-profile-history id="history" data-tab-title="History"></app-profile-history>
+            <app-profile-stats class="mobile" data-tab-title="Stats" id="stats-tab"></app-profile-stats>
+            <app-profile-leaderboard data-tab-title="Ranking" id="leaderboard"></app-profile-leaderboard>
+            <app-profile-history data-tab-title="History" id="history"></app-profile-history>
             <app-rank-repartition data-tab-title="Rank distribution" id="rank-distribution"></app-rank-repartition>
         </app-tab-navigation>
     </main>

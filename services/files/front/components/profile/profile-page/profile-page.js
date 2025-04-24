@@ -43,8 +43,8 @@ export class ProfilePage extends HTMLComponent {
         this.removeFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, false));
         notificationService.addEventListener("refresh-friend-list", async () => await this.#refresh());
 
-        window.addEventListener("resize", () => this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString(), true);
-        this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString();
+        window.addEventListener("resize", () => this.#updateTabVisibility(), true);
+        this.#updateTabVisibility();
     };
 
     onVisible = () => this.#refresh().then();
@@ -59,6 +59,11 @@ export class ProfilePage extends HTMLComponent {
             isPending: friends?.pending?.includes(username) ?? false
         };
     };
+
+    #updateTabVisibility() {
+        this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString();
+        this.rankDistribution.dataset.tabDisabled = (window.innerWidth > 960).toString();
+    }
 
     async #refresh() {
         const urlPath = window.location.pathname.split("/");
@@ -101,8 +106,6 @@ export class ProfilePage extends HTMLComponent {
 
         const {isYou, isFriend, isPending} = await this.#getStatus(this.stats.username);
         this.history.dataset.tabDisabled = (!isYou).toString();
-        if (!Capacitor.isNativePlatform())
-            this.rankDistribution.dataset.tabDisabled = "true";
         this.share.classList.toggle("hidden", false);
         this.addFriend.classList.toggle("hidden", isYou || isFriend);
         this.removeFriend.classList.toggle("hidden", isYou || isPending || !isFriend);

@@ -76,7 +76,6 @@ h2, p {
     #joystick-p1 {
         justify-self: start;
         display: none;
-        margin-left: 30px;
     }
 
     #timer {
@@ -91,10 +90,6 @@ h2, p {
         grid-column: 3;
         grid-row: 3;
         justify-self: end;
-    }
-
-    joystick-p2 {
-        display: none;
     }
 }
 
@@ -125,4 +120,9 @@ h2, p {
             }
         }
     }
+
+    @media (orientation: portrait) {
+
+    }
 }
+

@@ -13,6 +13,7 @@ export class GameMaster extends HTMLComponent {
     /** @type {"local"|"computer"|string} */ against = "local";
     paused = false;
     socket;
+    started = false;
 
     static get observedAttributes() {
         return ["gridSize", "against"];
@@ -64,6 +65,11 @@ export class GameMaster extends HTMLComponent {
         this.emoteImg = this.shadowRoot.getElementById("emote-img");
 
         this.shadowRoot.getElementById("emote-list").addEventListener("emote", e => this.#sendEmote(e.detail.emote));
+
+        this.joystick_p1 = this.shadowRoot.getElementById("joystick-p1");
+        this.joystick_p2 = this.shadowRoot.getElementById("joystick-p2");
+        this.joystick_p1.addEventListener("joystick-direction", e => this.#joystick(e, 0));
+        this.joystick_p2.addEventListener("joystick-direction", e => this.#joystick(e, 1));
     };
 
     onVisible = () => {
@@ -80,7 +86,10 @@ export class GameMaster extends HTMLComponent {
     #launchGame() {
         this.container.style.visibility = "hidden";
         this.emoteDisplayContainer.innerHTML = "";
+        this.started = false;
+        this.#toggleJoystick(false);
         this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
+        this.container.classList.toggle("local", this.against === "local");
         this.against === "local" ? this.newGame().then() : this.#gameWithServer().then();
     }
 
@@ -106,6 +115,9 @@ export class GameMaster extends HTMLComponent {
             this.gameBoard.draw(this.game);
             if (e.detail.ended) await this.endScreen(e.detail);
         });
+        this.joystick_p1.setAttribute("color", selectedInventory.firstChoiceColors["cell-color"]);
+        this.joystick_p2.setAttribute("color", selectedInventory.secondChoiceColors["cell-color"]);
+
         this.game.init();
         this.matchIntro.removeAttribute("opponent");
         this.matchIntro.style.display = "block";
@@ -131,6 +143,8 @@ export class GameMaster extends HTMLComponent {
     async endScreen(details) {
         this.stopGame();
 
+        this.#toggleJoystick(false);
+        this.started = false;
         if (Capacitor.isNativePlatform() && (getUserInfo()?.username !== details.winner || details.draw || this.against === "local"))
             await Capacitor.Plugins.Haptics.vibrate();
         this.pauseWindow.style.display = "block";
@@ -150,7 +164,13 @@ export class GameMaster extends HTMLComponent {
         this.pauseTitle.innerText = "Pause";
         this.pauseTime.innerText = this.#timeToString(details.elapsed);
         this.pauseDescription.innerText = "";
+        this.#toggleJoystick(false);
         clearInterval(this.timer);
+    }
+
+    #toggleJoystick(display) {
+        this.joystick_p1.style.visibility = display ? "visible" : "hidden";
+        this.joystick_p2.style.visibility = display ? "visible" : "hidden";
     }
 
     #timeToString(time) {
@@ -224,6 +244,8 @@ export class GameMaster extends HTMLComponent {
             });
             await this.#applyMessage(msg, this.game.reversed);
 
+            this.joystick_p1.setAttribute("color", players[0].color["cell-color"]);
+
             this.waitingWindow.style.display = "none";
             this.container.style.visibility = "visible";
             this.matchIntro.setAttribute("opponent", players[1].name);
@@ -248,7 +270,12 @@ export class GameMaster extends HTMLComponent {
         });
     }
 
-    async #applyMessage(msg, reverse = false) {
+    async #joystick(e, player) {
+        if (this.game && this.game.players[player] instanceof HumanPlayer)
+            this.game.players[player].changeDirection(e.detail);
+    };
+
+    #applyMessage(msg, reverse = false) {
         if (!this.game) {
             console.warn("Game not initialized");
             this.socket.disconnect();
@@ -266,6 +293,8 @@ export class GameMaster extends HTMLComponent {
     }
 
     #startTimer() {
+        this.started = true;
+        this.#toggleJoystick(true);
         this.timerDisplay.innerText = "00'00\"";
         this.timer = setInterval(() => {
             const elapsed = Math.max(this.game?.startTime ? Date.now() - this.game.startTime : 0, 0);
@@ -278,6 +307,7 @@ export class GameMaster extends HTMLComponent {
     #keyReleased = (e) => {
         if (e.code === "Escape" && this.against === "local") {
             e.preventDefault();
+            if (!this.started) return;
             if (this.game.isPaused()) this.resume();
             else this.pause();
         }

@@ -33,6 +33,10 @@ h2, p {
         }
     }
 
+    &:not(.local) #joystick-p2 {
+        display: none;
+    }
+
     #players {
         grid-row: 2;
         grid-column: 1 / span 3;
@@ -69,12 +73,9 @@ h2, p {
         }
     }
 
-    #joystick {
+    #joystick-p1 {
         justify-self: start;
-        min-height: 100px;
         display: none;
-        height: 100%;
-        aspect-ratio: 1/1;
     }
 
     #timer {
@@ -85,7 +86,7 @@ h2, p {
         font-weight: bold;
     }
 
-    #emote-list {
+    #emote-list, #joystick-p2 {
         grid-column: 3;
         grid-row: 3;
         justify-self: end;
@@ -103,7 +104,7 @@ h2, p {
     }
 }
 
-@media (max-height: 480px) or (max-width: 480px) {
+@media (hover: none) {
     .container {
         #mobile-container {
             grid-row: 3;
@@ -114,7 +115,7 @@ h2, p {
             justify-content: start;
             gap: 30px;
 
-            #joystick {
+            #joystick-p1 {
                 display: block;
             }
         }

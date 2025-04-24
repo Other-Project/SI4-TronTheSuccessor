@@ -31,3 +31,11 @@
         opacity: 0;
     }
 }
+
+@media (hover: none) {
+    .container {
+        #emote-sender, img {
+            width: 34px;
+        }
+    }
+}

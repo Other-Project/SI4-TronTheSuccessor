@@ -9,7 +9,7 @@ export class HelpPage extends HTMLComponent {
     }
 
     constructor() {
-        super("help-page", ["html"]);
+        super("help-page", ["html", "css"]);
     }
 
     onSetupCompleted = () => {

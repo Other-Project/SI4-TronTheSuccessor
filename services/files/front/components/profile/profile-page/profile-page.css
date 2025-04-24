@@ -51,8 +51,8 @@ main {
     grid-template-columns: minmax(250px, 25%) minmax(300px, 1fr);
     grid-template-rows: repeat(3, auto) 1fr;
     gap: 1em;
-    padding: 0 1em;
-    height: calc(100vh - 6.5em);
+    min-height: 0;
+    padding-bottom: 1em;
 }
 
 .panel {

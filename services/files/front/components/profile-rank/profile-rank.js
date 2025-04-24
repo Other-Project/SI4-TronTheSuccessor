@@ -48,9 +48,7 @@ export class ProfileRank extends HTMLComponent {
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("viewBox", "0 0 100 85");
         svg.setAttribute("fill", "none");
-        svg.style.display = "block";
         svg.style.maxHeight = this.height + "px";
-        svg.style.width = "100%";
 
         const polygon = document.createElementNS(svgNS, "polygon");
         polygon.setAttribute("points", this.#calculatePolygonPoints(vertices));

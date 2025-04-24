@@ -7,10 +7,6 @@ export class GamePage extends HTMLComponent {
 
     constructor() {
         super("help-page", ["html"]);
-        document.addEventListener("keyup", async (event) => {
-            if (event.code === "Space" && !this.inGame) this.startGame();
-        });
-        document.addEventListener("touchend", () => this.startGame());
     }
 
     onVisible = () => {
@@ -25,6 +21,9 @@ export class GamePage extends HTMLComponent {
         const helpPage = document.createElement("app-help-page");
         helpPage.setAttribute("against", this.against);
         this.shadowRoot.appendChild(helpPage);
+
+        document.addEventListener("keyup", this.#keyupHandler);
+        document.addEventListener("touchend", this.#touchendHandler);
     };
 
     onHidden = async () => {
@@ -35,6 +34,16 @@ export class GamePage extends HTMLComponent {
                 status: "cancelled"
             }, {method: "PUT"});
         }
+        document.removeEventListener("touchend", this.#touchendHandler);
+        document.removeEventListener("keyup", this.#touchendHandler);
+    };
+
+    #keyupHandler = e => {
+        if (e.code === "Space" && !this.inGame) this.startGame();
+    };
+
+    #touchendHandler = _ => {
+        if (!this.inGame) this.startGame();
     };
 
     startGame() {

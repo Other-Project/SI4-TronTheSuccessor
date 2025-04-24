@@ -87,24 +87,26 @@ async function handleFriendListModification(request, response, username, add) {
         if (connectedUsers.has(data.username) && !data.pending) io.to(userSocketId).emit(add ? "connected" : "disconnected", {username: data.username});
     }
 
-    if (!friendSocketId) return;
-    if (data.pending) {
+    if (data.pending && !friendSocketId) {
         const token = await notificationDatabase.getNotificationTokens(data.username);
-        if (!token) return data;
-        await sendPushNotification(
-            token,
-            `${username} sent you a friend request`,
-            "Do you wish to accept it?",
-            {
-                channelId: "important-notifications",
-                actionTypeId: "response-action",
-                extra: {
-                    friend: username,
-                    redirect: `/#${username}`
+        if (token) {
+            await sendPushNotification(
+                token,
+                `${username} sent you a friend request`,
+                "Do you wish to accept it?",
+                {
+                    channelId: "important-notifications",
+                    actionTypeId: "response-action",
+                    extra: {
+                        friend: username,
+                        redirect: `/#chat`
+                    }
                 }
-            }
-        );
+            );
+        }
     }
+
+    if (!friendSocketId) return sendResponse(response, HTTP_STATUS.OK);
 
     io.to(friendSocketId).emit("refreshFriendList", {username: username, pending: data.pending});
     if (connectedUsers.has(username) && !data.pending) io.to(friendSocketId).emit(add ? "connected" : "disconnected", {username: username});
@@ -128,19 +130,20 @@ async function handleUnreadNotification(request, username) {
     });
     else {
         const token = await notificationDatabase.getNotificationTokens(data.username);
-        if (!token || !data.preview) return data;
-        await sendPushNotification(
-            token,
-            `${username} sent you a message`,
-            data.preview,
-            {
-                channelId: "default-notifications",
-                extra: {
-                    friend: username,
-                    redirect: `/#${username}`
+        if (token && data.preview) {
+            await sendPushNotification(
+                token,
+                `${username} sent you a message`,
+                data.preview,
+                {
+                    channelId: "default-notifications",
+                    extra: {
+                        friend: username,
+                        redirect: `/#chat`
+                    }
                 }
-            }
-        );
+            );
+        }
     }
     return data;
 }

@@ -94,7 +94,7 @@ export class NotificationService extends EventTarget {
                             channelId: "default-notifications",
                             extra: {
                                 friend: notification.username,
-                                redirect: `/#${notification.username}`
+                                redirect: `/#chat`
                             }
                         }
                     ]
@@ -108,14 +108,14 @@ export class NotificationService extends EventTarget {
             await LocalNotifications.schedule({
                 notifications: [
                     {
-                        title: `${friend.username} as sent you a friend request`,
+                        title: `${friend.username} has sent you a friend request`,
                         body: "Do you wish to accept it?",
                         id: this.id++,
                         channelId: "important-notifications",
                         actionTypeId: "response-action",
                         extra: {
                             friend: friend.username,
-                            redirect: `/#${friend.username}`
+                            redirect: `/#chat`
                         }
                     }
                 ]
@@ -131,15 +131,14 @@ export class NotificationService extends EventTarget {
         if (!Capacitor.isNativePlatform() || this.notificationSetUp) return;
         const permStatus = await this.requestPermission();
 
-        if (permStatus) {
-            this.notificationSetUp = true;
-            await this.createNotificationChannel();
-            await this.setupNotificationActions();
+        if (!permStatus) return;
+        this.notificationSetUp = true;
+        await this.createNotificationChannel();
+        await this.setupNotificationActions();
 
-            this.setupLocalNotificationListeners();
-            this.setupPushListeners();
-            PushNotifications.register();
-        }
+        this.setupLocalNotificationListeners();
+        this.setupPushListeners();
+        PushNotifications.register();
     }
 
     /**

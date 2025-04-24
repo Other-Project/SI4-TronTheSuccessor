@@ -30,12 +30,11 @@ import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
 
 // Profile components
 import {ProfilePage} from "/components/profile/profile-page/profile-page.js";
-import {ProfileUserInfo} from "/components/profile/profile-userinfo/profile-user-info.js";
+import {ProfileUserInfo} from "/components/profile/profile-userinfo/profile-userinfo.js";
 import {ProfileStats} from "/components/profile/profile-stats/profile-stats.js";
 
 import {ProfileHistory} from "/components/profile-history/profile-history.js";
 import {ProfileLeaderboard} from "/components/profile-leaderboard/profile-leaderboard.js";
-import {ProfilePfp} from "/components/profile-pfp/profile-pfp.js";
 import {ProfileRank} from "/components/profile-rank/profile-rank.js";
 import {RankRepartition} from "/components/rank-repartition/rank-repartition.js";
 import {RankListing} from "/components/rank-listing/rank-listing.js";
@@ -102,7 +101,6 @@ customElements.define("app-profile-stats", ProfileStats);
 
 customElements.define("app-profile-history", ProfileHistory);
 customElements.define("app-profile-leaderboard", ProfileLeaderboard);
-customElements.define("app-profile-pfp", ProfilePfp);
 customElements.define("app-profile-rank", ProfileRank);
 customElements.define("app-rank-repartition", RankRepartition);
 customElements.define("app-rank-listing", RankListing);

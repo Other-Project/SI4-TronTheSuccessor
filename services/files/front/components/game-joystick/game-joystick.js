@@ -5,28 +5,45 @@ import {directionToAngle} from "/js/player.js";
 export class GameJoystick extends HTMLComponent {
     direction = "right";
     directionToAngleEntries = Object.entries(directionToAngle);
+    size = 120;
+    color = "#75208f";
+
+    static get observedAttributes() {
+        return ["color", "size"];
+    }
 
     constructor() {
         super("game-joystick", ["css"]);
     }
 
+    attributeChangedCallback(name, oldValue, newValue) {
+        super.attributeChangedCallback(name, oldValue, newValue);
+        this.#refresh();
+    }
+
     onSetupCompleted = () => {
         const joystickContainer = document.createElement("div");
-        const joystickZone = document.createElement("div");
         joystickContainer.id = "joystick-zone";
-        joystickContainer.appendChild(joystickZone);
+        this.joystickZone = document.createElement("div");
+        joystickContainer.appendChild(this.joystickZone);
         this.shadowRoot.appendChild(joystickContainer);
+        this.#refresh();
+    };
 
-        const size = 120;
-        const joystick = nipplejs.create({
-            zone: joystickZone,
+    #refresh() {
+        if (this.joystick) this.joystick.destroy();
+        this.joystickZone.innerHTML = "";
+        this.joystickZone.style.width = this.joystickZone.style.height = `${this.size}px`;
+
+        this.joystick = nipplejs.create({
+            zone: this.joystickZone,
             mode: "static",
             position: {left: "50%", top: "50%"},
-            color: "#000000",
-            size: size
+            color: this.color,
+            size: this.size
         });
 
-        joystick.on("move", (evt, data) => {
+        this.joystick.on("move", (evt, data) => {
             if (data.force < 0.2) return;
 
             let adjustedAngle = (450 - data.angle.degree) % 360;
@@ -45,11 +62,9 @@ export class GameJoystick extends HTMLComponent {
             if (closestDirection && closestDirection !== this.direction) {
                 this.direction = closestDirection;
                 this.dispatchEvent(new CustomEvent("joystick-direction", {
-                    detail: this.direction,
-                    bubbles: true,
-                    composed: true
+                    detail: this.direction
                 }));
             }
         });
-    };
+    }
 }

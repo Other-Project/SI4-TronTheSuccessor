@@ -13,8 +13,8 @@ body {
     touch-action: pan-x pan-y;
 }
 
-@media (resolution >= 240dpi) {
+@media (max-height: 480px) or (max-width: 480px) {
     body {
-        font-size: 0.65em;
+        font-size: 0.8em;
     }
 }

@@ -41,14 +41,12 @@ export class HumanPlayer extends Player {
         this.#keypressed.clear();
         document.addEventListener("keydown", this.#onKeyPressed);
         document.addEventListener("keyup", this.#onKeyReleased);
-        document.addEventListener("joystick-direction", this.#onJoystickMove);
     }
 
     unsubscribe() {
         super.unsubscribe();
         document.removeEventListener("keydown", this.#onKeyPressed);
         document.removeEventListener("keyup", this.#onKeyReleased);
-        document.removeEventListener("joystick-direction", this.#onJoystickMove);
     }
 
     #onKeyPressed = e => {
@@ -56,15 +54,10 @@ export class HumanPlayer extends Player {
         this.#keypressed.add(e.key.toUpperCase());
         let direction = Object.entries(this.keys)
             .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-        if (direction) this.#changeDirection(direction[0]);
+        this.changeDirection(direction[0]);
     }
 
-    #onJoystickMove = e => {
-        const direction = e.detail;
-        this.#changeDirection(direction);
-    };
-
-    #changeDirection(direction) {
+    changeDirection(direction) {
         if (!direction) return;
         super.setNextDirection(direction);
         this.dispatchEvent(new CustomEvent("player-direction", {

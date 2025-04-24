@@ -64,6 +64,9 @@ export class GameMaster extends HTMLComponent {
         this.emoteImg = this.shadowRoot.getElementById("emote-img");
 
         this.shadowRoot.getElementById("emote-list").addEventListener("emote", e => this.#sendEmote(e.detail.emote));
+
+        this.joystick_p1 = this.shadowRoot.getElementById("joystick-p1");
+        this.joystick_p2 = this.shadowRoot.getElementById("joystick-p2");
     };
 
     onVisible = () => {
@@ -106,6 +109,11 @@ export class GameMaster extends HTMLComponent {
             this.gameBoard.draw(this.game);
             if (e.detail.ended) this.endScreen(e.detail);
         });
+        this.joystick_p1.addEventListener("joystick-direction", (e) => player.changeDirection(e.detail));
+        if (this.against !== "computer") this.joystick_p2.addEventListener("joystick-direction", (e) => opponent.changeDirection(e.detail));
+        this.joystick_p1.setAttribute("color", selectedInventory.firstChoiceColors);
+        this.joystick_p2.setAttribute("color", selectedInventory.secondChoiceColors);
+
         this.game.init();
         this.matchIntro.removeAttribute("opponent");
         this.matchIntro.style.display = "block";
@@ -221,6 +229,8 @@ export class GameMaster extends HTMLComponent {
                 player.init(i + 1, this.game.playerStatesTransform(msg.playerStates, this.game.reversed));
             });
             this.#applyMessage(msg, this.game.reversed);
+
+            this.joystick_p1.setAttribute("color", players[0].color["cell-color"]);
 
             this.waitingWindow.style.display = "none";
             this.container.style.visibility = "visible";

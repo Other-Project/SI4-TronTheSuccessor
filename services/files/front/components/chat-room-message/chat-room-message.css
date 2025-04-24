@@ -17,17 +17,9 @@
     }
 }
 
-#sender-avatar-container {
-    position: relative;
+#sender-avatar {
     max-width: 100%;
     height: fit-content;
-
-    #status-indicator {
-        bottom: 2px;
-        width: 12px;
-        height: 12px;
-        right: 1px;
-    }
 }
 
 h3, small, p {

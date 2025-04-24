@@ -33,9 +33,10 @@ export class TabNavigation extends HTMLComponent {
     };
 
     onVisible = () => {
-        const tab = this.tabs.querySelector("[data-tab-id].active") ?? this.tabs.querySelector("[data-tab-id]");
-        if (tab) this.changeTab(tab.dataset.tabId);
-        else this.newTab();
+        let tab = this.tabs.querySelector("[data-tab-id].active") ?? this.tabs.querySelector("[data-tab-id]");
+        while (tab && !this.changeTab(tab.dataset.tabId))
+            tab = tab.nextElementSibling;
+        if (!tab) this.newTab();
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -62,12 +63,17 @@ export class TabNavigation extends HTMLComponent {
      * @param {string} tabId The tab id to display
      */
     changeTab(tabId = undefined) {
-        if (!this.tabs) return;
+        if (!this.tabs) return false;
         const tabToActivate = this.tabs.querySelector(`[data-tab-id="${tabId}"]`);
-        if (!tabToActivate) return;
+        if (!tabToActivate) return false;
+        const tabPanels = this.#getTabs();
+        if (!tabPanels.some(panel => panel.dataset.tabDisabled !== "true" && panel.id === tabId)) return false;
+
         for (let tab of this.tabs.querySelectorAll("[data-tab-id]")) tab.classList.toggle("active", tab.dataset.tabId === tabId);
-        for (let panel of this.#getTabs()) panel.classList.toggle("active", panel.id === tabId);
+        for (let panel of tabPanels)
+            panel.classList.toggle("active", panel.dataset.tabDisabled !== "true" && panel.id === tabId);
         tabToActivate.scrollIntoView({behavior: "smooth"});
+        return true;
     }
 
     /**

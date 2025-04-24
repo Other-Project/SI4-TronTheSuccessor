@@ -7,10 +7,6 @@ export class GamePage extends HTMLComponent {
 
     constructor() {
         super("help-page", ["html"]);
-        document.addEventListener("keyup", async (event) => {
-            if (event.code === "Space" && !this.inGame) this.startGame();
-        });
-        this.shadowRoot.addEventListener("touchend", () => this.startGame());
     }
 
     onVisible = () => {

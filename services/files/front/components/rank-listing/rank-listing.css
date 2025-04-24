@@ -7,8 +7,6 @@
     border-radius: 10px;
     border: 2px solid #444;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(50, 50, 50, 0.3);
-    max-height: 200%;
-    overflow-y: auto;
 }
 
 .grid-row {
@@ -105,16 +103,9 @@ h2 {
     letter-spacing: 2px;
 }
 
-@media (max-width: 480px) {
-    #top-list {
-        max-height: none;
-    }
-}
-
 @media (max-width: 900px) and (max-height: 480px) {
     #top-list {
         margin: auto;
         width: 80%;
-        max-height: none;
     }
 }

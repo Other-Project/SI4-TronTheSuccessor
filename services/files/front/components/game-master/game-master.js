@@ -275,7 +275,7 @@ export class GameMaster extends HTMLComponent {
             this.game.players[player].changeDirection(e.detail);
     };
 
-    #applyMessage(msg, reverse = false) {
+    async #applyMessage(msg, reverse = false) {
         if (!this.game) {
             console.warn("Game not initialized");
             this.socket.disconnect();

@@ -70,6 +70,10 @@ main {
     }
 }
 
+#rank-distribution {
+    overflow: auto;
+}
+
 
 @media screen and (orientation: portrait) {
     main {

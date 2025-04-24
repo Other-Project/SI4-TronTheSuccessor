@@ -1,6 +1,9 @@
-import {getAccessToken, renewAccessToken} from "./login-manager.js";
+import {fetchApi, getAccessToken, getUserInfo, renewAccessToken} from "./login-manager.js";
+import {changePage} from "/components/pages/pages.js";
 import "./socket.io.js";
 import "/js/capacitor.min.js";
+
+const {LocalNotifications, PushNotifications, Device} = Capacitor.Plugins;
 
 /**
  * Class to handle notifications
@@ -9,6 +12,8 @@ export class NotificationService extends EventTarget {
     connectedFriends = [];
     unreadNotifications = [];
     numberOfConnectedUsers = 0;
+    notificationSetUp = false;
+    id = 0;
 
     constructor() {
         super();
@@ -16,7 +21,10 @@ export class NotificationService extends EventTarget {
         NotificationService.instance = this;
 
         window.addEventListener('pageshow', async (event) => {
-            if (event.persisted) await this.openWebSocket();
+            if (event.persisted) {
+                await this.openWebSocket();
+                await this.initializeNotifications();
+            }
         });
     }
 
@@ -68,17 +76,163 @@ export class NotificationService extends EventTarget {
             this.dispatchEvent(new CustomEvent("user-count-update"));
         });
 
-        this.socket.on("unreadNotification", (notification) => {
+        this.socket.on("unreadNotification", async (notification) => {
             this.unreadNotifications.push(notification.username);
             this.dispatchEvent(new CustomEvent("unread-notification", {
                 detail: {
-                    friend: notification.username
+                    friend: notification.username,
+                    preview: notification.preview
                 }
             }));
+            if (Capacitor.isNativePlatform()) {
+                await LocalNotifications.schedule({
+                    notifications: [
+                        {
+                            title: `${notification.username} sent you a message`,
+                            body: `${notification.preview}`,
+                            id: this.id++,
+                            channelId: "default-notifications",
+                            extra: {
+                                friend: notification.username,
+                                redirect: `/#chat`
+                            }
+                        }
+                    ]
+                });
+            }
         });
 
-        this.socket.on("refreshFriendList", () => {
+        this.socket.on("refreshFriendList", async (friend) => {
             this.dispatchEvent(new CustomEvent("refresh-friend-list"));
+            if (!friend?.pending) return;
+            await LocalNotifications.schedule({
+                notifications: [
+                    {
+                        title: `${friend.username} has sent you a friend request`,
+                        body: "Do you wish to accept it?",
+                        id: this.id++,
+                        channelId: "important-notifications",
+                        actionTypeId: "response-action",
+                        extra: {
+                            friend: friend.username,
+                            redirect: `/#chat`
+                        }
+                    }
+                ]
+            });
+        });
+    }
+
+    /**
+     * Initialize notifications for the app
+     * @returns {Promise<void>}
+     */
+    async initializeNotifications() {
+        if (!Capacitor.isNativePlatform() || this.notificationSetUp) return;
+        const permStatus = await this.requestPermission();
+
+        if (!permStatus) return;
+        this.notificationSetUp = true;
+        await this.createNotificationChannel();
+        await this.setupNotificationActions();
+
+        this.setupLocalNotificationListeners();
+        this.setupPushListeners();
+        PushNotifications.register();
+    }
+
+    /**
+     * Setup listeners for push notifications
+     * @returns {void}
+     */
+    setupPushListeners() {
+        PushNotifications.addListener("registration", async (token) => {
+            await fetchApi("/api/notification/register", {
+                method: "POST",
+                body: JSON.stringify({
+                    token: token.value,
+                    device: Device.getId().identifier,
+                    username: getUserInfo().username
+                }),
+            });
+        });
+    }
+
+    /**
+     * Request permission to display notifications
+     * @returns {Promise<boolean>}
+     */
+    async requestPermission() {
+        const permResultLocal = await LocalNotifications.requestPermissions();
+        const permResultPush = await PushNotifications.requestPermissions();
+        return permResultLocal.display === "granted" && permResultPush.receive === "granted";
+    }
+
+    /**
+     * Create a notification channel for Android
+     * @returns {Promise<void>}
+     */
+    async createNotificationChannel() {
+        await LocalNotifications.createChannel({
+            id: "important-notifications",
+            name: "Important Notifications",
+            description: "Notifications that require immediate attention",
+            importance: 5,
+            visibility: 1,
+            vibration: true,
+        });
+        await LocalNotifications.createChannel({
+            id: "default-notifications",
+            name: "Default Notifications",
+            description: "Notifications",
+            importance: 2,
+            visibility: 1,
+        });
+    }
+
+    /**
+     * Setup action types for notifications
+     * @returns {Promise<void>}
+     */
+    async setupNotificationActions() {
+        await LocalNotifications.registerActionTypes({
+            types: [
+                {
+                    id: "response-action",
+                    actions: [
+                        {
+                            id: "accept",
+                            title: "Accept",
+                            destructive: false
+                        },
+                        {
+                            id: "decline",
+                            title: "Decline",
+                            destructive: true
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    /**
+     * Setup local notification action listeners
+     * @returns {void}
+     */
+    setupLocalNotificationListeners() {
+        LocalNotifications.addListener("localNotificationActionPerformed", async (notification) => this.#handleFriendRequest(notification));
+        PushNotifications.addListener("pushNotificationActionPerformed", async (notification) => this.#handleFriendRequest(notification));
+    }
+
+    async #handleFriendRequest(notification) {
+        const actionId = notification.actionId;
+        if (notification.notification.extra.redirect) changePage(notification.notification.extra.redirect);
+        if (actionId === "tap") return;
+        const friend = notification.notification.extra.friend;
+
+        await fetchApi(`/api/user/friends/${friend}`, {
+            method: actionId === "accept" ? "POST" : "DELETE",
         });
     }
 

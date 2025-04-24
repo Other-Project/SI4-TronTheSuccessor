@@ -112,3 +112,4 @@ package-lock.json
 build/
 dist/
 .DS_Store
+tronthesuccessor-firebase-adminsdk-*.json

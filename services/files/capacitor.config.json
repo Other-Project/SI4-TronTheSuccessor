@@ -5,6 +5,18 @@
   "plugins": {
     "CapacitorCookies": {
       "enabled": true
-    }
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_launcher_foreground"
+    },
+    "PushNotifications": {
+      "smallIcon": "ic_launcher_foreground",
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    },
+    "Device": {}
   }
 }

@@ -1,5 +1,5 @@
 const {MongoClient} = require("mongodb");
-const client = new MongoClient(process.env.MONGO_DB_URL ?? 'mongodb://mongodb:27017');
+const client = new MongoClient(process.env.MONGO_DB_URL ?? "mongodb://mongodb:27017");
 const database = client.db("Tron-the-successor");
 const notificationCollection = database.collection("notification");
 
@@ -36,4 +36,35 @@ exports.removeNotification = async function (playerId, otherPlayerId) {
         playerId: playerId,
         fromPlayer: otherPlayerId
     });
+};
+
+/**
+ * Register a notification token for a player.
+ * @param playerId The username of the player.
+ * @param token The notification token.
+ * @param device The device of the player.
+ * @returns {Promise<void>} Promise resolving when the token is registered.
+ */
+exports.registerNotificationToken = async function (playerId, token, device) {
+    await notificationCollection.updateOne(
+        {playerId: playerId},
+        {
+            $set: {
+                "devices": {
+                    [device]: token
+                }
+            }
+        },
+        {upsert: true}
+    );
+};
+
+/**
+ * Get the notification tokens for a player.
+ * @param playerId The username of the player.
+ * @returns {Promise<string[] | null>} Promise resolving to an array of notification tokens.
+ */
+exports.getNotificationTokens = async function (playerId) {
+    const data = await notificationCollection.findOne({playerId: playerId});
+    return data?.devices ? Object.values(data.devices) : null;
 };

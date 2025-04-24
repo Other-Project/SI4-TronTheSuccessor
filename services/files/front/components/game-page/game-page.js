@@ -35,7 +35,7 @@ export class GamePage extends HTMLComponent {
             }, {method: "PUT"});
         }
         document.removeEventListener("touchend", this.#touchendHandler);
-        document.removeEventListener("keyup", this.#touchendHandler);
+        document.removeEventListener("keyup", this.#keyupHandler);
     };
 
     #keyupHandler = e => {

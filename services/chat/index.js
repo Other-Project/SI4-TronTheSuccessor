@@ -30,7 +30,6 @@ const server = http.createServer(async (request, response) => {
                 ? await chatDatabase.sendGameInvitation(roomId, user.username, message.type, message.content, room)
                 : await chatDatabase.storeMessage(roomId, user.username, message.type, message.content);
             if (storedMessage.shouldEmit) io.to(roomId).emit("message", storedMessage);
-            await notifyMessageSent(request.headers.authorization, room);
             return sendResponse(response, HTTP_STATUS.CREATED, message.type === "game-invitation" ? {gameInvitationToken: storedMessage.gameInvitationToken} : null);
         }
     } else if ((/^\/api\/chat\/?$/).test(requestUrl.pathname) && request.method === "GET") {
@@ -110,6 +109,6 @@ io.on("connection", (socket) => {
 
         io.to(roomId).emit("message", await chatDatabase.storeMessage(roomId, user.username, message.type, message.content));
         callback?.(true);
-        if (roomId !== "global") await notifyMessageSent(socket.request.headers.authorization, roomId.filter(elem => elem !== user.username)[0]);
+        if (roomId !== "global") await notifyMessageSent(socket.request.headers.authorization, roomId.filter(elem => elem !== user.username)[0], message.content);
     });
 });

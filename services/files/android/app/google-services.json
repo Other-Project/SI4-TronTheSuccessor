@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "334607701185",
+    "project_id": "tronthesuccessor",
+    "storage_bucket": "tronthesuccessor.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:334607701185:android:9d8ef374cc5f84dcf63040",
+        "android_client_info": {
+          "package_name": "academy.pns.ps8.tronsuccessor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_AZCMuel3FQaPDkfcfKBc1RdrWAfm47w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

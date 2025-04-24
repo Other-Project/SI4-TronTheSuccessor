@@ -10,7 +10,9 @@
     filter: invert();
 
     ~ p {
-        margin: 0;
+        font-size: 0.8em;
+        text-align: center;
+        margin: -5px 0 0 12.5px;
     }
 }
 
@@ -76,7 +78,7 @@ p {
     }
 }
 
-#connect-icon {
+#connect {
     animation: pulse 6s infinite;
 }
 

@@ -85,7 +85,7 @@ async function handleFriendListModification(request, username, add) {
     }
 
     if (!friendSocketId) return;
-    else if (data.pending) {
+    if (data.pending) {
         const token = await notificationDatabase.getNotificationToken(data.username);
         if (!token) return data;
         await sendPushNotification(
@@ -154,7 +154,7 @@ async function handleRegisterNotificationToken(request, response, username) {
 
 /**
  * Send a push notification to a user.
- * @param {string} userToken The user's notification token.
+ * @param {string[]} userToken All notification tokens of the user.
  * @param {string} title The notification title.
  * @param {string} body The notification body.
  * @param options
@@ -169,7 +169,6 @@ async function sendPushNotification(userToken, title, body, options = {}) {
             },
             data: {
                 ...(options.extra || {}),
-                redirect: options.redirect || "",
                 channelId: options.channelId || "default-notifications",
                 actionTypeId: options.actionTypeId || ""
             },

@@ -3,7 +3,7 @@ import {changePage} from "/components/pages/pages.js";
 import "./socket.io.js";
 import "/js/capacitor.min.js";
 
-const {LocalNotifications, PushNotifications} = Capacitor.Plugins;
+const {LocalNotifications, PushNotifications, Device} = Capacitor.Plugins;
 
 /**
  * Class to handle notifications
@@ -151,14 +151,21 @@ export class NotificationService extends EventTarget {
                 method: "POST",
                 body: JSON.stringify({
                     token: token.value,
-                    device: Capacitor.getPlatform(),
+                    device: Device.getId().identifier,
                     username: getUserInfo().username
                 }),
             });
         });
 
-        PushNotifications.addListener("pushNotificationActionPerformed", (notification) => {
-            // Default : open the app
+        PushNotifications.addListener("pushNotificationActionPerformed", async (notification) => {
+            const actionId = notification.actionId;
+            if (notification.notification.extra.redirect) changePage(notification.notification.extra.redirect);
+            if (!actionId) return;
+            const friend = notification.notification.extra.friend;
+
+            await fetchApi(`/api/user/friends/${friend}`, {
+                method: actionId === "accept" ? "POST" : "DELETE"
+            });
         });
     }
 
@@ -200,6 +207,25 @@ export class NotificationService extends EventTarget {
      */
     async setupNotificationActions() {
         await LocalNotifications.registerActionTypes({
+            types: [
+                {
+                    id: "response-action",
+                    actions: [
+                        {
+                            id: "accept",
+                            title: "Accept",
+                            destructive: false
+                        },
+                        {
+                            id: "decline",
+                            title: "Decline",
+                            destructive: true
+                        }
+                    ]
+                }
+            ]
+        });
+        await PushNotifications.registerActionTypes({
             types: [
                 {
                     id: "response-action",

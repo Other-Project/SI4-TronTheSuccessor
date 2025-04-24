@@ -91,3 +91,13 @@ p {
         transform: scale(1);
     }
 }
+
+@media (max-width: 960px) {
+    #username {
+        margin: -5px 0 0;
+    }
+
+    .connected-info {
+        flex-direction: column-reverse;
+    }
+}

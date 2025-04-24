@@ -105,7 +105,7 @@ export class ProfilePage extends HTMLComponent {
         this.addFriend.button.disabled = isPending;
         this.addFriend.title = isPending ? "Friend request already sent" : "";
 
-        this.tabNavigation.changeTab("leaderboard");
+        if (!this.tabNavigation.changeTab("stats-tab")) this.tabNavigation.changeTab("leaderboard");
         this.actionButtons.classList.toggle("hidden", false);
     }
 

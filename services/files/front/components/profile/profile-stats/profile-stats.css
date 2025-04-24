@@ -1,12 +1,7 @@
 :host {
-    display: block;
+    display: inline-flex;
     min-height: 100px;
-}
-
-.container {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    justify-content: center;
 }
 
 svg {

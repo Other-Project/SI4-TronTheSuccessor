@@ -35,7 +35,6 @@ import {ProfileStats} from "/components/profile/profile-stats/profile-stats.js";
 
 import {ProfileHistory} from "/components/profile-history/profile-history.js";
 import {ProfileLeaderboard} from "/components/profile-leaderboard/profile-leaderboard.js";
-import {ProfileRank} from "/components/profile-rank/profile-rank.js";
 import {RankRepartition} from "/components/rank-repartition/rank-repartition.js";
 import {RankListing} from "/components/rank-listing/rank-listing.js";
 import {RankExplanation} from "/components/rank-explanation/rank-explanation.js";
@@ -101,7 +100,6 @@ customElements.define("app-profile-stats", ProfileStats);
 
 customElements.define("app-profile-history", ProfileHistory);
 customElements.define("app-profile-leaderboard", ProfileLeaderboard);
-customElements.define("app-profile-rank", ProfileRank);
 customElements.define("app-rank-repartition", RankRepartition);
 customElements.define("app-rank-listing", RankListing);
 customElements.define("app-rank-explanation", RankExplanation);

@@ -87,8 +87,9 @@ label {
 }
 
 @media (max-height: 480px) {
-    #board-container {
+    #board {
         max-width: 65%;
+        margin: auto;
     }
 
     #play-pause, #next-btn, #previous-btn {

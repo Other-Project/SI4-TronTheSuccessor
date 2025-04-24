@@ -46,16 +46,10 @@
     }
 }
 
-#history {
-    overflow: auto;
-    padding-top: 20px;
-}
-
-
 main {
     display: grid;
-    grid-template-columns: minmax(350px, 25%) 1fr;
-    grid-template-rows: auto auto 1fr;
+    grid-template-columns: minmax(250px, 25%) minmax(300px, 1fr);
+    grid-template-rows: repeat(3, auto) 1fr;
     gap: 1em;
     padding: 0 1em;
     height: calc(100vh - 6.5em);
@@ -63,37 +57,55 @@ main {
 
 .panel {
     padding: 1em;
-    background: #2f2f2f;
+    background: #222;
     border-radius: .75em;
 }
 
 #tab-navigation {
     grid-column: 2;
-    grid-row: 1 / span 3;
+    grid-row: 1 / span 4;
+
+    & > * {
+        border-radius: 0 0.75em 0.75em;
+    }
 }
 
 
-@media screen and (max-width: 960px) {
+@media screen and (orientation: portrait) {
     main {
         grid-template-columns: 1fr;
-        grid-template-rows: repeat(auto-fill, auto);
+        grid-template-rows: auto 1fr;
     }
 
     #tab-navigation {
         grid-area: unset;
+        min-height: 0;
+    }
+
+    .desktop {
+        display: none;
+    }
+}
+
+@media screen and (orientation: landscape) {
+    .mobile {
+        display: none;
+    }
+
+    @media (max-width: 960px) {
+        main {
+            grid-template-rows: auto 1fr 0 0;
+        }
     }
 }
 
 #action-buttons {
-    position: fixed;
-    right: 25px;
-    bottom: 25px;
-    z-index: 3;
-
     display: flex;
     gap: .5em;
 
-    flex-direction: row-reverse;
+    app-button {
+        flex: 1;
+    }
 
     .icon {
         height: 1.5em;
@@ -104,11 +116,21 @@ main {
         margin-left: .25em;
     }
 
-    @media screen and (hover: none) {
+    @media screen and (max-width: 960px) {
+        padding: 0;
+        background: none;
+
+        position: fixed;
+        right: 25px;
+        bottom: 25px;
+        z-index: 3;
+
+        display: flex;
         flex-direction: column-reverse;
         width: 60px;
 
         app-button {
+            flex: unset;
             display: block;
             aspect-ratio: 1 / 1;
             border-radius: 50%;

@@ -1,6 +1,6 @@
 :host {
     display: grid;
-    grid-template: auto / 100px 1fr;
+    grid-template: auto / minmax(10%, 100px) minmax(60%, 1fr);
     gap: 1em;
 }
 

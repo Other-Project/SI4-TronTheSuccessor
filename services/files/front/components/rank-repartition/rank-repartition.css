@@ -30,7 +30,8 @@
 
 @media (max-width: 900px) and (max-height: 480px) {
     #rank-distribution-container {
-        flex-direction: row;
+        display: grid;
+        grid-template-columns: 1fr auto;
     }
 
     #rank-repartition svg {

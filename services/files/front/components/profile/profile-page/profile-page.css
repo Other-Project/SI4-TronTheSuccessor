@@ -100,10 +100,6 @@ main {
         main {
             grid-template-rows: auto 1fr 0 0;
         }
-
-        #rank-distribution {
-            overflow: auto;
-        }
     }
 }
 

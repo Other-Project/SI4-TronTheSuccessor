@@ -27,16 +27,35 @@
 .grid-row.rank-1 {
     background: linear-gradient(to right, #411e59, #562baa);
     border-left: 2px solid #777;
+
+    .rank-marker {
+        background-color: #dcc94e;
+        border: 1px solid #777;
+        box-shadow: 0 0 15px rgba(80, 80, 80, 0.5);
+        color: black;
+    }
 }
 
 .grid-row.rank-2 {
     background: linear-gradient(to right, #2e164c, #411e59);
     border-left: 2px solid #666;
+
+    .rank-marker {
+        background-color: #b5b097;
+        border: 1px solid #666;
+        color: black;
+    }
 }
 
 .grid-row.rank-3 {
     background: linear-gradient(to right, #141230, #2e164c);
     border-left: 2px solid #555;
+
+    .rank-marker {
+        background-color: #985a29;
+        border: 1px solid #555;
+        color: black;
+    }
 }
 
 .rank-marker {
@@ -47,25 +66,6 @@
     height: 30px;
     border-radius: 6px;
     font-weight: bold;
-}
-
-.rank-1 .rank-marker {
-    background-color: #dcc94e;
-    border: 1px solid #777;
-    box-shadow: 0 0 15px rgba(80, 80, 80, 0.5);
-    color: black;
-}
-
-.rank-2 .rank-marker {
-    background-color: #b5b097;
-    border: 1px solid #666;
-    color: black;
-}
-
-.rank-3 .rank-marker {
-    background-color: #985a29;
-    border: 1px solid #555;
-    color: black;
 }
 
 .points-text {

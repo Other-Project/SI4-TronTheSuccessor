@@ -2,6 +2,7 @@ import {Game} from "/js/game.js";
 import {HTMLComponent} from "/js/component.js";
 import {Player} from "/js/player.js";
 import {player1_keys, player2_keys} from "/js/human-player.js";
+import "/js/capacitor.min.js";
 
 const cells = {
     "up-left": [1, 0],
@@ -67,6 +68,7 @@ export class Control extends HTMLComponent {
         this.gameBoard.ctx.textAlign = "center";
         this.gameBoard.ctx.textBaseline = "middle";
 
+        if (Capacitor.isNativePlatform()) return;
         const keys = [player1_keys, player2_keys][owner - 1];
         Object.entries(cells).forEach(([direction, coords]) => {
             let [px, py] = this.gameBoard.cellCoordinates(coords[0], coords[1]);

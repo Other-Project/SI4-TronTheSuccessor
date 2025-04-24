@@ -67,6 +67,10 @@ footer {
     display: none;
 }
 
+.mobile-p {
+    display: none;
+}
+
 @media screen and (hover: none) {
     .desktop {
         display: none;
@@ -74,5 +78,9 @@ footer {
 
     .mobile {
         display: inline;
+    }
+
+    .mobile-p {
+        display: block;
     }
 }

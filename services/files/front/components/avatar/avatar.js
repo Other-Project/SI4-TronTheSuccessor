@@ -25,6 +25,7 @@ export class Avatar extends HTMLComponent {
         const image = document.createElement("div");
         const url = Capacitor.isNativePlatform() ? new URL(this.avatar, "https://tronsuccessor.ps8.pns.academy").toString() : this.avatar;
         image.style.backgroundImage = `url("${url}")`;
+        image.appendChild(document.createElement("slot"));
         this.shadowRoot.replaceChildren(image);
     }
 }

@@ -16,7 +16,8 @@ export class ProfileHistory extends HTMLComponent {
     onSetupCompleted = () => {
         this.gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
         this.loadingSpinner = this.shadowRoot.getElementById("loading-spinner");
-        this.addEventListener("scroll", this.handleScroll);
+        this.container = this.shadowRoot.getElementById("profile-history");
+        this.container.addEventListener("scroll", this.handleScroll);
     };
 
     onVisible = async () => {
@@ -24,14 +25,14 @@ export class ProfileHistory extends HTMLComponent {
         this.hasMore = true;
         this.gameResultsContainer.innerHTML = "";
         this.oldestGameDate = null;
+        this.container.classList.toggle("full-loaded", !this.hasMore);
         await this.loadNextPage();
     };
 
     handleScroll = async () => {
         const {scrollTop, scrollHeight, clientHeight} = this;
-        if (scrollTop + clientHeight >= scrollHeight && this.hasMore && !this.isLoading) {
+        if (scrollTop + clientHeight >= scrollHeight && this.hasMore && !this.isLoading)
             await this.loadNextPage();
-        }
     };
 
     async loadNextPage() {
@@ -62,6 +63,7 @@ export class ProfileHistory extends HTMLComponent {
         } finally {
             this.isLoading = false;
             this.loadingSpinner.removeAttribute("show");
+            this.container.classList.toggle("full-loaded", !this.hasMore);
         }
     }
 

@@ -1,4 +1,19 @@
 #profile-history {
     max-width: 800px;
-    margin: auto auto 150px auto;
+    margin: 0 auto;
+    height: 100%;
+    overflow: auto;
+
+    .game-results-container {
+        height: 100%;
+    }
+
+    &.full-loaded #loading-spinner {
+        display: none;
+    }
+}
+
+#loading-spinner {
+    display: block;
+    height: 150px;
 }

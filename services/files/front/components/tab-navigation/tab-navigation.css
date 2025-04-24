@@ -21,10 +21,11 @@
 button {
     border: none;
     color: white;
-    background: #2c2c2c;
+    background: #1d1d1d;
     border-radius: 10px;
     padding: .5em .75em;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 #tabs {
@@ -39,10 +40,18 @@ button {
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
 
+        span {
+            padding: 0 .5em;
+        }
+
         .close-btn {
             padding: 0;
             background: none;
             float: right;
+        }
+
+        @media screen and (max-width: 480px) {
+            width: auto;
         }
     }
 }
@@ -71,5 +80,5 @@ button {
 }
 
 .active, ::slotted(.active) {
-    background: #1F1F1F;
+    background: #222;
 }

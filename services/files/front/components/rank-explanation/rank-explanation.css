@@ -86,3 +86,21 @@
         margin: 20px 0 10px 0;
     }
 }
+
+@media (max-width: 480px) and (orientation: portrait) {
+    .ranks-container {
+        grid-template-columns: unset;
+        gap: 5px;
+    }
+
+    .section .factors {
+        grid-template-columns: unset;
+        gap: 5px;
+    }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+    .rank-category .rank-icon {
+        height: 50px;
+    }
+}

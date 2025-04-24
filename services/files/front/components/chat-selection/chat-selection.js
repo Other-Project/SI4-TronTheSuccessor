@@ -85,17 +85,18 @@ export class ChatSelection extends HTMLComponent {
     #updateFriendStatus = (event) => {
         const {friend, connected} = event.detail;
         const friendButton = this.shadowRoot.getElementById(`friend-${friend}`);
-        if (friendButton) friendButton.setAttribute("connected", connected);
-
+        if (!friendButton) return;
+        friendButton.setAttribute("connected", connected);
         if (connected && friendButton !== this.friendListPanel.firstElementChild) this.friendListPanel.prepend(friendButton);
         else if (friendButton !== this.friendListPanel.lastElementChild) this.friendListPanel.appendChild(friendButton);
     };
 
     #updateMessageNotification = (event) => {
-        const {friend} = event.detail;
+        const {friend, preview} = event.detail;
         const friendButton = this.shadowRoot.getElementById(`friend-${friend}`);
-        if (friendButton) friendButton.setAttribute("unread", "true");
-
+        if (!friendButton) return;
+        friendButton.setAttribute("unread", "true");
+        friendButton.setAttribute("preview", preview);
         if (friendButton !== this.friendListPanel.firstElementChild) this.friendListPanel.prepend(friendButton);
     };
 

@@ -80,7 +80,8 @@ export class NotificationService extends EventTarget {
             this.unreadNotifications.push(notification.username);
             this.dispatchEvent(new CustomEvent("unread-notification", {
                 detail: {
-                    friend: notification.username
+                    friend: notification.username,
+                    preview: notification.preview
                 }
             }));
             if (Capacitor.isNativePlatform()) {
@@ -88,7 +89,7 @@ export class NotificationService extends EventTarget {
                     notifications: [
                         {
                             title: `${notification.username} sent you a message`,
-                            body: "I would love to display the message but, the Giga Chad backend only send the username 🗿",
+                            body: `${notification.preview}`,
                             id: this.id++,
                             channelId: "default-notifications",
                             extra: {
@@ -103,7 +104,7 @@ export class NotificationService extends EventTarget {
 
         this.socket.on("refreshFriendList", async (friend) => {
             this.dispatchEvent(new CustomEvent("refresh-friend-list"));
-            if (!friend || !friend.pending) return;
+            if (!friend?.pending) return;
             await LocalNotifications.schedule({
                 notifications: [
                     {
@@ -154,17 +155,6 @@ export class NotificationService extends EventTarget {
                     device: Device.getId().identifier,
                     username: getUserInfo().username
                 }),
-            });
-        });
-
-        PushNotifications.addListener("pushNotificationActionPerformed", async (notification) => {
-            const actionId = notification.actionId;
-            if (notification.notification.extra.redirect) changePage(notification.notification.extra.redirect);
-            if (!actionId) return;
-            const friend = notification.notification.extra.friend;
-
-            await fetchApi(`/api/user/friends/${friend}`, {
-                method: actionId === "accept" ? "POST" : "DELETE"
             });
         });
     }
@@ -225,25 +215,6 @@ export class NotificationService extends EventTarget {
                 }
             ]
         });
-        await PushNotifications.registerActionTypes({
-            types: [
-                {
-                    id: "response-action",
-                    actions: [
-                        {
-                            id: "accept",
-                            title: "Accept",
-                            destructive: false
-                        },
-                        {
-                            id: "decline",
-                            title: "Decline",
-                            destructive: true
-                        }
-                    ]
-                }
-            ]
-        });
     }
 
     /**
@@ -251,15 +222,18 @@ export class NotificationService extends EventTarget {
      * @returns {void}
      */
     setupLocalNotificationListeners() {
-        LocalNotifications.addListener("localNotificationActionPerformed", async (notification) => {
-            const actionId = notification.actionId;
-            if (notification.notification.extra.redirect) changePage(notification.notification.extra.redirect);
-            if (!actionId) return;
-            const friend = notification.notification.extra.friend;
+        LocalNotifications.addListener("localNotificationActionPerformed", async (notification) => this.#handleFriendRequest(notification));
+        PushNotifications.addListener("pushNotificationActionPerformed", async (notification) => this.#handleFriendRequest(notification));
+    }
 
-            await fetchApi(`/api/user/friends/${friend}`, {
-                method: actionId === "accept" ? "POST" : "DELETE",
-            });
+    async #handleFriendRequest(notification) {
+        const actionId = notification.actionId;
+        if (notification.notification.extra.redirect) changePage(notification.notification.extra.redirect);
+        if (actionId === "tap") return;
+        const friend = notification.notification.extra.friend;
+
+        await fetchApi(`/api/user/friends/${friend}`, {
+            method: actionId === "accept" ? "POST" : "DELETE",
         });
     }
 

@@ -22,9 +22,6 @@ const server = http.createServer(async (request, response) => {
         return sendResponse(response, HTTP_STATUS.OK);
     } else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") await handleFriendListModification(request, response, user.username, true);
     else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "DELETE") await handleFriendListModification(request, response, user.username, false);
-    if (filePath.length === 3 && filePath[2] === "chat" && request.method === "POST") await handleUnreadNotification(request, user.username);
-    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") await handleFriendListModification(request, user.username, true);
-    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "DELETE") await handleFriendListModification(request, user.username, false);
     else if (filePath.length === 3 && filePath[2] === "register" && request.method === "POST") await handleRegisterNotificationToken(request, response, user.username);
     else return sendResponse(response, HTTP_STATUS.NOT_FOUND);
 }).listen(8005);
@@ -92,7 +89,7 @@ async function handleFriendListModification(request, response, username, add) {
 
     if (!friendSocketId) return;
     if (data.pending) {
-        const token = await notificationDatabase.getNotificationToken(data.username);
+        const token = await notificationDatabase.getNotificationTokens(data.username);
         if (!token) return data;
         await sendPushNotification(
             token,
@@ -125,14 +122,17 @@ async function handleUnreadNotification(request, username) {
     const data = JSON.parse(body);
     const friendSocketId = connectedUsers.get(data.username);
     await notificationDatabase.addNotification(data.username, username);
-    if (friendSocketId) io.to(friendSocketId).emit("unreadNotification", {username: username});
+    if (friendSocketId) io.to(friendSocketId).emit("unreadNotification", {
+        username: username,
+        preview: data.preview ?? "Hey, let's be friends!"
+    });
     else {
-        const token = await notificationDatabase.getNotificationToken(data.username);
-        if (!token) return data;
+        const token = await notificationDatabase.getNotificationTokens(data.username);
+        if (!token || !data.preview) return data;
         await sendPushNotification(
             token,
             `${username} sent you a message`,
-            "I would love to display the message but, the Giga Chad backend only send the username 🗿",
+            data.preview,
             {
                 channelId: "default-notifications",
                 extra: {
@@ -160,15 +160,15 @@ async function handleRegisterNotificationToken(request, response, username) {
 
 /**
  * Send a push notification to a user.
- * @param {string[]} userToken All notification tokens of the user.
+ * @param {string[]} userTokens All notification tokens of the user.
  * @param {string} title The notification title.
  * @param {string} body The notification body.
  * @param options
  */
-async function sendPushNotification(userToken, title, body, options = {}) {
+async function sendPushNotification(userTokens, title, body, options = {}) {
     try {
         const message = {
-            token: userToken,
+            token: userTokens,
             notification: {
                 title: title,
                 body: body

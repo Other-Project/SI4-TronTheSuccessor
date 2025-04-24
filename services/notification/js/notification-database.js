@@ -60,11 +60,11 @@ exports.registerNotificationToken = async function (playerId, token, device) {
 };
 
 /**
- * Get the notification token for a player.
+ * Get the notification tokens for a player.
  * @param playerId The username of the player.
- * @returns {Promise<string[]>} Promise resolving to an array of notification tokens.
+ * @returns {Promise<string[] | null>} Promise resolving to an array of notification tokens.
  */
-exports.getNotificationToken = async function (playerId) {
+exports.getNotificationTokens = async function (playerId) {
     const data = await notificationCollection.findOne({playerId: playerId});
-    return Object.values(data?.devices) ?? null;
+    return data?.devices ? Object.values(data.devices) : null;
 };

@@ -54,7 +54,7 @@ export class HumanPlayer extends Player {
         this.#keypressed.add(e.key.toUpperCase());
         let direction = Object.entries(this.keys)
             .find(([_, keyComp]) => keyComp.every(k => Array.from(this.#keypressed).some(value => value.includes(k.toUpperCase()))));
-        this.changeDirection(direction[0]);
+        this.changeDirection(direction?.[0]);
     }
 
     changeDirection(direction) {

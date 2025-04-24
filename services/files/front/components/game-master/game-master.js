@@ -13,6 +13,7 @@ export class GameMaster extends HTMLComponent {
     /** @type {"local"|"computer"|string} */ against = "local";
     paused = false;
     socket;
+    started = false;
 
     static get observedAttributes() {
         return ["gridSize", "against"];
@@ -85,6 +86,8 @@ export class GameMaster extends HTMLComponent {
     #launchGame() {
         this.container.style.visibility = "hidden";
         this.emoteDisplayContainer.innerHTML = "";
+        this.started = false;
+        this.#toggleJoystick(false);
         this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
         this.container.classList.toggle("local", this.against === "local");
         this.against === "local" ? this.newGame().then() : this.#gameWithServer().then();
@@ -140,6 +143,8 @@ export class GameMaster extends HTMLComponent {
     endScreen(details) {
         this.stopGame();
 
+        this.#toggleJoystick(false);
+        this.started = false;
         this.pauseWindow.style.display = "block";
         this.resumeButton.style.display = "none";
         this.pauseTitle.innerText = details.draw ? "Draw" : details.winner + " won";
@@ -157,7 +162,13 @@ export class GameMaster extends HTMLComponent {
         this.pauseTitle.innerText = "Pause";
         this.pauseTime.innerText = this.#timeToString(details.elapsed);
         this.pauseDescription.innerText = "";
+        this.#toggleJoystick(false);
         clearInterval(this.timer);
+    }
+
+    #toggleJoystick(display) {
+        this.joystick_p1.style.visibility = display ? "visible" : "hidden";
+        this.joystick_p2.style.visibility = display ? "visible" : "hidden";
     }
 
     #timeToString(time) {
@@ -280,6 +291,8 @@ export class GameMaster extends HTMLComponent {
     }
 
     #startTimer() {
+        this.started = true;
+        this.#toggleJoystick(true);
         this.timerDisplay.innerText = "00'00\"";
         this.timer = setInterval(() => {
             const elapsed = Math.max(this.game?.startTime ? Date.now() - this.game.startTime : 0, 0);
@@ -292,6 +305,7 @@ export class GameMaster extends HTMLComponent {
     #keyReleased = (e) => {
         if (e.code === "Escape" && this.against === "local") {
             e.preventDefault();
+            if (!this.started) return;
             if (this.game.isPaused()) this.resume();
             else this.pause();
         }

@@ -17,7 +17,7 @@
         cursor: pointer;
     }
 
-    @media screen and (max-width: 580px) {
+    @media screen and (max-width: 850px) {
         grid-template-columns: 1fr auto auto 1fr 30px;
         grid-template-rows: auto auto;
         font-size: 0.75em;

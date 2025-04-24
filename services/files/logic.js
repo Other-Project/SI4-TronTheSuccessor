@@ -3,6 +3,8 @@ const fs = require('fs/promises');
 // path is used only for its parse method, which creates an object containing useful information about the path.
 const path = require('path');
 
+const postcss = require("./postcss.js");
+
 // We will limit the search of files in the front folder (../../front from here).
 // Note that fs methods consider the current folder to be the one where the app is run, that's why we don't need the "../.." before front.
 const baseFrontPath = '/front';
@@ -43,8 +45,9 @@ async function manageRequest(request, response) {
 async function sendFile(pathName, response) {
     const extension = path.parse(pathName).ext ?? ".html";
     try {
-        const data = await fs.readFile(pathName);
-        response.setHeader('Content-type', mimeTypes[extension] || mimeTypes['default']);
+        const mime = mimeTypes[extension] || mimeTypes['default'];
+        const data = mime === "text/css" ? await postcss.processCSS(pathName).then(result => result.css) : await fs.readFile(pathName);
+        response.setHeader('Content-type', mime);
         response.end(data);
     } catch (error) {
         console.log(`Error getting the file: ${pathName}: ${error.message}`);

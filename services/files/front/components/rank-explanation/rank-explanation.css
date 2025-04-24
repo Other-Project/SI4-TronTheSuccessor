@@ -16,9 +16,7 @@
 .rank-category {
     .rank-icon {
         height: 120px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        width: 100%;
     }
 
     .rank-name {
@@ -45,41 +43,6 @@
             font-size: 12px;
             background-color: rgba(255, 255, 255, 0.1);
         }
-    }
-
-    .line {
-        width: 80px;
-        height: 5px;
-        background-color: #6e6e6e;
-        top: 50%;
-    }
-
-    .triangle {
-        width: 0;
-        height: 0;
-        border-left: 50px solid transparent;
-        border-right: 50px solid transparent;
-        border-bottom: 90px solid #8B4513;
-    }
-
-    .square {
-        width: 80px;
-        height: 80px;
-        background-color: #C0C0C0;
-    }
-
-    .pentagon {
-        width: 80px;
-        height: 76px;
-        background-color: #FFD700;
-        clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
-    }
-
-    .hexagon {
-        width: 90px;
-        height: 80px;
-        background: linear-gradient(45deg, #ff33cc, #33ccff);
-        clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
     }
 }
 

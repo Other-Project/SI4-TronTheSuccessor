@@ -1,0 +1,40 @@
+:host {
+    height: 1em;
+    aspect-ratio: 1/1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+div {
+    height: 100%;
+}
+
+.line {
+    aspect-ratio: 1 / 16;
+    background-color: #6e6e6e;
+    top: 50%;
+}
+
+.triangle {
+    aspect-ratio: 10 / 9;
+    background-color: #8B4513;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+}
+
+.square {
+    aspect-ratio: 1 / 1;
+    background-color: #C0C0C0;
+}
+
+.pentagon {
+    aspect-ratio: 80 / 76;
+    background-color: #FFD700;
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+.hexagon {
+    aspect-ratio: 9 / 8;
+    background: linear-gradient(45deg, #ff33cc, #33ccff);
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+}

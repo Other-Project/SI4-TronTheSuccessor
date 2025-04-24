@@ -6,7 +6,7 @@ export class ProfileStats extends HTMLComponent {
     }
 
     constructor() {
-        super("profile-stats", ["html", "css"]);
+        super("profile-stats", ["html", "css"], "profile");
     }
 
     onSetupCompleted = () => {

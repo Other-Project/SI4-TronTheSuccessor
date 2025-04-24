@@ -28,13 +28,9 @@ h2, p {
     }
 
     &:not(.online-multiplayer) {
-        #players, #emote-display, #emote-list {
+        #players, #emote-display, #emote-display-container, #emote-list {
             display: none;
         }
-    }
-
-    &:not(.local) #joystick-p2 {
-        display: none;
     }
 
     #players {
@@ -78,6 +74,10 @@ h2, p {
         display: none;
     }
 
+    #joystick-p2 {
+        display: none;
+    }
+
     #timer {
         grid-column: 2;
         grid-row: 3;
@@ -118,6 +118,49 @@ h2, p {
             #joystick-p1 {
                 display: block;
             }
+        }
+
+        &.local #joystick-p2 {
+            display: block;
+        }
+    }
+}
+
+@media screen and (orientation: portrait) {
+    .container {
+        grid-template: auto 1fr auto auto / 1fr;
+
+        #joystick-p2 {
+            grid-area: 1 / 1;
+            justify-self: center;
+        }
+
+        #board {
+            transform: rotateZ(-90deg);
+            grid-area: 2 / 1;
+        }
+
+        #timer {
+            display: none;
+        }
+
+        #emote-list {
+            grid-area: 3 / 1;
+            justify-self: center;
+        }
+
+        #mobile-container {
+            grid-area: 4 / 1;
+            justify-content: center;
+            flex-direction: column-reverse;
+        }
+
+        #emote-display-container {
+            height: 50px;
+        }
+
+        #players {
+            display: none;
         }
     }
 }

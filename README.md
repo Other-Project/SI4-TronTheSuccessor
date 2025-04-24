@@ -8,7 +8,9 @@
 
 ## Installation
 
-### Using Docker
+### Web
+
+#### Using Docker
 
 The following steps require Git and Docker Compose.
 
@@ -16,14 +18,36 @@ The following steps require Git and Docker Compose.
 2. Copy the `.env.template` file to one named `.env`
 3. Modify the configuration inside `.env`, especially the `JWT_SECRET`
 4. Launch the services with `docker compose up -d`
+5. Visit the front-end at `http://localhost:8000` (or the port you specified in the `.env` file)
 
-### Manually
+#### Manually
 
 You'll need a working MongoDB installation to use this project.
 
 1. Clone the repository using Git
 2. Set the required environment variables (they are listed in the `.env.template` file)
 3. Launch every service using `npm start`
+4. Visit the front-end at `http://localhost:8000` (or the port you specified in the `.env` file)
+
+### Android
+
+With the Android environment setup, you can run the following commands to build and run the Android app:
+
+```shell
+cd services/files/front
+npx gulp
+npx cap run android
+```
+
+### iOS
+
+On MacOS with XCode 15+ and XCode Command Line Tools installed, you can run the following script to build the unsigned iOS app:
+
+```shell
+./setup-ios.sh
+```
+
+Then you can use something like [AltStore](https://altstore.io/) to install it on your iOS device.
 
 ## Features
 

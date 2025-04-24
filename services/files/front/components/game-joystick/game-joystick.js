@@ -47,6 +47,7 @@ export class GameJoystick extends HTMLComponent {
             if (data.force < 0.2) return;
 
             let adjustedAngle = (450 - data.angle.degree) % 360;
+            if (window.innerWidth < window.innerHeight) adjustedAngle = (adjustedAngle + 90) % 360;
             let closestDirection = null;
             let smallestDiff = 360;
 

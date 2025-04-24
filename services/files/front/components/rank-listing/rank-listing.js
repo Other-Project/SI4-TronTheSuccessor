@@ -12,6 +12,7 @@ export class RankListing extends HTMLComponent {
 
     onSetupCompleted = () => {
         this.topList = this.shadowRoot.getElementById("top-list");
+        this.#refresh();
     };
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -24,31 +25,39 @@ export class RankListing extends HTMLComponent {
         if (!this.topList || !this.stats) return;
         this.topPlayers = this.stats;
 
-        const headerRow = this.topList.querySelector(".header");
         this.topList.innerHTML = "";
-        this.topList.appendChild(headerRow);
 
-        this.topPlayers.forEach((player) => {
+        this.topPlayers.forEach((player, index) => {
             const playerRow = document.createElement("div");
             playerRow.classList.add("grid-row");
+            playerRow.classList.add(`rank-${index + 1}`);
+
+            const rankMarker = document.createElement("div");
+            rankMarker.classList.add("rank-marker");
+            rankMarker.textContent = index + 1;
+            playerRow.appendChild(rankMarker);
 
             const playerIdCell = document.createElement("div");
-            playerIdCell.classList.add("grid-cell");
-            playerIdCell.classList.add("player-id");
-            playerIdCell.textContent = player.playerId;
-            playerIdCell.addEventListener("click", () => changePage(`/profile/${player.playerId}`));
+            playerIdCell.classList.add("grid-cell", "player-id");
 
-            const rankCell = document.createElement("div");
-            rankCell.classList.add("grid-cell");
-            rankCell.textContent = player.rank;
+            const playerName = document.createElement("span");
+            playerName.textContent = player.playerId;
+            playerName.classList.add("player-name");
+            playerIdCell.appendChild(playerName);
 
-            const winrateCell = document.createElement("div");
-            winrateCell.classList.add("grid-cell");
-            winrateCell.textContent = Math.round(player.tronPoints).toString();
+            playerName.addEventListener("click", () => changePage(`/profile/${player.playerId}`));
+
+            const playerRank = document.createElement("app-rank");
+            playerRank.setAttribute("rank", player.rank.split(" ")[0].toLowerCase());
+            playerRank.classList.add("rank-icon");
+            playerIdCell.appendChild(playerRank);
+
+            const pointsText = document.createElement("span");
+            pointsText.textContent = Math.round(player.tronPoints).toLocaleString() + " TP";
+            pointsText.classList.add("points-text");
 
             playerRow.appendChild(playerIdCell);
-            playerRow.appendChild(rankCell);
-            playerRow.appendChild(winrateCell);
+            playerRow.appendChild(pointsText);
 
             this.topList.appendChild(playerRow);
         });

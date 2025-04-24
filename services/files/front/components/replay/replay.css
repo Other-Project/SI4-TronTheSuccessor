@@ -85,3 +85,19 @@ label {
     border-radius: 50%;
     border: 2px solid rgb(102, 26, 113);
 }
+
+@media (max-height: 480px) {
+    #board {
+        max-width: 65%;
+        margin: auto;
+    }
+
+    #play-pause, #next-btn, #previous-btn {
+        width: 25px;
+        height: 25px;
+    }
+
+    #play-pause img, #next-btn img, #previous-btn img {
+        height: 17px;
+    }
+}

@@ -15,6 +15,7 @@ export class ProfilePage extends HTMLComponent {
         this.profileStatsTab = this.shadowRoot.getElementById("stats-tab");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
+        this.rankDistribution = this.shadowRoot.getElementById("rank-distribution");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
 
         this.userInfo = this.shadowRoot.getElementById("userinfo");
@@ -42,8 +43,8 @@ export class ProfilePage extends HTMLComponent {
         this.removeFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, false));
         notificationService.addEventListener("refresh-friend-list", async () => await this.#refresh());
 
-        window.addEventListener("resize", () => this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString(), true);
-        this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString();
+        window.addEventListener("resize", () => this.#updateTabVisibility(), true);
+        this.#updateTabVisibility();
     };
 
     onVisible = () => this.#refresh().then();
@@ -58,6 +59,11 @@ export class ProfilePage extends HTMLComponent {
             isPending: friends?.pending?.includes(username) ?? false
         };
     };
+
+    #updateTabVisibility() {
+        this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString();
+        this.rankDistribution.dataset.tabDisabled = (window.innerWidth > 960).toString();
+    }
 
     async #refresh() {
         const urlPath = window.location.pathname.split("/");
@@ -86,6 +92,7 @@ export class ProfilePage extends HTMLComponent {
         this.stats.loggedusername = loggedUser;
         this.userInfo.setAttribute("stats", JSON.stringify(this.stats));
         this.leaderboard.setAttribute("stats", JSON.stringify(this.stats));
+        this.rankDistribution.setAttribute("stats", JSON.stringify(this.stats));
 
         for (let profStats of [this.profileStats, this.profileStatsTab]) {
             profStats.setAttribute("games", this.stats.games);

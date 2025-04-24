@@ -13,6 +13,7 @@ export class RankRepartition extends HTMLComponent {
         this.rankRepartition = this.shadowRoot.getElementById("rank-repartition");
         this.descriptionElement = this.shadowRoot.getElementById("rank-distribution-description");
         this.hoverInfo = this.shadowRoot.getElementById("hover-info");
+        this.#refresh();
     };
 
     attributeChangedCallback(name, oldValue, newValue) {

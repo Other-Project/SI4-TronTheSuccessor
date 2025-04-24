@@ -31,10 +31,10 @@ h2, p {
         #players, #emote-display, #emote-list {
             display: none;
         }
+    }
 
-        #joystick-p2 {
-            display: block;
-        }
+    &:not(.local) #joystick-p2 {
+        display: none;
     }
 
     #players {

@@ -67,6 +67,8 @@ export class GameMaster extends HTMLComponent {
 
         this.joystick_p1 = this.shadowRoot.getElementById("joystick-p1");
         this.joystick_p2 = this.shadowRoot.getElementById("joystick-p2");
+        this.joystick_p1.addEventListener("joystick-direction", e => this.#joystick(e, 0));
+        this.joystick_p2.addEventListener("joystick-direction", e => this.#joystick(e, 1));
     };
 
     onVisible = () => {
@@ -84,6 +86,7 @@ export class GameMaster extends HTMLComponent {
         this.container.style.visibility = "hidden";
         this.emoteDisplayContainer.innerHTML = "";
         this.container.classList.toggle("online-multiplayer", this.against !== "local" && this.against !== "computer");
+        this.container.classList.toggle("local", this.against === "local");
         this.against === "local" ? this.newGame().then() : this.#gameWithServer().then();
     }
 
@@ -109,10 +112,8 @@ export class GameMaster extends HTMLComponent {
             this.gameBoard.draw(this.game);
             if (e.detail.ended) this.endScreen(e.detail);
         });
-        this.joystick_p1.addEventListener("joystick-direction", (e) => player.changeDirection(e.detail));
-        if (this.against !== "computer") this.joystick_p2.addEventListener("joystick-direction", (e) => opponent.changeDirection(e.detail));
-        this.joystick_p1.setAttribute("color", selectedInventory.firstChoiceColors);
-        this.joystick_p2.setAttribute("color", selectedInventory.secondChoiceColors);
+        this.joystick_p1.setAttribute("color", selectedInventory.firstChoiceColors["cell-color"]);
+        this.joystick_p2.setAttribute("color", selectedInventory.secondChoiceColors["cell-color"]);
 
         this.game.init();
         this.matchIntro.removeAttribute("opponent");
@@ -255,6 +256,11 @@ export class GameMaster extends HTMLComponent {
             this.emoteDisplayContainer.appendChild(emoteDisplay);
         });
     }
+
+    #joystick(e, player) {
+        if (this.game && this.game.players[player] instanceof HumanPlayer)
+            this.game.players[player].changeDirection(e.detail);
+    };
 
     #applyMessage(msg, reverse = false) {
         if (!this.game) {

@@ -32,4 +32,8 @@
     #rank-distribution-container {
         flex-direction: row;
     }
+
+    #rank-repartition svg {
+        max-height: 300px;
+    }
 }

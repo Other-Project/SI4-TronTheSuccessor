@@ -55,16 +55,19 @@
     background-color: #dcc94e;
     border: 1px solid #777;
     box-shadow: 0 0 15px rgba(80, 80, 80, 0.5);
+    color: black;
 }
 
 .rank-2 .rank-marker {
     background-color: #b5b097;
     border: 1px solid #666;
+    color: black;
 }
 
 .rank-3 .rank-marker {
     background-color: #985a29;
     border: 1px solid #555;
+    color: black;
 }
 
 .points-text {
@@ -77,14 +80,12 @@
     flex: 2;
     padding-left: 30px;
     font-weight: bold;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-shadow: 0 0 5px rgba(100, 100, 100, 0.7);
+    font-size: 1.2em;
 }
 
 .player-name:hover {
     cursor: pointer;
+    text-decoration: underline;
 }
 
 .rank-icon {
@@ -94,19 +95,14 @@
 .points {
     font-weight: bold;
     text-shadow: 0 0 8px rgba(100, 100, 100, 0.6);
+    font-size: 1.5em;
 }
 
 h2 {
     text-align: center;
     color: #ccc;
-    text-shadow: 0 0 10px rgba(80, 80, 80, 0.8), 0 0 20px rgba(50, 50, 50, 0.5);
     text-transform: uppercase;
     letter-spacing: 2px;
-}
-
-.player-id:hover {
-    color: #fff;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 @media (max-width: 480px) {

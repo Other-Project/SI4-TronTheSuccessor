@@ -7,10 +7,6 @@
     height: calc(100vh - 30px);
 
     font-size: xx-large;
-
-    @media screen and (max-width: 600px) {
-        font-size: x-large;
-    }
 }
 
 main {
@@ -26,10 +22,6 @@ main {
     justify-content: center;
     align-items: center;
     gap: 30px;
-
-    @media screen and (max-width: 800px) {
-        flex-direction: column;
-    }
 
     app-control {
         max-width: 400px;
@@ -57,4 +49,30 @@ footer {
 
 #rank-popup {
     font-size: 1rem;
+}
+
+@media (max-height: 480px) or (max-width: 480px) {
+    .grid {
+        font-size: small;
+    }
+}
+
+@media screen and (max-aspect-ratio: 1/2) {
+    #controls {
+        flex-direction: column;
+    }
+}
+
+.mobile {
+    display: none;
+}
+
+@media screen and (hover: none) {
+    .desktop {
+        display: none;
+    }
+
+    .mobile {
+        display: inline;
+    }
 }

@@ -45,3 +45,11 @@ slot[name="actions"] {
     background: #0007;
     backdrop-filter: blur(1px);
 }
+
+@media (max-height: 480px) and (orientation: landscape) {
+    #popup-panel {
+        &.large {
+            max-height: 480px;
+        }
+    }
+}

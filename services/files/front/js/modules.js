@@ -27,6 +27,7 @@ import {GameMaster} from "/components/game-master/game-master.js";
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
 import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-display.js";
 import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
+import {GameJoystick} from "/components/game-joystick/game-joystick.js";
 
 // Profile components
 import {ProfilePage} from "/components/profile/profile-page/profile-page.js";
@@ -93,6 +94,7 @@ customElements.define("app-game-master", GameMaster);
 customElements.define("app-game-emotes", GameEmotes);
 customElements.define("app-game-emote-display", GameEmoteDisplay);
 customElements.define("app-game-match-intro", GameMatchIntro);
+customElements.define("app-game-joystick", GameJoystick);
 
 // Profile components
 customElements.define("app-profile-page", ProfilePage);

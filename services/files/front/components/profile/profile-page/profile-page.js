@@ -12,6 +12,7 @@ export class ProfilePage extends HTMLComponent {
     onSetupCompleted = () => {
         this.profilePage = this.shadowRoot.getElementById("profile-page");
         this.profileStats = this.shadowRoot.getElementById("stats");
+        this.profileStatsTab = this.shadowRoot.getElementById("stats-tab");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
@@ -40,6 +41,9 @@ export class ProfilePage extends HTMLComponent {
         this.addFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, "add"));
         this.removeFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, "remove"));
         notificationService.addEventListener("refresh-friend-list", async () => await this.#refresh());
+
+        window.addEventListener("resize", () => this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString(), true);
+        this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString();
     };
 
     onVisible = () => this.#refresh().then();
@@ -83,12 +87,14 @@ export class ProfilePage extends HTMLComponent {
         this.userInfo.setAttribute("stats", JSON.stringify(this.stats));
         this.leaderboard.setAttribute("stats", JSON.stringify(this.stats));
 
-        this.profileStats.setAttribute("games", this.stats.games);
-        this.profileStats.setAttribute("time", this.stats.timePlayed);
-        this.profileStats.setAttribute("streak", this.stats.winStreak);
-        const totalGames = this.stats.games - this.stats.draws;
-        if (totalGames === 0) this.profileStats.setAttribute("winrate", "-");
-        else this.profileStats.setAttribute("winrate", Math.round((this.stats.wins * 100 / totalGames)));
+        for (let profStats of [this.profileStats, this.profileStatsTab]) {
+            profStats.setAttribute("games", this.stats.games);
+            profStats.setAttribute("time", this.stats.timePlayed);
+            profStats.setAttribute("streak", this.stats.winStreak);
+            const totalGames = this.stats.games - this.stats.draws;
+            if (totalGames === 0) this.profileStats.setAttribute("winrate", "-");
+            else profStats.setAttribute("winrate", Math.round(this.stats.wins * 100 / totalGames));
+        }
 
 
         const {isYou, isFriend, isPending} = await this.#getStatus(this.stats.username);

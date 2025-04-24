@@ -16,7 +16,7 @@ export class ProfileHistory extends HTMLComponent {
     onSetupCompleted = () => {
         this.gameResultsContainer = this.shadowRoot.querySelector(".game-results-container");
         this.loadingSpinner = this.shadowRoot.getElementById("loading-spinner");
-        this.addEventListener("scroll", this.handleScroll);
+        this.shadowRoot.getElementById("profile-history").addEventListener("scroll", this.handleScroll);
     };
 
     onVisible = async () => {

@@ -1,4 +1,10 @@
 #profile-history {
+    height: 100%;
     max-width: 800px;
-    margin: auto auto 150px auto;
+    overflow: auto;
+}
+
+#loading-spinner {
+    display: block;
+    height: 150px;
 }

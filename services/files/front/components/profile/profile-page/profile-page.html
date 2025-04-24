@@ -13,7 +13,7 @@
 
     <main>
         <app-profile-userinfo id="userinfo" class="panel"></app-profile-userinfo>
-        <app-profile-stats id="stats" class="panel"></app-profile-stats>
+        <app-profile-stats id="stats" class="panel desktop"></app-profile-stats>
 
         <div id="action-buttons" class="panel">
             <app-button id="share" background="purple">
@@ -33,6 +33,7 @@
         </div>
 
         <app-tab-navigation id="tab-navigation" readonly="true">
+            <app-profile-stats id="stats-tab" class="mobile" data-tab-title="Stats"></app-profile-stats>
             <app-profile-leaderboard id="leaderboard" data-tab-title="Ranking"></app-profile-leaderboard>
             <app-profile-history id="history" data-tab-title="History"></app-profile-history>
         </app-tab-navigation>

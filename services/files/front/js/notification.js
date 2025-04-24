@@ -276,6 +276,7 @@ export class NotificationService extends EventTarget {
     }
 
     readNotification(friend) {
+        if (!this.socket) return;
         this.unreadNotifications.splice(this.unreadNotifications.indexOf(friend), 1);
         this.socket.emit("readNotification", friend);
     }

@@ -1,12 +1,13 @@
 {
   "appId": "academy.pns.ps8.tronsuccessor",
   "appName": "Tron: The Successor",
-  "webDir": "front",
+  "webDir": "dist",
   "plugins": {
+    "CapacitorCookies": {
+      "enabled": true
+    },
     "LocalNotifications": {
-      "smallIcon": "ic_stat_icon_config_sample",
-      "iconColor": "#488AFF",
-      "sound": "beep.wav"
+      "smallIcon": "ic_stat_icon_config_sample"
     },
     "PushNotifications": {
       "presentationOptions": [

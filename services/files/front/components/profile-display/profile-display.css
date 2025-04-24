@@ -1,4 +1,4 @@
-#connect, #profile {
+#connect-icon, #profile {
     width: 55px;
 
     &:hover {
@@ -6,8 +6,12 @@
     }
 }
 
-#connect {
+#connect-icon {
     filter: invert();
+
+    ~ p {
+        margin: 0;
+    }
 }
 
 #container {
@@ -72,7 +76,7 @@ p {
     }
 }
 
-#connect {
+#connect-icon {
     animation: pulse 6s infinite;
 }
 

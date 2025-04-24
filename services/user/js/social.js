@@ -65,8 +65,8 @@ exports.handleRemoveFriend = async function (request, response, friend) {
         return;
     }
     if (await userDatabase.removeFriend(user.username, friend)) {
-        sendResponse(response, HTTP_STATUS.OK, friend);
         await sendNotification(false, friend, request.headers.authorization, "DELETE");
+        sendResponse(response, HTTP_STATUS.OK, friend);
     }
     else
         sendResponse(response, HTTP_STATUS.BAD_REQUEST, {error: "No friend request or you are not friends"});

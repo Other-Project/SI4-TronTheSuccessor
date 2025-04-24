@@ -38,8 +38,8 @@ export class ProfilePage extends HTMLComponent {
 
         this.addFriend = this.shadowRoot.getElementById("add-friend");
         this.removeFriend = this.shadowRoot.getElementById("remove-friend");
-        this.addFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, "add"));
-        this.removeFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, "remove"));
+        this.addFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, true));
+        this.removeFriend.addEventListener("click", async () => await this.#manageFriend(this.stats.username, false));
         notificationService.addEventListener("refresh-friend-list", async () => await this.#refresh());
 
         window.addEventListener("resize", () => this.profileStatsTab.dataset.tabDisabled = (window.innerWidth > window.innerHeight).toString(), true);

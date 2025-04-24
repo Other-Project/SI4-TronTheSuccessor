@@ -12,9 +12,11 @@ const server = http.createServer(async (request, response) => {
     const user = getUser(request);
     if (!user) return sendResponse(response, HTTP_STATUS.UNAUTHORIZED);
 
-    if (filePath.length === 3 && filePath[2] === "chat" && request.method === "POST") await handleUnreadNotification(request, user.username);
-    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") await handleFriendListModification(request, user.username, true);
-    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "DELETE") await handleFriendListModification(request, user.username, false);
+    if (filePath.length === 3 && filePath[2] === "chat" && request.method === "POST") {
+        await handleUnreadNotification(request, user.username);
+        return sendResponse(response, HTTP_STATUS.OK);
+    } else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "POST") await handleFriendListModification(request, response, user.username, true);
+    else if (filePath.length === 3 && filePath[2] === "friend" && request.method === "DELETE") await handleFriendListModification(request, response, user.username, false);
     else return sendResponse(response, HTTP_STATUS.NOT_FOUND);
 }).listen(8005);
 
@@ -65,10 +67,11 @@ io.on("connection", async (socket) => {
 /**
  * Handle the friend list modification event.
  * @param {module:http.IncomingMessage} request the request object
+ * @param {module:http.ServerResponse} response the response object
  * @param {string} username the username of the user who sent the message
  * @param {boolean} add whether the friend is being added or removed
  */
-async function handleFriendListModification(request, username, add) {
+async function handleFriendListModification(request, response, username, add) {
     const data = await handleUnreadNotification(request, username);
     const friendSocketId = connectedUsers.get(data.username);
     const userSocketId = connectedUsers.get(username);
@@ -82,7 +85,7 @@ async function handleFriendListModification(request, username, add) {
 
     io.to(friendSocketId).emit("refreshFriendList");
     if (connectedUsers.has(username) && !data.pending) io.to(friendSocketId).emit(add ? "connected" : "disconnected", {username: username});
-
+    sendResponse(response, HTTP_STATUS.OK);
 }
 
 

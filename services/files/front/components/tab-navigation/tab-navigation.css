@@ -25,6 +25,7 @@ button {
     border-radius: 10px;
     padding: .5em .75em;
     cursor: pointer;
+    box-sizing: border-box;
 }
 
 #tabs {
@@ -39,10 +40,18 @@ button {
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
 
+        span {
+            padding: 0 .5em;
+        }
+
         .close-btn {
             padding: 0;
             background: none;
             float: right;
+        }
+
+        @media screen and (max-width: 480px) {
+            width: auto;
         }
     }
 }

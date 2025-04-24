@@ -17,16 +17,11 @@
 }
 
 @media (max-height: 480px) and (max-width: 1025px), (max-height: 1025px) and (max-width: 480px) {
-    #profile-leaderboard {
-        display: flex;
-    }
-
-    #neon-container {
-        margin: auto;
-        width: 100%;
-    }
-
     #rank-repartition {
         display: none;
+    }
+
+    #profile-leaderboard {
+        display: block;
     }
 }

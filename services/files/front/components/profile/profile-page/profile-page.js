@@ -14,6 +14,7 @@ export class ProfilePage extends HTMLComponent {
         this.profileStats = this.shadowRoot.getElementById("stats");
         this.history = this.shadowRoot.getElementById("history");
         this.leaderboard = this.shadowRoot.getElementById("leaderboard");
+        this.rankDistribution = this.shadowRoot.getElementById("rank-distribution");
         this.notFoundUser = this.shadowRoot.getElementById("not-found-user");
 
         this.userInfo = this.shadowRoot.getElementById("userinfo");
@@ -82,6 +83,7 @@ export class ProfilePage extends HTMLComponent {
         this.stats.loggedusername = loggedUser;
         this.userInfo.setAttribute("stats", JSON.stringify(this.stats));
         this.leaderboard.setAttribute("stats", JSON.stringify(this.stats));
+        this.rankDistribution.setAttribute("stats", JSON.stringify(this.stats));
 
         this.profileStats.setAttribute("games", this.stats.games);
         this.profileStats.setAttribute("time", this.stats.timePlayed);
@@ -93,6 +95,8 @@ export class ProfilePage extends HTMLComponent {
 
         const {isYou, isFriend, isPending} = await this.#getStatus(this.stats.username);
         this.history.dataset.tabDisabled = (!isYou).toString();
+        if (!Capacitor.isNativePlatform())
+            this.rankDistribution.dataset.tabDisabled = "true";
         this.share.classList.toggle("hidden", false);
         this.addFriend.classList.toggle("hidden", isYou || isFriend);
         this.removeFriend.classList.toggle("hidden", isYou || isPending || !isFriend);

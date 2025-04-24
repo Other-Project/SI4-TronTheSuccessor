@@ -7,7 +7,6 @@ import {Pages} from "/components/pages/pages.js";
 import {Popup} from "/components/popup/popup.js";
 import {Input} from "/components/input/input.js";
 import {Notification} from "/components/notification/notification.js";
-import {NeonContainer} from "/components/neon-container/neon-container.js";
 import {Badge} from "/components/badge/badge.js";
 import {LoadingSpinner} from "/components/loading-spinner/loading-spinner.js";
 
@@ -27,6 +26,7 @@ import {GameMaster} from "/components/game-master/game-master.js";
 import {GameEmotes} from "/components/game-emotes/game-emotes.js";
 import {GameEmoteDisplay} from "/components/game-emote-display/game-emote-display.js";
 import {GameMatchIntro} from "/components/game-match-intro/game-match-intro.js";
+import {GameJoystick} from "/components/game-joystick/game-joystick.js";
 
 // Profile components
 import {ProfilePage} from "/components/profile/profile-page/profile-page.js";
@@ -36,7 +36,6 @@ import {ProfileStats} from "/components/profile/profile-stats/profile-stats.js";
 import {ProfileHistory} from "/components/profile-history/profile-history.js";
 import {ProfileLeaderboard} from "/components/profile-leaderboard/profile-leaderboard.js";
 import {ProfilePfp} from "/components/profile-pfp/profile-pfp.js";
-import {ProfileRank} from "/components/profile-rank/profile-rank.js";
 import {RankRepartition} from "/components/rank-repartition/rank-repartition.js";
 import {RankListing} from "/components/rank-listing/rank-listing.js";
 import {RankExplanation} from "/components/rank-explanation/rank-explanation.js";
@@ -74,7 +73,6 @@ customElements.define("app-pages", Pages);
 customElements.define("app-popup", Popup);
 customElements.define("app-input", Input);
 customElements.define("app-notification", Notification);
-customElements.define("app-neon-container", NeonContainer);
 customElements.define("app-badge", Badge);
 customElements.define("app-loading-spinner", LoadingSpinner);
 
@@ -104,7 +102,6 @@ customElements.define("app-profile-stats", ProfileStats);
 customElements.define("app-profile-history", ProfileHistory);
 customElements.define("app-profile-leaderboard", ProfileLeaderboard);
 customElements.define("app-profile-pfp", ProfilePfp);
-customElements.define("app-profile-rank", ProfileRank);
 customElements.define("app-rank-repartition", RankRepartition);
 customElements.define("app-rank-listing", RankListing);
 customElements.define("app-rank-explanation", RankExplanation);

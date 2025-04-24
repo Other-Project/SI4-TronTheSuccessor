@@ -29,19 +29,3 @@ p {
     text-align: center;
     margin: 0;
 }
-
-@media (max-height: 480px) and (orientation: landscape) {
-    svg {
-        width: 80%;
-    }
-}
-
-@media (max-width: 480px) and (orientation: portrait) {
-    #stats {
-        font-size: 1.5em;
-    }
-
-    svg {
-        width: 70%;
-    }
-}

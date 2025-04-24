@@ -33,10 +33,6 @@ h2, p {
         }
     }
 
-    &:not(.local) #joystick-p2 {
-        display: none;
-    }
-
     #players {
         grid-row: 2;
         grid-column: 1 / span 3;
@@ -75,6 +71,10 @@ h2, p {
 
     #joystick-p1 {
         justify-self: start;
+        display: none;
+    }
+
+    #joystick-p2 {
         display: none;
     }
 
@@ -118,6 +118,10 @@ h2, p {
             #joystick-p1 {
                 display: block;
             }
+        }
+
+        &.local #joystick-p2 {
+            display: block;
         }
     }
 }
